@@ -33,7 +33,7 @@ export const QuizPage = () => {
       const { jobId } = await quizService.generate(request, files);
       
       // Poll for completion
-      const newQuiz = await quizService.pollForCompletion(jobId);
+      await quizService.pollForCompletion(jobId);
       
       // Refresh the quiz list to get the latest quizzes
       const allQuizzes = await quizService.getAll();

@@ -18,7 +18,6 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   showResults = false,
   correctAnswer,
 }) => {
-  const [matchingAnswers, setMatchingAnswers] = useState<{ [key: string]: string }>({});
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
 
   const renderTrueFalse = () => (

@@ -1,6 +1,6 @@
 import { apiClient } from './api';
 import { STREAK_ENDPOINTS, LEADERBOARD_ENDPOINTS, CHALLENGE_ENDPOINTS, RECOMMENDATION_ENDPOINTS, ATTEMPTS_ENDPOINTS } from '../config/api';
-import type { Streak, UpdateStreakRequest, LeaderboardEntry, Challenge, CompleteChallengeRequest, Recommendation, Attempt } from '../types';
+import type { Streak, UpdateStreakRequest, LeaderboardEntry, Challenge, CompleteChallengeRequest, Recommendation, Attempt, Leaderboard } from '../types';
 
 export const streakService = {
   getCurrent: async (): Promise<Streak> => {
@@ -15,14 +15,25 @@ export const streakService = {
 };
 
 export const leaderboardService = {
-  getGlobal: async (): Promise<LeaderboardEntry[]> => {
+  getGlobal: async (): Promise<Leaderboard> => {
     const response = await apiClient.get<LeaderboardEntry[]>(LEADERBOARD_ENDPOINTS.GLOBAL);
-    return response.data;
+    // Map avatar and userName for compatibility
+    const entries = response.data.map(entry => ({
+      ...entry,
+      avatar: entry.user?.avatar,
+      userName: entry.user?.name,
+    }));
+    return { entries };
   },
 
-  getFriends: async (): Promise<LeaderboardEntry[]> => {
+  getFriends: async (): Promise<Leaderboard> => {
     const response = await apiClient.get<LeaderboardEntry[]>(LEADERBOARD_ENDPOINTS.FRIENDS);
-    return response.data;
+    const entries = response.data.map(entry => ({
+      ...entry,
+      avatar: entry.user?.avatar,
+      userName: entry.user?.name,
+    }));
+    return { entries };
   },
 };
 

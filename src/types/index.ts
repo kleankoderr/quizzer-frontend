@@ -39,6 +39,10 @@ export interface Quiz {
   questions: QuizQuestion[];
   userId: string;
   createdAt: string;
+  attempts?: {
+    score: number;
+    completedAt: string;
+  }[];
 }
 
 export interface QuizGenerateRequest {
@@ -77,6 +81,7 @@ export interface FlashcardSet {
   cards: Flashcard[];
   userId: string;
   createdAt: string;
+  lastStudiedAt?: string;
 }
 
 export interface FlashcardGenerateRequest {
@@ -134,6 +139,8 @@ export interface LeaderboardEntry {
     name: string;
     avatar?: string;
   };
+  avatar?: string;
+  userName?: string;
 }
 
 export interface Leaderboard {
