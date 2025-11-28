@@ -1,6 +1,6 @@
-import { apiClient } from './api';
-import { AUTH_ENDPOINTS } from '../config/api';
-import type { AuthResponse, User } from '../types';
+import { apiClient } from "./api";
+import { AUTH_ENDPOINTS } from "../config/api";
+import type { AuthResponse, User } from "../types";
 
 export const authService = {
   // Email/password login
@@ -13,11 +13,17 @@ export const authService = {
   },
 
   // Email/password signup
-  signup: async (email: string, password: string, name: string): Promise<AuthResponse> => {
+  signup: async (
+    email: string,
+    password: string,
+    name: string,
+    schoolName: string
+  ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(AUTH_ENDPOINTS.SIGNUP, {
       email,
       password,
       name,
+      schoolName,
     });
     return response.data;
   },
@@ -31,24 +37,24 @@ export const authService = {
   // Logout
   logout: async (): Promise<void> => {
     await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
   },
 
   // Save auth data
   saveAuthData: (data: AuthResponse) => {
-    localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("user", JSON.stringify(data.user));
   },
 
   // Get stored user
   getStoredUser: (): User | null => {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
   },
 
   // Get stored token
   getStoredToken: (): string | null => {
-    return localStorage.getItem('accessToken');
+    return localStorage.getItem("accessToken");
   },
 };

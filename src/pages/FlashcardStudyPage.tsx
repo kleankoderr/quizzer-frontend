@@ -226,7 +226,7 @@ export const FlashcardStudyPage = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-xl bg-primary-600 p-6 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -235,7 +235,7 @@ export const FlashcardStudyPage = () => {
         <div className="relative z-10">
           <button
             onClick={() => navigate('/flashcards')}
-            className="flex items-center gap-2 text-white hover:text-emerald-100 mb-4 transition-colors"
+            className="flex items-center gap-2 text-white hover:text-primary-100 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Flashcards
@@ -252,7 +252,7 @@ export const FlashcardStudyPage = () => {
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-white mb-2">{flashcardSet.title}</h1>
-              <p className="text-emerald-100">{flashcardSet.topic}</p>
+              <p className="text-primary-100">{flashcardSet.topic}</p>
             </div>
           </div>
           
@@ -264,7 +264,7 @@ export const FlashcardStudyPage = () => {
             </div>
             <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-emerald-400 to-teal-400 h-2.5 rounded-full transition-all duration-300 shadow-lg"
+                className="bg-primary-400 h-2.5 rounded-full transition-all duration-300 shadow-lg"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -273,7 +273,7 @@ export const FlashcardStudyPage = () => {
       </div>
 
       {/* Flashcard */}
-      <div className="card border-2 border-emerald-200 shadow-xl" style={{ perspective: '1000px' }}>
+      <div className="card border border-primary-200 shadow-xl" style={{ perspective: '1000px' }}>
         <div
           className="min-h-[450px] relative rounded-xl"
           style={{
@@ -287,8 +287,8 @@ export const FlashcardStudyPage = () => {
               onClick={handleFlip}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 ${
                 isFlipped 
-                  ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-white/30 hover:from-teal-600 hover:to-emerald-600' 
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-white/30 hover:from-emerald-600 hover:to-teal-600'
+                  ? 'bg-primary-600 text-white border-white/30 hover:bg-primary-700' 
+                  : 'bg-primary-600 text-white border-white/30 hover:bg-primary-700'
               }`}
             >
               <RotateCw 
@@ -301,7 +301,7 @@ export const FlashcardStudyPage = () => {
 
           {/* Front of card */}
           <div
-            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl"
+            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-primary-50 rounded-xl"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
@@ -309,7 +309,7 @@ export const FlashcardStudyPage = () => {
               width: '100%',
             }}
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full mb-6 shadow-lg">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
               <BookOpen className="w-8 h-8 text-white" />
             </div>
             <p 
@@ -320,7 +320,7 @@ export const FlashcardStudyPage = () => {
 
           {/* Back of card */}
           <div
-            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl"
+            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-primary-50 rounded-xl"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
@@ -330,7 +330,7 @@ export const FlashcardStudyPage = () => {
               width: '100%',
             }}
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full mb-6 shadow-lg">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <p 
@@ -338,10 +338,10 @@ export const FlashcardStudyPage = () => {
               dangerouslySetInnerHTML={renderMarkdown(currentCard.back)}
             />
             {currentCard.explanation && (
-              <div className="mt-6 pt-6 border-t-2 border-teal-200 max-w-2xl">
+              <div className="mt-6 pt-6 border-t-2 border-primary-200 max-w-2xl">
                 <div className="inline-flex items-center gap-2 mb-3">
                   <span className="text-2xl">💡</span>
-                  <p className="text-sm font-bold text-teal-900 uppercase tracking-wide">
+                  <p className="text-sm font-bold text-primary-900 uppercase tracking-wide">
                     Explanation
                   </p>
                 </div>
@@ -361,7 +361,7 @@ export const FlashcardStudyPage = () => {
             <button
               onClick={() => handleResponse('dont-know')}
               disabled={submitting}
-              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-300 hover:border-red-400 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-red-50 hover:bg-red-100 border-2 border-red-300 hover:border-red-400 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
               <span className="text-3xl group-hover:scale-110 group-active:scale-95 transition-transform duration-200">👎🏼</span>
             </button>
@@ -369,7 +369,7 @@ export const FlashcardStudyPage = () => {
             <button
               onClick={() => handleResponse('know')}
               disabled={submitting}
-              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-br from-emerald-50 to-teal-100 hover:from-emerald-100 hover:to-teal-200 border-2 border-emerald-300 hover:border-emerald-400 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+              className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-green-50 hover:bg-green-100 border-2 border-green-300 hover:border-green-400 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
               <span className="text-3xl group-hover:scale-110 group-active:scale-95 transition-transform duration-200">👍🏼</span>
             </button>
@@ -387,7 +387,7 @@ export const FlashcardStudyPage = () => {
 
             <button
               onClick={handleFlip}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
             >
               <RotateCw className="w-5 h-5" />
               Flip Card

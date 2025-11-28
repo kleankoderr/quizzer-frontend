@@ -35,16 +35,30 @@ export const LeaderboardPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="card">
-        <div className="flex items-center gap-3 mb-6">
-          <Trophy className="w-8 h-8 text-primary-600" />
-          <div>
-            <h1 className="text-3xl font-bold">Leaderboard</h1>
-            <p className="text-gray-600">See how you rank against others</p>
-          </div>
+    <div className="space-y-6 pb-8">
+      {/* Hero Header */}
+      <header className="relative overflow-hidden rounded-xl bg-primary-600 p-6 md:p-8 shadow-lg">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Trophy className="w-6 h-6 text-yellow-300" />
+            <span className="text-yellow-300 font-semibold text-sm">Rankings</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            Leaderboard
+          </h1>
+          <p className="text-primary-100 text-lg">
+            See how you rank against others
+          </p>
+        </div>
+      </header>
 
+      {/* Tabs Card */}
+      <div className="card">
         <div className="flex gap-2 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('global')}
@@ -82,7 +96,7 @@ export const LeaderboardPage = () => {
                   key={entry.userId}
                   className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                     entry.rank <= 3
-                      ? 'bg-gradient-to-r from-primary-50 to-primary-100'
+                      ? 'bg-primary-50 border border-primary-100'
                       : 'hover:bg-gray-50'
                   }`}
                 >
@@ -99,7 +113,7 @@ export const LeaderboardPage = () => {
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold">
-                          {entry.userName.charAt(0).toUpperCase()}
+                          {(entry.userName || 'U').charAt(0).toUpperCase()}
                         </div>
                       )}
                       <span className="font-medium">{entry.userName}</span>
@@ -129,7 +143,7 @@ export const LeaderboardPage = () => {
       )}
 
       {leaderboard?.userRank && (
-        <div className="card bg-gradient-to-br from-primary-50 to-primary-100">
+        <div className="card bg-primary-50 border border-primary-100">
           <h3 className="font-semibold mb-2">Your Rank</h3>
           <p className="text-3xl font-bold text-primary-600">
             #{leaderboard.userRank}

@@ -208,7 +208,6 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         : {};
       
       const newMatches = { ...currentMatches, [leftItem]: rightItem };
-      setMatchingAnswers(newMatches);
       onAnswerSelect(newMatches);
     };
 
@@ -221,7 +220,6 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       
       const newMatches = { ...currentMatches };
       delete newMatches[leftItem];
-      setMatchingAnswers(newMatches);
       onAnswerSelect(newMatches);
     };
 

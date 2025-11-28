@@ -1,5 +1,6 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 // Auth endpoints
 export const AUTH_ENDPOINTS = {
@@ -22,7 +23,8 @@ export const FLASHCARD_ENDPOINTS = {
   GENERATE: `${API_BASE_URL}/flashcards/generate`,
   GET_ALL: `${API_BASE_URL}/flashcards`,
   GET_BY_ID: (id: string) => `${API_BASE_URL}/flashcards/${id}`,
-  RECORD_SESSION: (id: string) => `${API_BASE_URL}/flashcards/${id}/record-session`,
+  RECORD_SESSION: (id: string) =>
+    `${API_BASE_URL}/flashcards/${id}/record-session`,
 };
 
 // Streak endpoints
@@ -55,4 +57,13 @@ export const RECOMMENDATION_ENDPOINTS = {
 export const ATTEMPTS_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/attempts`,
   GET_BY_ID: (id: string) => `${API_BASE_URL}/attempts/${id}`,
+};
+
+// User endpoints
+export const USER_ENDPOINTS = {
+  GET_PROFILE: `${API_BASE_URL}/user/profile`,
+  UPDATE_PROFILE: `${API_BASE_URL}/user/profile`,
+  UPDATE_SETTINGS: `${API_BASE_URL}/user/settings`,
+  CHANGE_PASSWORD: `${API_BASE_URL}/user/password`,
+  DELETE_ACCOUNT: `${API_BASE_URL}/user/account`,
 };

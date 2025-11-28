@@ -5,13 +5,21 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { StudyPage } from './pages/StudyPage';
+import { ContentPage } from './pages/ContentPage';
 import { QuizPage } from './pages/QuizPage';
 import { QuizTakePage } from './pages/QuizTakePage';
 import { FlashcardsPage } from './pages/FlashcardsPage';
 import { FlashcardStudyPage } from './pages/FlashcardStudyPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ChallengesPage } from './pages/ChallengesPage';
+import { DiscoverPage } from './pages/DiscoverPage';
+import { StatisticsPage } from './pages/StatisticsPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +37,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
             
             <Route
               path="/"
@@ -40,12 +49,19 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="study" element={<StudyPage />} />
+              <Route path="discover" element={<DiscoverPage />} />
+              <Route path="content/generate" element={<ContentPage />} />
+              <Route path="content/:id" element={<ContentPage />} />
               <Route path="quiz" element={<QuizPage />} />
               <Route path="quiz/:id" element={<QuizTakePage />} />
               <Route path="flashcards" element={<FlashcardsPage />} />
               <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="challenges" element={<ChallengesPage />} />
+              <Route path="statistics" element={<StatisticsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

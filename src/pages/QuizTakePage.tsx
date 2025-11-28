@@ -338,7 +338,7 @@ export const QuizTakePage = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-xl bg-primary-600 p-6 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -347,7 +347,7 @@ export const QuizTakePage = () => {
         <div className="relative z-10">
           <button
             onClick={() => navigate('/quiz')}
-            className="flex items-center gap-2 text-white hover:text-blue-100 mb-4 transition-colors"
+            className="flex items-center gap-2 text-white hover:text-primary-100 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Quizzes
@@ -360,7 +360,7 @@ export const QuizTakePage = () => {
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-white mb-2">{quiz.title}</h1>
-                <div className="flex items-center gap-3 text-sm text-blue-100">
+                <div className="flex items-center gap-3 text-sm text-primary-100">
                   <span>{quiz.topic}</span>
                   {quiz.difficulty && (
                     <>
@@ -399,7 +399,7 @@ export const QuizTakePage = () => {
             </div>
             <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-green-400 to-emerald-400 h-2.5 rounded-full transition-all duration-300 shadow-lg"
+                className="bg-green-400 h-2.5 rounded-full transition-all duration-300 shadow-lg"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -408,7 +408,7 @@ export const QuizTakePage = () => {
       </div>
 
       {/* Question */}
-      <div className="card border-2 border-blue-200 shadow-lg">
+      <div className="card border border-primary-200 shadow-lg">
         <QuestionRenderer
           question={currentQuestion}
           questionIndex={currentQuestionIndex}
@@ -430,7 +430,7 @@ export const QuizTakePage = () => {
           {currentQuestionIndex === quiz.questions.length - 1 ? (
             <button 
               onClick={() => handleSubmit()} 
-              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
             >
               <Trophy className="w-5 h-5" />
               Submit Quiz
@@ -438,7 +438,7 @@ export const QuizTakePage = () => {
           ) : (
             <button 
               onClick={handleNext} 
-              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
             >
               Next
               <ChevronRight className="w-5 h-5" />

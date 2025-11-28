@@ -3,8 +3,41 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  schoolName?: string;
+  grade?: string;
+  preferences?: Record<string, any>;
   avatar?: string;
   createdAt: string;
+}
+
+// User profile with statistics
+export interface UserProfile extends User {
+  statistics: {
+    totalQuizzes: number;
+    totalFlashcards: number;
+    currentStreak: number;
+    longestStreak: number;
+    level: number;
+    totalXP: number;
+    totalAttempts: number;
+  };
+}
+
+// User update types
+export interface UpdateProfileRequest {
+  name?: string;
+  avatar?: string;
+  schoolName?: string;
+  grade?: string;
+}
+
+export interface UpdateSettingsRequest {
+  preferences?: Record<string, any>;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
 
 // Auth types
@@ -14,9 +47,18 @@ export interface AuthResponse {
 }
 
 // Quiz types
-export type QuizType = 'standard' | 'timed' | 'scenario';
-export type QuestionType = 'true-false' | 'single-select' | 'multi-select' | 'matching' | 'fill-blank';
-export type AnswerValue = number | number[] | string | { [key: string]: string };
+export type QuizType = "standard" | "timed" | "scenario";
+export type QuestionType =
+  | "true-false"
+  | "single-select"
+  | "multi-select"
+  | "matching"
+  | "fill-blank";
+export type AnswerValue =
+  | number
+  | number[]
+  | string
+  | { [key: string]: string };
 
 export interface QuizQuestion {
   questionType: QuestionType;
@@ -49,7 +91,7 @@ export interface QuizGenerateRequest {
   topic?: string;
   content?: string;
   numberOfQuestions: number;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: "easy" | "medium" | "hard";
   quizType?: QuizType;
   timeLimit?: number;
   questionTypes?: QuestionType[];
@@ -153,7 +195,7 @@ export interface Challenge {
   id: string;
   title: string;
   description: string;
-  type: 'daily' | 'weekly' | 'monthly';
+  type: "daily" | "weekly" | "monthly";
   target: number;
   reward: number;
   startDate: Date | string;
@@ -171,7 +213,7 @@ export interface CompleteChallengeRequest {
 export interface Recommendation {
   topic: string;
   reason: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
 }
 
 // Attempt types
@@ -180,7 +222,7 @@ export interface Attempt {
   userId: string;
   quizId?: string;
   flashcardSetId?: string;
-  type: 'quiz' | 'flashcard';
+  type: "quiz" | "flashcard";
   score?: number;
   completedAt: string;
 }

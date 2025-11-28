@@ -68,10 +68,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   };
 
   return (
-    <div className="card border-2 border-emerald-200 shadow-lg">
+    <div className="card border border-primary-200 shadow-sm">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg">
-          <Layers className="w-6 h-6 text-emerald-600" />
+        <div className="p-2 bg-primary-100 rounded-lg">
+          <Layers className="w-6 h-6 text-primary-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Generate New Flashcard Set</h2>
       </div>
@@ -82,7 +82,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           onClick={() => setMode('topic')}
           className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${
             mode === 'topic'
-              ? 'text-emerald-600 border-b-3 border-emerald-600 bg-emerald-50'
+              ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
@@ -93,7 +93,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           onClick={() => setMode('content')}
           className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${
             mode === 'content'
-              ? 'text-emerald-600 border-b-3 border-emerald-600 bg-emerald-50'
+              ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
@@ -104,7 +104,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           onClick={() => setMode('files')}
           className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${
             mode === 'files'
-              ? 'text-emerald-600 border-b-3 border-emerald-600 bg-emerald-50'
+              ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
@@ -263,7 +263,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-lg hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg">
+        <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md">
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

@@ -21,7 +21,7 @@ export const ChallengesPage = () => {
         leaderboardService.getGlobal(),
       ]);
       setChallenges(challengesData);
-      setLeaderboard(leaderboardData.slice(0, 10));
+      setLeaderboard(leaderboardData.entries.slice(0, 10));
       
       // Track which challenges user has joined (based on progress > 0 or completed)
       const joined = new Set(
@@ -76,7 +76,7 @@ export const ChallengesPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-600 via-red-600 to-pink-700 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-primary-600 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -92,22 +92,22 @@ export const ChallengesPage = () => {
                 <Trophy className="w-10 h-10" />
                 Daily Challenges
               </h1>
-              <p className="text-orange-100 text-lg">
+              <p className="text-primary-100 text-lg">
                 Join global challenges and compete with learners worldwide
               </p>
             </div>
             <div className="flex items-center gap-3">
               <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
                 <div className="text-2xl font-bold text-white">{activeChallenges.length}</div>
-                <div className="text-xs text-orange-100">Joined</div>
+                <div className="text-xs text-primary-100">Joined</div>
               </div>
               <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
                 <div className="text-2xl font-bold text-white">{availableChallenges.length + recommendedChallenges.length}</div>
-                <div className="text-xs text-orange-100">Available</div>
+                <div className="text-xs text-primary-100">Available</div>
               </div>
               <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
                 <div className="text-2xl font-bold text-white">{completedChallenges.length}</div>
-                <div className="text-xs text-orange-100">Done</div>
+                <div className="text-xs text-primary-100">Done</div>
               </div>
             </div>
           </div>
@@ -119,14 +119,14 @@ export const ChallengesPage = () => {
         <section className="lg:col-span-2 space-y-6">
           {/* Recommended Challenges */}
           {recommendedChallenges.length > 0 && (
-            <div className="card border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+            <div className="card border border-primary-200 bg-primary-50">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
-                  <Sparkles className="w-6 h-6 text-purple-600" />
+                <div className="p-2 bg-primary-100 rounded-lg">
+                  <Sparkles className="w-6 h-6 text-primary-600" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900">Recommended For You</h2>
-                  <p className="text-sm text-purple-600">Based on your learning progress</p>
+                  <p className="text-sm text-primary-600">Based on your learning progress</p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -137,10 +137,10 @@ export const ChallengesPage = () => {
                   return (
                     <div
                       key={challenge.id}
-                      className="p-5 bg-white rounded-xl border-2 border-purple-200 hover:border-purple-300 transition-all hover:shadow-md"
+                      className="p-5 bg-white rounded-xl border border-primary-200 hover:border-primary-300 transition-all hover:shadow-md"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-gradient-to-br from-purple-400 to-pink-500">
+                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-primary-500">
                           <Sparkles className="w-7 h-7 text-white" />
                         </div>
                         
@@ -174,7 +174,7 @@ export const ChallengesPage = () => {
                             </div>
                             <button
                               onClick={() => handleJoinChallenge(challenge.id)}
-                              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg text-sm"
+                              className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg text-sm"
                             >
                               <UserPlus className="w-4 h-4" />
                               Join Challenge
@@ -193,8 +193,8 @@ export const ChallengesPage = () => {
           {availableChallenges.length > 0 && (
             <div className="card">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
-                  <Trophy className="w-6 h-6 text-blue-600" />
+                <div className="p-2 bg-primary-100 rounded-lg">
+                  <Trophy className="w-6 h-6 text-primary-600" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900">Available Challenges</h2>
@@ -209,10 +209,10 @@ export const ChallengesPage = () => {
                   return (
                     <div
                       key={challenge.id}
-                      className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 hover:border-blue-300 transition-all hover:shadow-md"
+                      className="p-5 bg-white rounded-xl border border-gray-200 hover:border-primary-300 transition-all hover:shadow-md"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-gradient-to-br from-blue-400 to-indigo-500">
+                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-primary-500">
                           <Target className="w-7 h-7 text-white" />
                         </div>
                         
@@ -241,7 +241,7 @@ export const ChallengesPage = () => {
                             </div>
                             <button
                               onClick={() => handleJoinChallenge(challenge.id)}
-                              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg text-sm"
+                              className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg text-sm"
                             >
                               <UserPlus className="w-4 h-4" />
                               Join Challenge
@@ -260,7 +260,7 @@ export const ChallengesPage = () => {
           {activeChallenges.length > 0 && (
             <div className="card">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg">
+                <div className="p-2 bg-orange-100 rounded-lg">
                   <Target className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="flex-1">
@@ -276,10 +276,10 @@ export const ChallengesPage = () => {
                   return (
                     <div
                       key={challenge.id}
-                      className="p-5 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border-2 border-orange-200 hover:border-orange-300 transition-all hover:shadow-md"
+                      className="p-5 bg-orange-50 rounded-xl border border-orange-200 hover:border-orange-300 transition-all hover:shadow-md"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-gradient-to-br from-orange-400 to-red-500">
+                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-orange-500">
                           <Target className="w-7 h-7 text-white" />
                         </div>
                         
@@ -335,7 +335,7 @@ export const ChallengesPage = () => {
           {completedChallenges.length > 0 && (
             <div className="card">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                <div className="p-2 bg-green-100 rounded-lg">
                   <Trophy className="w-6 h-6 text-green-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Completed Today</h2>
@@ -344,10 +344,10 @@ export const ChallengesPage = () => {
                 {completedChallenges.map((challenge) => (
                   <div
                     key={challenge.id}
-                    className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200"
+                    className="p-4 bg-green-50 rounded-xl border border-green-200"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-green-400 to-emerald-500">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-green-500">
                         <span className="text-white text-lg font-bold">✓</span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -393,12 +393,12 @@ export const ChallengesPage = () => {
           <div className="card">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg">
-                  <Crown className="w-6 h-6 text-purple-600" />
+                <div className="p-2 bg-primary-100 rounded-lg">
+                  <Crown className="w-6 h-6 text-primary-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">Global Leaderboard</h3>
               </div>
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <TrendingUp className="w-5 h-5 text-primary-600" />
             </div>
 
             {leaderboard.length === 0 ? (
@@ -409,17 +409,17 @@ export const ChallengesPage = () => {
             ) : (
               <div className="space-y-2">
                 {leaderboard.map((entry, idx) => {
-                  let rankStyle = 'bg-purple-50 text-purple-600 border-purple-200';
+                  let rankStyle = 'bg-primary-50 text-primary-600 border-primary-200';
                   let rankIcon = <span className="font-bold">{idx + 1}</span>;
                   
                   if (idx === 0) {
-                    rankStyle = 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-white border-yellow-300';
+                    rankStyle = 'bg-yellow-500 text-white border-yellow-400';
                     rankIcon = <Crown className="w-4 h-4" />;
                   } else if (idx === 1) {
-                    rankStyle = 'bg-gradient-to-br from-gray-300 to-gray-400 text-white border-gray-300';
+                    rankStyle = 'bg-gray-400 text-white border-gray-300';
                     rankIcon = <Medal className="w-4 h-4" />;
                   } else if (idx === 2) {
-                    rankStyle = 'bg-gradient-to-br from-orange-400 to-orange-500 text-white border-orange-300';
+                    rankStyle = 'bg-orange-500 text-white border-orange-400';
                     rankIcon = <Medal className="w-4 h-4" />;
                   }
                   

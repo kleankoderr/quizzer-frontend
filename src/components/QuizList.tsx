@@ -31,7 +31,7 @@ export const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {quizzes.map((quiz) => {
           const hasAttempts = quiz.attempts && quiz.attempts.length > 0;
-          const latestAttempt = hasAttempts ? quiz.attempts[0] : null;
+          const latestAttempt = quiz.attempts?.[0] ?? null;
           
           return (
             <Link

@@ -96,10 +96,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
   };
 
   return (
-    <div className="card border-2 border-blue-200 shadow-lg">
+    <div className="card border border-primary-200 shadow-sm">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
-          <Brain className="w-6 h-6 text-blue-600" />
+        <div className="p-2 bg-primary-100 rounded-lg">
+          <Brain className="w-6 h-6 text-primary-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Generate New Quiz</h2>
       </div>
@@ -390,7 +390,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
         >
           {loading ? (
             <>
