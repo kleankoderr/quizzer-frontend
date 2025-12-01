@@ -152,6 +152,7 @@ export const ContentPage = () => {
   // Modal states
   const [deleteHighlightId, setDeleteHighlightId] = useState<string | null>(null);
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] = useState(false);
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | undefined>(undefined);
 
   // Handle errors
   if (error) {
@@ -174,6 +175,18 @@ export const ContentPage = () => {
         const range = sel.getRangeAt(0);
         const rect = range.getBoundingClientRect();
         setSelectedText(sel.toString().trim());
+        
+        // Detect section index
+        const anchorNode = sel.anchorNode;
+        const element = anchorNode instanceof Element ? anchorNode : anchorNode?.parentElement;
+        const sectionNode = element?.closest('[data-section-index]');
+        if (sectionNode) {
+          const index = parseInt(sectionNode.getAttribute('data-section-index') || '0', 10);
+          setSelectedSectionIndex(index);
+        } else {
+          setSelectedSectionIndex(undefined);
+        }
+
         setToolbarPosition({
           x: rect.left + rect.width / 2,
           y: rect.top - 10 + window.scrollY
@@ -200,6 +213,23 @@ export const ContentPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleAddSectionNote = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { sectionIndex, x, y } = customEvent.detail;
+      setSelectedSectionIndex(sectionIndex);
+      setInlineNote({
+        text: '',
+        position: { x, y }
+      });
+      setSelectedText(''); // Clear selected text to indicate section note
+      window.getSelection()?.removeAllRanges();
+    };
+
+    window.addEventListener('add-section-note', handleAddSectionNote);
+    return () => window.removeEventListener('add-section-note', handleAddSectionNote);
+  }, []);
+
   const handleHighlight = async (color: 'yellow' | 'green' | 'pink' = selectedColor) => {
     if (!selectedText || !id) return;
     
@@ -208,7 +238,8 @@ export const ContentPage = () => {
         text: selectedText,
         startOffset: 0, 
         endOffset: 0,   
-        color: color
+        color: color,
+        sectionIndex: selectedSectionIndex
       });
       toast.success('Text highlighted');
       refetch(); // Refresh to show new highlight
@@ -236,12 +267,18 @@ export const ContentPage = () => {
     if (!inlineNote?.text || !id) return;
 
     try {
+      let textToSave = selectedText;
+      if (!textToSave && selectedSectionIndex !== undefined && content?.learningGuide) {
+         textToSave = content.learningGuide.sections[selectedSectionIndex].title;
+      }
+
       await contentService.addHighlight(id, {
-        text: selectedText,
+        text: textToSave || 'Note',
         startOffset: 0,
         endOffset: 0,
         note: inlineNote.text,
-        color: 'yellow'
+        color: 'yellow',
+        sectionIndex: selectedSectionIndex
       });
       toast.success('Note added');
       refetch();

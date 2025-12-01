@@ -132,6 +132,7 @@ export const contentService = {
       startOffset: number;
       endOffset: number;
       note?: string;
+      sectionIndex?: number;
     }
   ): Promise<unknown> {
     const response = await apiClient.post(

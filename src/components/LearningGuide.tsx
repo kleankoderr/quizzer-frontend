@@ -243,12 +243,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       {/* Sections */}
       <div className="space-y-4">
         {guide.sections.map((section, idx) => {
-          const processedContent = applyHighlights(section.content, highlights);
+          const processedContent = applyHighlights(section.content, highlights, idx);
           const isCompleted = completedSections.has(idx);
 
           return (
             <div
               key={idx}
+              data-section-index={idx}
               className={`bg-white dark:bg-gray-800 rounded-xl border transition-all duration-300 overflow-hidden ${
                 activeSection === idx
                   ? 'border-primary-500 shadow-md ring-1 ring-primary-500/20'
@@ -276,11 +277,44 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                     {section.title}
                   </h3>
                 </div>
-                <ChevronRight
-                  className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
-                    activeSection === idx ? 'rotate-90' : ''
-                  }`}
-                />
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Trigger note creation for this section
+                      // We can simulate a selection or use a callback
+                      // For now, let's just use the global note handler if possible, 
+                      // or we might need to expose a specific handler.
+                      // Since the requirement says "Clicking the note icon allows the user to add a note for that section",
+                      // and "Do not highlight text when adding a note",
+                      // we might need a way to open the note input without text selection.
+                      // But the current note input is "InlineNoteInput" which positions based on selection/toolbar.
+                      
+                      // Let's emit a custom event or callback if provided, 
+                      // or we can rely on the parent to handle "add note to section".
+                      // For this iteration, I'll add the button and we can wire it up in ContentPage.
+                      const rect = (e.target as HTMLElement).getBoundingClientRect();
+                      const event = new CustomEvent('add-section-note', { 
+                        detail: { 
+                          sectionIndex: idx, 
+                          sectionTitle: section.title,
+                          x: rect.left,
+                          y: rect.bottom + window.scrollY
+                        } 
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                    className="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    title="Add Note to Section"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                  </button>
+                  <ChevronRight
+                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+                      activeSection === idx ? 'rotate-90' : ''
+                    }`}
+                  />
+                </div>
               </div>
 
               <div

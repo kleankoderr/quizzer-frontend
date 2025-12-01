@@ -3,6 +3,7 @@ export interface Highlight {
   text: string;
   note?: string;
   color: "yellow" | "green" | "pink";
+  sectionIndex?: number;
   createdAt: string;
 }
 
@@ -18,11 +19,23 @@ export const HIGHLIGHT_BORDER_COLORS = {
   pink: "border-pink-400 dark:border-pink-700",
 };
 
-export const applyHighlights = (markdown: string, highlights: Highlight[]) => {
+export const applyHighlights = (
+  markdown: string,
+  highlights: Highlight[],
+  currentSectionIndex?: number
+) => {
   if (!highlights || highlights.length === 0) return markdown;
 
+  // Filter highlights for the current section if sectionIndex is provided
+  const relevantHighlights =
+    currentSectionIndex !== undefined
+      ? highlights.filter((h) => h.sectionIndex === currentSectionIndex)
+      : highlights;
+
+  if (relevantHighlights.length === 0) return markdown;
+
   let processed = markdown;
-  const sortedHighlights = [...highlights].sort(
+  const sortedHighlights = [...relevantHighlights].sort(
     (a, b) => b.text.length - a.text.length
   );
   const replacements: Map<string, string> = new Map();

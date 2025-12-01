@@ -21,11 +21,11 @@ class AnalyticsService {
 
     if (token) {
       mixpanel.init(token, {
-        debug: isDev,
+        debug: false,
         track_pageview: false,
         persistence: "localStorage",
-        autocapture: true,
-        record_sessions_percent: 100,
+        autocapture: false,
+        record_sessions_percent: 0,
         api_host: isDev ? "/mixpanel" : "https://api-js.mixpanel.com",
       });
       this.isInitialized = true;
