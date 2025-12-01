@@ -6,6 +6,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { format } from 'date-fns';
 
 import { contentService, type Content } from '../services/content.service';
@@ -13,6 +15,7 @@ import toast from 'react-hot-toast';
 import { analytics } from '../services/analytics.service';
 import { Modal } from '../components/Modal';
 import { InlineNoteInput } from '../components/InlineNoteInput';
+import { LearningGuide } from '../components/LearningGuide';
 
 import './ContentPage.css';
 import { useContent } from '../hooks';
@@ -40,6 +43,90 @@ const HIGHLIGHT_BORDER_COLORS = {
   yellow: 'border-yellow-400 dark:border-yellow-700',
   green: 'border-green-400 dark:border-green-700',
   pink: 'border-pink-400 dark:border-pink-700'
+};
+
+// Markdown Content Component with Scroll Tracking
+const MarkdownContent = ({ 
+  processedContent, 
+  initialProgress, 
+  onProgressUpdate 
+}: { 
+  processedContent: string;
+  initialProgress: number;
+  onProgressUpdate: (progress: number) => void;
+}) => {
+  const [restored, setRestored] = useState(false);
+
+  // Custom heading renderer to add IDs
+  const HeadingRenderer = ({ level, children }: any) => {
+    const text = children?.[0]?.toString() || '';
+    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+    const Tag = `h${level}` as React.ElementType;
+    return <Tag id={id}>{children}</Tag>;
+  };
+
+  // Restore scroll position
+  useEffect(() => {
+    if (!restored && initialProgress > 0) {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const targetScroll = (initialProgress / 100) * scrollHeight;
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      setRestored(true);
+    }
+  }, [initialProgress, restored]);
+
+  // Track scroll progress
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    
+    const handleScroll = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const scrollTop = window.scrollY;
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (scrollHeight <= 0) return;
+        
+        const progress = Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100));
+        onProgressUpdate(progress);
+      }, 500); // Debounce by 500ms
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, [onProgressUpdate]);
+
+  return (
+    <div className="prose prose-lg max-w-none content-markdown font-sans dark:prose-invert">
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm, remarkMath]} 
+        rehypePlugins={[
+          rehypeRaw,
+          rehypeKatex,
+          [rehypeSanitize, {
+            ...defaultSchema,
+            tagNames: [...(defaultSchema.tagNames || []), 'mark', 'span', 'div', 'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd'],
+            attributes: {
+              ...defaultSchema.attributes,
+              mark: [['className'], ['data-highlight-id']],
+              span: [['className'], ['title'], ['style']],
+              div: [['className']],
+              math: [['xmlns'], ['display']],
+            }
+          }]
+        ]}
+        components={{
+          h1: (props) => <HeadingRenderer level={1} {...props} />,
+          h2: (props) => <HeadingRenderer level={2} {...props} />,
+          h3: (props) => <HeadingRenderer level={3} {...props} />,
+        }}
+      >
+        {processedContent}
+      </ReactMarkdown>
+    </div>
+  );
 };
 
 export const ContentPage = () => {
@@ -372,14 +459,6 @@ export const ContentPage = () => {
   };
 
 
-  // Custom heading renderer to add IDs
-  const HeadingRenderer = ({ level, children }: any) => {
-    const text = children?.[0]?.toString() || '';
-    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-    const Tag = `h${level}` as React.ElementType;
-    return <Tag id={id}>{children}</Tag>;
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -506,7 +585,7 @@ export const ContentPage = () => {
         </div>
       </div>
 
-      <div className="flex gap-8 max-w-7xl mx-auto">
+      <div className="flex gap-8 max-w-[1600px] mx-auto">
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           <div ref={contentRef} onClick={handleContentClick} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 md:p-12 min-h-[500px]">
@@ -535,37 +614,76 @@ export const ContentPage = () => {
                 <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Preview</h4>
                   <div className="prose prose-sm max-w-none bg-white dark:bg-gray-800 rounded p-4 border border-gray-200 dark:border-gray-700">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                       {editedContent || '*No content to preview*'}
                     </ReactMarkdown>
                   </div>
                 </div>
               </div>
+            ) : content.learningGuide ? (
+              <LearningGuide 
+                key={content.id}
+                guide={content.learningGuide} 
+                title={content.title}
+                highlights={content.highlights}
+                onContentClick={handleContentClick}
+                contentRef={contentRef}
+                contentId={content.id}
+                topic={content.topic}
+                onGenerateQuiz={handleGenerateQuiz}
+                onGenerateFlashcards={handleGenerateFlashcards}
+                onToggleSectionComplete={async (index, isComplete) => {
+                  if (!content?.learningGuide) return;
+                  
+                  const previousContent = queryClient.getQueryData(['content', id]);
+                  
+                  // Calculate new progress
+                  const updatedGuide = JSON.parse(JSON.stringify(content.learningGuide));
+                  if (updatedGuide.sections[index]) {
+                    updatedGuide.sections[index].completed = isComplete;
+                  }
+                  
+                  const totalSections = updatedGuide.sections.length;
+                  const completedCount = updatedGuide.sections.filter((s: any) => s.completed).length;
+                  const newProgress = Math.round((completedCount / totalSections) * 100);
+
+                  // Optimistic update
+                  queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+                    if (!old || !old.learningGuide) return old;
+                    return { 
+                      ...old, 
+                      learningGuide: updatedGuide,
+                      lastReadPosition: newProgress 
+                    };
+                  });
+
+                  try {
+                    await contentService.update(content.id, {
+                      learningGuide: updatedGuide,
+                      lastReadPosition: newProgress
+                    });
+                  } catch (error) {
+                    console.error('Failed to save progress:', error);
+                    // Revert
+                    queryClient.setQueryData(['content', id], previousContent);
+                    toast.error('Failed to save progress');
+                  }
+                }}
+              />
             ) : (
-              <div className="prose prose-lg max-w-none content-markdown font-sans dark:prose-invert">
-                <ReactMarkdown 
-                  remarkPlugins={[remarkGfm]} 
-                  rehypePlugins={[
-                    rehypeRaw,
-                    [rehypeSanitize, {
-                      ...defaultSchema,
-                      tagNames: [...(defaultSchema.tagNames || []), 'mark', 'span'],
-                      attributes: {
-                        ...defaultSchema.attributes,
-                        mark: [['className'], ['data-highlight-id']],
-                        span: [['className'], ['title']]
-                      }
-                    }]
-                  ]}
-                  components={{
-                    h1: (props) => <HeadingRenderer level={1} {...props} />,
-                    h2: (props) => <HeadingRenderer level={2} {...props} />,
-                    h3: (props) => <HeadingRenderer level={3} {...props} />,
-                  }}
-                >
-                  {processedContent}
-                </ReactMarkdown>
-              </div>
+              <MarkdownContent 
+                processedContent={processedContent}
+                initialProgress={content.lastReadPosition || 0}
+                onProgressUpdate={async (progress) => {
+                  try {
+                    await contentService.update(content.id, {
+                      lastReadPosition: progress
+                    });
+                  } catch (error) {
+                    console.error('Failed to save scroll progress:', error);
+                  }
+                }}
+              />
             )}
           </div>
         </div>

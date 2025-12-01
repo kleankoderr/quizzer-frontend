@@ -25,6 +25,14 @@ export function AttemptsPage() {
   // Get URL params for filtering
   const quizId = searchParams.get('quizId');
   const flashcardId = searchParams.get('flashcardId');
+  const typeParam = searchParams.get('type');
+
+  // Sync filter type with URL params
+  useEffect(() => {
+    if (typeParam === 'quiz' || typeParam === 'flashcard' || typeParam === 'all') {
+      setFilterType(typeParam);
+    }
+  }, [typeParam]);
 
   // Use React Query hook with filters
   const { data: attemptsData, isLoading: loading, error } = useAttempts({
@@ -269,7 +277,14 @@ export function AttemptsPage() {
               {(['all', 'quiz', 'flashcard'] as const).map((type) => (
                 <button
                   key={type}
-                  onClick={() => setFilterType(type)}
+                  onClick={() => {
+                    setFilterType(type);
+                    setSearchParams(prev => {
+                      const newParams = new URLSearchParams(prev);
+                      newParams.set('type', type);
+                      return newParams;
+                    });
+                  }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     filterType === type
                       ? 'bg-blue-600 text-white'

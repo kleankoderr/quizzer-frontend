@@ -71,7 +71,7 @@ export const QuizPage = () => {
       const { jobId } = await quizService.generate(request, files);
       
       // Poll for completion with progress updates
-      await quizService.pollForCompletion(jobId, (p) => {
+      const quiz = await quizService.pollForCompletion(jobId, (p) => {
         toast.custom((t) => (
           <ProgressToast
             t={t}
@@ -96,11 +96,18 @@ export const QuizPage = () => {
         <ProgressToast
           t={t}
           title="Success!"
-          message="Quiz generated successfully."
+          message="Opening your quiz..."
           progress={100}
           status="success"
         />
-      ), { id: toastId, duration: 4000 });
+      ), { id: toastId, duration: 2000 });
+
+      // Navigate to the quiz if we have the quiz object
+      if (quiz?.id) {
+        setTimeout(() => {
+          navigate(`/quiz/${quiz.id}`);
+        }, 500);
+      }
 
     } catch (error) {
       // Error toast

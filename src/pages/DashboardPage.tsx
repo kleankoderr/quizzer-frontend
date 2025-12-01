@@ -1,35 +1,120 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useDashboardData } from '../hooks';
-import { Trophy, Brain, Flame, Zap, Crown, Medal, Star, TrendingUp, Sparkles, BookOpen, ArrowRight, Layers } from 'lucide-react';
-import { XPProgressBar } from '../components/XPProgressBar';
-import { StatCardSkeleton } from '../components/skeletons';
+import { quoteService } from '../services/quote.service';
+import { ArrowRight, BookOpen, Clock, TrendingUp, BarChart3, Sparkles, Target, Zap, Brain, Award, Calendar } from 'lucide-react';
+import { StatCardSkeleton, ChartSkeleton } from '../components/skeletons';
+import { useQuery } from '@tanstack/react-query';
+import { studyService } from '../services/study.service';
+import { contentService } from '../services/content.service';
+import { statisticsService } from '../services/statistics.service';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format, subDays, startOfDay } from 'date-fns';
 
 export const DashboardPage = () => {
   const { user } = useAuth();
-  const { data, isLoading: loading } = useDashboardData();
+  const navigate = useNavigate();
+  
+  const { data: dailyQuote } = useQuery({
+    queryKey: ['daily-quote'],
+    queryFn: quoteService.getDailyQuote,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+  
+  const { data: studyInsights, isLoading: insightsLoading } = useQuery({
+    queryKey: ['study-insights'],
+    queryFn: studyService.getInsights,
+  });
 
-  const streak = useMemo(() => data?.streak ?? null, [data?.streak]);
-  const leaderboard = useMemo(() => data?.leaderboard ?? [], [data?.leaderboard]);
-  const recommendations = useMemo(() => data?.recommendations ?? [], [data?.recommendations]);
+  const { data: statistics, isLoading: statsLoading } = useQuery({
+    queryKey: ['statistics-overview'],
+    queryFn: statisticsService.getOverview,
+  });
 
+  const { data: recentAttemptsData, isLoading: attemptsLoading } = useQuery({
+    queryKey: ['recent-attempts-dashboard'],
+    queryFn: () => statisticsService.getAttempts({ limit: 5, page: 1 }),
+  });
 
-  if (loading) {
+  const { data: activityData, isLoading: activityLoading } = useQuery({
+    queryKey: ['activity-heatmap'],
+    queryFn: () => statisticsService.getActivityHeatmap(),
+  });
+
+  // Fetch recent content for activity feed
+  const { data: recentContent, isLoading: contentLoading } = useQuery({
+    queryKey: ['recent-content'],
+    queryFn: async () => {
+      const response = await contentService.getAll();
+      return response.data.slice(0, 5);
+    },
+  });
+
+  // Get the top recommendation
+  const topRecommendation = useMemo(() => {
+    if (studyInsights?.suggestions && studyInsights.suggestions.length > 0) {
+      return studyInsights.suggestions[0];
+    }
+    return null;
+  }, [studyInsights]);
+
+  // Calculate simple stats
+  const activeTopics = useMemo(() => {
+    if (!recentContent) return 0;
+    const uniqueTopics = new Set(recentContent.map(c => c.topic));
+    return uniqueTopics.size;
+  }, [recentContent]);
+
+  const retentionLevel = useMemo(() => {
+    if (!studyInsights?.retentionDistribution) return 'Getting Started';
+    const dist = studyInsights.retentionDistribution;
+    const total = dist.LEARNING + dist.REINFORCEMENT + dist.RECALL + dist.MASTERY;
+    if (total === 0) return 'Getting Started';
+    
+    const masteryPercent = (dist.MASTERY / total) * 100;
+    if (masteryPercent > 50) return 'Excellent';
+    if (masteryPercent > 25) return 'Improving';
+    return 'Building';
+  }, [studyInsights]);
+
+  // Prepare activity chart data (last 7 days)
+  const activityChartData = useMemo(() => {
+    if (!activityData) {
+      // Generate empty data for last 7 days
+      return Array.from({ length: 7 }, (_, i) => {
+        const date = startOfDay(subDays(new Date(), 6 - i));
+        return {
+          date: format(date, 'MMM dd'),
+          count: 0,
+        };
+      });
+    }
+
+    // Get last 7 days
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = startOfDay(subDays(new Date(), 6 - i));
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const activity = activityData.find(a => a.date === dateStr);
+      return {
+        date: format(date, 'MMM dd'),
+        count: activity?.count || 0,
+      };
+    });
+
+    return last7Days;
+  }, [activityData]);
+
+  const isLoading = insightsLoading || statsLoading || contentLoading;
+
+  if (isLoading) {
     return (
       <div className="space-y-6 pb-8">
-        <div className="card bg-primary-600 dark:bg-primary-900 p-6 md:p-8">
-          <div className="h-24" />
-        </div>
+        <div className="h-48" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCardSkeleton count={3} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCardSkeleton count={3} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <StatCardSkeleton count={2} />
-        </div>
+        <ChartSkeleton />
+        <StatCardSkeleton count={1} />
       </div>
     );
   }
@@ -37,232 +122,404 @@ export const DashboardPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-600 dark:from-blue-800 dark:via-indigo-800 dark:to-cyan-800 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">Welcome back!</span>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-6 h-6 text-yellow-300" />
+              <span className="text-yellow-300 font-semibold text-sm">Your Learning Hub</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              Welcome back, {user?.name || 'Learner'}! 👋
+            </h1>
+            <p className="text-blue-100 dark:text-blue-200 text-lg">
+              Track your progress and continue your learning journey
+            </p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Hello, {user?.name || 'Learner'}! 👋
-          </h1>
-          <p className="text-primary-100 dark:text-primary-200 text-lg">
-            Create content, take quizzes, or study flashcards to level up your knowledge
-          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => navigate('/study')}
+              className="flex items-center gap-2 px-6 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              <BookOpen className="w-5 h-5" />
+              Start Studying
+            </button>
+            <button
+              onClick={() => navigate('/quiz')}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600/20 text-white hover:bg-blue-600/30 border border-white/20 backdrop-blur-sm rounded-xl font-semibold transition-colors"
+            >
+              <Brain className="w-5 h-5" />
+              Create Quiz
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link
-          to="/quiz"
-          className="card hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-700 dark:bg-gray-800"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white">Create Quiz</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Generate AI-powered quizzes</p>
-            </div>
-          </div>
-        </Link>
-
-        <Link
-          to="/flashcards"
-          className="card hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-700 dark:bg-gray-800"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <Layers className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white">Create Flashcards</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Build flashcard sets</p>
-            </div>
-          </div>
-        </Link>
-
-        <Link
-          to="/challenges"
-          className="card hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-700 dark:bg-gray-800"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-              <Trophy className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white">Join Challenges</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Compete with others</p>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Call to Action - Create Study Content */}
-      <Link 
-        to="/study"
-        className="block group"
-      >
-        <div className="card bg-gradient-to-br from-primary-600 via-primary-700 to-blue-700 dark:from-primary-800 dark:via-primary-900 dark:to-blue-900 border-0 shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 cursor-pointer">
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full blur-2xl"></div>
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full blur-2xl"></div>
-            </div>
-            
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-white/20 backdrop-blur-sm rounded-xl group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-1">Ready to Study?</h2>
-                  <p className="text-primary-100 dark:text-primary-200 text-base">Create AI-powered study materials from topics, text, or files</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 text-white group-hover:gap-4 transition-all">
-                <span className="font-semibold text-lg">Get Started</span>
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          </div>
+      {/* Daily Inspiration */}
+      {dailyQuote && (
+        <div className="px-1 py-2">
+          <p className="text-gray-600 dark:text-gray-400 text-sm italic text-center">
+            "{dailyQuote.text}" <span className="text-gray-400 dark:text-gray-500 not-italic ml-2">— {dailyQuote.author}</span>
+          </p>
         </div>
-      </Link>
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card bg-primary-50 dark:bg-gray-800 border border-primary-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary-500 rounded-lg">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
+        <div className="card bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border-blue-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Content</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Total Attempts</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{statistics?.totalAttempts || 0}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {statistics?.quizAttempts || 0} quizzes, {statistics?.flashcardAttempts || 0} flashcards
+              </p>
+            </div>
+            <div className="p-3 bg-blue-500 rounded-xl">
+              <BookOpen className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="card bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-500 rounded-lg">
+        <div className="card bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 border-green-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Avg. Accuracy</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {statistics?.averageAccuracy ? `${statistics.averageAccuracy.toFixed(1)}%` : '0%'}
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">Keep it up!</p>
+            </div>
+            <div className="p-3 bg-green-500 rounded-xl">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">This Week</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
-            </div>
           </div>
         </div>
 
-        <div className="card bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-yellow-500 rounded-lg">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+        <div className="card bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border-orange-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Popular Topic</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">-</p>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Current Streak</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{statistics?.currentStreak || 0}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">days</p>
+            </div>
+            <div className="p-3 bg-orange-500 rounded-xl">
+              <Award className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Rest of dashboard content */}
+      {/* Activity Chart */}
+      <div className="card dark:bg-gray-800">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Activity (Last 7 Days)</h2>
+          </div>
+        </div>
+        
+        {activityLoading ? (
+          <div className="h-[200px] flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={activityChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '8px 12px'
+                }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="count" 
+                stroke="#3b82f6" 
+                strokeWidth={2}
+                fillOpacity={1} 
+                fill="url(#colorActivity)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Streak & XP */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <Flame className="w-6 h-6 text-orange-500" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Progress</h2>
+        {/* Learning Progress */}
+        <div className="card dark:bg-gray-800">
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Learning Progress</h3>
           </div>
           
-          {streak && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Current Streak</p>
-                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-500">{streak.currentStreak} days</p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Active Topics</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">{activeTopics}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Retention Level</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-gray-900 dark:text-white">{retentionLevel}</span>
+                {retentionLevel !== 'Getting Started' && (
+                  <TrendingUp className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                )}
+              </div>
+            </div>
+
+            {studyInsights?.retentionDistribution && (
+              <div className="pt-2">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <span>Mastery Progress</span>
+                  <span>
+                    {Math.round(
+                      ((studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY) / 
+                      (studyInsights.retentionDistribution.LEARNING + studyInsights.retentionDistribution.REINFORCEMENT + 
+                       studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY || 1)) * 100
+                    )}%
+                  </span>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Longest Streak</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{streak.longestStreak} days</p>
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${
+                        ((studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY) / 
+                        (studyInsights.retentionDistribution.LEARNING + studyInsights.retentionDistribution.REINFORCEMENT + 
+                         studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY || 1)) * 100
+                      }%` 
+                    }}
+                  />
                 </div>
               </div>
-              
-              <XPProgressBar streak={streak} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Leaderboard Preview */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Trophy className="w-6 h-6 text-yellow-500" />
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Leaderboard</h2>
+        {/* Smart Recommendation */}
+        {topRecommendation ? (
+          <div className="card relative overflow-hidden border-0 shadow-lg group">
+            <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
+            
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
+
+            <div className="relative z-10 p-6 text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <Sparkles className="w-5 h-5 text-yellow-300" />
+                </div>
+                <h3 className="text-sm font-bold tracking-wider uppercase text-blue-100">
+                  Recommended for You
+                </h3>
+              </div>
+
+              <h4 className="text-2xl font-bold mb-2 text-white">
+                {topRecommendation.topic}
+              </h4>
+              <p className="text-blue-100 mb-6 text-sm leading-relaxed opacity-90">
+                {topRecommendation.reason}
+              </p>
+
+              <div className="flex gap-3">
+                {topRecommendation.quizId && (
+                  <button
+                    onClick={() => navigate(`/quiz/${topRecommendation.quizId}`)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    <Target className="w-5 h-5" />
+                    Take Quiz
+                  </button>
+                )}
+                
+                {topRecommendation.flashcardSetId && (
+                  <button
+                    onClick={() => navigate(`/flashcards/${topRecommendation.flashcardSetId}`)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
+                      !topRecommendation.quizId 
+                        ? 'bg-white text-blue-600 hover:bg-blue-50' 
+                        : 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
+                    }`}
+                  >
+                    <Brain className="w-5 h-5" />
+                    Review Cards
+                  </button>
+                )}
+
+                {!topRecommendation.quizId && !topRecommendation.flashcardSetId && (
+                   <button
+                   onClick={() => navigate('/study')}
+                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                 >
+                   <BookOpen className="w-5 h-5" />
+                   Continue Learning
+                 </button>
+                )}
+              </div>
             </div>
-            <Link to="/leaderboard" className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
+          </div>
+        ) : (
+          <div className="card dark:bg-gray-800">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Get Started</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Begin your learning journey by creating your first study material!
+            </p>
+            <button
+              onClick={() => navigate('/study')}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              Create Content
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Recent Attempts */}
+      {!attemptsLoading && recentAttemptsData && recentAttemptsData.attempts.length > 0 && (
+        <div className="card dark:bg-gray-800">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Attempts</h3>
+            <button
+              onClick={() => navigate('/statistics')}
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1"
+            >
               View All
-            </Link>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
           
           <div className="space-y-2">
-            {leaderboard.map((entry, index) => (
-              <div key={entry.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <div className="flex-shrink-0 w-8 text-center">
-                  {index === 0 && <Crown className="w-5 h-5 text-yellow-500 mx-auto" />}
-                  {index === 1 && <Medal className="w-5 h-5 text-gray-400 mx-auto" />}
-                  {index === 2 && <Medal className="w-5 h-5 text-orange-600 mx-auto" />}
-                  {index > 2 && <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">#{index + 1}</span>}
-                </div>
+            {recentAttemptsData.attempts.slice(0, 3).map((attempt) => (
+              <div
+                key={attempt.id}
+                onClick={() => {
+                  if (attempt.type === 'quiz' && attempt.quiz?.id) {
+                    navigate(`/attempts?quizId=${attempt.quiz.id}`);
+                  } else if (attempt.type === 'flashcard' && attempt.flashcardSet?.id) {
+                    navigate(`/attempts?flashcardId=${attempt.flashcardSet.id}`);
+                  }
+                }}
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
+              >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{entry.userName || entry.user?.name}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {attempt.quiz?.title || attempt.flashcardSet?.title || 'Untitled'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {attempt.type === 'quiz' ? 'Quiz' : 'Flashcards'} • {new Date(attempt.completedAt).toLocaleDateString()}
+                  </p>
                 </div>
-                <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400">
-                  <Star className="w-4 h-4" />
-                  <span className="text-sm font-semibold">{entry.score}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recommendations */}
-      {recommendations.length > 0 && (
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <TrendingUp className="w-6 h-6 text-green-500" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recommended for You</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recommendations.map((rec, index) => (
-              <div key={rec.topic + index} className="p-4 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 rounded-lg border border-primary-200 dark:border-gray-700">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{rec.topic}</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    rec.priority === 'high' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
-                    rec.priority === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
-                    'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                  }`}>
-                    {rec.priority}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{rec.reason}</p>
+                {attempt.score !== undefined && attempt.totalQuestions && (
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${
+                      (attempt.score / attempt.totalQuestions) >= 0.7 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : (attempt.score / attempt.totalQuestions) >= 0.5 
+                        ? 'text-yellow-600 dark:text-yellow-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {Math.round((attempt.score / attempt.totalQuestions) * 100)}%
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link
+          to="/study"
+          className="card dark:bg-gray-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+              <BookOpen className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                Create Content
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Start learning</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+          </div>
+        </Link>
+
+        <Link
+          to="/statistics"
+          className="card dark:bg-gray-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                View Analytics
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Track progress</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+          </div>
+        </Link>
+
+        <Link
+          to="/attempts"
+          className="card dark:bg-gray-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+              <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                View Attempts
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Review history</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+          </div>
+        </Link>
+      </div>
     </div>
   );
 };

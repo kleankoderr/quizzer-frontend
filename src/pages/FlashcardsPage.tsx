@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { flashcardService } from '../services/flashcard.service';
 import type { FlashcardGenerateRequest } from '../types';
-import { CreditCard, Plus, Sparkles, Layers, BookOpen, X } from 'lucide-react';
+import { CreditCard, Plus, Sparkles, Layers, BookOpen, X, History } from 'lucide-react';
 import { FlashcardGenerator } from '../components/FlashcardGenerator';
 import { FlashcardSetList } from '../components/FlashcardSetList';
 import { Modal } from '../components/Modal';
@@ -15,6 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
   const { data: flashcardSets = [], isLoading } = useFlashcardSets();
   const [loading, setLoading] = useState(false);
@@ -66,7 +67,7 @@ export const FlashcardsPage = () => {
       const { jobId } = await flashcardService.generate(request, files);
       
       // Poll for completion with progress updates
-      await flashcardService.pollForCompletion(jobId, (p) => {
+      const flashcardSet = await flashcardService.pollForCompletion(jobId, (p) => {
         toast.custom((t) => (
           <ProgressToast
             t={t}
@@ -91,11 +92,18 @@ export const FlashcardsPage = () => {
         <ProgressToast
           t={t}
           title="Success!"
-          message="Flashcards generated successfully."
+          message="Opening your flashcards..."
           progress={100}
           status="success"
         />
-      ), { id: toastId, duration: 4000 });
+      ), { id: toastId, duration: 2000 });
+
+      // Navigate to the flashcard set if we have it
+      if (flashcardSet?.id) {
+        setTimeout(() => {
+          navigate(`/flashcards/${flashcardSet.id}`);
+        }, 500);
+      }
 
     } catch (error) {
       // Error toast
@@ -219,6 +227,17 @@ export const FlashcardsPage = () => {
             </>
           )}
         </div>
+      )}
+      
+      {/* View All Attempts Button */}
+      {(isLoading || totalSets > 0) && (
+        <button
+          onClick={() => navigate('/attempts?type=flashcard')}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium"
+        >
+          <History className="w-5 h-5" />
+          View All Flashcard Attempts
+        </button>
       )}
 
       {showGenerator && (

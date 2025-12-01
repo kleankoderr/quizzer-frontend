@@ -10,6 +10,20 @@ export interface Content {
   updatedAt: string;
   quizId?: string;
   flashcardSetId?: string;
+  learningGuide?: {
+    overview: string;
+    keyConcepts: string[];
+    sections: {
+      title: string;
+      content: string;
+      example?: string;
+      completed?: boolean;
+      generatedExplanation?: string;
+      generatedExample?: string;
+    }[];
+    nextSteps: string[];
+  };
+  lastReadPosition?: number;
 }
 
 export interface CreateContentDto {
@@ -28,6 +42,11 @@ const cache = new Map<string, { data: unknown; timestamp: number }>();
 const clearCache = () => {
   cache.clear();
 };
+
+export interface UpdateContentDto extends Partial<CreateContentDto> {
+  learningGuide?: Content["learningGuide"];
+  lastReadPosition?: number;
+}
 
 export const contentService = {
   async generateFromTopic(topic: string): Promise<{ taskId: string }> {
@@ -94,7 +113,7 @@ export const contentService = {
     return response.data;
   },
 
-  async update(id: string, data: Partial<CreateContentDto>): Promise<Content> {
+  async update(id: string, data: UpdateContentDto): Promise<Content> {
     clearCache();
     const response = await apiClient.put(`/content/${id}`, data);
     return response.data;
@@ -128,6 +147,30 @@ export const contentService = {
 
   async getPopularTopics(): Promise<string[]> {
     const response = await apiClient.get("/content/popular-topics");
+    return response.data;
+  },
+
+  async generateExplanation(
+    contentId: string,
+    sectionTitle: string,
+    sectionContent: string
+  ): Promise<string> {
+    const response = await apiClient.post(`/content/${contentId}/explain`, {
+      sectionTitle,
+      sectionContent,
+    });
+    return response.data;
+  },
+
+  async generateExample(
+    contentId: string,
+    sectionTitle: string,
+    sectionContent: string
+  ): Promise<string> {
+    const response = await apiClient.post(`/content/${contentId}/example`, {
+      sectionTitle,
+      sectionContent,
+    });
     return response.data;
   },
 };

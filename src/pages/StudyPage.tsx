@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { contentService } from '../services';
@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Modal } from '../components/Modal';
 import { CardSkeleton } from '../components/skeletons';
+import { ProgressToast } from '../components/ProgressToast';
 
 export const StudyPage = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export const StudyPage = () => {
   
   // Task processing state
   const [taskId, setTaskId] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const toastIdRef = useRef<string | null>(null);
 
   // Delete state
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
@@ -48,17 +49,48 @@ export const StudyPage = () => {
     
     const task = taskQuery.data;
     if (task.status === 'COMPLETED') {
-      toast.success('Content generated successfully!');
+      if (toastIdRef.current) {
+        toast.custom((t) => (
+          <ProgressToast
+            t={t}
+            title="Generation Complete"
+            message="Your study material is ready!"
+            progress={100}
+            status="success"
+          />
+        ), { id: toastIdRef.current });
+      }
       setTaskId(null);
-      setIsProcessing(false);
       setContentLoading(false);
       refetch();
       navigate(`/content/${task.result.contentId}`);
     } else if (task.status === 'FAILED') {
-      setIsProcessing(false);
+      if (toastIdRef.current) {
+        toast.custom((t) => (
+          <ProgressToast
+            t={t}
+            title="Generation Failed"
+            message={task.error || 'Unknown error'}
+            progress={100}
+            status="error"
+          />
+        ), { id: toastIdRef.current });
+      }
       setTaskId(null);
       setContentLoading(false);
-      toast.error(`Generation failed: ${task.error}`);
+    } else {
+       // Update progress
+       if (toastIdRef.current) {
+         toast.custom((t) => (
+           <ProgressToast
+             t={t}
+             title="Generating Content"
+             message="AI is crafting your study materials..."
+             progress={50}
+             status="processing"
+           />
+         ), { id: toastIdRef.current });
+       }
     }
   }, [taskQuery.data, navigate, refetch]);
 
@@ -69,14 +101,35 @@ export const StudyPage = () => {
     }
 
     setContentLoading(true);
+    
+    // Start toast
+    toastIdRef.current = toast.custom((t) => (
+      <ProgressToast
+        t={t}
+        title="Generating Content"
+        message="Initiating generation..."
+        progress={0}
+        status="processing"
+      />
+    ), { duration: Infinity });
+
     try {
       const { taskId } = await contentService.generateFromTopic(topic);
       setTaskId(taskId);
-      setIsProcessing(true);
       // Navigation happens after polling completes
     } catch (error) {
       console.error('Error generating content:', error);
-      toast.error('Failed to generate content. Please try again.');
+      if (toastIdRef.current) {
+         toast.custom((t) => (
+           <ProgressToast
+             t={t}
+             title="Generation Failed"
+             message="Failed to start generation"
+             progress={0}
+             status="error"
+           />
+         ), { id: toastIdRef.current });
+      }
       setContentLoading(false);
     }
   }, [topic]);
@@ -88,17 +141,45 @@ export const StudyPage = () => {
     }
 
     setContentLoading(true);
+    const toastId = toast.custom((t) => (
+      <ProgressToast
+        t={t}
+        title="Creating Content"
+        message="Processing your text..."
+        progress={20}
+        status="processing"
+      />
+    ), { duration: Infinity });
+
     try {
       const content = await contentService.createFromText({
         title: textTitle,
         content: textContent,
         topic: textTopic || 'General',
       });
-      toast.success('Content created successfully!');
+      
+      toast.custom((t) => (
+        <ProgressToast
+          t={t}
+          title="Content Created"
+          message="Redirecting..."
+          progress={100}
+          status="success"
+        />
+      ), { id: toastId });
+
       navigate(`/content/${content.id}`);
     } catch (error) {
       console.error('Error creating content:', error);
-      toast.error('Failed to create content. Please try again.');
+      toast.custom((t) => (
+        <ProgressToast
+          t={t}
+          title="Creation Failed"
+          message="Failed to create content"
+          progress={0}
+          status="error"
+        />
+      ), { id: toastId });
     } finally {
       setContentLoading(false);
     }
@@ -111,15 +192,57 @@ export const StudyPage = () => {
     }
 
     setContentLoading(true);
+    const toastId = toast.custom((t) => (
+      <ProgressToast
+        t={t}
+        title="Processing File"
+        message="Uploading and extracting text..."
+        progress={10}
+        status="processing"
+      />
+    ), { duration: Infinity });
+
     try {
       analytics.trackFileUpload(file.name, file.size, file.type);
+      
+      // Update progress to show we are working
+      setTimeout(() => {
+         toast.custom((t) => (
+          <ProgressToast
+            t={t}
+            title="Processing File"
+            message="Analyzing content with AI..."
+            progress={50}
+            status="processing"
+          />
+        ), { id: toastId });
+      }, 1000);
+
       const content = await contentService.createFromFile(file);
-      toast.success('File uploaded and processed successfully!');
+      
+      toast.custom((t) => (
+        <ProgressToast
+          t={t}
+          title="File Processed"
+          message="Content generated successfully!"
+          progress={100}
+          status="success"
+        />
+      ), { id: toastId });
+
       analytics.trackFileUploadResult(file.name, true);
       navigate(`/content/${content.id}`);
     } catch (error: any) {
       console.error('Error uploading file:', error);
-      toast.error('Failed to upload file. Please try again.');
+      toast.custom((t) => (
+        <ProgressToast
+          t={t}
+          title="Upload Failed"
+          message={error.message || 'Failed to process file'}
+          progress={0}
+          status="error"
+        />
+      ), { id: toastId });
       analytics.trackFileUploadResult(file.name, false, error.message || 'Upload failed');
     } finally {
       setContentLoading(false);
@@ -144,23 +267,7 @@ export const StudyPage = () => {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Processing Modal */}
-      {isProcessing && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-300">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-primary-200 rounded-full animate-ping opacity-75"></div>
-              <div className="relative bg-white p-2 rounded-full">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent"></div>
-              </div>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Generating Content...</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-center">
-              Our AI is crafting your study materials. This may take a few moments.
-            </p>
-          </div>
-        </div>
-      )}
+
 
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-700 to-blue-700 dark:from-primary-800 dark:via-primary-900 dark:to-blue-900 p-8 md:p-10 shadow-xl">
