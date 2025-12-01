@@ -20,16 +20,34 @@ export default defineConfig({
       output: {
         // Manual chunk splitting for better caching and performance
         manualChunks: (id) => {
-          // React core
+          // Only split truly independent libraries that don't depend on React
+
+          // Firebase (independent, large library)
           if (
-            id.includes("node_modules/react") ||
-            id.includes("node_modules/react-dom") ||
-            id.includes("node_modules/react-router-dom")
+            id.includes("node_modules/firebase") ||
+            id.includes("node_modules/@firebase")
           ) {
-            return "react-vendor";
+            return "firebase-vendor";
           }
 
-          // Lexical editor (large library)
+          // Analytics (independent)
+          if (id.includes("node_modules/mixpanel-browser")) {
+            return "analytics-vendor";
+          }
+
+          // Markdown rendering with syntax highlighting (large, but React-dependent)
+          // Keep this separate as it's very large
+          if (
+            id.includes("node_modules/react-markdown") ||
+            id.includes("node_modules/remark-") ||
+            id.includes("node_modules/rehype-") ||
+            id.includes("node_modules/katex") ||
+            id.includes("node_modules/highlight.js")
+          ) {
+            return "markdown-vendor";
+          }
+
+          // Lexical editor (large library, React-dependent)
           if (
             id.includes("node_modules/lexical") ||
             id.includes("node_modules/@lexical")
@@ -37,52 +55,37 @@ export default defineConfig({
             return "lexical-vendor";
           }
 
-          // Charts library
-          if (id.includes("node_modules/recharts")) {
-            return "charts-vendor";
-          }
-
-          // Markdown rendering (large with syntax highlighting)
+          // React core and router - keep together
           if (
-            id.includes("node_modules/react-markdown") ||
-            id.includes("node_modules/remark-") ||
-            id.includes("node_modules/rehype-")
+            id.includes("node_modules/react") ||
+            id.includes("node_modules/react-dom") ||
+            id.includes("node_modules/react-router") ||
+            id.includes("node_modules/scheduler")
           ) {
-            return "markdown-vendor";
+            return "react-vendor";
           }
 
-          // Data fetching and state management
+          // Data fetching (React Query depends on React)
           if (
             id.includes("node_modules/@tanstack/react-query") ||
-            id.includes("node_modules/axios")
+            id.includes("node_modules/@tanstack/query-core")
           ) {
             return "data-vendor";
           }
 
-          // Firebase
-          if (id.includes("node_modules/firebase")) {
-            return "firebase-vendor";
+          // Axios (independent HTTP client)
+          if (id.includes("node_modules/axios")) {
+            return "axios-vendor";
           }
 
-          // Analytics
-          if (id.includes("node_modules/mixpanel-browser")) {
-            return "analytics-vendor";
-          }
-
-          // UI libraries
-          if (
-            id.includes("node_modules/lucide-react") ||
-            id.includes("node_modules/react-hot-toast") ||
-            id.includes("node_modules/react-loading-skeleton") ||
-            id.includes("node_modules/react-confetti") ||
-            id.includes("node_modules/react-use")
-          ) {
-            return "ui-vendor";
-          }
-
-          // Date utilities
+          // Date utilities (independent)
           if (id.includes("node_modules/date-fns")) {
             return "date-vendor";
+          }
+
+          // All other node_modules go into a general vendor chunk
+          if (id.includes("node_modules")) {
+            return "vendor";
           }
         },
       },
