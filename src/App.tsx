@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -7,34 +7,47 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { analytics } from './services/analytics.service';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
-import { LoginPage } from './pages/LoginPage';
-import { SignupPage } from './pages/SignupPage';
-import { OnboardingPage } from './pages/OnboardingPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { StudyPage } from './pages/StudyPage';
-import { ContentPage } from './pages/ContentPage';
-import { QuizPage } from './pages/QuizPage';
-import { QuizTakePage } from './pages/QuizTakePage';
-import { FlashcardsPage } from './pages/FlashcardsPage';
-import { FlashcardStudyPage } from './pages/FlashcardStudyPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { SettingsPage } from './pages/SettingsPage';
-import { StatisticsPage } from './pages/StatisticsPage';
-import { LeaderboardPage } from './pages/LeaderboardPage';
-import { ChallengesPage } from './pages/ChallengesPage';
-import { ChallengeDetailsPage } from './pages/ChallengeDetailsPage';
-import { ChallengeQuizPage } from './pages/ChallengeQuizPage';
-import { ChallengeResultsPage } from './pages/ChallengeResultsPage';
-import { AttemptsPage } from './pages/AttemptsPage';
-import { DiscoverPage } from './pages/DiscoverPage';
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { UserManagement } from './pages/admin/UserManagement';
-import { ContentManagement } from './pages/admin/ContentManagement';
-import { ContentModeration } from './pages/admin/ContentModeration';
-import { SchoolManagement } from './pages/admin/SchoolManagement';
-import { AiAnalytics } from './pages/admin/AiAnalytics';
-import { PlatformSettings } from './pages/admin/PlatformSettings';
+
+// Lazy load all page components for code splitting
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const StudyPage = lazy(() => import('./pages/StudyPage').then(m => ({ default: m.StudyPage })));
+const ContentPage = lazy(() => import('./pages/ContentPage').then(m => ({ default: m.ContentPage })));
+const QuizPage = lazy(() => import('./pages/QuizPage').then(m => ({ default: m.QuizPage })));
+const QuizTakePage = lazy(() => import('./pages/QuizTakePage').then(m => ({ default: m.QuizTakePage })));
+const FlashcardsPage = lazy(() => import('./pages/FlashcardsPage').then(m => ({ default: m.FlashcardsPage })));
+const FlashcardStudyPage = lazy(() => import('./pages/FlashcardStudyPage').then(m => ({ default: m.FlashcardStudyPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const StatisticsPage = lazy(() => import('./pages/StatisticsPage').then(m => ({ default: m.StatisticsPage })));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage').then(m => ({ default: m.LeaderboardPage })));
+const ChallengesPage = lazy(() => import('./pages/ChallengesPage').then(m => ({ default: m.ChallengesPage })));
+const ChallengeDetailsPage = lazy(() => import('./pages/ChallengeDetailsPage').then(m => ({ default: m.ChallengeDetailsPage })));
+const ChallengeQuizPage = lazy(() => import('./pages/ChallengeQuizPage').then(m => ({ default: m.ChallengeQuizPage })));
+const ChallengeResultsPage = lazy(() => import('./pages/ChallengeResultsPage').then(m => ({ default: m.ChallengeResultsPage })));
+const AttemptsPage = lazy(() => import('./pages/AttemptsPage').then(m => ({ default: m.AttemptsPage })));
+const DiscoverPage = lazy(() => import('./pages/DiscoverPage').then(m => ({ default: m.DiscoverPage })));
+
+// Lazy load admin pages
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
+const ContentManagement = lazy(() => import('./pages/admin/ContentManagement').then(m => ({ default: m.ContentManagement })));
+const ContentModeration = lazy(() => import('./pages/admin/ContentModeration').then(m => ({ default: m.ContentModeration })));
+const SchoolManagement = lazy(() => import('./pages/admin/SchoolManagement').then(m => ({ default: m.SchoolManagement })));
+const AiAnalytics = lazy(() => import('./pages/admin/AiAnalytics').then(m => ({ default: m.AiAnalytics })));
+const PlatformSettings = lazy(() => import('./pages/admin/PlatformSettings').then(m => ({ default: m.PlatformSettings })));
+
+// Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
+
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+  </div>
+);
 
 
 const queryClient = new QueryClient({
@@ -92,110 +105,112 @@ function AppRoutes() {
 
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      
-      {/* Onboarding - Protected but outside main layout */}
-      <Route 
-        path="/onboarding" 
-        element={
-          <ProtectedRoute>
-            <OnboardingPage />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? "/admin" : "/dashboard"} replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="study" element={<StudyPage />} />
-        <Route path="discover" element={<DiscoverPage />} />
-        <Route path="content/generate" element={<ContentPage />} />
-        <Route path="content/:id" element={<ContentPage />} />
-        <Route path="quiz" element={<QuizPage />} />
-        <Route path="quiz/:id" element={<QuizTakePage />} />
-        <Route path="quiz/:id/results/:attemptId" element={<QuizTakePage />} />
-        <Route path="flashcards" element={<FlashcardsPage />} />
-        <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
-        <Route path="leaderboard" element={<LeaderboardPage />} />
-        <Route path="challenges" element={<ChallengesPage />} />
-        <Route path="challenges/:id" element={<ChallengeDetailsPage />} />
-        <Route path="challenges/:id/quiz/:quizIndex" element={<ChallengeQuizPage />} />
-        <Route path="challenges/:id/results" element={<ChallengeResultsPage />} />
-        <Route path="statistics" element={<StatisticsPage />} />
-        <Route path="attempts" element={<AttemptsPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-        <Route path="settings" element={<SettingsPage />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         
-        {/* Admin Routes */}
-        <Route
-          path="admin"
+        {/* Onboarding - Protected but outside main layout */}
+        <Route 
+          path="/onboarding" 
           element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
+            <ProtectedRoute>
+              <OnboardingPage />
+            </ProtectedRoute>
+          } 
         />
+        
         <Route
-          path="admin/users"
+          path="/"
           element={
-            <AdminRoute>
-              <UserManagement />
-            </AdminRoute>
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
           }
-        />
-        <Route
-          path="admin/content"
-          element={
-            <AdminRoute>
-              <ContentManagement />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="admin/moderation"
-          element={
-            <AdminRoute>
-              <ContentModeration />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="admin/schools"
-          element={
-            <AdminRoute>
-              <SchoolManagement />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="admin/ai-analytics"
-          element={
-            <AdminRoute>
-              <AiAnalytics />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="admin/settings"
-          element={
-            <AdminRoute>
-              <PlatformSettings />
-            </AdminRoute>
-          }
-        />
-      </Route>
+        >
+          <Route index element={<Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? "/admin" : "/dashboard"} replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="study" element={<StudyPage />} />
+          <Route path="discover" element={<DiscoverPage />} />
+          <Route path="content/generate" element={<ContentPage />} />
+          <Route path="content/:id" element={<ContentPage />} />
+          <Route path="quiz" element={<QuizPage />} />
+          <Route path="quiz/:id" element={<QuizTakePage />} />
+          <Route path="quiz/:id/results/:attemptId" element={<QuizTakePage />} />
+          <Route path="flashcards" element={<FlashcardsPage />} />
+          <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
+          <Route path="leaderboard" element={<LeaderboardPage />} />
+          <Route path="challenges" element={<ChallengesPage />} />
+          <Route path="challenges/:id" element={<ChallengeDetailsPage />} />
+          <Route path="challenges/:id/quiz/:quizIndex" element={<ChallengeQuizPage />} />
+          <Route path="challenges/:id/results" element={<ChallengeResultsPage />} />
+          <Route path="statistics" element={<StatisticsPage />} />
+          <Route path="attempts" element={<AttemptsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          
+          {/* Admin Routes */}
+          <Route
+            path="admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/users"
+            element={
+              <AdminRoute>
+                <UserManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/content"
+            element={
+              <AdminRoute>
+                <ContentManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/moderation"
+            element={
+              <AdminRoute>
+                <ContentModeration />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/schools"
+            element={
+              <AdminRoute>
+                <SchoolManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/ai-analytics"
+            element={
+              <AdminRoute>
+                <AiAnalytics />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/settings"
+            element={
+              <AdminRoute>
+                <PlatformSettings />
+              </AdminRoute>
+            }
+          />
+        </Route>
 
-      <Route path="*" element={<Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? "/admin" : "/dashboard"} replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? "/admin" : "/dashboard"} replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
