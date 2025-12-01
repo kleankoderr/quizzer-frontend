@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await authService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+
     }
     authStore.setState({ user: null });
     analytics.reset();

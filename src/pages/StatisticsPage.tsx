@@ -8,6 +8,7 @@ import type { Attempt, PerformanceByTopic } from '../services/statistics.service
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from '../components/skeletons';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'];
+const ACTIVITY_COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
 
 export const StatisticsPage = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ export const StatisticsPage = () => {
       navigate(`/attempts?quizId=${attempt.quiz.id}`);
     } else if (attempt.type === 'flashcard' && attempt.flashcardSet?.id) {
       navigate(`/attempts?flashcardId=${attempt.flashcardSet.id}`);
+    } else if (attempt.type === 'challenge' && attempt.challenge?.id) {
+      navigate(`/attempts?challengeId=${attempt.challenge.id}`);
     }
   }, [navigate]);
 
@@ -31,7 +34,8 @@ export const StatisticsPage = () => {
   const typeDistributionData = useMemo(() => [
     { name: 'Quizzes', value: overview?.quizAttempts || 0 },
     { name: 'Flashcards', value: overview?.flashcardAttempts || 0 },
-  ], [overview?.quizAttempts, overview?.flashcardAttempts]);
+    { name: 'Challenges', value: overview?.challengeAttempts || 0 },
+  ], [overview?.quizAttempts, overview?.flashcardAttempts, overview?.challengeAttempts]);
 
   const performanceChartData = useMemo(() => 
     performanceByTopic.slice(0, 5).map((topic: PerformanceByTopic) => ({
@@ -93,7 +97,7 @@ export const StatisticsPage = () => {
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{overview?.totalAttempts || 0}</p>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {overview?.quizAttempts || 0} quizzes, {overview?.flashcardAttempts || 0} flashcards
+            {overview?.quizAttempts || 0} quizzes, {overview?.flashcardAttempts || 0} flashcards, {overview?.challengeAttempts || 0} challenges
           </p>
         </div>
 
@@ -150,10 +154,17 @@ export const StatisticsPage = () => {
                   dataKey="value"
                 >
                   {typeDistributionData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={ACTIVITY_COLORS[index % ACTIVITY_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1f2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -331,9 +342,11 @@ export const StatisticsPage = () => {
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
                           attempt.type === 'quiz' 
                             ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
+                            : attempt.type === 'challenge'
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
                             : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                         }`}>
-                          {attempt.type === 'quiz' ? <BookOpen className="w-3 h-3" /> : <Layers className="w-3 h-3" />}
+                          {attempt.type === 'quiz' ? <BookOpen className="w-3 h-3" /> : attempt.type === 'challenge' ? <Flame className="w-3 h-3" /> : <Layers className="w-3 h-3" />}
                           {attempt.type}
                         </span>
                       </td>

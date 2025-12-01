@@ -26,7 +26,7 @@ export const OnboardingPage = () => {
       });
       navigate('/dashboard');
     } catch (error) {
-      console.error('Failed to update school name:', error);
+
       // Still navigate to dashboard even if update fails
       navigate('/dashboard');
     } finally {

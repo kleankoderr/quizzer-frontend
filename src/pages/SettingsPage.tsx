@@ -63,7 +63,7 @@ export const SettingsPage = () => {
       toast.success('Profile updated successfully!');
       refetch();
     } catch (error) {
-      console.error('Error updating profile:', error);
+
       toast.error('Failed to update profile');
     } finally {
       setLoading(false);
@@ -80,7 +80,7 @@ export const SettingsPage = () => {
       });
       toast.success('Preferences updated successfully!');
     } catch (error) {
-      console.error('Error updating preferences:', error);
+
       toast.error('Failed to update preferences');
     } finally {
       setLoading(false);
@@ -112,7 +112,7 @@ export const SettingsPage = () => {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
-      console.error('Error changing password:', error);
+
       const message = error.response?.data?.message || 'Failed to change password';
       toast.error(message);
     } finally {
@@ -137,7 +137,7 @@ export const SettingsPage = () => {
       logout();
       navigate('/login');
     } catch (error) {
-      console.error('Error deleting account:', error);
+
       toast.error('Failed to delete account');
       setLoading(false);
     } finally {

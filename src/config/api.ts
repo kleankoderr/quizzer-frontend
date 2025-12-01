@@ -44,14 +44,23 @@ export const LEADERBOARD_ENDPOINTS = {
 export const CHALLENGE_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/challenges`,
   GET_DAILY: `${API_BASE_URL}/challenges/daily`,
+  GET_HOT: `${API_BASE_URL}/challenges/hot`,
+  GET_WEEKLY: `${API_BASE_URL}/challenges/weekly`,
+  GET_MONTHLY: `${API_BASE_URL}/challenges/monthly`,
   GET_BY_ID: (id: string) => `${API_BASE_URL}/challenges/${id}`,
   COMPLETE: `${API_BASE_URL}/challenges/complete`,
   JOIN: `${API_BASE_URL}/challenges/join`,
+  LEAVE: `${API_BASE_URL}/challenges/leave`,
 };
 
 // Recommendation endpoints
 export const RECOMMENDATION_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/recommendations`,
+};
+
+// Coaching endpoints
+export const COACHING_ENDPOINTS = {
+  GET_TIPS: `${API_BASE_URL}/coaching/tips`,
 };
 
 // Attempts endpoints

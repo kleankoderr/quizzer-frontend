@@ -154,8 +154,8 @@ export function RichTextEditor({
       LinkNode,
       AutoLinkNode,
     ],
-    onError: (error: Error) => {
-      console.error('Lexical error:', error);
+    onError: () => {
+
     },
   };
 

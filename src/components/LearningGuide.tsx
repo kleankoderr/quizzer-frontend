@@ -151,11 +151,11 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             learningGuide: updatedGuide
           });
         } catch (err) {
-          console.error('Failed to persist generated content:', err);
+
         }
       }
     } catch (error) {
-      console.error('Failed to generate content:', error);
+
     } finally {
       setLoadingAction(null);
     }

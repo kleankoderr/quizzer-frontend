@@ -120,7 +120,7 @@ export const FlashcardStudyPage = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading flashcards...</p>
         </div>
       </div>
@@ -133,7 +133,7 @@ export const FlashcardStudyPage = () => {
         <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
           No flashcards found
         </h3>
-        <button onClick={() => navigate('/flashcards')} className="btn-primary mt-4">
+        <button onClick={() => navigate('/flashcards')} className="mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors">
           Back to Flashcards
         </button>
       </div>
@@ -221,7 +221,7 @@ export const FlashcardStudyPage = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-900 p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-xl bg-emerald-600 dark:bg-emerald-900 p-6 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -230,7 +230,7 @@ export const FlashcardStudyPage = () => {
         <div className="relative z-10">
           <button
             onClick={() => navigate('/flashcards')}
-            className="flex items-center gap-2 text-white hover:text-primary-100 mb-4 transition-colors"
+            className="flex items-center gap-2 text-white hover:text-emerald-100 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Flashcards
@@ -247,7 +247,7 @@ export const FlashcardStudyPage = () => {
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-white mb-2">{flashcardSet.title}</h1>
-              <p className="text-primary-100 dark:text-primary-200">{flashcardSet.topic}</p>
+              <p className="text-emerald-100 dark:text-emerald-200">{flashcardSet.topic}</p>
             </div>
           </div>
           
@@ -259,7 +259,7 @@ export const FlashcardStudyPage = () => {
             </div>
             <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
               <div
-                className="bg-primary-400 h-2.5 rounded-full transition-all duration-300 shadow-lg"
+                className="bg-emerald-400 h-2.5 rounded-full transition-all duration-300 shadow-lg"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -268,7 +268,7 @@ export const FlashcardStudyPage = () => {
       </div>
 
       {/* Flashcard */}
-      <div className="card border border-primary-200 dark:border-gray-700 shadow-xl dark:bg-gray-800" style={{ perspective: '1000px' }}>
+      <div className="card border border-emerald-200 dark:border-gray-700 shadow-xl dark:bg-gray-800" style={{ perspective: '1000px' }}>
         <div
           className="min-h-[450px] relative rounded-xl"
           style={{
@@ -282,8 +282,8 @@ export const FlashcardStudyPage = () => {
               onClick={handleFlip}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 ${
                 isFlipped 
-                  ? 'bg-primary-600 text-white border-white/30 hover:bg-primary-700' 
-                  : 'bg-primary-600 text-white border-white/30 hover:bg-primary-700'
+                  ? 'bg-emerald-600 text-white border-white/30 hover:bg-emerald-700' 
+                  : 'bg-emerald-600 text-white border-white/30 hover:bg-emerald-700'
               }`}
             >
               <RotateCw 
@@ -296,7 +296,7 @@ export const FlashcardStudyPage = () => {
 
           {/* Front of card */}
           <div
-            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-primary-50 dark:bg-gray-700 rounded-xl"
+            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
@@ -304,7 +304,7 @@ export const FlashcardStudyPage = () => {
               width: '100%',
             }}
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-full mb-6 shadow-lg">
               <BookOpen className="w-8 h-8 text-white" />
             </div>
             <p 
@@ -315,7 +315,7 @@ export const FlashcardStudyPage = () => {
 
           {/* Back of card */}
           <div
-            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-primary-50 dark:bg-gray-700 rounded-xl"
+            className="flex flex-col items-center justify-center min-h-[450px] text-center px-8 py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
@@ -325,7 +325,7 @@ export const FlashcardStudyPage = () => {
               width: '100%',
             }}
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-full mb-6 shadow-lg">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <p 
@@ -333,10 +333,10 @@ export const FlashcardStudyPage = () => {
               dangerouslySetInnerHTML={renderMarkdown(currentCard.back)}
             />
             {currentCard.explanation && (
-              <div className="mt-6 pt-6 border-t-2 border-primary-200 dark:border-gray-600 max-w-2xl">
+              <div className="mt-6 pt-6 border-t-2 border-emerald-200 dark:border-gray-600 max-w-2xl">
                 <div className="inline-flex items-center gap-2 mb-3">
                   <span className="text-2xl">💡</span>
-                  <p className="text-sm font-bold text-primary-900 dark:text-primary-300 uppercase tracking-wide">
+                  <p className="text-sm font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wide">
                     Explanation
                   </p>
                 </div>
@@ -382,7 +382,7 @@ export const FlashcardStudyPage = () => {
 
             <button
               onClick={handleFlip}
-              className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
             >
               <RotateCw className="w-5 h-5" />
               Flip Card

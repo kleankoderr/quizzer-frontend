@@ -14,22 +14,23 @@ import type { Attempt } from '../types';
 import { useAttempts } from '../hooks';
 import { CardSkeleton, ChartSkeleton, StatCardSkeleton } from '../components/skeletons';
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'];
+const COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
 
 export function AttemptsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filterType, setFilterType] = useState<'all' | 'quiz' | 'flashcard'>('all');
-  const [selectedItem, setSelectedItem] = useState<{ id: string; title: string; type: 'quiz' | 'flashcard' } | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'quiz' | 'flashcard' | 'challenge'>('all');
+  const [selectedItem, setSelectedItem] = useState<{ id: string; title: string; type: 'quiz' | 'flashcard' | 'challenge' } | null>(null);
 
   // Get URL params for filtering
   const quizId = searchParams.get('quizId');
   const flashcardId = searchParams.get('flashcardId');
+  const challengeId = searchParams.get('challengeId');
   const typeParam = searchParams.get('type');
 
   // Sync filter type with URL params
   useEffect(() => {
-    if (typeParam === 'quiz' || typeParam === 'flashcard' || typeParam === 'all') {
+    if (typeParam === 'quiz' || typeParam === 'flashcard' || typeParam === 'challenge' || typeParam === 'all') {
       setFilterType(typeParam);
     }
   }, [typeParam]);
@@ -38,6 +39,7 @@ export function AttemptsPage() {
   const { data: attemptsData, isLoading: loading, error } = useAttempts({
     quizId: quizId || undefined,
     flashcardSetId: flashcardId || undefined,
+    challengeId: challengeId || undefined,
   });
 
   // Extract attempts array from paginated response
@@ -48,9 +50,11 @@ export function AttemptsPage() {
     toast.error('Failed to load attempts');
   }
 
+
+
   // Sync selected item with URL params
   useEffect(() => {
-    if (!quizId && !flashcardId) {
+    if (!quizId && !flashcardId && !challengeId) {
       setSelectedItem(null);
       return;
     }
@@ -63,6 +67,13 @@ export function AttemptsPage() {
           title: attempt.quiz?.title || 'Quiz',
           type: 'quiz'
         });
+      } else if (challengeId) {
+        const attempt = attempts.find(a => a.challengeId === challengeId) || attempts[0];
+        setSelectedItem({
+          id: challengeId,
+          title: attempt.challenge?.title || 'Challenge',
+          type: 'challenge'
+        });
       } else if (flashcardId) {
         const attempt = attempts.find(a => a.flashcardSetId === flashcardId) || attempts[0];
         setSelectedItem({
@@ -72,7 +83,7 @@ export function AttemptsPage() {
         });
       }
     }
-  }, [quizId, flashcardId, attempts]);
+  }, [quizId, flashcardId, challengeId, attempts]);
 
   // Use useMemo for filtering instead of useEffect
   const filteredAttempts = useMemo(() => {
@@ -80,16 +91,40 @@ export function AttemptsPage() {
     return attempts.filter(attempt => attempt.type === filterType);
   }, [attempts, filterType]);
 
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="mb-4">
+            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
+            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <StatCardSkeleton count={4} />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+        <div className="space-y-4">
+          <CardSkeleton count={3} />
+        </div>
+      </div>
+    );
+  }
+
   const handleClearSelection = () => {
     setSelectedItem(null);
     setSearchParams({});
   };
 
   // Calculate statistics
-  const stats = {
+  const attemptStats = {
     total: filteredAttempts.length,
     quizzes: filteredAttempts.filter(a => a.type === 'quiz').length,
     flashcards: filteredAttempts.filter(a => a.type === 'flashcard').length,
+    challenges: filteredAttempts.filter(a => a.type === 'challenge').length,
     averageScore: filteredAttempts.length > 0
       ? Math.round(
           filteredAttempts
@@ -121,21 +156,43 @@ export function AttemptsPage() {
 
   // Prepare pie chart data - Quiz vs Flashcard distribution
   const typeDistributionData = [
-    { name: 'Quizzes', value: stats.quizzes },
-    { name: 'Flashcards', value: stats.flashcards },
+    { name: 'Quizzes', value: attemptStats.quizzes },
+    { name: 'Flashcards', value: attemptStats.flashcards },
+    { name: 'Challenges', value: attemptStats.challenges },
   ].filter(item => item.value > 0);
 
   // Group attempts by item (quiz or flashcard)
   const groupedAttempts = filteredAttempts.reduce((acc, attempt) => {
-    const key = attempt.type === 'quiz' 
-      ? `quiz-${attempt.quizId}` 
-      : `flashcard-${attempt.flashcardSetId}`;
+    let key = '';
+    let id = '';
+    let title = '';
+    let topic = '';
+    let quizId = '';
+
+    if (attempt.type === 'quiz') {
+      key = `quiz-${attempt.quizId}`;
+      id = attempt.quizId!;
+      title = attempt.quiz?.title || 'Untitled Quiz';
+      topic = attempt.quiz?.topic || 'General';
+    } else if (attempt.type === 'flashcard') {
+      key = `flashcard-${attempt.flashcardSetId}`;
+      id = attempt.flashcardSetId!;
+      title = attempt.flashcardSet?.title || 'Untitled Flashcard Set';
+      topic = attempt.flashcardSet?.topic || 'General';
+    } else if (attempt.type === 'challenge') {
+      key = `challenge-${attempt.challengeId}`;
+      id = attempt.challengeId!;
+      quizId = attempt.quizId!;
+      title = attempt.challenge?.title || 'Untitled Challenge';
+      topic = attempt.quiz?.topic || 'Challenge';
+    }
     
     if (!acc[key]) {
       acc[key] = {
-        id: attempt.type === 'quiz' ? attempt.quizId! : attempt.flashcardSetId!,
-        title: attempt.type === 'quiz' ? attempt.quiz?.title : attempt.flashcardSet?.title,
-        topic: attempt.type === 'quiz' ? attempt.quiz?.topic : attempt.flashcardSet?.topic,
+        id,
+        quizId,
+        title,
+        topic,
         type: attempt.type,
         attempts: [],
       };
@@ -147,39 +204,20 @@ export function AttemptsPage() {
   const handleItemClick = (item: any) => {
     if (item.type === 'quiz') {
       setSearchParams({ quizId: item.id });
+    } else if (item.type === 'challenge') {
+      setSearchParams({ challengeId: item.id });
     } else {
       setSearchParams({ flashcardId: item.id });
     }
   };
 
   const handleAttemptClick = (attempt: Attempt) => {
-    if (attempt.type === 'quiz' && attempt.quizId) {
+    if ((attempt.type === 'quiz' || attempt.type === 'challenge') && attempt.quizId) {
       navigate(`/quiz/${attempt.quizId}/results/${attempt.id}`);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="mb-4">
-            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
-            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <StatCardSkeleton count={4} />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <ChartSkeleton />
-          <ChartSkeleton />
-        </div>
-        <div className="space-y-4">
-          <CardSkeleton count={3} />
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -214,52 +252,64 @@ export function AttemptsPage() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-5">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Attempts</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Attempts</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.total}
+                  {attemptStats.total}
                 </p>
               </div>
-              <Calendar className="w-8 h-8 text-blue-600" />
+              <Calendar className="w-6 h-6 text-blue-600" />
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Quiz Attempts</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.quizzes}
+                  {attemptStats.quizzes}
                 </p>
               </div>
-              <BookOpen className="w-8 h-8 text-purple-600" />
+              <BookOpen className="w-6 h-6 text-blue-600" />
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Flashcard Attempts</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.flashcards}
+                  {attemptStats.flashcards}
                 </p>
               </div>
-              <Layers className="w-8 h-8 text-pink-600" />
+              <Layers className="w-6 h-6 text-green-600" />
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Challenge Attempts</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {attemptStats.challenges}
+                </p>
+              </div>
+              <TrendingUp className="w-6 h-6 text-pink-600" />
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Average Score</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.averageScore}%
+                  {attemptStats.averageScore}%
                 </p>
               </div>
-              <Award className="w-8 h-8 text-green-600" />
+              <Award className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>
@@ -274,7 +324,7 @@ export function AttemptsPage() {
               </span>
             </div>
             <div className="flex gap-2">
-              {(['all', 'quiz', 'flashcard'] as const).map((type) => (
+              {(['all', 'quiz', 'flashcard', 'challenge'] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => {
@@ -400,7 +450,7 @@ export function AttemptsPage() {
           {/* Type Distribution Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-4">
-              <Layers className="w-5 h-5 text-purple-600" />
+              <Layers className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Attempt Distribution
               </h2>
@@ -417,9 +467,13 @@ export function AttemptsPage() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {typeDistributionData.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  {typeDistributionData.map((entry, index) => {
+                    let color = COLORS[0]; // Default
+                    if (entry.name === 'Quizzes') color = '#3b82f6'; // Blue
+                    if (entry.name === 'Flashcards') color = '#10b981'; // Green
+                    if (entry.name === 'Challenges') color = 'rgb(236, 72, 153)'; // Pink
+                    return <Cell key={`cell-${index}`} fill={color} />;
+                  })}
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
@@ -453,7 +507,7 @@ export function AttemptsPage() {
                 key={attempt.id}
                 onClick={() => handleAttemptClick(attempt)}
                 className={`p-6 ${
-                  attempt.type === 'quiz' ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''
+                  (attempt.type === 'quiz' || attempt.type === 'challenge') ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''
                 } transition-colors`}
               >
                 <div className="flex items-center justify-between">
@@ -501,21 +555,17 @@ export function AttemptsPage() {
                 <div className="flex items-center gap-4">
                   <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${
                     item.type === 'quiz' 
-                      ? 'bg-purple-100 dark:bg-purple-900' 
-                      : 'bg-pink-100 dark:bg-pink-900'
+                      ? 'bg-blue-100 dark:bg-blue-900' 
+                      : item.type === 'challenge'
+                      ? 'bg-pink-100 dark:bg-pink-900'
+                      : 'bg-green-100 dark:bg-green-900'
                   }`}>
                     {item.type === 'quiz' ? (
-                      <BookOpen className={`w-6 h-6 ${
-                        item.type === 'quiz' 
-                          ? 'text-purple-600 dark:text-purple-400' 
-                          : 'text-pink-600 dark:text-pink-400'
-                      }`} />
+                      <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    ) : item.type === 'challenge' ? (
+                      <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                     ) : (
-                      <Layers className={`w-6 h-6 ${
-                        item.type === 'quiz' 
-                          ? 'text-purple-600 dark:text-purple-400' 
-                          : 'text-pink-600 dark:text-pink-400'
-                      }`} />
+                      <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />
                     )}
                   </div>
                   <div>
@@ -541,7 +591,7 @@ export function AttemptsPage() {
                       <Line 
                         type="monotone" 
                         dataKey="score" 
-                        stroke={item.type === 'quiz' ? '#8b5cf6' : '#ec4899'} 
+                        stroke={item.type === 'quiz' ? '#3b82f6' : item.type === 'challenge' ? 'rgb(236, 72, 153)' : '#10b981'} 
                         strokeWidth={2}
                         dot={false}
                       />

@@ -1,14 +1,18 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { challengeService } from '../services';
 import { useChallenges, useLeaderboard } from '../hooks';
-import { Trophy, Target, Users, Crown, Medal, Flame, Zap, TrendingUp, Clock, Sparkles, UserPlus, CheckCircle } from 'lucide-react';
+import { Trophy, Target, Users, Crown, Medal, Flame, Zap, TrendingUp, Clock, UserPlus, CheckCircle } from 'lucide-react';
 import { CardSkeleton, TableSkeleton } from '../components/skeletons';
 
 export const ChallengesPage = () => {
+  const navigate = useNavigate();
   const { data: challenges = [], isLoading: challengesLoading, refetch: refetchChallenges } = useChallenges();
   const { data: leaderboardData, isLoading: leaderboardLoading } = useLeaderboard('global');
   
+  const [filter, setFilter] = useState<'all' | 'available' | 'completed'>('all');
+
   const loading = challengesLoading || leaderboardLoading;
   const leaderboard = useMemo(() => leaderboardData?.entries.slice(0, 10) ?? [], [leaderboardData]);
   
@@ -21,15 +25,51 @@ export const ChallengesPage = () => {
     );
   }, [challenges]);
 
+  const filteredChallenges = useMemo(() => {
+    let result = challenges;
+    
+    if (filter === 'available') {
+      result = challenges.filter(c => !c.completed && !joinedChallenges.has(c.id));
+    } else if (filter === 'completed') {
+      result = challenges.filter(c => c.completed);
+    }
+
+    // Sort: Completed first if "all" is selected (as per user request), otherwise standard sort
+    if (filter === 'all') {
+      return [...result].sort((a, b) => {
+        if (a.completed && !b.completed) return -1;
+        if (!a.completed && b.completed) return 1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [challenges, filter, joinedChallenges]);
+
   const handleJoinChallenge = useCallback(async (challengeId: string) => {
     try {
       await challengeService.join(challengeId);
-      toast.success('Challenge joined! Start completing tasks to earn rewards.');
-      // Refetch challenges to get updated list
+      toast.success('Challenge joined successfully!');
+      await refetchChallenges();
+      
+      // Navigate to challenge details page
+      navigate(`/challenges/${challengeId}`);
+    } catch (error: any) {
+
+      toast.error(error?.response?.data?.message || 'Failed to join challenge. Please try again.');
+    }
+  }, [refetchChallenges, navigate]);
+
+  const handleLeaveChallenge = useCallback(async (challengeId: string) => {
+    if (!window.confirm('Are you sure you want to leave this challenge?')) return;
+
+    try {
+      await challengeService.leave(challengeId);
+      toast.success('Left challenge successfully.');
       await refetchChallenges();
     } catch (error: any) {
-      console.error('Error joining challenge:', error);
-      toast.error(error?.response?.data?.message || 'Failed to join challenge. Please try again.');
+
+      toast.error(error?.response?.data?.message || 'Failed to leave challenge.');
     }
   }, [refetchChallenges]);
 
@@ -51,17 +91,7 @@ export const ChallengesPage = () => {
     );
   }
 
-  // Separate challenges into categories
-  const recommendedChallenges = challenges.filter(c => 
-    !c.completed && !joinedChallenges.has(c.id) && c.description.includes('quiz')
-  );
-  const availableChallenges = challenges.filter(c => 
-    !c.completed && !joinedChallenges.has(c.id) && !recommendedChallenges.includes(c)
-  );
-  const activeChallenges = challenges.filter(c => 
-    !c.completed && joinedChallenges.has(c.id)
-  );
-  const completedChallenges = challenges.filter(c => c.completed);
+
 
   return (
     <div className="space-y-6 pb-8">
@@ -80,24 +110,24 @@ export const ChallengesPage = () => {
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-3">
                 <Trophy className="w-10 h-10" />
-                Daily Challenges
+                Challenges
               </h1>
               <p className="text-primary-100 dark:text-primary-200 text-lg">
-                Join global challenges and compete with learners worldwide
+                Compete in Daily, Weekly, and Monthly challenges
               </p>
             </div>
             <div className="flex items-center gap-3">
               <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
-                <div className="text-2xl font-bold text-white">{activeChallenges.length}</div>
-                <div className="text-xs text-primary-100">Joined</div>
-              </div>
-              <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
-                <div className="text-2xl font-bold text-white">{availableChallenges.length + recommendedChallenges.length}</div>
+                <div className="text-2xl font-bold text-white">
+                  {challenges.filter(c => !c.completed && !joinedChallenges.has(c.id)).length}
+                </div>
                 <div className="text-xs text-primary-100">Available</div>
               </div>
               <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
-                <div className="text-2xl font-bold text-white">{completedChallenges.length}</div>
-                <div className="text-xs text-primary-100 dark:text-primary-200">Done</div>
+                <div className="text-2xl font-bold text-white">
+                  {challenges.filter(c => c.completed).length}
+                </div>
+                <div className="text-xs text-primary-100 dark:text-primary-200">Completed</div>
               </div>
             </div>
           </div>
@@ -107,207 +137,173 @@ export const ChallengesPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Challenges Section */}
         <section className="lg:col-span-2 space-y-6">
-          {/* Recommended Challenges */}
-          {recommendedChallenges.length > 0 && (
-            <div className="card border border-primary-200 bg-primary-50">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-primary-100 rounded-lg">
-                  <Sparkles className="w-6 h-6 text-primary-600" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-900">Recommended For You</h2>
-                  <p className="text-sm text-primary-600 dark:text-primary-700">Based on your learning progress</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {recommendedChallenges.map((challenge) => {
-                  const timeLeft = getTimeLeft(challenge.endDate);
-                  const participantCount = Math.floor(Math.random() * 500) + 100; // Mock participant count
-                  
-                  return (
-                    <div
-                      key={challenge.id}
-                      className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-primary-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:shadow-md"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-primary-500">
-                          <Sparkles className="w-7 h-7 text-white" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-bold text-base text-gray-900 dark:text-white">{challenge.title}</h3>
-                                <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">
-                                  Recommended
-                                </span>
-                              </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{challenge.description}</p>
-                            </div>
-                            <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm">
-                              <Trophy className="w-4 h-4" />
-                              {challenge.reward}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <Users className="w-3.5 h-3.5" />
-                                {participantCount} joined
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {timeLeft}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => handleJoinChallenge(challenge.id)}
-                              className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg text-sm"
-                            >
-                              <UserPlus className="w-4 h-4" />
-                              Join Challenge
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
-          {/* Available Challenges to Join */}
-          {availableChallenges.length > 0 && (
-            <div className="card dark:bg-gray-800">
-              <div className="flex items-center gap-3 mb-6">
+          <div className="card dark:bg-gray-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
                   <Trophy className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Available Challenges</h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Join and start competing</p>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Challenges</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Compete and earn rewards</p>
                 </div>
               </div>
-              <div className="space-y-3">
-                {availableChallenges.map((challenge) => {
-                  const timeLeft = getTimeLeft(challenge.endDate);
-                  const participantCount = Math.floor(Math.random() * 500) + 100;
-                  
-                  return (
-                    <div
-                      key={challenge.id}
-                      className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:shadow-md"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-primary-500">
-                          <Target className="w-7 h-7 text-white" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div>
-                              <h3 className="font-bold text-base text-gray-900 dark:text-white">{challenge.title}</h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{challenge.description}</p>
-                            </div>
-                            <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm">
-                              <Trophy className="w-4 h-4" />
-                              {challenge.reward}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <Users className="w-3.5 h-3.5" />
-                                {participantCount} joined
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {timeLeft}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => handleJoinChallenge(challenge.id)}
-                              className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg text-sm"
-                            >
-                              <UserPlus className="w-4 h-4" />
-                              Join Challenge
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              
+              <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg overflow-x-auto">
+                {(['all', 'available', 'completed'] as const).map((filterType) => (
+                  <button
+                    key={filterType}
+                    onClick={() => setFilter(filterType)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all whitespace-nowrap ${
+                      filter === filterType
+                        ? 'bg-white dark:bg-gray-600 text-primary-600 dark:text-primary-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
 
-          {/* Active Challenges (Already Joined) */}
-          {activeChallenges.length > 0 && (
-            <div className="card dark:bg-gray-800">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                  <Target className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div className="space-y-4">
+              {filteredChallenges.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
+                    <Trophy className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No challenges found</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Try changing the filter or check back later.</p>
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Active Challenges</h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Challenges you've joined</p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                {activeChallenges.map((challenge) => {
+              ) : (
+                filteredChallenges.map((challenge) => {
+                  const isJoined = joinedChallenges.has(challenge.id);
+                  const isCompleted = challenge.completed;
                   const percentage = Math.min(((challenge.progress || 0) / challenge.target) * 100, 100);
                   const timeLeft = getTimeLeft(challenge.endDate);
-                  
+
                   return (
                     <div
                       key={challenge.id}
-                      className="p-5 bg-orange-50 dark:bg-orange-900/10 rounded-xl border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 transition-all hover:shadow-md"
+                      className={`p-5 rounded-xl border transition-all hover:shadow-md ${
+                        isCompleted
+                          ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
+                          : isJoined
+                          ? 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700'
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+                      }`}
                     >
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-orange-500">
-                          <Target className="w-7 h-7 text-white" />
+                        <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md ${
+                          isCompleted ? 'bg-green-500' : isJoined ? 'bg-orange-500' : 'bg-primary-500'
+                        }`}>
+                          {isCompleted ? (
+                            <span className="text-white text-lg font-bold">✓</span>
+                          ) : (
+                            <Target className="w-7 h-7 text-white" />
+                          )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-bold text-base text-gray-900 dark:text-white">{challenge.title}</h3>
-                                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold flex items-center gap-1">
-                                  <CheckCircle className="w-3 h-3" />
-                                  Joined
-                                </span>
+                                <h3 className="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
+                                  {challenge.title}
+                                  {challenge.format && challenge.format !== 'STANDARD' && (
+                                    <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-xs font-semibold">
+                                      {challenge.format}
+                                    </span>
+                                  )}
+                                </h3>
+                                {isCompleted && (
+                                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold flex items-center gap-1">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Completed
+                                  </span>
+                                )}
+                                {!isCompleted && isJoined && (
+                                  <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs font-semibold flex items-center gap-1">
+                                    <Flame className="w-3 h-3" />
+                                    Active
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400">{challenge.description}</p>
                             </div>
-                            <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm">
-                              <Trophy className="w-4 h-4" />
-                              {challenge.reward}
+                            <div className="flex flex-col items-end gap-2">
+                              <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm">
+                                <Trophy className="w-4 h-4" />
+                                {challenge.reward}
+                              </div>
+                              
+                              {!isCompleted && isJoined && challenge.quizId && (
+                                <button
+                                  onClick={() => navigate(`/challenges/${challenge.id}`)}
+                                  className="flex items-center gap-1 px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+                                >
+                                  <Zap className="w-3 h-3" />
+                                  {challenge.progress > 0 ? 'Continue' : 'Start'}
+                                </button>
+                              )}
+                              
+                              {!isCompleted && !isJoined && (
+                                <button
+                                  onClick={() => handleJoinChallenge(challenge.id)}
+                                  className="flex items-center gap-2 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg transition-all shadow-md hover:shadow-lg"
+                                >
+                                  <UserPlus className="w-3 h-3" />
+                                  Join
+                                </button>
+                              )}
+
+                              {!isCompleted && isJoined && (!challenge.progress || challenge.progress === 0) && (
+                                <button
+                                  onClick={() => handleLeaveChallenge(challenge.id)}
+                                  className="flex items-center gap-1 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-bold rounded-lg transition-colors shadow-sm"
+                                >
+                                  Leave
+                                </button>
+                              )}
                             </div>
                           </div>
                           
                           <div className="mt-3 space-y-2">
                             <div className="flex items-center justify-between text-xs">
                               <span className="text-gray-600 dark:text-gray-400">
-                                <span className="font-bold text-orange-600 dark:text-orange-400">{challenge.progress || 0}</span>
+                                <span className={`font-bold ${isCompleted ? 'text-green-600 dark:text-green-400' : isJoined ? 'text-orange-600 dark:text-orange-400' : 'text-primary-600 dark:text-primary-400'}`}>
+                                  {challenge.progress || 0}
+                                </span>
                                 <span className="text-gray-500 dark:text-gray-500"> / {challenge.target}</span>
                               </span>
                               <div className="flex items-center gap-3">
                                 <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  {timeLeft}
+                                  <Users className="w-3.5 h-3.5" />
+                                  {challenge.participantCount || 0}
                                 </span>
-                                <span className="font-semibold text-orange-600 dark:text-orange-400">{Math.round(percentage)}%</span>
+                                {!isCompleted && (
+                                  <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {timeLeft}
+                                  </span>
+                                )}
+                                <span className={`font-semibold ${isCompleted ? 'text-green-600 dark:text-green-400' : isJoined ? 'text-orange-600 dark:text-orange-400' : 'text-primary-600 dark:text-primary-400'}`}>
+                                  {Math.round(percentage)}%
+                                </span>
                               </div>
                             </div>
-                            <div className="relative w-full bg-orange-200 dark:bg-orange-900/30 rounded-full h-2.5 overflow-hidden">
+                            <div className={`relative w-full rounded-full h-2.5 overflow-hidden ${
+                              isCompleted ? 'bg-green-200 dark:bg-green-900/30' : isJoined ? 'bg-orange-200 dark:bg-orange-900/30' : 'bg-gray-200 dark:bg-gray-700'
+                            }`}>
                               <div
-                                className="bg-gradient-to-r from-orange-400 to-red-500 h-2.5 rounded-full transition-all duration-500 shadow-sm"
+                                className={`h-2.5 rounded-full transition-all duration-500 shadow-sm ${
+                                  isCompleted 
+                                    ? 'bg-gradient-to-r from-green-400 to-emerald-500' 
+                                    : isJoined 
+                                    ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                                    : 'bg-primary-500'
+                                }`}
                                 style={{ width: `${percentage}%` }}
                               ></div>
                             </div>
@@ -316,66 +312,10 @@ export const ChallengesPage = () => {
                       </div>
                     </div>
                   );
-                })}
-              </div>
+                })
+              )}
             </div>
-          )}
-
-          {/* Completed Challenges */}
-          {completedChallenges.length > 0 && (
-            <div className="card dark:bg-gray-800">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Trophy className="w-6 h-6 text-green-600 dark:text-green-400" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Completed Today</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {completedChallenges.map((challenge) => (
-                  <div
-                    key={challenge.id}
-                    className="p-4 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-200 dark:border-green-800"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-green-500">
-                        <span className="text-white text-lg font-bold">✓</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate">{challenge.title}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="flex items-center gap-1 text-xs text-green-700 dark:text-green-300 font-semibold">
-                            <Trophy className="w-3 h-3" />
-                            +{challenge.reward} XP
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {challenges.length === 0 && (
-            <div className="card text-center py-16 dark:bg-gray-800">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-full mb-4">
-                <Trophy className="w-10 h-10 text-orange-600 dark:text-orange-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Challenges Available</h3>
-              <p className="text-gray-500 dark:text-gray-400">New challenges coming soon! Check back later.</p>
-            </div>
-          )}
-
-          {/* All sections empty state */}
-          {challenges.length > 0 && recommendedChallenges.length === 0 && availableChallenges.length === 0 && activeChallenges.length === 0 && completedChallenges.length === 0 && (
-            <div className="card text-center py-12 dark:bg-gray-800">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full mb-4">
-                <UserPlus className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Join a Challenge</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Browse available challenges above and join to start competing!</p>
-            </div>
-          )}
+          </div>
         </section>
 
         {/* Leaderboard Sidebar */}
@@ -398,32 +338,32 @@ export const ChallengesPage = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                {leaderboard.map((entry, idx) => {
+                {leaderboard.map((entry) => {
                   let rankStyle = 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800';
-                  let rankIcon = <span className="font-bold">{idx + 1}</span>;
+                  let rankIcon = <span className="font-bold">{entry.rank}</span>;
                   
-                  if (idx === 0) {
+                  if (entry.rank === 1) {
                     rankStyle = 'bg-yellow-500 text-white border-yellow-400';
                     rankIcon = <Crown className="w-4 h-4" />;
-                  } else if (idx === 1) {
+                  } else if (entry.rank === 2) {
                     rankStyle = 'bg-gray-400 text-white border-gray-300';
                     rankIcon = <Medal className="w-4 h-4" />;
-                  } else if (idx === 2) {
+                  } else if (entry.rank === 3) {
                     rankStyle = 'bg-orange-500 text-white border-orange-400';
                     rankIcon = <Medal className="w-4 h-4" />;
                   }
                   
                   return (
                     <div
-                      key={entry.id}
+                      key={entry.userId}
                       className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
                     >
                       <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center border-2 shadow-sm ${rankStyle}`}>
                         {rankIcon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{entry.user.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Rank #{idx + 1}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{entry.userName}</p>
+                        {entry.schoolName && <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{entry.schoolName}</p>}
                       </div>
                       <div className="flex items-center gap-1 text-sm font-bold text-purple-600 dark:text-purple-400">
                         <Zap className="w-4 h-4" />
@@ -432,25 +372,36 @@ export const ChallengesPage = () => {
                     </div>
                   );
                 })}
+                
+                {/* Current User Rank if not in top list */}
+                {leaderboardData?.currentUser && !leaderboard.some(e => e.userId === leaderboardData.currentUser?.userId) && (
+                  <>
+                    <div className="flex items-center justify-center py-2">
+                      <div className="w-1 h-1 bg-gray-300 rounded-full mx-1"></div>
+                      <div className="w-1 h-1 bg-gray-300 rounded-full mx-1"></div>
+                      <div className="w-1 h-1 bg-gray-300 rounded-full mx-1"></div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+                      <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center border-2 shadow-sm bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-700">
+                        <span className="font-bold">{leaderboardData.currentUser.rank}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">You</p>
+                        {leaderboardData.currentUser.schoolName && <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{leaderboardData.currentUser.schoolName}</p>}
+                      </div>
+                      <div className="flex items-center gap-1 text-sm font-bold text-purple-600 dark:text-purple-400">
+                        <Zap className="w-4 h-4" />
+                        {leaderboardData.currentUser.score}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
 
           {/* Info Cards */}
           <div className="space-y-4">
-            <div className="card bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-800">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-gray-900 dark:text-white mb-1">Recommended Challenges</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    We analyze your learning patterns and recommend challenges to help improve your weak areas and boost your progress.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             <div className="card bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
               <div className="flex items-start gap-3">

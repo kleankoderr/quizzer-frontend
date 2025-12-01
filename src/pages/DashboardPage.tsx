@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { studyService } from '../services/study.service';
 import { contentService } from '../services/content.service';
 import { statisticsService } from '../services/statistics.service';
+import { coachingService } from '../services/coaching.service';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, startOfDay } from 'date-fns';
 
@@ -48,6 +49,12 @@ export const DashboardPage = () => {
       const response = await contentService.getAll();
       return response.data.slice(0, 5);
     },
+  });
+
+  const { data: coachingTips } = useQuery({
+    queryKey: ['coaching-tips'],
+    queryFn: coachingService.getTips,
+    staleTime: 1000 * 60 * 15, // 15 minutes
   });
 
   // Get the top recommendation
@@ -271,6 +278,45 @@ export const DashboardPage = () => {
           </ResponsiveContainer>
         )}
       </div>
+
+      {/* Coaching Tips */}
+      {coachingTips && coachingTips.length > 0 && (
+        <div className="card bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-lg">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+              <Sparkles className="w-6 h-6 text-yellow-300" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold mb-1">Coach's Tip</h3>
+              <div className="space-y-3">
+                {coachingTips.map((tip, index) => (
+                  <div key={index} className="bg-white/10 rounded-lg p-3 backdrop-blur-sm border border-white/10">
+                    <p className="text-sm font-medium leading-relaxed">
+                      {tip.message}
+                    </p>
+                    {tip.action && (
+                      <div className="mt-2 flex justify-end">
+                        <button 
+                          onClick={() => {
+                            if (tip.action === 'quiz') navigate('/quiz');
+                            else if (tip.action === 'flashcards') navigate('/study');
+                            else if (tip.action === 'challenge') navigate('/challenges');
+                          }}
+                          className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-full font-bold hover:bg-indigo-50 transition-colors"
+                        >
+                          {tip.action === 'quiz' ? 'Take a Quiz' : 
+                           tip.action === 'flashcards' ? 'Review Flashcards' : 
+                           tip.action === 'challenge' ? 'View Challenges' : 'Go'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

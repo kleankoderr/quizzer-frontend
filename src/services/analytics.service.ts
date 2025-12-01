@@ -22,16 +22,13 @@ class AnalyticsService {
     if (token) {
       mixpanel.init(token, {
         debug: isDev,
-        track_pageview: true,
+        track_pageview: false,
         persistence: "localStorage",
         autocapture: true,
         record_sessions_percent: 100,
+        api_host: isDev ? "/mixpanel" : "https://api-js.mixpanel.com",
       });
       this.isInitialized = true;
-    } else if (isDev) {
-      console.warn(
-        "Mixpanel token not found. Analytics disabled in development."
-      );
     }
   }
 
@@ -47,9 +44,6 @@ class AnalyticsService {
 
   public track(eventName: string, properties?: Dict): void {
     if (!this.isInitialized) {
-      if (import.meta.env.DEV) {
-        console.log(`[Analytics] ${eventName}`, properties);
-      }
       return;
     }
 

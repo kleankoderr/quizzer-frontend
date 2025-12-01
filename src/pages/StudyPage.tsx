@@ -118,7 +118,7 @@ export const StudyPage = () => {
       setTaskId(taskId);
       // Navigation happens after polling completes
     } catch (error) {
-      console.error('Error generating content:', error);
+
       if (toastIdRef.current) {
          toast.custom((t) => (
            <ProgressToast
@@ -170,7 +170,7 @@ export const StudyPage = () => {
 
       navigate(`/content/${content.id}`);
     } catch (error) {
-      console.error('Error creating content:', error);
+
       toast.custom((t) => (
         <ProgressToast
           t={t}
@@ -233,7 +233,7 @@ export const StudyPage = () => {
       analytics.trackFileUploadResult(file.name, true);
       navigate(`/content/${content.id}`);
     } catch (error: any) {
-      console.error('Error uploading file:', error);
+
       toast.custom((t) => (
         <ProgressToast
           t={t}
@@ -258,7 +258,7 @@ export const StudyPage = () => {
       toast.success('Content deleted successfully!', { id: loadingToast });
       // React Query will automatically refetch the contents list
     } catch (error) {
-      console.error('Error deleting content:', error);
+
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setDeleteContentId(null);

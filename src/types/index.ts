@@ -100,6 +100,7 @@ export interface QuizGenerateRequest {
 
 export interface QuizSubmission {
   answers: AnswerValue[];
+  challengeId?: string;
 }
 
 export interface QuizResult {
@@ -174,41 +175,119 @@ export interface UpdateStreakRequest {
 
 // Leaderboard types
 export interface LeaderboardEntry {
-  id: string;
   userId: string;
   score: number;
   rank: number;
-  user: {
+  userName: string;
+  avatar?: string;
+  schoolName?: string;
+  // Legacy fields
+  id?: string;
+  user?: {
     id: string;
     name: string;
     avatar?: string;
   };
-  avatar?: string;
-  userName?: string;
 }
 
 export interface Leaderboard {
   entries: LeaderboardEntry[];
   userRank?: number;
+  currentUser?: {
+    userId: string;
+    userName?: string;
+    avatar?: string;
+    score: number;
+    rank: number;
+    schoolName?: string;
+  } | null;
 }
 
 // Challenge types
+export interface ChallengeQuiz {
+  id: string;
+  quizId: string;
+  order: number;
+  quiz: {
+    id: string;
+    title: string;
+    topic: string;
+    difficulty: string;
+    quizType?: QuizType;
+    timeLimit?: number;
+    questions: QuizQuestion[];
+  };
+}
+
 export interface Challenge {
   id: string;
   title: string;
   description: string;
-  type: "daily" | "weekly" | "monthly";
+  type: "daily" | "weekly" | "monthly" | "hot";
+  category?: string;
   target: number;
   reward: number;
   startDate: Date | string;
   endDate: Date | string;
+  rules?: string;
+  timeLimit?: number;
+  format?: string; // "TIMED", "SCENARIO", "SPEED", "ACCURACY", "MIXED"
   progress: number;
   completed: boolean;
   completedAt?: Date | string;
+  currentQuizIndex?: number;
+  quizAttempts?: Array<{
+    quizId: string;
+    score: number;
+    totalQuestions: number;
+    attemptId: string;
+    completedAt: string;
+  }>;
+  finalScore?: number;
+  percentile?: number;
+  quizId?: string; // Legacy single quiz support
+  quizzes?: ChallengeQuiz[]; // Multi-quiz support
+  participantCount?: number;
+  joined?: boolean;
 }
 
 export interface CompleteChallengeRequest {
   challengeId: string;
+}
+
+export interface ChallengeProgress {
+  currentQuizIndex: number;
+  totalQuizzes: number;
+  completedQuizzes: number;
+  quizAttempts: Array<{
+    quizId: string;
+    score: number;
+    totalQuestions: number;
+    attemptId: string;
+    completedAt: string;
+  }>;
+  finalScore?: number;
+  percentile?: number;
+  completed: boolean;
+}
+
+export interface ChallengeLeaderboard {
+  entries: Array<{
+    userId: string;
+    userName: string;
+    avatar?: string;
+    score: number;
+    rank: number;
+    completedAt?: string;
+  }>;
+  currentUser?: {
+    userId: string;
+    userName: string;
+    avatar?: string;
+    score: number;
+    rank: number;
+    completedAt?: string;
+  } | null;
 }
 
 // Recommendation types
@@ -224,7 +303,8 @@ export interface Attempt {
   userId: string;
   quizId?: string;
   flashcardSetId?: string;
-  type: "quiz" | "flashcard";
+  challengeId?: string;
+  type: "quiz" | "flashcard" | "challenge";
   score?: number;
   totalQuestions?: number;
   completedAt: string;
@@ -237,5 +317,10 @@ export interface Attempt {
     id: string;
     title: string;
     topic: string;
+  };
+  challenge?: {
+    id: string;
+    title: string;
+    type: string;
   };
 }

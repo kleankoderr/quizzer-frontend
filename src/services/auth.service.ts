@@ -12,9 +12,7 @@ export const authService = {
         "/auth/csrf-token"
       );
       setCsrfToken(response.data.csrfToken);
-    } catch (error) {
-      console.error("Failed to fetch CSRF token", error);
-    }
+    } catch (error) {}
   },
 
   // Email/password login
@@ -65,7 +63,6 @@ export const authService = {
 
       return response.data.user;
     } catch (error: any) {
-      console.error("Google sign-in error:", error);
       throw error;
     }
   },

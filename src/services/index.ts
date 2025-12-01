@@ -2,16 +2,12 @@ import { apiClient } from "./api";
 import {
   STREAK_ENDPOINTS,
   LEADERBOARD_ENDPOINTS,
-  CHALLENGE_ENDPOINTS,
   RECOMMENDATION_ENDPOINTS,
   ATTEMPTS_ENDPOINTS,
 } from "../config/api";
 import type {
   Streak,
   UpdateStreakRequest,
-  LeaderboardEntry,
-  Challenge,
-  CompleteChallengeRequest,
   Recommendation,
   Attempt,
   Leaderboard,
@@ -34,68 +30,29 @@ export const streakService = {
 
 export const leaderboardService = {
   getGlobal: async (): Promise<Leaderboard> => {
-    const response = await apiClient.get<{ entries: LeaderboardEntry[] }>(
+    const response = await apiClient.get<Leaderboard>(
       LEADERBOARD_ENDPOINTS.GLOBAL
     );
-    // Map avatar and userName for compatibility
-    const entries = response.data.entries.map((entry) => ({
-      ...entry,
-      avatar: entry.user?.avatar,
-      userName: entry.user?.name,
-    }));
-    return { entries };
+    return {
+      entries: response.data.entries,
+      currentUser: response.data.currentUser,
+      userRank: response.data.currentUser?.rank,
+    };
   },
 
   getFriends: async (): Promise<Leaderboard> => {
-    const response = await apiClient.get<{ entries: LeaderboardEntry[] }>(
+    const response = await apiClient.get<Leaderboard>(
       LEADERBOARD_ENDPOINTS.FRIENDS
     );
-    const entries = response.data.entries.map((entry) => ({
-      ...entry,
-      avatar: entry.user?.avatar,
-      userName: entry.user?.name,
-    }));
-    return { entries };
+    return {
+      entries: response.data.entries,
+      currentUser: response.data.currentUser,
+      userRank: response.data.currentUser?.rank,
+    };
   },
 };
 
-export const challengeService = {
-  getAll: async (): Promise<Challenge[]> => {
-    const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_ALL
-    );
-    return response.data;
-  },
-
-  getDaily: async (): Promise<Challenge[]> => {
-    const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_DAILY
-    );
-    return response.data;
-  },
-
-  getById: async (id: string): Promise<Challenge> => {
-    const response = await apiClient.get<Challenge>(
-      CHALLENGE_ENDPOINTS.GET_BY_ID(id)
-    );
-    return response.data;
-  },
-
-  complete: async (data: CompleteChallengeRequest): Promise<Challenge> => {
-    const response = await apiClient.post<Challenge>(
-      CHALLENGE_ENDPOINTS.COMPLETE,
-      data
-    );
-    return response.data;
-  },
-
-  join: async (challengeId: string): Promise<Challenge> => {
-    const response = await apiClient.post<Challenge>(CHALLENGE_ENDPOINTS.JOIN, {
-      challengeId,
-    });
-    return response.data;
-  },
-};
+export { challengeService } from "./challenge.service";
 
 export const recommendationService = {
   getAll: async (): Promise<Recommendation[]> => {
@@ -134,6 +91,7 @@ export const attemptService = {
 
 export { gamificationService } from "./gamification.service";
 export { contentService } from "./content.service";
+export { coachingService } from "./coaching.service";
 export { userService } from "./user.service";
 export * from "./task.service";
 export * from "./notification.service";

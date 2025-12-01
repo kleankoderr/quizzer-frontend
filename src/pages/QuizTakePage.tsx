@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { quizService } from '../services/quiz.service';
 import type { QuizResult, Streak, AnswerValue } from '../types';
@@ -12,6 +13,9 @@ import { analytics } from '../services/analytics.service';
 export const QuizTakePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const challengeId = searchParams.get('challengeId');
   const { data: quiz, isLoading: loading, error } = useQuiz(id);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<(AnswerValue | null)[]>([]);
@@ -168,6 +172,7 @@ export const QuizTakePage = () => {
     try {
       const { result: submissionResult, gamification } = await quizService.submit(id, {
         answers: selectedAnswers as AnswerValue[],
+        challengeId: challengeId || undefined,
       });
       setResult(submissionResult);
       setStreak(gamification.streak);
@@ -180,6 +185,12 @@ export const QuizTakePage = () => {
       localStorage.removeItem(getStorageKey('timestamp'));
       
       toast.success(force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!');
+      
+      // If this is a challenge quiz, invalidate challenges cache
+      if (challengeId) {
+        await queryClient.invalidateQueries({ queryKey: ['challenges'] });
+      }
+      
       // Calculate duration if possible, otherwise 0
       const duration = quiz.timeLimit && timeRemaining !== null ? quiz.timeLimit - timeRemaining : 0;
       analytics.trackQuizAttemptCompleted(id, submissionResult.score, submissionResult.totalQuestions, duration);

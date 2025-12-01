@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { analytics } from './services/analytics.service';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { LoginPage } from './pages/LoginPage';
@@ -21,6 +22,9 @@ import { SettingsPage } from './pages/SettingsPage';
 import { StatisticsPage } from './pages/StatisticsPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ChallengesPage } from './pages/ChallengesPage';
+import { ChallengeDetailsPage } from './pages/ChallengeDetailsPage';
+import { ChallengeQuizPage } from './pages/ChallengeQuizPage';
+import { ChallengeResultsPage } from './pages/ChallengeResultsPage';
 import { AttemptsPage } from './pages/AttemptsPage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -40,6 +44,9 @@ const queryClient = new QueryClient({
 
 function App() {
   useEffect(() => {
+    // Initialize Analytics
+    analytics.init();
+
     // Placeholder for FCM token registration
     // In a real app, you would initialize Firebase here and get the token
     const registerNotifications = async () => {
@@ -47,13 +54,13 @@ function App() {
         if ('Notification' in window && Notification.permission === 'default') {
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
-            console.log('Notification permission granted');
+
             // const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' });
             // await notificationService.registerToken(token);
           }
         }
       } catch (error) {
-        console.error('Error requesting notification permission:', error);
+
       }
     };
 
@@ -76,6 +83,15 @@ function App() {
 
 function AppRoutes() {
   const { user } = useAuth(); // Now we can use the hook
+  const location = useLocation();
+
+  useEffect(() => {
+    analytics.track('page_view', {
+      path: location.pathname,
+      search: location.search,
+      title: document.title,
+    });
+  }, [location]);
 
   return (
     <Routes>
@@ -113,6 +129,9 @@ function AppRoutes() {
         <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
         <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route path="challenges" element={<ChallengesPage />} />
+        <Route path="challenges/:id" element={<ChallengeDetailsPage />} />
+        <Route path="challenges/:id/quiz/:quizIndex" element={<ChallengeQuizPage />} />
+        <Route path="challenges/:id/results" element={<ChallengeResultsPage />} />
         <Route path="statistics" element={<StatisticsPage />} />
         <Route path="attempts" element={<AttemptsPage />} />
         <Route path="profile" element={<ProfilePage />} />

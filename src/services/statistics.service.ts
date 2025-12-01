@@ -1,4 +1,6 @@
 import { apiClient } from "./api";
+import type { Attempt } from "../types";
+export type { Attempt };
 
 export interface StatisticsOverview {
   totalAttempts: number;
@@ -7,28 +9,10 @@ export interface StatisticsOverview {
   currentStreak: number;
   quizAttempts: number;
   flashcardAttempts: number;
+  challengeAttempts: number;
 }
 
-export interface Attempt {
-  id: string;
-  userId: string;
-  quizId?: string;
-  flashcardSetId?: string;
-  type: "quiz" | "flashcard";
-  score?: number;
-  totalQuestions?: number;
-  completedAt: string;
-  quiz?: {
-    id: string;
-    title: string;
-    topic: string;
-  };
-  flashcardSet?: {
-    id: string;
-    title: string;
-    topic: string;
-  };
-}
+// Removed local Attempt interface
 
 export interface PerformanceByTopic {
   topic: string;
@@ -49,9 +33,10 @@ export const statisticsService = {
   },
 
   async getAttempts(filters?: {
-    type?: "quiz" | "flashcard";
+    type?: "quiz" | "flashcard" | "challenge";
     quizId?: string;
     flashcardSetId?: string;
+    challengeId?: string;
     startDate?: string;
     endDate?: string;
     limit?: number;

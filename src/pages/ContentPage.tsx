@@ -213,7 +213,7 @@ export const ContentPage = () => {
       toast.success('Text highlighted');
       refetch(); // Refresh to show new highlight
     } catch (error) {
-      console.error('Failed to highlight:', error);
+
       toast.error('Failed to save highlight');
     } finally {
       setToolbarPosition(null);
@@ -246,7 +246,7 @@ export const ContentPage = () => {
       toast.success('Note added');
       refetch();
     } catch (error) {
-      console.error('Failed to add note:', error);
+
       toast.error('Failed to add note');
     } finally {
       setInlineNote(null);
@@ -265,7 +265,7 @@ export const ContentPage = () => {
       toast.success('Highlight removed');
       refetch();
     } catch (error) {
-      console.error('Failed to delete highlight:', error);
+
       toast.error('Failed to delete highlight');
     } finally {
       setDeleteHighlightId(null);
@@ -353,7 +353,7 @@ export const ContentPage = () => {
       // Invalidate contents list to reflect changes
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
     } catch (error) {
-      console.error('Failed to save content:', error);
+
       toast.error('Failed to save changes', { id: loadingToast });
     } finally {
       setIsSaving(false);
@@ -375,7 +375,7 @@ export const ContentPage = () => {
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
       navigate('/study');
     } catch (error) {
-      console.error('Failed to delete content:', error);
+
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setIsDeleteContentModalOpen(false);
@@ -663,7 +663,7 @@ export const ContentPage = () => {
                       lastReadPosition: newProgress
                     });
                   } catch (error) {
-                    console.error('Failed to save progress:', error);
+
                     // Revert
                     queryClient.setQueryData(['content', id], previousContent);
                     toast.error('Failed to save progress');
@@ -680,7 +680,7 @@ export const ContentPage = () => {
                       lastReadPosition: progress
                     });
                   } catch (error) {
-                    console.error('Failed to save scroll progress:', error);
+
                   }
                 }}
               />

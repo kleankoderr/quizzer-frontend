@@ -4,6 +4,7 @@ import { statisticsService } from "../services/statistics.service";
 interface AttemptsFilters {
   quizId?: string;
   flashcardSetId?: string;
+  challengeId?: string;
   limit?: number;
   page?: number;
 }
