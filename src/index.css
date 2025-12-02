@@ -2,18 +2,30 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
-
 @layer base {
   body {
     background: #3222de;
     color: #111827;
     font-family: "Lexend", sans-serif;
     margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   .dark body {
     background: #030712;
     color: #f3f4f6;
+  }
+
+  /* Ensure proper touch targets on mobile */
+  @media (max-width: 768px) {
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      min-height: 44px; /* iOS recommended touch target */
+    }
   }
 }
 

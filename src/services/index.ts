@@ -94,4 +94,3 @@ export { contentService } from "./content.service";
 export { coachingService } from "./coaching.service";
 export { userService } from "./user.service";
 export * from "./task.service";
-export * from "./notification.service";

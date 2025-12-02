@@ -12,6 +12,7 @@ export const ChallengeDetailsPage = () => {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState<any>(null);
+  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -44,20 +45,32 @@ export const ChallengeDetailsPage = () => {
   };
 
   const handleStartChallenge = async () => {
+    setStarting(true);
     try {
-      await challengeService.startChallenge(id!);
+      const result = await challengeService.startChallenge(id!);
       
-      // Navigate to first quiz
+      // Check if challenge has quizzes
+      if (result.totalQuizzes === 0) {
+        toast.error('This challenge has no quizzes associated. Please contact support.');
+        setStarting(false);
+        return;
+      }
+      
+      // Navigate to first quiz with challengeId parameter
       if (challenge?.quizzes && challenge.quizzes.length > 0) {
         const firstQuiz = challenge.quizzes[0];
-        navigate(`/challenges/${id}/quiz/0?quizId=${firstQuiz.quizId}`);
+        navigate(`/quiz/${firstQuiz.quizId}?challengeId=${id}`);
       } else if (challenge?.quizId) {
         // Legacy single quiz support
         navigate(`/quiz/${challenge.quizId}?challengeId=${id}`);
+      } else {
+        toast.error('Unable to start challenge. No quiz found.');
       }
     } catch (error: any) {
 
       toast.error(error?.response?.data?.message || 'Failed to start challenge');
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -248,10 +261,20 @@ export const ChallengeDetailsPage = () => {
               {!challenge.completed && (
                 <button
                   onClick={handleStartChallenge}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl"
+                  disabled={starting}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Zap className="w-5 h-5" />
-                  {challenge.joined && completedQuizzes > 0 ? 'Continue Challenge' : 'Start Challenge'}
+                  {starting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Starting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-5 h-5" />
+                      {challenge.joined && completedQuizzes > 0 ? 'Continue Challenge' : 'Start Challenge'}
+                    </>
+                  )}
                 </button>
               )}
               

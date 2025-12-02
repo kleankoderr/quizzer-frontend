@@ -25,7 +25,7 @@ const StatisticsPage = lazy(() => import('./pages/StatisticsPage').then(m => ({ 
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage').then(m => ({ default: m.LeaderboardPage })));
 const ChallengesPage = lazy(() => import('./pages/ChallengesPage').then(m => ({ default: m.ChallengesPage })));
 const ChallengeDetailsPage = lazy(() => import('./pages/ChallengeDetailsPage').then(m => ({ default: m.ChallengeDetailsPage })));
-const ChallengeQuizPage = lazy(() => import('./pages/ChallengeQuizPage').then(m => ({ default: m.ChallengeQuizPage })));
+
 const ChallengeResultsPage = lazy(() => import('./pages/ChallengeResultsPage').then(m => ({ default: m.ChallengeResultsPage })));
 const AttemptsPage = lazy(() => import('./pages/AttemptsPage').then(m => ({ default: m.AttemptsPage })));
 const DiscoverPage = lazy(() => import('./pages/DiscoverPage').then(m => ({ default: m.DiscoverPage })));
@@ -66,22 +66,6 @@ function App() {
 
     // Placeholder for FCM token registration
     // In a real app, you would initialize Firebase here and get the token
-    const registerNotifications = async () => {
-      try {
-        if ('Notification' in window && Notification.permission === 'default') {
-          const permission = await Notification.requestPermission();
-          if (permission === 'granted') {
-
-            // const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' });
-            // await notificationService.registerToken(token);
-          }
-        }
-      } catch (error) {
-
-      }
-    };
-
-    registerNotifications();
   }, []);
 
   return (
@@ -142,7 +126,7 @@ function AppRoutes() {
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="challenges" element={<ChallengesPage />} />
           <Route path="challenges/:id" element={<ChallengeDetailsPage />} />
-          <Route path="challenges/:id/quiz/:quizIndex" element={<ChallengeQuizPage />} />
+
           <Route path="challenges/:id/results" element={<ChallengeResultsPage />} />
           <Route path="statistics" element={<StatisticsPage />} />
           <Route path="attempts" element={<AttemptsPage />} />

@@ -121,7 +121,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         </div>
       )}
 
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         <button
           type="button"
           onClick={() => setMode('topic')}
@@ -314,7 +314,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty</label>
-          <div className="flex gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {(['easy', 'medium', 'hard'] as const).map((level) => (
               <button
                 key={level}
@@ -334,7 +334,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Type</label>
-          <div className="flex gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {(['standard', 'timed', 'scenario'] as const).map((type) => (
               <button
                 key={type}
@@ -383,7 +383,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Question Types
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
             {(Object.keys(questionTypeLabels) as QuestionType[]).map((type) => (
               <button
                 key={type}
@@ -407,7 +407,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 sm:py-4 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md text-base sm:text-lg touch-manipulation"
         >
           {loading ? (
             <>

@@ -8,7 +8,7 @@ import type { Attempt, PerformanceByTopic } from '../services/statistics.service
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from '../components/skeletons';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'];
-const ACTIVITY_COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
+const ACTIVITY_COLORS = ['#3b82f6', '#10b981', '#ec4899'];
 
 export const StatisticsPage = () => {
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ export const StatisticsPage = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={typeDistributionData}
+                  data={typeDistributionData.filter(d => d.value > 0)}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -153,7 +153,7 @@ export const StatisticsPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {typeDistributionData.map((_, index) => (
+                  {typeDistributionData.filter(d => d.value > 0).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={ACTIVITY_COLORS[index % ACTIVITY_COLORS.length]} />
                   ))}
                 </Pie>

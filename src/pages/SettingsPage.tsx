@@ -27,7 +27,7 @@ export const SettingsPage = () => {
 
   // Preferences form (excluding theme which is now in ThemeContext)
   const [preferences, setPreferences] = useState({
-    emailNotifications: profileData?.preferences?.emailNotifications ?? true,
+
     studyGoalMinutes: profileData?.preferences?.studyGoalMinutes ?? 30,
   });
 
@@ -352,35 +352,6 @@ export const SettingsPage = () => {
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email Notifications
-                  </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Receive updates about your progress and new challenges
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPreferences({
-                      ...preferences,
-                      emailNotifications: !preferences.emailNotifications,
-                    })
-                  }
-                  className={`w-11 h-6 rounded-full transition-colors relative ${
-                    preferences.emailNotifications ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                      preferences.emailNotifications ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
               </div>
 
               <div>

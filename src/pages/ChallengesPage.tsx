@@ -12,6 +12,7 @@ export const ChallengesPage = () => {
   const { data: leaderboardData, isLoading: leaderboardLoading } = useLeaderboard('global');
   
   const [filter, setFilter] = useState<'all' | 'available' | 'completed'>('all');
+  const [joiningChallengeId, setJoiningChallengeId] = useState<string | null>(null);
 
   const loading = challengesLoading || leaderboardLoading;
   const leaderboard = useMemo(() => leaderboardData?.entries.slice(0, 10) ?? [], [leaderboardData]);
@@ -47,6 +48,7 @@ export const ChallengesPage = () => {
   }, [challenges, filter, joinedChallenges]);
 
   const handleJoinChallenge = useCallback(async (challengeId: string) => {
+    setJoiningChallengeId(challengeId);
     try {
       await challengeService.join(challengeId);
       toast.success('Challenge joined successfully!');
@@ -57,6 +59,8 @@ export const ChallengesPage = () => {
     } catch (error: any) {
 
       toast.error(error?.response?.data?.message || 'Failed to join challenge. Please try again.');
+    } finally {
+      setJoiningChallengeId(null);
     }
   }, [refetchChallenges, navigate]);
 
@@ -134,7 +138,7 @@ export const ChallengesPage = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Challenges Section */}
         <section className="lg:col-span-2 space-y-6">
 
@@ -150,7 +154,7 @@ export const ChallengesPage = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg overflow-x-auto">
+              <div className="flex flex-wrap items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
                 {(['all', 'available', 'completed'] as const).map((filterType) => (
                   <button
                     key={filterType}
@@ -186,7 +190,7 @@ export const ChallengesPage = () => {
                   return (
                     <div
                       key={challenge.id}
-                      className={`p-5 rounded-xl border transition-all hover:shadow-md ${
+                      className={`p-4 sm:p-5 rounded-xl border transition-all hover:shadow-md ${
                         isCompleted
                           ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
                           : isJoined
@@ -251,10 +255,20 @@ export const ChallengesPage = () => {
                               {!isCompleted && !isJoined && (
                                 <button
                                   onClick={() => handleJoinChallenge(challenge.id)}
-                                  className="flex items-center gap-2 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg transition-all shadow-md hover:shadow-lg"
+                                  disabled={joiningChallengeId === challenge.id}
+                                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                  <UserPlus className="w-3 h-3" />
-                                  Join
+                                  {joiningChallengeId === challenge.id ? (
+                                    <>
+                                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                      <span>Joining...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserPlus className="w-4 h-4" />
+                                      Join
+                                    </>
+                                  )}
                                 </button>
                               )}
 

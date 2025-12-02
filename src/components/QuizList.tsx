@@ -33,11 +33,11 @@ export const QuizList: React.FC<QuizListProps> = ({ quizzes, onDelete }) => {
 
   return (
     <div className="card dark:bg-gray-800">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Quizzes</h2>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Your Quizzes</h2>
         <span className="text-sm text-gray-500 dark:text-gray-400">{quizzes.length} quiz{quizzes.length === 1 ? '' : 'zes'}</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {quizzes.map((quiz) => {
           const hasAttempts = quiz.attempts && quiz.attempts.length > 0;
           const latestAttempt = quiz.attempts?.[0] ?? null;

@@ -79,7 +79,7 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, closeMobile }: Si
         `}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-600">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-600 flex-shrink-0">
           {!isCollapsed && (
             <span className="text-xl font-bold text-primary-600 truncate">Quizzer</span>
           )}
@@ -88,14 +88,14 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, closeMobile }: Si
           )}
           <button 
             onClick={toggleCollapse}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden lg:block"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden lg:block flex-shrink-0"
           >
             {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 sm:p-4 space-y-1 overflow-y-auto">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -104,8 +104,9 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, closeMobile }: Si
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => isOpen && closeMobile()} // Close mobile sidebar on navigation
                 className={`
-                  flex items-center gap-3 px-3 py-2 rounded-lg transition-all relative
+                  flex items-center gap-3 px-3 py-3 sm:py-2 rounded-lg transition-all relative touch-manipulation
                   ${active 
                     ? 'bg-blue-50 dark:bg-blue-900/50 text-primary-700 dark:text-blue-300' 
                     : 'text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}
@@ -113,7 +114,7 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, closeMobile }: Si
                 title={isCollapsed ? item.label : ''}
               >
                 {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 rounded-r-full"></div>}
-                <Icon className={`w-5 h-5 ${active ? 'text-primary-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-300'}`} />
+                <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-primary-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-300'}`} />
                 {!isCollapsed && <span className={`font-medium ${active ? 'font-semibold' : ''}`}>{item.label}</span>}
               </Link>
             );
@@ -121,16 +122,16 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, closeMobile }: Si
         </nav>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-600">
+        <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-600 flex-shrink-0">
           <button
             onClick={logout}
             className={`
-              flex items-center gap-3 px-3 py-2 w-full rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors
+              flex items-center gap-3 px-3 py-3 sm:py-2 w-full rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors touch-manipulation
               ${isCollapsed ? 'justify-center' : ''}
             `}
             title="Logout"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && <span className="font-medium">Logout</span>}
           </button>
         </div>

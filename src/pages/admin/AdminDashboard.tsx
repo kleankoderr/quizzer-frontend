@@ -69,7 +69,7 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
           <div
             key={index}
@@ -100,7 +100,7 @@ export const AdminDashboard = () => {
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
             Quick Actions
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <Link
               to="/admin/users"
               className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
