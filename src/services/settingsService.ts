@@ -1,13 +1,13 @@
-import { api } from "./api";
+import { apiClient } from "./api";
 
 export const settingsService = {
   getPublicSettings: async () => {
-    const response = await api.get("/settings/public");
+    const response = await apiClient.get("/settings/public");
     return response.data;
   },
 
   getSettings: async () => {
-    const response = await api.get("/settings");
+    const response = await apiClient.get("/settings");
     return response.data;
   },
 
@@ -16,7 +16,7 @@ export const settingsService = {
     maintenanceMode?: boolean;
     supportEmail?: string;
   }) => {
-    const response = await api.patch("/settings", data);
+    const response = await apiClient.patch("/settings", data);
     return response.data;
   },
 };
