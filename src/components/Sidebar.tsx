@@ -34,13 +34,13 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, closeMobile }: Si
   let filteredNavItems = [...navItems];
 
   if (isAdmin) {
-    // For admins, show only Admin Dashboard, Users, Content, Profile, and Settings
+    // For admins, show Admin Dashboard, Users, Content, Analytics, and Settings
     filteredNavItems = [
       { path: '/admin', icon: Home, label: 'Dashboard' },
       { path: '/admin/users', icon: User, label: 'Users' },
       { path: '/admin/content', icon: Layers, label: 'Content' },
-      { path: '/profile', icon: User, label: 'Profile' },
-      { path: '/settings', icon: Settings, label: 'Settings' },
+      { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+      { path: '/admin/settings', icon: Settings, label: 'Settings' },
     ];
   } else {
     // For regular users, show standard navigation

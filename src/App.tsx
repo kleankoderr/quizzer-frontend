@@ -38,6 +38,8 @@ const ContentModeration = lazy(() => import('./pages/admin/ContentModeration').t
 const SchoolManagement = lazy(() => import('./pages/admin/SchoolManagement').then(m => ({ default: m.SchoolManagement })));
 const AiAnalytics = lazy(() => import('./pages/admin/AiAnalytics').then(m => ({ default: m.AiAnalytics })));
 const PlatformSettings = lazy(() => import('./pages/admin/PlatformSettings').then(m => ({ default: m.PlatformSettings })));
+const AnalyticsDashboard = lazy(() => import('./pages/admin/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
+const UserDetailsPage = lazy(() => import('./pages/admin/UserDetailsPage'));
 
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
@@ -151,6 +153,14 @@ function AppRoutes() {
             }
           />
           <Route
+            path="admin/users/:id"
+            element={
+              <AdminRoute>
+                <UserDetailsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="admin/content"
             element={
               <AdminRoute>
@@ -179,6 +189,14 @@ function AppRoutes() {
             element={
               <AdminRoute>
                 <AiAnalytics />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/analytics"
+            element={
+              <AdminRoute>
+                <AnalyticsDashboard />
               </AdminRoute>
             }
           />

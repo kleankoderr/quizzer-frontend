@@ -58,6 +58,13 @@ export const adminService = {
     return response.data;
   },
 
+  getUserContent: async (userId: string, filter?: any) => {
+    const response = await api.get(`/admin/users/${userId}/content`, {
+      params: filter,
+    });
+    return response.data;
+  },
+
   updateUserStatus: async (userId: string, isActive: boolean) => {
     const response = await api.patch(`/admin/users/${userId}/status`, {
       isActive,
@@ -134,6 +141,56 @@ export const adminService = {
 
   updateSettings: async (data: any) => {
     const response = await api.patch("/admin/settings", data);
+    return response.data;
+  },
+
+  deleteFlashcard: async (id: string) => {
+    const response = await api.delete(`/admin/flashcard/${id}`);
+    return response.data;
+  },
+
+  createChallenge: async (data: any) => {
+    const response = await api.post("/admin/challenges", data);
+    return response.data;
+  },
+
+  deleteChallenge: async (id: string) => {
+    const response = await api.delete(`/admin/challenges/${id}`);
+    return response.data;
+  },
+
+  getAnalytics: async () => {
+    const response = await api.get("/admin/analytics");
+    return response.data;
+  },
+
+  getAllChallenges: async (filter?: any) => {
+    const response = await api.get("/admin/challenges", { params: filter });
+    return response.data;
+  },
+
+  getAllFlashcards: async (filter?: any) => {
+    const response = await api.get("/admin/flashcards", { params: filter });
+    return response.data;
+  },
+
+  generateDailyChallenges: async () => {
+    const response = await api.post("/admin/challenges/generate/daily");
+    return response.data;
+  },
+
+  generateWeeklyChallenges: async () => {
+    const response = await api.post("/admin/challenges/generate/weekly");
+    return response.data;
+  },
+
+  generateMonthlyChallenges: async () => {
+    const response = await api.post("/admin/challenges/generate/monthly");
+    return response.data;
+  },
+
+  generateHotChallenges: async () => {
+    const response = await api.post("/admin/challenges/generate/hot");
     return response.data;
   },
 };

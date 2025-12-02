@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   Users, 
   BookOpen, 
@@ -7,19 +8,62 @@ import {
   UserPlus, 
   FileText,
   Layers,
-  Shield,
-  GraduationCap,
-  Settings as SettingsIcon,
-  Brain
+  SettingsIcon,
+  Brain,
+  Trophy,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['adminStats'],
+    queryKey: ['systemStats'],
     queryFn: adminService.getSystemStats,
   });
+  
+  const queryClient = useQueryClient();
+
+  const ChallengeGenerateButton = ({ type, label, description }: { type: string; label: string; description: string }) => {
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const handleGenerate = async () => {
+      setIsGenerating(true);
+      try {
+        let result;
+        if (type === 'daily') result = await adminService.generateDailyChallenges();
+        else if (type === 'weekly') result = await adminService.generateWeeklyChallenges();
+        else if (type === 'monthly') result = await adminService.generateMonthlyChallenges();
+        else if (type === 'hot') result = await adminService.generateHotChallenges();
+        
+        toast.success(result.message || 'Challenges generated successfully');
+        queryClient.invalidateQueries({ queryKey: ['systemStats'] });
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || 'Failed to generate challenges');
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    return (
+      <button
+        onClick={handleGenerate}
+        disabled={isGenerating}
+        className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-800"
+        title={description}
+      >
+        {isGenerating ? (
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"></div>
+        ) : (
+          <Trophy className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+        )}
+        <div className="text-center">
+          <p className="font-medium text-gray-900 dark:text-white">{label}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{isGenerating ? 'Generating...' : 'Generate'}</p>
+        </div>
+      </button>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -126,30 +170,6 @@ export const AdminDashboard = () => {
               </div>
             </Link>
             <Link
-              to="/admin/moderation"
-              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-            >
-              <div className="rounded-full bg-red-100 p-2 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                <Shield className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900 dark:text-white">Content Moderation</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Review reported content</p>
-              </div>
-            </Link>
-            <Link
-              to="/admin/schools"
-              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-            >
-              <div className="rounded-full bg-green-100 p-2 text-green-600 dark:bg-green-900/30 dark:text-green-400">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900 dark:text-white">Schools</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Manage schools</p>
-              </div>
-            </Link>
-            <Link
               to="/admin/ai-analytics"
               className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
             >
@@ -159,6 +179,18 @@ export const AdminDashboard = () => {
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">AI Management</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">AI stats & prompts</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/analytics"
+              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+            >
+              <div className="rounded-full bg-indigo-100 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Analytics</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Insights & metrics</p>
               </div>
             </Link>
             <Link
@@ -223,6 +255,38 @@ export const AdminDashboard = () => {
                 {stats?.content.studyMaterials || 0}
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* Challenge Generation */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            Generate Challenges
+          </h2>
+          <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            Manually trigger the creation of different types of challenges
+          </p>
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+            <ChallengeGenerateButton
+              type="daily"
+              label="Daily"
+              description="Generate today's challenges"
+            />
+            <ChallengeGenerateButton
+              type="weekly"
+              label="Weekly"
+              description="Generate this week's challenges"
+            />
+            <ChallengeGenerateButton
+              type="monthly"
+              label="Monthly"
+              description="Generate this month's challenges"
+            />
+            <ChallengeGenerateButton
+              type="hot"
+              label="Hot"
+              description="Generate hot challenges"
+            />
           </div>
         </div>
       </div>

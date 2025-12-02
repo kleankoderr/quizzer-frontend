@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   Shield, 
@@ -32,6 +33,7 @@ export const UserManagement = () => {
   });
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ['users', page, search, roleFilter],
@@ -155,7 +157,11 @@ export const UserManagement = () => {
                 </tr>
               ) : (
                 data?.data.map((user: User) => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <tr 
+                    key={user.id} 
+                    onClick={() => navigate(`/admin/users/${user.id}`)}
+                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
@@ -205,7 +211,7 @@ export const UserManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         {user.role !== 'SUPER_ADMIN' && (
                           <>
                             <button

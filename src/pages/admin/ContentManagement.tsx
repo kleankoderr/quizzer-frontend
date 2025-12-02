@@ -1,27 +1,142 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, 
   BookOpen, 
   Calendar,
-  User
+  User,
+  Trash2,
+  Layers,
+  Trophy,
+  FileText
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
+import toast from 'react-hot-toast';
+import { Modal } from '../../components/Modal';
+
+type ContentType = 'quizzes' | 'flashcards' | 'contents' | 'challenges';
 
 export const ContentManagement = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<ContentType>('quizzes');
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    confirmColor?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminContent', page, search],
-    queryFn: () => adminService.getAllContent({ 
-      page, 
-      limit: 10, 
-      search,
-      type: 'quiz' // Default to quiz for now
-    }),
+    queryKey: ['adminContent', activeTab, page, search],
+    queryFn: () => {
+      if (activeTab === 'quizzes') {
+        return adminService.getAllContent({ page, limit: 10, search, type: 'quiz' });
+      } else if (activeTab === 'flashcards') {
+        return adminService.getAllFlashcards({ page, limit: 10, search });
+      } else if (activeTab === 'challenges') {
+        return adminService.getAllChallenges({ page, limit: 10, search });
+      } else {
+        return adminService.getAllContent({ page, limit: 10, search, type: 'content' });
+      }
+    },
   });
+
+  const deleteQuizMutation = useMutation({
+    mutationFn: adminService.deleteQuiz,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+      toast.success('Quiz deleted successfully');
+      closeModal();
+    },
+    onError: () => {
+      toast.error('Failed to delete quiz');
+      closeModal();
+    },
+  });
+
+  const deleteFlashcardMutation = useMutation({
+    mutationFn: adminService.deleteFlashcard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+      toast.success('Flashcard set deleted successfully');
+      closeModal();
+    },
+    onError: () => {
+      toast.error('Failed to delete flashcard set');
+      closeModal();
+    },
+  });
+
+  const deleteContentMutation = useMutation({
+    mutationFn: adminService.deleteContent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+      toast.success('Content deleted successfully');
+      closeModal();
+    },
+    onError: () => {
+      toast.error('Failed to delete content');
+      closeModal();
+    },
+  });
+
+  const deleteChallengeMutation = useMutation({
+    mutationFn: adminService.deleteChallenge,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+      toast.success('Challenge deleted successfully');
+      closeModal();
+    },
+    onError: () => {
+      toast.error('Failed to delete challenge');
+      closeModal();
+    },
+  });
+
+  const closeModal = () => {
+    setModalConfig(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleDelete = (id: string, type: ContentType, title: string) => {
+    const typeLabels = {
+      quizzes: 'quiz',
+      flashcards: 'flashcard set',
+      contents: 'study material',
+      challenges: 'challenge',
+    };
+
+    setModalConfig({
+      isOpen: true,
+      title: `Delete ${typeLabels[type]}`,
+      message: `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      confirmColor: 'bg-red-600 hover:bg-red-700',
+      onConfirm: () => {
+        if (type === 'quizzes') deleteQuizMutation.mutate(id);
+        else if (type === 'flashcards') deleteFlashcardMutation.mutate(id);
+        else if (type === 'contents') deleteContentMutation.mutate(id);
+        else if (type === 'challenges') deleteChallengeMutation.mutate(id);
+      },
+    });
+  };
+
+  const tabs = [
+    { id: 'quizzes' as ContentType, label: 'Quizzes', icon: BookOpen },
+    { id: 'flashcards' as ContentType, label: 'Flashcards', icon: Layers },
+    { id: 'contents' as ContentType, label: 'Study Materials', icon: FileText },
+    { id: 'challenges' as ContentType, label: 'Challenges', icon: Trophy },
+  ];
 
   return (
     <div className="space-y-6 p-6">
@@ -40,17 +155,43 @@ export const ContentManagement = () => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setPage(1);
+                }}
+                className={`flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Title</th>
-                <th className="px-6 py-4 font-medium">Type</th>
                 <th className="px-6 py-4 font-medium">Topic</th>
                 <th className="px-6 py-4 font-medium">Creator</th>
                 <th className="px-6 py-4 font-medium">Created</th>
                 <th className="px-6 py-4 font-medium">Engagement</th>
+                <th className="px-6 py-4 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -62,33 +203,27 @@ export const ContentManagement = () => {
                     </div>
                   </td>
                 </tr>
-              ) : data?.data.length === 0 ? (
+              ) : data?.data?.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                     No content found
                   </td>
                 </tr>
               ) : (
-                data?.data.map((item: any) => (
+                data?.data?.map((item: any) => (
                   <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-900 dark:text-white">{item.title}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-indigo-500" />
-                        <span className="text-gray-700 dark:text-gray-300">Quiz</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
                       <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                        {item.topic}
+                        {item.topic || item.type || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                         <User className="h-4 w-4" />
-                        <span>{item.user?.name || 'Unknown'}</span>
+                        <span>{item.user?.name || 'System'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
@@ -98,7 +233,16 @@ export const ContentManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                      {item._count?.attempts || 0} attempts
+                      {item._count?.attempts || item._count?.completions || 0} {activeTab === 'challenges' ? 'participants' : 'attempts'}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDelete(item.id, activeTab, item.title)}
+                        className="p-1.5 rounded-lg text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -134,6 +278,30 @@ export const ContentManagement = () => {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={modalConfig.isOpen}
+        onClose={closeModal}
+        title={modalConfig.title}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={closeModal}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={modalConfig.onConfirm}
+              className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${modalConfig.confirmColor || 'bg-primary-600 hover:bg-primary-700'}`}
+            >
+              {modalConfig.confirmText || 'Confirm'}
+            </button>
+          </div>
+        }
+      >
+        <p>{modalConfig.message}</p>
+      </Modal>
     </div>
   );
 };
