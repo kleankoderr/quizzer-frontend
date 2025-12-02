@@ -55,9 +55,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     e.preventDefault();
     setIsDragging(false);
     
-    const droppedFiles = Array.from(e.dataTransfer.files).filter(
-      (file) => file.type.startsWith('text/') || file.type === 'application/pdf'
-    );
+    const droppedFiles = Array.from(e.dataTransfer.files);
     setFiles((prev) => [...prev, ...droppedFiles]);
   };
 
@@ -196,10 +194,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               </svg>
               <div className="mt-4">
                 <p className="text-sm font-medium text-gray-900">
-                  Drop files here or click to browse
+                  Drop PDF files here or click to browse
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  PDF, TXT, MD files (max 10MB each, up to 5 files)
+                  PDF files only (max 5MB each, up to 5 files)
                 </p>
               </div>
             </div>
@@ -208,7 +206,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               ref={fileInputRef}
               type="file"
               onChange={handleFileChange}
-              accept="text/*,.txt,.md,.pdf,application/pdf"
+              accept="application/pdf,.pdf"
               multiple
               className="hidden"
             />

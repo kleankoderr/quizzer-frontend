@@ -27,7 +27,8 @@ export const MaintenanceBanner = () => {
 
     checkMaintenanceMode();
     
-    const interval = setInterval(checkMaintenanceMode, 30000);
+    // Poll every 30 minutes (settings rarely change, cache handles freshness)
+    const interval = setInterval(checkMaintenanceMode, 30 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);

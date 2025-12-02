@@ -243,7 +243,7 @@ export const DiscoverPage = () => {
                 Drag and drop your file here, or click to browse
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Supported formats: PDF, DOCX, TXT (Max 10MB)
+                Supported formats: PDF, DOCX, TXT (Max 5MB)
               </p>
               <input
                 type="file"

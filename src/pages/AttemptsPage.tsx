@@ -477,10 +477,20 @@ export function AttemptsPage() {
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
+                    backgroundColor: '#ffffff', 
+                    border: '1px solid #e5e7eb',
                     borderRadius: '8px',
-                    color: '#fff'
+                    color: '#111827',
+                    padding: '8px 12px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
+                  itemStyle={{
+                    color: '#111827',
+                    fontWeight: 500
+                  }}
+                  labelStyle={{
+                    color: '#111827',
+                    fontWeight: 600
                   }}
                 />
               </PieChart>
