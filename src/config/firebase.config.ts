@@ -1,9 +1,13 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
+const getAuthDomain = () => {
+  return window.location.hostname;
+};
+
 const firebaseConfig = {
   apiKey: "AIzaSyCC2AsgmVpm_wpS-MoommA3g4cKpsTOCBY",
-  authDomain: "quizzer-609ff.firebaseapp.com", // Always use Firebase domain
+  authDomain: getAuthDomain(),
   projectId: "quizzer-609ff",
   storageBucket: "quizzer-609ff.firebasestorage.app",
   messagingSenderId: "208450280402",
