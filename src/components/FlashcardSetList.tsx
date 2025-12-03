@@ -50,7 +50,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({ sets, onDele
             <Link
               key={set.id}
               to={`/flashcards/${set.id}`}
-              className="group relative overflow-hidden border-2 border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800"
+              className="group relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1"
             >
               {/* Gradient accent */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
@@ -112,8 +112,11 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({ sets, onDele
               
               {/* Action hint */}
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-gray-400">Click to study</span>
-                <Play className="w-4 h-4 text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Click to study</span>
+                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                  <span className="text-sm font-bold">Study Now</span>
+                  <Play className="w-4 h-4 fill-current" />
+                </div>
               </div>
             </Link>
           );

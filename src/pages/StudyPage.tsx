@@ -326,7 +326,7 @@ export const StudyPage = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-8 border-b-2 border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <div className="flex gap-2 mb-8 border-b-2 border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('topic')}
               className={`px-6 py-3 font-semibold transition-all border-b-3 -mb-0.5 whitespace-nowrap ${

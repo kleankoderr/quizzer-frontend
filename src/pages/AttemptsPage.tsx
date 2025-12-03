@@ -222,121 +222,133 @@ export function AttemptsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-8 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-lg text-white">
+        <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-white">
               Attempt History
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-blue-100 dark:text-blue-200 mt-1 text-lg">
               Track your progress across all quizzes and flashcards
             </p>
           </div>
         </div>
 
-        {/* Breadcrumb */}
-        {selectedItem && (
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
-            <button
-              onClick={handleClearSelection}
-              className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              All Attempts
-            </button>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-gray-900 dark:text-white font-medium">
-              {selectedItem.title}
-            </span>
-          </div>
-        )}
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-5">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Attempts</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {attemptStats.total}
-                </p>
-              </div>
-              <Calendar className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
+      {/* Breadcrumb */}
+      {selectedItem && (
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+          <button
+            onClick={handleClearSelection}
+            className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            All Attempts
+          </button>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-gray-900 dark:text-white font-medium">
+            {selectedItem.title}
+          </span>
+        </div>
+      )}
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Quiz Attempts</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {attemptStats.quizzes}
-                </p>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
+              <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <BookOpen className="w-6 h-6 text-blue-600" />
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Flashcard Attempts</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {attemptStats.flashcards}
-                </p>
-              </div>
-              <Layers className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Challenge Attempts</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {attemptStats.challenges}
-                </p>
-              </div>
-              <TrendingUp className="w-6 h-6 text-pink-600" />
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Average Score</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {attemptStats.averageScore}%
-                </p>
-              </div>
-              <Award className="w-6 h-6 text-green-600" />
-            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {attemptStats.total}
+            </p>
           </div>
         </div>
 
-        {/* Filters */}
-        {!selectedItem && (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Filter:
-              </span>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Quizzes</p>
+              <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
             </div>
-            <div className="flex gap-2">
-              {(['all', 'quiz', 'flashcard', 'challenge'] as const).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => {
-                    setFilterType(type);
-                    setSearchParams(prev => {
-                      const newParams = new URLSearchParams(prev);
-                      newParams.set('type', type);
-                      return newParams;
-                    });
-                  }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filterType === type
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {attemptStats.quizzes}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Flashcards</p>
+              <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {attemptStats.flashcards}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Challenges</p>
+              <div className="p-1.5 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                <TrendingUp className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {attemptStats.challenges}
+            </p>
+          </div>
+        </div>
+
+        <div className="col-span-2 md:col-span-1 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Avg Score</p>
+              <div className="p-1.5 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                <Award className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {attemptStats.averageScore}%
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      {!selectedItem && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Filter:
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(['all', 'quiz', 'flashcard', 'challenge'] as const).map((type) => (
+              <button
+                key={type}
+                onClick={() => {
+                  setFilterType(type);
+                  setSearchParams(prev => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.set('type', type);
+                    return newParams;
+                  });
+                }}
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filterType === type
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
@@ -347,7 +359,7 @@ export function AttemptsPage() {
             </div>
           </div>
         )}
-      </div>
+
 
       {/* Charts Section */}
       {filteredAttempts.length > 0 && (

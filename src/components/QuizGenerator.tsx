@@ -119,7 +119,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         </div>
       )}
 
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto pb-1">
+      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto pb-1 scrollbar-hide">
         <button
           type="button"
           onClick={() => setMode('topic')}

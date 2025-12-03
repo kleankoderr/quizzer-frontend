@@ -100,7 +100,7 @@ export const ChallengesPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-600 to-red-700 dark:from-orange-800 dark:to-red-900 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -121,13 +121,13 @@ export const ChallengesPage = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+              <div className="text-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                 <div className="text-2xl font-bold text-white">
                   {challenges.filter(c => !c.completed && !joinedChallenges.has(c.id)).length}
                 </div>
                 <div className="text-xs text-primary-100">Available</div>
               </div>
-              <div className="text-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+              <div className="text-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                 <div className="text-2xl font-bold text-white">
                   {challenges.filter(c => c.completed).length}
                 </div>
@@ -190,17 +190,17 @@ export const ChallengesPage = () => {
                   return (
                     <div
                       key={challenge.id}
-                      className={`p-4 sm:p-5 rounded-xl border transition-all hover:shadow-md ${
+                      className={`p-4 sm:p-5 rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
                         isCompleted
-                          ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
+                          ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800'
                           : isJoined
-                          ? 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700'
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+                          ? 'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700'
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600'
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md ${
-                          isCompleted ? 'bg-green-500' : isJoined ? 'bg-orange-500' : 'bg-primary-500'
+                          isCompleted ? 'bg-gradient-to-br from-green-500 to-emerald-600' : isJoined ? 'bg-gradient-to-br from-orange-500 to-red-600' : 'bg-gradient-to-br from-gray-500 to-gray-600'
                         }`}>
                           {isCompleted ? (
                             <span className="text-white text-lg font-bold">✓</span>
@@ -237,7 +237,7 @@ export const ChallengesPage = () => {
                               <p className="text-sm text-gray-600 dark:text-gray-400">{challenge.description}</p>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm">
+                              <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm border border-white/20">
                                 <Trophy className="w-4 h-4" />
                                 {challenge.reward}
                               </div>
@@ -256,7 +256,7 @@ export const ChallengesPage = () => {
                                 <button
                                   onClick={() => handleJoinChallenge(challenge.id)}
                                   disabled={joiningChallengeId === challenge.id}
-                                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                                 >
                                   {joiningChallengeId === challenge.id ? (
                                     <>
@@ -357,13 +357,13 @@ export const ChallengesPage = () => {
                   let rankIcon = <span className="font-bold">{entry.rank}</span>;
                   
                   if (entry.rank === 1) {
-                    rankStyle = 'bg-yellow-500 text-white border-yellow-400';
+                    rankStyle = 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white border-yellow-400 shadow-md';
                     rankIcon = <Crown className="w-4 h-4" />;
                   } else if (entry.rank === 2) {
-                    rankStyle = 'bg-gray-400 text-white border-gray-300';
+                    rankStyle = 'bg-gradient-to-br from-gray-300 to-gray-500 text-white border-gray-300 shadow-md';
                     rankIcon = <Medal className="w-4 h-4" />;
                   } else if (entry.rank === 3) {
-                    rankStyle = 'bg-orange-500 text-white border-orange-400';
+                    rankStyle = 'bg-gradient-to-br from-orange-400 to-orange-600 text-white border-orange-400 shadow-md';
                     rankIcon = <Medal className="w-4 h-4" />;
                   }
                   

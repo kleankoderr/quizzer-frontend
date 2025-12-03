@@ -91,7 +91,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <h2 className="text-2xl font-bold text-gray-900">Generate New Flashcard Set</h2>
       </div>
 
-      <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-1">
+      <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-1 scrollbar-hide">
         <button
           type="button"
           onClick={() => setMode('topic')}

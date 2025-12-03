@@ -68,7 +68,7 @@ export const StatisticsPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
-      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 dark:from-violet-800 dark:to-indigo-900 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -90,48 +90,60 @@ export const StatisticsPage = () => {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card bg-primary-50 dark:bg-gray-800 border border-primary-200 dark:border-gray-700">
+        <div className="card bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/10 dark:to-indigo-900/10 border-violet-200 dark:border-violet-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Attempts</p>
-            <BookOpen className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Attempts</p>
+            <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+              <BookOpen className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{overview?.totalAttempts || 0}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {overview?.quizAttempts || 0} quizzes, {overview?.flashcardAttempts || 0} flashcards, {overview?.challengeAttempts || 0} challenges
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
+            {overview?.quizAttempts || 0} quizzes • {overview?.flashcardAttempts || 0} flashcards
           </p>
         </div>
 
-        <div className="card bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-700">
+        <div className="card bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Average Accuracy</p>
-            <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Average Accuracy</p>
+            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {overview?.averageAccuracy ? `${overview.averageAccuracy.toFixed(1)}%` : '0%'}
           </p>
-          <p className="text-sm text-green-600 dark:text-green-400 mt-1">Keep it up!</p>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" /> Keep it up!
+          </p>
         </div>
 
-        <div className="card bg-blue-50 dark:bg-gray-800 border border-blue-200 dark:border-gray-700">
+        <div className="card bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border-blue-200 dark:border-blue-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Time Spent</p>
-            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Time Spent</p>
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {overview?.totalTimeSpent ? `${Math.floor(overview.totalTimeSpent / 60)}h` : '0h'}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
             {overview?.totalTimeSpent ? `${overview.totalTimeSpent % 60}m this month` : 'Start studying!'}
           </p>
         </div>
 
-        <div className="card bg-orange-50 dark:bg-gray-800 border border-orange-200 dark:border-gray-700">
+        <div className="card bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 border-orange-200 dark:border-orange-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Current Streak</p>
-            <Flame className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Current Streak</p>
+            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+              <Flame className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{overview?.currentStreak || 0}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">days</p>
+          <p className="text-xs text-orange-600 dark:text-orange-400 mt-2 font-medium flex items-center gap-1">
+            <Flame className="w-3 h-3" /> days streak
+          </p>
         </div>
       </div>
 
@@ -233,7 +245,7 @@ export const StatisticsPage = () => {
 
       {/* Performance by Topic - Detailed Chart */}
       {performanceByTopic.length > 0 && (
-        <div className="card dark:bg-gray-800">
+        <div className="card dark:bg-gray-800 hidden md:block">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Performance by Topic</h2>
           <ResponsiveContainer width="100%" height={Math.max(300, performanceByTopic.length * 60)}>
             <BarChart 
@@ -329,15 +341,16 @@ export const StatisticsPage = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Type</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Title</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Topic</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Score</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Date</th>
+                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                    <th className="text-left py-4 px-4 font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">Type</th>
+                    <th className="text-left py-4 px-4 font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">Title</th>
+                    <th className="text-left py-4 px-4 font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">Topic</th>
+                    <th className="text-left py-4 px-4 font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">Score</th>
+                    <th className="text-left py-4 px-4 font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -411,6 +424,73 @@ export const StatisticsPage = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {recentAttempts.map((attempt: Attempt) => (
+                <div 
+                  key={attempt.id}
+                  onClick={() => handleAttemptClick(attempt)}
+                  className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 active:scale-[0.98] transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                      attempt.type === 'quiz' 
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
+                        : attempt.type === 'challenge'
+                        ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                        : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                    }`}>
+                      {attempt.type === 'quiz' ? <BookOpen className="w-3 h-3" /> : attempt.type === 'challenge' ? <Flame className="w-3 h-3" /> : <Layers className="w-3 h-3" />}
+                      {attempt.type}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                  
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                    {attempt.quiz?.title || attempt.flashcardSet?.title || 'Untitled'}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    {attempt.quiz?.topic || attempt.flashcardSet?.topic || '-'}
+                  </p>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {format(new Date(attempt.completedAt), 'MMM d, yyyy')}
+                    </span>
+                    {attempt.score !== undefined && attempt.totalQuestions ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div 
+                            className={`h-1.5 rounded-full ${
+                              (Math.max(0, attempt.score) / attempt.totalQuestions) >= 0.7 
+                                ? 'bg-green-500' 
+                                : (Math.max(0, attempt.score) / attempt.totalQuestions) >= 0.5 
+                                ? 'bg-yellow-500' 
+                                : 'bg-red-500'
+                            }`}
+                            style={{ width: `${Math.round((Math.max(0, attempt.score) / attempt.totalQuestions) * 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className={`text-sm font-bold ${
+                          (Math.max(0, attempt.score) / attempt.totalQuestions) >= 0.7 
+                            ? 'text-green-600' 
+                            : (Math.max(0, attempt.score) / attempt.totalQuestions) >= 0.5 
+                            ? 'text-yellow-600' 
+                            : 'text-red-600'
+                        }`}>
+                          {Math.round((Math.max(0, attempt.score) / attempt.totalQuestions) * 100)}%
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-500 dark:text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
             
             {/* Pagination Controls */}

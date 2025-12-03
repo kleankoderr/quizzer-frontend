@@ -221,7 +221,7 @@ export const FlashcardStudyPage = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl bg-emerald-600 dark:bg-emerald-900 p-4 md:p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-900 dark:from-emerald-800 dark:to-emerald-950 p-4 md:p-6 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -230,10 +230,10 @@ export const FlashcardStudyPage = () => {
         <div className="relative z-10">
           <button
             onClick={() => navigate('/flashcards')}
-            className="flex items-center gap-2 text-white hover:text-emerald-100 mb-4 transition-colors"
+            className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm mb-4 transition-all touch-manipulation w-fit"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Flashcards
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base font-medium">Back to Flashcards</span>
           </button>
           
           <div className="flex items-center gap-2 mb-3">
@@ -270,7 +270,7 @@ export const FlashcardStudyPage = () => {
       {/* Flashcard */}
       <div className="card border border-emerald-200 dark:border-gray-700 shadow-xl dark:bg-gray-800" style={{ perspective: '1000px' }}>
         <div
-          className="min-h-[450px] relative rounded-xl"
+          className="min-h-[350px] sm:min-h-[450px] relative rounded-xl"
           style={{
             transformStyle: 'preserve-3d',
             transition: 'transform 0.6s',
@@ -280,7 +280,7 @@ export const FlashcardStudyPage = () => {
           <div className="absolute top-4 right-4 z-10" style={{ transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
             <button
               onClick={handleFlip}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 ${
+              className={`inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 ${
                 isFlipped 
                   ? 'bg-emerald-600 text-white border-white/30 hover:bg-emerald-700' 
                   : 'bg-emerald-600 text-white border-white/30 hover:bg-emerald-700'
@@ -290,13 +290,13 @@ export const FlashcardStudyPage = () => {
                 className="w-4 h-4 transition-transform duration-600" 
                 style={{ transform: isFlipped ? 'rotate(180deg)' : 'rotate(0deg)' }}
               />
-              {isFlipped ? 'Show Question' : 'Show Answer'}
+              <span className="hidden sm:inline">{isFlipped ? 'Show Question' : 'Show Answer'}</span>
             </button>
           </div>
 
           {/* Front of card */}
             <div
-              className="flex flex-col items-center justify-center min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
+              className="flex flex-col items-center justify-center min-h-[350px] sm:min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
@@ -315,7 +315,7 @@ export const FlashcardStudyPage = () => {
 
           {/* Back of card */}
           <div
-            className="flex flex-col items-center justify-center min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
+            className="flex flex-col items-center justify-center min-h-[350px] sm:min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',

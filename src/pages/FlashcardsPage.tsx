@@ -153,7 +153,7 @@ export const FlashcardsPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 dark:from-emerald-800 dark:via-teal-800 dark:to-cyan-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-900 dark:from-emerald-800 dark:to-emerald-950 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -174,7 +174,7 @@ export const FlashcardsPage = () => {
             {!showGenerator && (
               <button
                 onClick={() => setShowGenerator(true)}
-                className="group flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-700 rounded-xl transition-all hover:scale-105 font-semibold shadow-lg"
+                className="group flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all hover:scale-105 font-semibold shadow-lg backdrop-blur-sm border border-white/20"
               >
                 <Plus className="w-5 h-5" />
                 New Set
@@ -191,36 +191,36 @@ export const FlashcardsPage = () => {
             <StatCardSkeleton count={3} />
           ) : (
             <>
-              <div className="card p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-gray-800 dark:to-gray-800 border-emerald-200 dark:border-gray-700">
+              <div className="card p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500">
+                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md">
                     <Layers className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalSets}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Total Sets</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">Total Sets</p>
                   </div>
                 </div>
               </div>
-              <div className="card p-4 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 border-cyan-200 dark:border-gray-700">
+              <div className="card p-4 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/10 dark:to-blue-900/10 border-cyan-200 dark:border-cyan-800 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500">
+                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 shadow-md">
                     <CreditCard className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalCards}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Total Cards</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">Total Cards</p>
                   </div>
                 </div>
               </div>
-              <div className="card p-4 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 border-teal-200 dark:border-gray-700">
+              <div className="card p-4 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/10 dark:to-emerald-900/10 border-teal-200 dark:border-teal-800 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-500">
+                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-500 shadow-md">
                     <BookOpen className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{studiedSets}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Studied Sets</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">Studied Sets</p>
                   </div>
                 </div>
               </div>

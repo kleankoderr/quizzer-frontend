@@ -40,7 +40,7 @@ export const ProfilePage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-600 to-pink-700 dark:from-purple-800 dark:to-pink-900 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -62,21 +62,21 @@ export const ProfilePage = () => {
             </div>
             <Link
               to="/settings"
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-lg transition-colors border border-white/30"
+              className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-lg transition-colors border border-white/30"
             >
               <Settings className="w-4 h-4" />
-              Edit Profile
+              <span className="hidden sm:inline">Edit Profile</span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* Profile Card */}
-      <div className="card dark:bg-gray-800">
+      <div className="card dark:bg-gray-800 overflow-hidden">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Avatar */}
-          <div className="flex-shrink-0">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-blue-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+          <div className="flex-shrink-0 flex justify-center md:justify-start">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white text-4xl font-bold shadow-xl border-4 border-white dark:border-gray-700">
               {profile.avatar ? (
                 <img
                   src={profile.avatar}
@@ -90,54 +90,57 @@ export const ProfilePage = () => {
           </div>
 
           {/* Profile Info */}
-          <div className="flex-1 space-y-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.name}</h2>
-              <p className="text-gray-600 dark:text-gray-400">Level {profile.statistics.level} Learner</p>
+          <div className="flex-1 space-y-6">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{profile.name}</h2>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mt-2">
+                <Brain className="w-4 h-4" />
+                Level {profile.statistics.level} Learner
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{profile.email}</p>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Email</p>
+                  <p className="font-medium text-gray-900 dark:text-white truncate">{profile.email}</p>
                 </div>
               </div>
 
               {profile.schoolName && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                     <School className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">School</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{profile.schoolName}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">School</p>
+                    <p className="font-medium text-gray-900 dark:text-white truncate">{profile.schoolName}</p>
                   </div>
                 </div>
               )}
 
               {profile.grade && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                     <GraduationCap className="w-5 h-5 text-green-600 dark:text-green-400" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Grade</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{profile.grade}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Grade</p>
+                    <p className="font-medium text-gray-900 dark:text-white truncate">{profile.grade}</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
                   <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Member Since</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{formatDate(profile.createdAt)}</p>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Joined</p>
+                  <p className="font-medium text-gray-900 dark:text-white truncate">{formatDate(profile.createdAt)}</p>
                 </div>
               </div>
             </div>
@@ -147,49 +150,49 @@ export const ProfilePage = () => {
 
       {/* Statistics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <div className="card bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border-blue-200 dark:border-blue-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-500 rounded-lg">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg shadow-md">
               <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Quizzes</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Quizzes</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{profile.statistics.totalQuizzes}</p>
             </div>
           </div>
         </div>
 
-        <div className="card bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+        <div className="card bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/10 dark:to-fuchsia-900/10 border-purple-200 dark:border-purple-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-500 rounded-lg">
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-fuchsia-600 rounded-lg shadow-md">
               <Layers className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Flashcard Sets</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Flashcard Sets</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{profile.statistics.totalFlashcards}</p>
             </div>
           </div>
         </div>
 
-        <div className="card bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+        <div className="card bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 border-orange-200 dark:border-orange-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-orange-500 rounded-lg">
+            <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg shadow-md">
               <Flame className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Current Streak</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Current Streak</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{profile.statistics.currentStreak} days</p>
             </div>
           </div>
         </div>
 
-        <div className="card bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+        <div className="card bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10 border-yellow-200 dark:border-yellow-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-yellow-500 rounded-lg">
+            <div className="p-3 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg shadow-md">
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total XP</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total XP</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{profile.statistics.totalXP.toLocaleString()}</p>
             </div>
           </div>
@@ -200,22 +203,28 @@ export const ProfilePage = () => {
       <div className="card dark:bg-gray-800">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Learning Progress</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{profile.statistics.longestStreak}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Longest Streak</p>
+          <div className="text-center p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-white dark:hover:bg-gray-700 transition-all hover:shadow-md border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+            <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trophy className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{profile.statistics.longestStreak}</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Longest Streak</p>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <User className="w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">Level {profile.statistics.level}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Current Level</p>
+          <div className="text-center p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-white dark:hover:bg-gray-700 transition-all hover:shadow-md border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Level {profile.statistics.level}</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Current Level</p>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{profile.statistics.totalAttempts}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total Attempts</p>
+          <div className="text-center p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-white dark:hover:bg-gray-700 transition-all hover:shadow-md border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{profile.statistics.totalAttempts}</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Attempts</p>
           </div>
         </div>
       </div>

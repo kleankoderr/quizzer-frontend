@@ -4,11 +4,11 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { userService } from '../services';
-import { User, Lock, Settings as SettingsIcon, AlertTriangle, Save } from 'lucide-react';
+import { User, Lock, Settings as SettingsIcon, AlertTriangle, Save, Palette } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useProfile } from '../hooks';
 
-type TabType = 'account' | 'security' | 'preferences' | 'danger';
+type TabType = 'account' | 'security' | 'theme' | 'danger';
 
 export const SettingsPage = () => {
   const { user, logout } = useAuth();
@@ -148,14 +148,14 @@ export const SettingsPage = () => {
   const tabs = [
     { id: 'account' as TabType, label: 'Account', icon: User },
     { id: 'security' as TabType, label: 'Security', icon: Lock },
-    { id: 'preferences' as TabType, label: 'Preferences', icon: SettingsIcon },
+    { id: 'theme' as TabType, label: 'Theme', icon: Palette },
     { id: 'danger' as TabType, label: 'Danger Zone', icon: AlertTriangle },
   ];
 
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 dark:from-slate-800 dark:to-slate-950 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -177,7 +177,7 @@ export const SettingsPage = () => {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex gap-4 overflow-x-auto">
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -327,10 +327,10 @@ export const SettingsPage = () => {
           </div>
         )}
 
-        {/* Preferences */}
-        {activeTab === 'preferences' && (
+        {/* Theme Settings */}
+        {activeTab === 'theme' && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Preferences</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Theme Settings</h2>
             <form onSubmit={handleUpdatePreferences} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
