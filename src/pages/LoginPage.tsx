@@ -81,7 +81,7 @@ export const LoginPage = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">Quizzer</h1>
-          <p className="text-gray-600 dark:text-gray-400">AI-Powered Learning Platform</p>
+          <p className="text-gray-600 dark:text-gray-400">Smart Learning Platform</p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 space-y-6">

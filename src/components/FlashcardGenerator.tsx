@@ -157,7 +157,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               required
             />
             <p className="text-sm text-gray-500 mt-1">
-              AI will extract key concepts and create flashcards automatically
+              The system will extract key concepts and create flashcards automatically
             </p>
           </div>
         ) : (

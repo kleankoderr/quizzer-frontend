@@ -163,7 +163,7 @@ export const QuizPage = () => {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">AI-Powered Learning</span>
+            <span className="text-yellow-300 font-semibold text-sm">Smart Learning</span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>

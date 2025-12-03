@@ -430,7 +430,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                     <h4 className="font-bold text-gray-900 dark:text-white text-base" style={{ fontFamily: 'Lexend' }}>
                                       Simpler Explanation
                                     </h4>
-                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">AI Tutor</p>
+                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">Smart Tutor</p>
                                   </div>
                                 </div>
                                 <button 
@@ -465,7 +465,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                     <h4 className="font-bold text-gray-900 dark:text-white text-base" style={{ fontFamily: 'Lexend' }}>
                                       Real-World Examples
                                     </h4>
-                                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">AI Tutor</p>
+                                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Smart Tutor</p>
                                   </div>
                                 </div>
                                 <button 

@@ -187,7 +187,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
               required
             />
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              AI will analyze your content and generate relevant questions
+              The system will analyze your content and generate relevant questions
             </p>
           </div>
         )}

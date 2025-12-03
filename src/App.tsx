@@ -187,7 +187,7 @@ function AppRoutes() {
             }
           />
           <Route
-            path="admin/ai-analytics"
+            path="admin/generation-analytics"
             element={
               <AdminRoute>
                 <AiAnalytics />

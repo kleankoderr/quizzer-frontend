@@ -81,7 +81,7 @@ export const AiAnalytics = () => {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Generation Management</h1>
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('stats')}
@@ -144,7 +144,7 @@ export const AiAnalytics = () => {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{item.type}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">AI Generations</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Generations</p>
                     </div>
                   </div>
                   <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -159,10 +159,10 @@ export const AiAnalytics = () => {
         <div className="space-y-6">
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-              AI Prompt Configuration
+              Prompt Configuration
             </h2>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-              Customize the prompts used for AI generation. These prompts will be used when generating quizzes, flashcards, and study content.
+              Customize the prompts used for content generation. These prompts will be used when generating quizzes, flashcards, and study content.
             </p>
 
             <div className="space-y-6">

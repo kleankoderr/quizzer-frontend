@@ -85,7 +85,7 @@ export const StudyPage = () => {
            <ProgressToast
              t={t}
              title="Generating Content"
-             message="AI is crafting your study materials..."
+             message="Crafting your study materials..."
              progress={50}
              status="processing"
            />
@@ -211,7 +211,7 @@ export const StudyPage = () => {
           <ProgressToast
             t={t}
             title="Processing File"
-            message="Analyzing content with AI..."
+            message="Analyzing content..."
             progress={50}
             status="processing"
           />
@@ -288,7 +288,7 @@ export const StudyPage = () => {
                 Study Materials
               </h1>
               <p className="text-primary-100 dark:text-primary-200 text-base md:text-xl max-w-2xl">
-                Access your generated study content or create new materials powered by AI
+                Access your generated study content or create new materials automatically
               </p>
             </div>
             {!showCreator && (
@@ -376,9 +376,9 @@ export const StudyPage = () => {
                   <div className="flex items-start gap-3 mb-4">
                     <Zap className="w-6 h-6 text-primary-600 mt-1" />
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">AI-Powered Generation</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Smart Generation</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Enter any topic and our AI will generate comprehensive study materials including summaries, key points, and practice questions.
+                        Enter any topic and the system will generate comprehensive study materials including summaries, key points, and practice questions.
                       </p>
                     </div>
                   </div>
@@ -512,7 +512,7 @@ export const StudyPage = () => {
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Upload Documents</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Upload PDF, DOCX, or TXT files. Our AI will extract and organize the content into study materials.
+                        Upload PDF, DOCX, or TXT files. The system will extract and organize the content into study materials.
                       </p>
                     </div>
                   </div>
