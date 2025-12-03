@@ -1,17 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-const isIpAddress = (hostname: string) =>
-  /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
-
 const firebaseConfig = {
   apiKey: "AIzaSyCC2AsgmVpm_wpS-MoommA3g4cKpsTOCBY",
-  authDomain:
-    typeof window !== "undefined" &&
-    window.location.hostname !== "localhost" &&
-    !isIpAddress(window.location.hostname)
-      ? window.location.hostname
-      : "quizzer-609ff.firebaseapp.com",
+  authDomain: "quizzer-609ff.firebaseapp.com", // Always use Firebase domain
   projectId: "quizzer-609ff",
   storageBucket: "quizzer-609ff.firebasestorage.app",
   messagingSenderId: "208450280402",
