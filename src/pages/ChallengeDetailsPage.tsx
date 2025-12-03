@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Breadcrumb } from '../components/Breadcrumb';
 import { challengeService } from '../services';
 import type { Challenge } from '../types';
 import { Trophy, Clock, Target, Users, Zap, ArrowLeft, TrendingUp, CheckCircle } from 'lucide-react';
@@ -95,14 +94,6 @@ export const ChallengeDetailsPage = () => {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { label: challenge.category || challenge.type.charAt(0).toUpperCase() + challenge.type.slice(1) + ' Challenges', path: '/challenges' },
-          { label: challenge.title },
-        ]}
-      />
-
       {/* Back Button */}
       <button
         onClick={() => navigate('/challenges')}

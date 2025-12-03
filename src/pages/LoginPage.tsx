@@ -63,19 +63,15 @@ export const LoginPage = () => {
     setGoogleLoading(true);
 
     try {
-      // Check if mobile device
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const isIpAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(window.location.hostname);
-
-      // If mobile and NOT an IP address (meaning we are on a proper domain like vercel.app), use redirect
-      // We also exclude localhost to be safe, though isIpAddress handles 127.0.0.1
-      if (isMobile && !isIpAddress && window.location.hostname !== 'localhost') {
-        await authService.initiateGoogleRedirect();
-        // Redirect happens, so no need to navigate here
-        return;
+      const user = await authService.googleSignIn();
+      
+      // If user is null, it means redirect was initiated (mobile flow)
+      // The page will reload and handleGoogleRedirect will process the result
+      if (!user) {
+        return; // Don't set loading to false, page is redirecting
       }
 
-      const user = await authService.googleSignIn();
+      // Desktop popup flow - user data returned immediately
       login(user);
       analytics.trackAuthLogin('google', true);
       if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
@@ -87,11 +83,7 @@ export const LoginPage = () => {
       const errorMessage = err.response?.data?.message || 'Google sign-in failed. Please try again.';
       setError(errorMessage);
       analytics.trackAuthLogin('google', false, errorMessage);
-    } finally {
-      // Note: We don't set loading false in finally block for redirect flow because the page will unload
-      if (!(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))) {
-        setGoogleLoading(false);
-      }
+      setGoogleLoading(false);
     }
   }, [login, navigate]);
 

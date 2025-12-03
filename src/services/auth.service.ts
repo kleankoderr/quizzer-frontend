@@ -48,37 +48,54 @@ export const authService = {
     return response.data.user;
   },
 
-  // Google Sign-In (Popup)
-  googleSignIn: async (): Promise<User> => {
+  // Detect if device is mobile
+  isMobileDevice: (): boolean => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  },
+
+  // Google Sign-In - Uses popup on desktop, redirect on mobile
+  googleSignIn: async (): Promise<User | null> => {
     try {
-      // Sign in with Google using Firebase
-      const result = await signInWithPopup(auth, googleProvider);
+      const isMobile = authService.isMobileDevice();
 
-      // Get the ID token
-      const idToken = await result.user.getIdToken();
+      if (isMobile) {
+        // On mobile, initiate redirect flow
+        await signInWithRedirect(auth, googleProvider);
+        // Redirect happens, return null as we'll handle result on page load
+        return null;
+      } else {
+        // On desktop, use popup
+        const result = await signInWithPopup(auth, googleProvider);
+        const idToken = await result.user.getIdToken();
 
-      // Send the token to backend for verification
-      const response = await apiClient.post<{ user: User }>(
-        AUTH_ENDPOINTS.GOOGLE_LOGIN,
-        { idToken }
-      );
+        const response = await apiClient.post<{ user: User }>(
+          AUTH_ENDPOINTS.GOOGLE_LOGIN,
+          { idToken }
+        );
 
-      return response.data.user;
+        return response.data.user;
+      }
     } catch (error: any) {
+      // If popup was blocked, fall back to redirect
+      if (error.code === "auth/popup-blocked") {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      }
       throw error;
     }
   },
 
-  // Google Sign-In (Redirect) - Better for mobile
-  initiateGoogleRedirect: async (): Promise<void> => {
-    await signInWithRedirect(auth, googleProvider);
-  },
-
-  // Handle Redirect Result
+  // Handle Redirect Result - Call this on page load
   handleGoogleRedirect: async (): Promise<User | null> => {
     try {
       const result = await getRedirectResult(auth);
-      if (!result) return null;
+
+      // No redirect result means user didn't come from OAuth redirect
+      if (!result || !result.user) {
+        return null;
+      }
 
       const idToken = await result.user.getIdToken();
 
@@ -89,7 +106,11 @@ export const authService = {
 
       return response.data.user;
     } catch (error: any) {
-      throw error;
+      // Only throw if it's not a "no redirect result" scenario
+      if (error.code && error.code !== "auth/no-redirect-result") {
+        throw error;
+      }
+      return null;
     }
   },
 
