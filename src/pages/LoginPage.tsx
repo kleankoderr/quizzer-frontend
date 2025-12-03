@@ -13,9 +13,35 @@ export const LoginPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [checkingRedirect, setCheckingRedirect] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const checkGoogleRedirect = async () => {
+      try {
+        const user = await authService.handleGoogleRedirect();
+        if (user) {
+          login(user);
+          analytics.trackAuthLogin('google', true);
+          if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        }
+      } catch (err: any) {
+        const errorMessage = err.response?.data?.message || 'Google sign-in failed. Please try again.';
+        setError(errorMessage);
+        analytics.trackAuthLogin('google', false, errorMessage);
+      } finally {
+        setCheckingRedirect(false);
+      }
+    };
+
+    checkGoogleRedirect();
+  }, [login, navigate]);
 
   useEffect(() => {
     const state = location.state as { message?: string };
@@ -35,6 +61,15 @@ export const LoginPage = () => {
     setGoogleLoading(true);
 
     try {
+      // Check if mobile device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        await authService.initiateGoogleRedirect();
+        // Redirect happens, so no need to navigate here
+        return;
+      }
+
       const user = await authService.googleSignIn();
       login(user);
       analytics.trackAuthLogin('google', true);
@@ -47,8 +82,11 @@ export const LoginPage = () => {
       const errorMessage = err.response?.data?.message || 'Google sign-in failed. Please try again.';
       setError(errorMessage);
       analytics.trackAuthLogin('google', false, errorMessage);
-    } finally {
       setGoogleLoading(false);
+    } 
+    // Note: We don't set loading false in finally block for redirect flow because the page will unload
+    if (!(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))) {
+       setGoogleLoading(false);
     }
   }, [login, navigate]);
 
@@ -75,6 +113,17 @@ export const LoginPage = () => {
       setLoading(false);
     }
   }, [email, password, login, navigate]);
+
+  if (checkingRedirect) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">

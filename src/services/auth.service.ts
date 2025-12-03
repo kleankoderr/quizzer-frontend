@@ -1,7 +1,11 @@
 import { apiClient /*, setCsrfToken */ } from "./api";
 import { AUTH_ENDPOINTS } from "../config/api";
 import type { User } from "../types";
-import { signInWithPopup } from "firebase/auth";
+import {
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+} from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase.config";
 
 export const authService = {
@@ -44,7 +48,7 @@ export const authService = {
     return response.data.user;
   },
 
-  // Google Sign-In
+  // Google Sign-In (Popup)
   googleSignIn: async (): Promise<User> => {
     try {
       // Sign in with Google using Firebase
@@ -54,6 +58,30 @@ export const authService = {
       const idToken = await result.user.getIdToken();
 
       // Send the token to backend for verification
+      const response = await apiClient.post<{ user: User }>(
+        AUTH_ENDPOINTS.GOOGLE_LOGIN,
+        { idToken }
+      );
+
+      return response.data.user;
+    } catch (error: any) {
+      throw error;
+    }
+  },
+
+  // Google Sign-In (Redirect) - Better for mobile
+  initiateGoogleRedirect: async (): Promise<void> => {
+    await signInWithRedirect(auth, googleProvider);
+  },
+
+  // Handle Redirect Result
+  handleGoogleRedirect: async (): Promise<User | null> => {
+    try {
+      const result = await getRedirectResult(auth);
+      if (!result) return null;
+
+      const idToken = await result.user.getIdToken();
+
       const response = await apiClient.post<{ user: User }>(
         AUTH_ENDPOINTS.GOOGLE_LOGIN,
         { idToken }

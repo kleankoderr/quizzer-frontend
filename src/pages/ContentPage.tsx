@@ -138,7 +138,7 @@ export const ContentPage = () => {
   const [selectedText, setSelectedText] = useState('');
   const [toolbarPosition, setToolbarPosition] = useState<{ x: number; y: number } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [showNotes, setShowNotes] = useState(true);
+  const [showNotes, setShowNotes] = useState(window.innerWidth >= 1280);
   const [selectedColor, setSelectedColor] = useState<'yellow' | 'green' | 'pink'>('yellow');
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
@@ -328,7 +328,12 @@ export const ContentPage = () => {
         contentText: contentText,
         sourceId: content.id,
         sourceTitle: content.title,
-        contentId: content.id
+        contentId: content.id,
+        breadcrumb: [
+          { label: 'Study', path: '/study' },
+          { label: content.title, path: `/content/${content.id}` },
+          { label: 'Generate Quiz' }
+        ]
       } 
     });
   };
@@ -352,7 +357,12 @@ export const ContentPage = () => {
         contentText: contentText,
         sourceId: content.id,
         sourceTitle: content.title,
-        contentId: content.id
+        contentId: content.id,
+        breadcrumb: [
+          { label: 'Study', path: '/study' },
+          { label: content.title, path: `/content/${content.id}` },
+          { label: 'Generate Flashcards' }
+        ]
       } 
     });
   };

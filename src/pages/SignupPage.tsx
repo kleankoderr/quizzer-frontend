@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { analytics } from '../services/analytics.service';
 import { authService } from '../services/auth.service';
+import { useAuth } from '../contexts/AuthContext';
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export const SignupPage = () => {
@@ -13,6 +14,7 @@ export const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
 
 
@@ -21,10 +23,14 @@ export const SignupPage = () => {
     setGoogleLoading(true);
 
     try {
-      await authService.googleSignIn();
+      const user = await authService.googleSignIn();
+      login(user);
       analytics.trackAuthSignup('google', true);
-      // Redirect to login page after successful signup
-      navigate('/login', { state: { message: 'Account created successfully! Please sign in.' } });
+      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Google sign-up failed. Please try again.';
       setError(errorMessage);
@@ -40,10 +46,14 @@ export const SignupPage = () => {
     setLoading(true);
 
     try {
-      await authService.signup(email, password, name);
+      const user = await authService.signup(email, password, name);
+      login(user);
       analytics.trackAuthSignup('email', true);
-      // Redirect to login page after successful signup
-      navigate('/login', { state: { message: 'Account created successfully! Please sign in.' } });
+      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to create account';
       setError(errorMessage);

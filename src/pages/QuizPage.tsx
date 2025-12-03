@@ -25,6 +25,7 @@ export const QuizPage = () => {
     sourceId?: string;
     sourceTitle?: string;
     contentId?: string;
+    breadcrumb?: any[];
   } | undefined>(undefined);
   const [deleteQuizId, setDeleteQuizId] = useState<string | null>(null);
 
@@ -36,6 +37,7 @@ export const QuizPage = () => {
         sourceId?: string;
         sourceTitle?: string;
         contentId?: string;
+        breadcrumb?: any[];
       };
       
       if (topic || contentText) {
@@ -45,7 +47,8 @@ export const QuizPage = () => {
           mode: contentText ? 'content' : 'topic',
           sourceId,
           sourceTitle,
-          contentId
+          contentId,
+          breadcrumb: (location.state as any).breadcrumb
         });
         setShowGenerator(true);
       }
@@ -105,7 +108,14 @@ export const QuizPage = () => {
       // Navigate to the quiz if we have the quiz object
       if (quiz?.id) {
         setTimeout(() => {
-          navigate(`/quiz/${quiz.id}`);
+          navigate(`/quiz/${quiz.id}`, {
+            state: {
+              breadcrumb: initialValues?.breadcrumb ? [
+                ...initialValues.breadcrumb,
+                { label: quiz.title, path: `/quiz/${quiz.id}` }
+              ] : undefined
+            }
+          });
         }, 500);
       }
 

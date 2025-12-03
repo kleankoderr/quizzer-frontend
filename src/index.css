@@ -18,15 +18,16 @@
   }
 
   /* Ensure proper touch targets on mobile */
-  @media (max-width: 768px) {
+  /* Ensure proper touch targets on mobile */
+  /* @media (max-width: 768px) {
     button,
     a,
     input,
     select,
     textarea {
-      min-height: 44px; /* iOS recommended touch target */
+      min-height: 44px; 
     }
-  }
+  } */
 }
 
 @layer components {
