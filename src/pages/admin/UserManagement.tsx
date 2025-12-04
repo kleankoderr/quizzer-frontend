@@ -13,6 +13,7 @@ import { adminService, type User } from '../../services/adminService';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { Modal } from '../../components/Modal';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 export const UserManagement = () => {
   const [search, setSearch] = useState('');
@@ -48,8 +49,8 @@ export const UserManagement = () => {
   const updateStatusMutation = useMutation({
     mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
       adminService.updateUserStatus(userId, isActive),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User status updated');
       closeModal();
     },
@@ -61,8 +62,8 @@ export const UserManagement = () => {
 
   const deleteUserMutation = useMutation({
     mutationFn: adminService.deleteUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User deleted');
       closeModal();
     },
@@ -99,19 +100,19 @@ export const UserManagement = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
         
-        <div className="flex gap-2">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white sm:w-64"
             />
           </div>
           <select
@@ -143,10 +144,8 @@ export const UserManagement = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center">
-                    <div className="flex justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"></div>
-                    </div>
+                  <td colSpan={6} className="p-0">
+                    <TableSkeleton rows={10} columns={6} />
                   </td>
                 </tr>
               ) : data?.data.length === 0 ? (
@@ -245,8 +244,8 @@ export const UserManagement = () => {
         
         {/* Pagination */}
         {data?.meta && (
-          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
               Showing <span className="font-medium">{(page - 1) * 10 + 1}</span> to{' '}
               <span className="font-medium">{Math.min(page * 10, data.meta.total)}</span> of{' '}
               <span className="font-medium">{data.meta.total}</span> results
@@ -279,15 +278,24 @@ export const UserManagement = () => {
           <div className="flex justify-end gap-3">
             <button
               onClick={closeModal}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              disabled={updateStatusMutation.isPending || deleteUserMutation.isPending}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               onClick={modalConfig.onConfirm}
-              className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${modalConfig.confirmColor || 'bg-primary-600 hover:bg-primary-700'}`}
+              disabled={updateStatusMutation.isPending || deleteUserMutation.isPending}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50 ${modalConfig.confirmColor || 'bg-primary-600 hover:bg-primary-700'}`}
             >
-              {modalConfig.confirmText || 'Confirm'}
+              {(updateStatusMutation.isPending || deleteUserMutation.isPending) ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  Processing...
+                </>
+              ) : (
+                modalConfig.confirmText || 'Confirm'
+              )}
             </button>
           </div>
         }

@@ -117,7 +117,7 @@ export const StudyPage = () => {
       const { taskId } = await contentService.generateFromTopic(topic);
       setTaskId(taskId);
       // Navigation happens after polling completes
-    } catch (error) {
+    } catch (_error) {
 
       if (toastIdRef.current) {
          toast.custom((t) => (
@@ -169,7 +169,7 @@ export const StudyPage = () => {
       ), { id: toastId });
 
       navigate(`/content/${content.id}`);
-    } catch (error) {
+    } catch (_error) {
 
       toast.custom((t) => (
         <ProgressToast
@@ -257,7 +257,7 @@ export const StudyPage = () => {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
       // React Query will automatically refetch the contents list
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
@@ -266,11 +266,11 @@ export const StudyPage = () => {
   }, [deleteContentId]);
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8 px-4 sm:px-0">
 
 
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-700 to-blue-700 dark:from-primary-800 dark:via-primary-900 dark:to-blue-900 p-6 md:p-10 shadow-xl">
+      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-700 to-blue-700 dark:from-primary-800 dark:via-primary-900 dark:to-blue-900 p-4 sm:p-6 md:p-10 shadow-xl">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-20 -right-20 w-40 h-40 md:w-64 md:h-64 bg-white rounded-full blur-3xl"></div>
           <div className="absolute -bottom-20 -left-20 w-40 h-40 md:w-64 md:h-64 bg-white rounded-full blur-3xl"></div>
@@ -631,21 +631,21 @@ export const StudyPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center mt-8 gap-2">
+              <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-2">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Previous
                 </button>
-                <span className="px-4 py-2 font-medium text-gray-600 dark:text-gray-300 flex items-center">
+                <span className="px-4 py-2 font-medium text-gray-600 dark:text-gray-300 flex items-center text-center">
                   Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Next
                 </button>

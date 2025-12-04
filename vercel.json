@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/__/firebase/(.*)",
+      "destination": "https://quizzer-609ff.firebaseapp.com/__/firebase/$1"
+    },
+    {
       "source": "/__/auth/(.*)",
       "destination": "https://quizzer-609ff.firebaseapp.com/__/auth/$1"
     },

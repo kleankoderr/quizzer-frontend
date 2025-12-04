@@ -109,7 +109,7 @@ export const FlashcardStudyPage = () => {
       await flashcardService.recordSession(id, responses);
       setShowResults(true);
       toast.success('Session completed! 🎉');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to save session');
     } finally {
       setSubmitting(false);

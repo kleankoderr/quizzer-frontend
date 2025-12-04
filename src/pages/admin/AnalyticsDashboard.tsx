@@ -21,6 +21,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -32,8 +34,25 @@ export const AnalyticsDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"></div>
+      <div className="space-y-6 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Analytics Dashboard
+          </h1>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Last 30 days
+          </div>
+        </div>
+
+        {/* Stat Cards Skeleton */}
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCardSkeleton count={4} />
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <CardSkeleton count={4} />
+        </div>
       </div>
     );
   }
@@ -49,8 +68,8 @@ export const AnalyticsDashboard = () => {
   })) || [];
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Analytics Dashboard
         </h1>

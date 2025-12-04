@@ -215,8 +215,7 @@ export const QuizTakePage = () => {
             // More quizzes to complete, show results first then user can continue
             setShowResults(true);
           }
-        } catch (error) {
-          console.error('Failed to update challenge progress:', error);
+        } catch (_error) {
           // Still show results even if challenge update fails
           setShowResults(true);
         }
@@ -228,7 +227,7 @@ export const QuizTakePage = () => {
       // Calculate duration if possible, otherwise 0
       const duration = quiz.timeLimit && timeRemaining !== null ? quiz.timeLimit - timeRemaining : 0;
       analytics.trackQuizAttemptCompleted(id, submissionResult.score, submissionResult.totalQuestions, duration);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to submit quiz. Please try again.');
     } finally {
       setSubmitting(false);
@@ -344,7 +343,7 @@ export const QuizTakePage = () => {
                     if (nextQuiz) {
                       navigate(`/quiz/${nextQuiz.quizId}?challengeId=${challengeId}`);
                     }
-                  } catch (error) {
+                  } catch (_error) {
                     toast.error('Failed to load next quiz');
                   }
                 }}
@@ -486,7 +485,13 @@ export const QuizTakePage = () => {
       </div>
 
       {/* Question */}
-      <div className="card dark:bg-gray-800 border border-primary-200 dark:border-primary-700 shadow-lg p-4 sm:p-6">
+      <div 
+        className="card dark:bg-gray-800 border border-primary-200 dark:border-primary-700 shadow-lg p-4 sm:p-6 select-none"
+        onCopy={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <QuestionRenderer
           question={currentQuestion}
           questionIndex={currentQuestionIndex}

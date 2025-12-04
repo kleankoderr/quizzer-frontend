@@ -14,6 +14,7 @@ import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { Modal } from '../../components/Modal';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 type ContentType = 'quizzes' | 'flashcards' | 'contents' | 'challenges';
 
@@ -54,8 +55,8 @@ export const ContentManagement = () => {
 
   const deleteQuizMutation = useMutation({
     mutationFn: adminService.deleteQuiz,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['adminContent'] });
       toast.success('Quiz deleted successfully');
       closeModal();
     },
@@ -67,8 +68,8 @@ export const ContentManagement = () => {
 
   const deleteFlashcardMutation = useMutation({
     mutationFn: adminService.deleteFlashcard,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['adminContent'] });
       toast.success('Flashcard set deleted successfully');
       closeModal();
     },
@@ -80,8 +81,8 @@ export const ContentManagement = () => {
 
   const deleteContentMutation = useMutation({
     mutationFn: adminService.deleteContent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['adminContent'] });
       toast.success('Content deleted successfully');
       closeModal();
     },
@@ -93,8 +94,8 @@ export const ContentManagement = () => {
 
   const deleteChallengeMutation = useMutation({
     mutationFn: adminService.deleteChallenge,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminContent'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['adminContent'] });
       toast.success('Challenge deleted successfully');
       closeModal();
     },
@@ -139,11 +140,11 @@ export const ContentManagement = () => {
   ];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Content Management</h1>
         
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -156,8 +157,8 @@ export const ContentManagement = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
+      <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max px-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -197,10 +198,8 @@ export const ContentManagement = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center">
-                    <div className="flex justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"></div>
-                    </div>
+                  <td colSpan={6} className="p-0">
+                    <TableSkeleton rows={10} columns={6} />
                   </td>
                 </tr>
               ) : data?.data?.length === 0 ? (
@@ -253,8 +252,8 @@ export const ContentManagement = () => {
         
         {/* Pagination */}
         {data?.meta && (
-          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
               Showing <span className="font-medium">{(page - 1) * 10 + 1}</span> to{' '}
               <span className="font-medium">{Math.min(page * 10, data.meta.total)}</span> of{' '}
               <span className="font-medium">{data.meta.total}</span> results

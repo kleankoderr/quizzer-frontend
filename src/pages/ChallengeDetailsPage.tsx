@@ -25,7 +25,7 @@ export const ChallengeDetailsPage = () => {
       setLoading(true);
       const data = await challengeService.getChallengeById(id!);
       setChallenge(data);
-    } catch (error: any) {
+    } catch (_error) {
 
       toast.error('Failed to load challenge details');
       navigate('/challenges');
@@ -38,7 +38,7 @@ export const ChallengeDetailsPage = () => {
     try {
       const data = await challengeService.getChallengeLeaderboard(id!);
       setLeaderboard(data);
-    } catch (error) {
+    } catch (_error) {
 
     }
   };
@@ -65,9 +65,9 @@ export const ChallengeDetailsPage = () => {
       } else {
         toast.error('Unable to start challenge. No quiz found.');
       }
-    } catch (error: any) {
+    } catch (_error) {
 
-      toast.error(error?.response?.data?.message || 'Failed to start challenge');
+      toast.error('Failed to start challenge');
     } finally {
       setStarting(false);
     }

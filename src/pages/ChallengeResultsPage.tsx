@@ -38,7 +38,7 @@ export const ChallengeResultsPage = () => {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
       }
-    } catch (error: any) {
+    } catch (_error) {
 
       toast.error('Failed to load results');
       navigate('/challenges');

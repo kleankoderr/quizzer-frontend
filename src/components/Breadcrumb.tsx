@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 
 export interface BreadcrumbItem {
@@ -11,13 +11,19 @@ interface BreadcrumbProps {
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+  const location = useLocation();
+  
+  // Determine if we're on an admin route
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const homePath = isAdminRoute ? '/admin' : '/dashboard';
+  
   return (
     <nav className="flex items-center space-x-1 sm:space-x-2 text-sm mb-6 w-full overflow-hidden" aria-label="Breadcrumb">
       
       {/* Home */}
       <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-shrink">
         <Link
-          to="/dashboard"
+          to={homePath}
           className="flex items-center text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors"
           aria-label="Home"
         >

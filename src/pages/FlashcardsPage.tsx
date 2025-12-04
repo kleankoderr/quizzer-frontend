@@ -105,7 +105,7 @@ export const FlashcardsPage = () => {
         }, 500);
       }
 
-    } catch (error) {
+    } catch (_error) {
       // Error toast
       toast.custom((t) => (
         <ProgressToast
@@ -136,7 +136,7 @@ export const FlashcardsPage = () => {
       await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
       
       toast.success('Flashcard set deleted successfully!', { id: loadingToast });
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete flashcard set. Please try again.', { id: loadingToast });
     } finally {
       setDeleteSetId(null);

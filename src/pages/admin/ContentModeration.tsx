@@ -18,8 +18,8 @@ export const ContentModeration = () => {
   const moderateMutation = useMutation({
     mutationFn: ({ id, action, reason }: { id: string; action: 'DELETE' | 'HIDE' | 'IGNORE'; reason?: string }) =>
       adminService.moderateContent(id, action, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reportedContent'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['reportedContent'] });
       toast.success('Content moderated successfully');
       setModalOpen(false);
       setSelectedReport(null);

@@ -19,8 +19,11 @@ import {
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { Modal } from '../../components/Modal';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
+import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 type ContentType = 'all' | 'quiz' | 'flashcard' | 'content';
 
@@ -70,9 +73,9 @@ export default function UserDetailsPage() {
 
   const deleteQuizMutation = useMutation({
     mutationFn: adminService.deleteQuiz,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userContent'] });
-      queryClient.invalidateQueries({ queryKey: ['userDetails'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['userContent'] });
+      await queryClient.invalidateQueries({ queryKey: ['userDetails'] });
       toast.success('Quiz deleted successfully');
       closeModal();
     },
@@ -84,9 +87,9 @@ export default function UserDetailsPage() {
 
   const deleteFlashcardMutation = useMutation({
     mutationFn: adminService.deleteFlashcard,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userContent'] });
-      queryClient.invalidateQueries({ queryKey: ['userDetails'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['userContent'] });
+      await queryClient.invalidateQueries({ queryKey: ['userDetails'] });
       toast.success('Flashcard set deleted successfully');
       closeModal();
     },
@@ -98,9 +101,9 @@ export default function UserDetailsPage() {
 
   const deleteContentMutation = useMutation({
     mutationFn: adminService.deleteContent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userContent'] });
-      queryClient.invalidateQueries({ queryKey: ['userDetails'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['userContent'] });
+      await queryClient.invalidateQueries({ queryKey: ['userDetails'] });
       toast.success('Content deleted successfully');
       closeModal();
     },
@@ -155,8 +158,21 @@ export default function UserDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"></div>
+      <div className="space-y-6 p-4 sm:p-6">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/admin/users')}
+            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Details</h1>
+        </div>
+        <CardSkeleton count={1} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCardSkeleton count={4} />
+        </div>
+        <CardSkeleton count={1} />
       </div>
     );
   }
@@ -172,9 +188,9 @@ export default function UserDetailsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       {/* Header with Delete Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/users')}
@@ -188,7 +204,7 @@ export default function UserDetailsPage() {
           <button
             onClick={handleDeleteUser}
             disabled={deleteUserMutation.isPending}
-            className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {deleteUserMutation.isPending ? (
               <>
@@ -382,10 +398,8 @@ export default function UserDetailsPage() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {contentLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center">
-                    <div className="flex justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"></div>
-                    </div>
+                  <td colSpan={6} className="p-0">
+                    <TableSkeleton rows={10} columns={6} />
                   </td>
                 </tr>
               ) : userContent?.data?.length === 0 ? (
@@ -432,8 +446,8 @@ export default function UserDetailsPage() {
 
         {/* Pagination */}
         {userContent?.meta && userContent.meta.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
               Showing <span className="font-medium">{(page - 1) * 10 + 1}</span> to{' '}
               <span className="font-medium">{Math.min(page * 10, userContent.meta.total)}</span> of{' '}
               <span className="font-medium">{userContent.meta.total}</span> results

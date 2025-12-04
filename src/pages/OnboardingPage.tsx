@@ -25,7 +25,7 @@ export const OnboardingPage = () => {
         schoolName: schoolName.trim(),
       });
       navigate('/dashboard');
-    } catch (error) {
+    } catch (_error) {
 
       // Still navigate to dashboard even if update fails
       navigate('/dashboard');

@@ -119,7 +119,7 @@ export const QuizPage = () => {
         }, 500);
       }
 
-    } catch (error) {
+    } catch (_error) {
       // Error toast
       toast.custom((t) => (
         <ProgressToast
@@ -148,7 +148,7 @@ export const QuizPage = () => {
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
       
       toast.success('Quiz deleted successfully!', { id: loadingToast });
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete quiz. Please try again.', { id: loadingToast });
     } finally {
       setDeleteQuizId(null);

@@ -243,7 +243,7 @@ export const ContentPage = () => {
       });
       toast.success('Text highlighted');
       refetch(); // Refresh to show new highlight
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to save highlight');
     } finally {
@@ -282,7 +282,7 @@ export const ContentPage = () => {
       });
       toast.success('Note added');
       refetch();
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to add note');
     } finally {
@@ -301,7 +301,7 @@ export const ContentPage = () => {
       await contentService.deleteHighlight(deleteHighlightId);
       toast.success('Highlight removed');
       refetch();
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to delete highlight');
     } finally {
@@ -399,7 +399,7 @@ export const ContentPage = () => {
       refetch();
       // Invalidate contents list to reflect changes
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to save changes', { id: loadingToast });
     } finally {
@@ -421,7 +421,7 @@ export const ContentPage = () => {
       // Invalidate contents list to remove deleted item
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
       navigate('/study');
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
@@ -807,7 +807,7 @@ export const ContentPage = () => {
                       learningGuide: updatedGuide,
                       lastReadPosition: newProgress
                     });
-                  } catch (error) {
+                  } catch (_error) {
 
                     // Revert
                     queryClient.setQueryData(['content', id], previousContent);
@@ -824,7 +824,7 @@ export const ContentPage = () => {
                     await contentService.update(content.id, {
                       lastReadPosition: progress
                     });
-                  } catch (error) {
+                  } catch (_error) {
 
                   }
                 }}

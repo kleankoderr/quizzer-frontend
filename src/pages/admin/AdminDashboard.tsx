@@ -15,6 +15,8 @@ import {
 import { adminService } from '../../services/adminService';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
@@ -67,8 +69,39 @@ export const AdminDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"></div>
+      <div className="space-y-6 p-4 sm:p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+        </div>
+
+        {/* Stat Cards Skeleton */}
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCardSkeleton count={4} />
+        </div>
+
+        {/* Quick Actions and Content Overview Skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <CardSkeleton count={2} />
+          
+          {/* Challenge Generation Skeleton */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div className="mb-4">
+              <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+            <div className="mb-4">
+              <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                  <div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -105,8 +138,8 @@ export const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Last updated: {new Date().toLocaleTimeString()}
@@ -144,7 +177,7 @@ export const AdminDashboard = () => {
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
             Quick Actions
           </h2>
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             <Link
               to="/admin/users"
               className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"

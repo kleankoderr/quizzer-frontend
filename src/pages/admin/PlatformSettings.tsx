@@ -3,6 +3,7 @@ import { Save } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
 
 export const PlatformSettings = () => {
   const queryClient = useQueryClient();
@@ -29,8 +30,8 @@ export const PlatformSettings = () => {
 
   const updateMutation = useMutation({
     mutationFn: adminService.updateSettings,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
       toast.success('Settings updated successfully');
     },
     onError: () => {
@@ -45,14 +46,17 @@ export const PlatformSettings = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"></div>
+      <div className="space-y-6 p-4 sm:p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h1>
+        </div>
+        <CardSkeleton count={1} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h1>
       </div>

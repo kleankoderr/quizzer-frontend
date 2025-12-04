@@ -33,8 +33,8 @@ export const AiAnalytics = () => {
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => adminService.updateSettings(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
       toast.success('AI prompts updated successfully');
     },
     onError: () => {

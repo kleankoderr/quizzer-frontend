@@ -21,14 +21,23 @@ export const SignupPage = () => {
     const checkGoogleRedirect = async () => {
       try {
         const user = await authService.handleGoogleRedirect();
+        
         if (user) {
+          
+          // Update auth context
           login(user);
+          
+          // Track analytics
           analytics.trackAuthSignup('google', true);
-          if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-            navigate('/admin');
-          } else {
-            navigate('/dashboard');
-          }
+          
+          // Small delay to ensure state is updated
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Navigate based on role
+          const destination = (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? '/admin' : '/dashboard';
+          navigate(destination, { replace: true });
+        } else {
+          // No redirect result
         }
       } catch (err: any) {
         const errorMessage = err.response?.data?.message || 'Google sign-up failed. Please try again.';

@@ -8,17 +8,10 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase.config";
 
-export const authService = {
-  // Fetch CSRF token
-  // fetchCsrfToken: async (): Promise<void> => {
-  //   try {
-  //     const response = await apiClient.get<{ csrfToken: string }>(
-  //       "/auth/csrf-token"
-  //     );
-  //     setCsrfToken(response.data.csrfToken);
-  //   } catch (error) {}
-  // },
+// Cache for redirect result to prevent multiple calls
+let redirectResultPromise: Promise<User | null> | null = null;
 
+export const authService = {
   // Email/password login
   login: async (email: string, password: string): Promise<User> => {
     const response = await apiClient.post<{ user: User }>(
@@ -28,7 +21,12 @@ export const authService = {
         password,
       }
     );
-    return response.data.user;
+
+    // Save user data to localStorage for persistence
+    const userData = response.data.user;
+    authService.saveAuthData(userData);
+
+    return userData;
   },
 
   // Email/password signup
@@ -45,7 +43,12 @@ export const authService = {
         name,
       }
     );
-    return response.data.user;
+
+    // Save user data to localStorage for persistence
+    const userData = response.data.user;
+    authService.saveAuthData(userData);
+
+    return userData;
   },
 
   // Detect if device is mobile
@@ -75,7 +78,11 @@ export const authService = {
           { idToken }
         );
 
-        return response.data.user;
+        // Save user data to localStorage for persistence
+        const userData = response.data.user;
+        authService.saveAuthData(userData);
+
+        return userData;
       }
     } catch (error: any) {
       // If popup was blocked, fall back to redirect
@@ -88,30 +95,44 @@ export const authService = {
   },
 
   // Handle Redirect Result - Call this on page load
+  // Uses a singleton pattern to ensure it's only called once
   handleGoogleRedirect: async (): Promise<User | null> => {
-    try {
-      const result = await getRedirectResult(auth);
+    // If we already have a promise in flight, return it
+    if (redirectResultPromise) {
+      return redirectResultPromise;
+    }
 
-      // No redirect result means user didn't come from OAuth redirect
-      if (!result || !result.user) {
+    // Create and cache the promise
+    redirectResultPromise = (async () => {
+      try {
+        const result = await getRedirectResult(auth);
+
+        // No redirect result means user didn't come from OAuth redirect
+        if (!result || !result.user) {
+          return null;
+        }
+
+        const idToken = await result.user.getIdToken();
+
+        const response = await apiClient.post<{ user: User }>(
+          AUTH_ENDPOINTS.GOOGLE_LOGIN,
+          { idToken }
+        );
+
+        // Save user data to localStorage for persistence
+        const userData = response.data.user;
+        authService.saveAuthData(userData);
+        return userData;
+      } catch (error: any) {
+        // Only throw if it's not a "no redirect result" scenario
+        if (error.code && error.code !== "auth/no-redirect-result") {
+          throw error;
+        }
         return null;
       }
+    })();
 
-      const idToken = await result.user.getIdToken();
-
-      const response = await apiClient.post<{ user: User }>(
-        AUTH_ENDPOINTS.GOOGLE_LOGIN,
-        { idToken }
-      );
-
-      return response.data.user;
-    } catch (error: any) {
-      // Only throw if it's not a "no redirect result" scenario
-      if (error.code && error.code !== "auth/no-redirect-result") {
-        throw error;
-      }
-      return null;
-    }
+    return redirectResultPromise;
   },
 
   // Get current user
@@ -124,6 +145,8 @@ export const authService = {
   logout: async (): Promise<void> => {
     await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
     localStorage.removeItem("user");
+    // Clear the redirect result cache on logout
+    redirectResultPromise = null;
   },
 
   // Save auth data (only user info now)

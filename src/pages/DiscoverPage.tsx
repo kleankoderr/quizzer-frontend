@@ -27,7 +27,7 @@ export const DiscoverPage = () => {
       // TODO: Integrate with content service
       toast.success('Content generated successfully!');
       // navigate to content page
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to generate content');
     } finally {
       setLoading(false);
@@ -47,7 +47,7 @@ export const DiscoverPage = () => {
       setTextTitle('');
       setTextContent('');
       setTextTopic('');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to create content');
     } finally {
       setLoading(false);
@@ -65,7 +65,7 @@ export const DiscoverPage = () => {
       // TODO: Integrate with content service
       toast.success('File uploaded successfully!');
       setFile(null);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to upload file');
     } finally {
       setLoading(false);

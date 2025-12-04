@@ -62,7 +62,7 @@ export const SettingsPage = () => {
       });
       toast.success('Profile updated successfully!');
       refetch();
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to update profile');
     } finally {
@@ -79,7 +79,7 @@ export const SettingsPage = () => {
         preferences,
       });
       toast.success('Preferences updated successfully!');
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to update preferences');
     } finally {
@@ -136,7 +136,7 @@ export const SettingsPage = () => {
       toast.success('Account deleted successfully');
       logout();
       navigate('/login');
-    } catch (error) {
+    } catch (_error) {
 
       toast.error('Failed to delete account');
       setLoading(false);

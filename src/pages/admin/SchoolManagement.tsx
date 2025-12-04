@@ -18,26 +18,27 @@ export const SchoolManagement = () => {
 
   const createMutation = useMutation({
     mutationFn: adminService.createSchool,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schools'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['schools'] });
       toast.success('School created successfully');
       closeModal();
     },
-    onError: () => {
-      toast.error('Failed to create school');
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to create school');
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       adminService.updateSchool(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schools'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['schools'] });
       toast.success('School updated successfully');
-      closeModal();
+      setEditingSchool(null);
+      closeModal(); // Keep closeModal to reset form and modal state
     },
-    onError: () => {
-      toast.error('Failed to update school');
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update school');
     },
   });
 
@@ -80,12 +81,12 @@ export const SchoolManagement = () => {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">School Management</h1>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
         >
           <Plus className="h-4 w-4" />
           Add School

@@ -37,7 +37,7 @@ export const settingsService = {
           }, 0);
           return data;
         }
-      } catch (error) {
+      } catch (_error) {
         // Invalid cache, continue to fetch
       }
     }

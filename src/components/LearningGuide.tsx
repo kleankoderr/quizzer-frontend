@@ -154,11 +154,11 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           await contentService.update(contentId, {
             learningGuide: updatedGuide
           });
-        } catch (err) {
+        } catch (_err) {
 
         }
       }
-    } catch (error) {
+    } catch (_error) {
 
     } finally {
       setLoadingAction(null);

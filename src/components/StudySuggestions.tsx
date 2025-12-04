@@ -23,7 +23,7 @@ export const StudySuggestions: React.FC<StudySuggestionsProps> = ({ suggestions 
       await contentService.generateFromTopic(suggestion.topic);
       // Navigate to tasks or wait for completion (simplified for now)
       navigate('/dashboard'); // Ideally navigate to a "generating" view or the quiz itself
-    } catch (error) {
+    } catch (_error) {
 
     }
   };

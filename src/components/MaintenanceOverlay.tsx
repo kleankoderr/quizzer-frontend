@@ -20,7 +20,7 @@ export const MaintenanceBanner = () => {
             setIsVisible(true);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently fail
       }
     };

@@ -30,7 +30,7 @@ export const ChallengeLeaderboardModal: React.FC<ChallengeLeaderboardModalProps>
       setLoading(true);
       const data = await challengeService.getChallengeLeaderboard(challengeId);
       setLeaderboard(data);
-    } catch (error) {
+    } catch (_error) {
 
     } finally {
       setLoading(false);
