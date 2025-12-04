@@ -81,29 +81,40 @@ export const QuizList: React.FC<QuizListProps> = ({ quizzes, onDelete }) => {
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{quiz.topic}</p>
               
-              {/* Stats */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                    <FileText className="w-4 h-4" />
-                    {quiz.questions.length} questions
-                  </span>
-                  <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md text-xs font-medium">
-                    {quiz.difficulty || 'Medium'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {new Date(quiz.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                  {latestAttempt && (
-                    <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
-                      Score: {latestAttempt.score}%
+                {/* Tags */}
+                {quiz.tags && quiz.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {quiz.tags.map(tag => (
+                      <span key={tag} className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-[10px] font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                      <FileText className="w-4 h-4" />
+                      {quiz.questions.length} questions
                     </span>
-                  )}
+                    <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md text-xs font-medium">
+                      {quiz.difficulty || 'Medium'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(quiz.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    {latestAttempt && (
+                      <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+                        Score: {latestAttempt.score}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
               
               {/* Action hint */}
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">

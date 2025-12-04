@@ -12,6 +12,8 @@ import { coachingService } from '../services/coaching.service';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, startOfDay } from 'date-fns';
 
+
+
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();

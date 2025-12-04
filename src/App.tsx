@@ -8,6 +8,7 @@ import { analytics } from './services/analytics.service';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { MaintenanceBanner } from './components/MaintenanceOverlay';
+import { AssessmentPopup } from './components/AssessmentPopup';
 
 // Lazy load all page components for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -45,11 +46,11 @@ const UserDetailsPage = lazy(() => import('./pages/admin/UserDetailsPage'));
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
 
+import { LoadingScreen } from './components/LoadingScreen';
+
 // Loading component for Suspense fallback
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-  </div>
+  <LoadingScreen message="Loading Quizzer" subMessage="Preparing your learning environment..." />
 );
 
 
@@ -94,6 +95,7 @@ function AppRoutes() {
 
   return (
     <Suspense fallback={<PageLoader />}>
+      {user && <AssessmentPopup />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -102,7 +104,7 @@ function AppRoutes() {
         <Route 
           path="/onboarding" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireOnboarding={false}>
               <OnboardingPage />
             </ProtectedRoute>
           } 
@@ -116,7 +118,13 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? "/admin" : "/dashboard"} replace />} />
+          <Route index element={
+            user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' 
+              ? <Navigate to="/admin" replace /> 
+              : !user?.onboardingCompleted 
+                ? <Navigate to="/onboarding" replace />
+                : <Navigate to="/dashboard" replace />
+          } />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="study" element={<StudyPage />} />
           <Route path="discover" element={<DiscoverPage />} />
@@ -212,7 +220,13 @@ function AppRoutes() {
           />
         </Route>
 
-        <Route path="*" element={<Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? "/admin" : "/dashboard"} replace />} />
+        <Route path="*" element={
+          user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' 
+            ? <Navigate to="/admin" replace /> 
+            : !user?.onboardingCompleted 
+              ? <Navigate to="/onboarding" replace />
+              : <Navigate to="/dashboard" replace />
+        } />
       </Routes>
     </Suspense>
   );

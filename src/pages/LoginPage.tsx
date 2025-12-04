@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { analytics } from '../services/analytics.service';
 import { authService } from '../services/auth.service';
 import { Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import type { User } from '../types';
+import { LoadingScreen } from '../components/LoadingScreen';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -18,7 +20,21 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-
+  const handleLoginSuccess = useCallback(async (user: User, method: 'email' | 'google') => {
+    login(user);
+    analytics.trackAuthLogin(method, true);
+    
+    // Small delay to ensure state is updated and user sees the success state
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      navigate('/admin', { replace: true });
+    } else if (!user.onboardingCompleted) {
+      navigate('/onboarding', { replace: true });
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [login, navigate]);
 
   useEffect(() => {
     const checkGoogleRedirect = async () => {
@@ -26,19 +42,7 @@ export const LoginPage = () => {
         const user = await authService.handleGoogleRedirect();
         
         if (user) {
-          
-          // Update auth context
-          login(user);
-          
-          // Track analytics
-          analytics.trackAuthLogin('google', true);
-          
-          // Small delay to ensure state is updated
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          // Navigate based on role
-          const destination = (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? '/admin' : '/dashboard';
-          navigate(destination, { replace: true });
+          await handleLoginSuccess(user, 'google');
         }
       } catch (err: any) {
         const errorMessage = err.response?.data?.message || 'Google sign-in failed. Please try again.';
@@ -50,7 +54,7 @@ export const LoginPage = () => {
     };
 
     checkGoogleRedirect();
-  }, [login, navigate]);
+  }, [handleLoginSuccess]);
 
   useEffect(() => {
     const state = location.state as { message?: string };
@@ -79,20 +83,14 @@ export const LoginPage = () => {
       }
 
       // Desktop popup flow - user data returned immediately
-      login(user);
-      analytics.trackAuthLogin('google', true);
-      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      await handleLoginSuccess(user, 'google');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Google sign-in failed. Please try again.';
       setError(errorMessage);
       analytics.trackAuthLogin('google', false, errorMessage);
       setGoogleLoading(false);
     }
-  }, [login, navigate]);
+  }, [handleLoginSuccess]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,30 +100,25 @@ export const LoginPage = () => {
 
     try {
       const user = await authService.login(email, password);
-      login(user);
-      analytics.trackAuthLogin('email', true);
-      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      await handleLoginSuccess(user, 'email');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Authentication failed. Please try again.';
       setError(errorMessage);
       analytics.trackAuthLogin('email', false, errorMessage);
-    } finally {
       setLoading(false);
     }
-  }, [email, password, login, navigate]);
+  }, [email, password, handleLoginSuccess]);
+
+// ... imports ...
+
+// ... inside component ...
 
   if (checkingRedirect) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Verifying authentication...</p>
-        </div>
-      </div>
+      <LoadingScreen 
+        message="Welcome Back!" 
+        subMessage="We're getting your learning space ready..." 
+      />
     );
   }
 

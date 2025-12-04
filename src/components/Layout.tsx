@@ -5,6 +5,8 @@ import { Sidebar } from './Sidebar';
 import { Breadcrumb } from './Breadcrumb';
 import { useBreadcrumbs } from '../hooks/useBreadcrumbs';
 
+
+
 export const Layout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);

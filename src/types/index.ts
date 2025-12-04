@@ -8,6 +8,7 @@ export interface User {
   schoolName?: string;
   grade?: string;
   preferences?: Record<string, any>;
+  onboardingCompleted?: boolean;
   createdAt: string;
 }
 
@@ -80,6 +81,7 @@ export interface Quiz {
   timeLimit?: number;
   questions: QuizQuestion[];
   userId: string;
+  tags?: string[];
   createdAt: string;
   attempts?: {
     score: number;

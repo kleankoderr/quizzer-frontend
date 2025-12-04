@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { analytics } from '../services/analytics.service';
 import { authService } from '../services/auth.service';
 import { useAuth } from '../contexts/AuthContext';
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import type { User as UserType } from '../types';
+import { LoadingScreen } from '../components/LoadingScreen';
 
 export const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -17,27 +19,29 @@ export const SignupPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const handleSignupSuccess = useCallback(async (user: UserType, method: 'email' | 'google') => {
+    login(user);
+    analytics.trackAuthSignup(method, true);
+    
+    // Small delay to ensure state is updated
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      navigate('/admin', { replace: true });
+    } else if (!user.onboardingCompleted) {
+      navigate('/onboarding', { replace: true });
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [login, navigate]);
+
   useEffect(() => {
     const checkGoogleRedirect = async () => {
       try {
         const user = await authService.handleGoogleRedirect();
         
         if (user) {
-          
-          // Update auth context
-          login(user);
-          
-          // Track analytics
-          analytics.trackAuthSignup('google', true);
-          
-          // Small delay to ensure state is updated
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          // Navigate based on role
-          const destination = (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? '/admin' : '/dashboard';
-          navigate(destination, { replace: true });
-        } else {
-          // No redirect result
+          await handleSignupSuccess(user, 'google');
         }
       } catch (err: any) {
         const errorMessage = err.response?.data?.message || 'Google sign-up failed. Please try again.';
@@ -49,7 +53,7 @@ export const SignupPage = () => {
     };
 
     checkGoogleRedirect();
-  }, [login, navigate]);
+  }, [handleSignupSuccess]);
 
   const handleGoogleSignUp = async () => {
     setError('');
@@ -64,13 +68,7 @@ export const SignupPage = () => {
       }
 
       // Desktop popup flow - user data returned immediately
-      login(user);
-      analytics.trackAuthSignup('google', true);
-      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      await handleSignupSuccess(user, 'google');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Google sign-up failed. Please try again.';
       setError(errorMessage);
@@ -86,13 +84,7 @@ export const SignupPage = () => {
 
     try {
       const user = await authService.signup(email, password, name);
-      login(user);
-      analytics.trackAuthSignup('email', true);
-      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      await handleSignupSuccess(user, 'email');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to create account';
       setError(errorMessage);
@@ -102,14 +94,16 @@ export const SignupPage = () => {
     }
   };
 
+// ... imports ...
+
+// ... inside component ...
+
   if (checkingRedirect) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Verifying authentication...</p>
-        </div>
-      </div>
+      <LoadingScreen 
+        message="Creating Account..." 
+        subMessage="Setting up your personalized learning journey" 
+      />
     );
   }
 
@@ -183,8 +177,6 @@ export const SignupPage = () => {
                 />
               </div>
             </div>
-
-
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>

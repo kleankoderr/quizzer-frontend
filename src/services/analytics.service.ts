@@ -1,8 +1,10 @@
-import mixpanel, { type Dict } from "mixpanel-browser";
+// import mixpanel, { type Dict } from "mixpanel-browser";
+
+// Define a type for the properties to avoid import errors
+type Dict = Record<string, any>;
 
 class AnalyticsService {
   private static instance: AnalyticsService;
-  private isInitialized = false;
 
   private constructor() {}
 
@@ -14,114 +16,84 @@ class AnalyticsService {
   }
 
   public init(): void {
-    if (this.isInitialized) return;
-
-    const token = import.meta.env.VITE_MIXPANEL_TOKEN;
-    const isDev = import.meta.env.DEV;
-
-    if (token) {
-      mixpanel.init(token, {
-        debug: false,
-        track_pageview: false,
-        persistence: "localStorage",
-        autocapture: false,
-        record_sessions_percent: 0,
-        api_host: isDev ? "/mixpanel" : "https://api-js.mixpanel.com",
-      });
-      this.isInitialized = true;
-    }
+    // Analytics removed
   }
 
-  public identify(userId: string): void {
-    if (!this.isInitialized) return;
-    mixpanel.identify(userId);
+  public identify(_userId: string): void {
+    // Analytics removed
   }
 
   public reset(): void {
-    if (!this.isInitialized) return;
-    mixpanel.reset();
+    // Analytics removed
   }
 
-  public track(eventName: string, properties?: Dict): void {
-    if (!this.isInitialized) {
-      return;
-    }
-
-    mixpanel.track(eventName, {
-      ...properties,
-      timestamp: new Date().toISOString(),
-      environment: import.meta.env.MODE,
-    });
+  public track(_eventName: string, _properties?: Dict): void {
+    // Analytics removed
   }
 
   // Auth Events
   public trackAuthLogin(
-    method: string,
-    success: boolean,
-    error?: string
+    _method: string,
+    _success: boolean,
+    _error?: string
   ): void {
-    const eventName = success ? "auth.login_success" : "auth.login_failed";
-    this.track(eventName, { method, error });
+    // Analytics removed
   }
 
   public trackAuthSignup(
-    method: string,
-    success: boolean,
-    error?: string
+    _method: string,
+    _success: boolean,
+    _error?: string
   ): void {
-    const eventName = success ? "auth.signup_success" : "auth.signup_failed";
-    this.track(eventName, { method, error });
+    // Analytics removed
   }
 
   // Content Events
   public trackContentView(
-    contentId: string,
-    type: string,
-    title: string
+    _contentId: string,
+    _type: string,
+    _title: string
   ): void {
-    this.track("content.opened", { contentId, type, title });
+    // Analytics removed
   }
 
-  public trackFileUpload(fileName: string, size: number, type: string): void {
-    this.track("file.upload_started", { fileName, size, type });
+  public trackFileUpload(
+    _fileName: string,
+    _size: number,
+    _type: string
+  ): void {
+    // Analytics removed
   }
 
   public trackFileUploadResult(
-    fileName: string,
-    success: boolean,
-    error?: string
+    _fileName: string,
+    _success: boolean,
+    _error?: string
   ): void {
-    const eventName = success ? "file.upload_completed" : "file.upload_failed";
-    this.track(eventName, { fileName, error });
+    // Analytics removed
   }
 
   // Quiz Events
-  public trackQuizAttemptStarted(quizId: string, title: string): void {
-    this.track("quiz.attempt_started", { quizId, title });
+  public trackQuizAttemptStarted(_quizId: string, _title: string): void {
+    // Analytics removed
   }
 
   public trackQuizAttemptCompleted(
-    quizId: string,
-    score: number,
-    totalQuestions: number,
-    durationSeconds: number
+    _quizId: string,
+    _score: number,
+    _totalQuestions: number,
+    _durationSeconds: number
   ): void {
-    this.track("quiz.attempt_completed", {
-      quizId,
-      score,
-      totalQuestions,
-      percentage: (score / totalQuestions) * 100,
-      duration: durationSeconds,
-    });
+    // Analytics removed
   }
 
   // Flashcard Events
-  public trackFlashcardStudyStarted(setId: string, title: string): void {
-    this.track("flashcard.study_started", { setId, title });
+  public trackFlashcardStudyStarted(_setId: string, _title: string): void {
+    // Analytics removed
   }
 
-  public trackFlashcardViewed(setId: string, cardId: string): void {
-    this.track("flashcard.viewed", { setId, cardId });
+  public trackFlashcardViewed(_setId: string, _cardId: string): void {
+    // Analytics removed
   }
 }
 

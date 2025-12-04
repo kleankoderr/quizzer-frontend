@@ -20,13 +20,5 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    proxy: {
-      "/mixpanel": {
-        target: "https://api-js.mixpanel.com",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/mixpanel/, ""),
-      },
-    },
-  },
+  server: {},
 });

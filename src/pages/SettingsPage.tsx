@@ -7,6 +7,7 @@ import { userService } from '../services';
 import { User, Lock, Settings as SettingsIcon, AlertTriangle, Save, Palette } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useProfile } from '../hooks';
+import { SchoolSearch } from '../components/SchoolSearch';
 
 type TabType = 'account' | 'security' | 'theme' | 'danger';
 
@@ -235,11 +236,9 @@ export const SettingsPage = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   School Name (Optional)
                 </label>
-                <input
-                  type="text"
+                <SchoolSearch
                   value={schoolName}
-                  onChange={(e) => setSchoolName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  onChange={(value) => setSchoolName(value)}
                 />
               </div>
 

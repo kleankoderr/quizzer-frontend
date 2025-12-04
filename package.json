@@ -23,9 +23,9 @@
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "firebase": "^12.6.0",
+    "framer-motion": "^12.23.25",
     "lexical": "^0.38.2",
     "lucide-react": "^0.553.0",
-    "mixpanel-browser": "^2.72.0",
     "react": "^19.2.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.2.0",
@@ -45,7 +45,6 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@tailwindcss/typography": "^0.5.19",
-    "@types/mixpanel-browser": "^2.60.0",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
