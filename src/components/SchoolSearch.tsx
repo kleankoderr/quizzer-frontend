@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { School as SchoolIcon, Search, Plus, Check } from 'lucide-react';
+import { School as SchoolIcon, Search, Plus } from 'lucide-react';
 import { apiClient } from '../services/api';
 
 interface School {
