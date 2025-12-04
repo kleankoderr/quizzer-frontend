@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { QuizQuestion, AnswerValue } from '../types';
+import { useState } from "react";
+import type { QuizQuestion, AnswerValue } from "../types";
 
 interface QuestionRendererProps {
   question: QuizQuestion;
@@ -25,7 +25,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       {question.options?.map((option, index) => {
         const isSelected = selectedAnswer === index;
         const isCorrect = showResults && correctAnswer === index;
-        const isWrong = showResults && isSelected && selectedAnswer !== correctAnswer;
+        const isWrong =
+          showResults && isSelected && selectedAnswer !== correctAnswer;
 
         return (
           <button
@@ -34,34 +35,40 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             disabled={showResults}
             className={`w-full text-left p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 group ${
               isCorrect
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600'
+                ? "border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600"
                 : isWrong
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600'
-                : isSelected
-                ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-md scale-[1.02] dark:border-blue-400'
-                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm bg-white dark:bg-gray-800'
+                  ? "border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600"
+                  : isSelected
+                    ? "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-md scale-[1.02] dark:border-blue-400"
+                    : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm bg-white dark:bg-gray-800"
             }`}
           >
             <div className="flex items-start gap-3">
               <span
                 className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors mt-0.5 ${
                   isCorrect
-                    ? 'bg-green-500 text-white'
+                    ? "bg-green-500 text-white"
                     : isWrong
-                    ? 'bg-red-500 text-white'
-                    : isSelected
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-700'
+                      ? "bg-red-500 text-white"
+                      : isSelected
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-700"
                 }`}
               >
-                {option === 'True' ? 'T' : 'F'}
+                {option === "True" ? "T" : "F"}
               </span>
-              <span className="text-base text-gray-900 dark:text-white pt-0.5">{option}</span>
+              <span className="text-base text-gray-900 dark:text-white pt-0.5">
+                {option}
+              </span>
               {showResults && isCorrect && (
-                <span className="ml-auto text-green-700 font-semibold text-sm sm:text-base">✓ Correct</span>
+                <span className="ml-auto text-green-700 font-semibold text-sm sm:text-base">
+                  ✓ Correct
+                </span>
               )}
               {showResults && isWrong && (
-                <span className="ml-auto text-red-700 font-semibold text-sm sm:text-base">✗ Your answer</span>
+                <span className="ml-auto text-red-700 font-semibold text-sm sm:text-base">
+                  ✗ Your answer
+                </span>
               )}
             </div>
           </button>
@@ -75,7 +82,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       {question.options?.map((option, index) => {
         const isSelected = selectedAnswer === index;
         const isCorrect = showResults && correctAnswer === index;
-        const isWrong = showResults && isSelected && selectedAnswer !== correctAnswer;
+        const isWrong =
+          showResults && isSelected && selectedAnswer !== correctAnswer;
 
         return (
           <button
@@ -84,34 +92,40 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             disabled={showResults}
             className={`w-full text-left p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 group ${
               isCorrect
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600'
+                ? "border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600"
                 : isWrong
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600'
-                : isSelected
-                ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-md scale-[1.02] dark:border-blue-400'
-                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm bg-white dark:bg-gray-800'
+                  ? "border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600"
+                  : isSelected
+                    ? "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-md scale-[1.02] dark:border-blue-400"
+                    : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm bg-white dark:bg-gray-800"
             }`}
           >
             <div className="flex items-start gap-3">
               <span
                 className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors mt-0.5 ${
                   isCorrect
-                    ? 'bg-green-500 text-white'
+                    ? "bg-green-500 text-white"
                     : isWrong
-                    ? 'bg-red-500 text-white'
-                    : isSelected
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-700'
+                      ? "bg-red-500 text-white"
+                      : isSelected
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-700"
                 }`}
               >
                 {String.fromCharCode(65 + index)}
               </span>
-              <span className="text-base text-gray-900 dark:text-white pt-0.5">{option}</span>
+              <span className="text-base text-gray-900 dark:text-white pt-0.5">
+                {option}
+              </span>
               {showResults && isCorrect && (
-                <span className="ml-auto text-green-700 font-semibold text-sm sm:text-base">✓ Correct</span>
+                <span className="ml-auto text-green-700 font-semibold text-sm sm:text-base">
+                  ✓ Correct
+                </span>
               )}
               {showResults && isWrong && (
-                <span className="ml-auto text-red-700 font-semibold text-sm sm:text-base">✗ Your answer</span>
+                <span className="ml-auto text-red-700 font-semibold text-sm sm:text-base">
+                  ✗ Your answer
+                </span>
               )}
             </div>
           </button>
@@ -126,7 +140,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
 
     const toggleOption = (index: number) => {
       if (showResults) return;
-      
+
       const newSelection = selectedIndices.includes(index)
         ? selectedIndices.filter((i) => i !== index)
         : [...selectedIndices, index];
@@ -142,8 +156,10 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           {question.options?.map((option, index) => {
             const isSelected = selectedIndices.includes(index);
             const shouldBeSelected = correctIndices.includes(index);
-            const isCorrectlySelected = showResults && isSelected && shouldBeSelected;
-            const isWronglySelected = showResults && isSelected && !shouldBeSelected;
+            const isCorrectlySelected =
+              showResults && isSelected && shouldBeSelected;
+            const isWronglySelected =
+              showResults && isSelected && !shouldBeSelected;
             const isMissed = showResults && !isSelected && shouldBeSelected;
 
             return (
@@ -153,35 +169,39 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                 disabled={showResults}
                 className={`w-full text-left p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 group ${
                   isCorrectlySelected
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600'
+                    ? "border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600"
                     : isWronglySelected
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600'
-                    : isMissed
-                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-600'
-                    : isSelected
-                    ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-md dark:border-blue-400'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm bg-white dark:bg-gray-800'
+                      ? "border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-600"
+                      : isMissed
+                        ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-600"
+                        : isSelected
+                          ? "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-md dark:border-blue-400"
+                          : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm bg-white dark:bg-gray-800"
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <span
                     className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center text-sm transition-colors mt-0.5 ${
                       isCorrectlySelected
-                        ? 'bg-green-500 border-green-600 text-white'
+                        ? "bg-green-500 border-green-600 text-white"
                         : isWronglySelected
-                        ? 'bg-red-500 border-red-600 text-white'
-                        : isMissed
-                        ? 'bg-orange-500 border-orange-600 text-white'
-                        : isSelected
-                        ? 'bg-blue-500 border-blue-600 text-white'
-                        : 'bg-white border-gray-300 group-hover:border-blue-400'
+                          ? "bg-red-500 border-red-600 text-white"
+                          : isMissed
+                            ? "bg-orange-500 border-orange-600 text-white"
+                            : isSelected
+                              ? "bg-blue-500 border-blue-600 text-white"
+                              : "bg-white border-gray-300 group-hover:border-blue-400"
                     }`}
                   >
-                    {(isSelected || isMissed) && '✓'}
+                    {(isSelected || isMissed) && "✓"}
                   </span>
-                  <span className="text-base text-gray-900 dark:text-white pt-0.5">{option}</span>
+                  <span className="text-base text-gray-900 dark:text-white pt-0.5">
+                    {option}
+                  </span>
                   {isMissed && (
-                    <span className="ml-auto text-orange-700 font-semibold text-sm sm:text-base">⚠ Missed</span>
+                    <span className="ml-auto text-orange-700 font-semibold text-sm sm:text-base">
+                      ⚠ Missed
+                    </span>
                   )}
                 </div>
               </button>
@@ -195,37 +215,47 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   const renderMatching = () => {
     const leftItems = question.leftColumn || [];
     const rightItems = question.rightColumn || [];
-    const correctMatches = typeof correctAnswer === 'object' && !Array.isArray(correctAnswer) 
-      ? correctAnswer 
-      : {};
+    const correctMatches =
+      typeof correctAnswer === "object" && !Array.isArray(correctAnswer)
+        ? correctAnswer
+        : {};
     const hasCorrectAnswer = correctAnswer !== undefined;
 
     const handleMatchClick = (leftItem: string, rightItem: string) => {
       if (showResults) return;
-      
-      const currentMatches = typeof selectedAnswer === 'object' && selectedAnswer !== null && !Array.isArray(selectedAnswer)
-        ? selectedAnswer
-        : {};
-      
+
+      const currentMatches =
+        typeof selectedAnswer === "object" &&
+        selectedAnswer !== null &&
+        !Array.isArray(selectedAnswer)
+          ? selectedAnswer
+          : {};
+
       const newMatches = { ...currentMatches, [leftItem]: rightItem };
       onAnswerSelect(newMatches);
     };
 
     const handleUnselect = (leftItem: string) => {
       if (showResults) return;
-      
-      const currentMatches = typeof selectedAnswer === 'object' && selectedAnswer !== null && !Array.isArray(selectedAnswer)
-        ? selectedAnswer
-        : {};
-      
+
+      const currentMatches =
+        typeof selectedAnswer === "object" &&
+        selectedAnswer !== null &&
+        !Array.isArray(selectedAnswer)
+          ? selectedAnswer
+          : {};
+
       const newMatches = { ...currentMatches };
       delete newMatches[leftItem];
       onAnswerSelect(newMatches);
     };
 
-    const currentMatches = typeof selectedAnswer === 'object' && selectedAnswer !== null && !Array.isArray(selectedAnswer)
-      ? selectedAnswer
-      : {};
+    const currentMatches =
+      typeof selectedAnswer === "object" &&
+      selectedAnswer !== null &&
+      !Array.isArray(selectedAnswer)
+        ? selectedAnswer
+        : {};
 
     return (
       <div className="space-y-6">
@@ -234,13 +264,20 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-1 h-6 bg-blue-600 rounded-full"></div>
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Items to Match</h3>
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                Items to Match
+              </h3>
             </div>
             {leftItems.map((leftItem, index) => {
               const userMatch = currentMatches[leftItem];
               const correctMatch = correctMatches[leftItem];
-              const isCorrect = showResults && hasCorrectAnswer && userMatch === correctMatch;
-              const isWrong = showResults && hasCorrectAnswer && userMatch && userMatch !== correctMatch;
+              const isCorrect =
+                showResults && hasCorrectAnswer && userMatch === correctMatch;
+              const isWrong =
+                showResults &&
+                hasCorrectAnswer &&
+                userMatch &&
+                userMatch !== correctMatch;
               const isSelected = !showResults && selectedLeft === leftItem;
 
               return (
@@ -260,45 +297,53 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                   disabled={showResults}
                   className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
                     isCorrect
-                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md dark:border-green-600'
+                      ? "border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md dark:border-green-600"
                       : isWrong
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900/20 shadow-md dark:border-red-600'
-                      : isSelected
-                      ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/30 shadow-lg scale-[1.02] ring-2 ring-blue-300 dark:ring-blue-600 dark:border-blue-400'
-                      : userMatch
-                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm hover:shadow-md cursor-pointer dark:border-blue-500'
-                      : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-sm cursor-pointer'
-                  } ${showResults ? 'cursor-default' : ''}`}
+                        ? "border-red-500 bg-red-50 dark:bg-red-900/20 shadow-md dark:border-red-600"
+                        : isSelected
+                          ? "border-blue-500 bg-blue-100 dark:bg-blue-900/30 shadow-lg scale-[1.02] ring-2 ring-blue-300 dark:ring-blue-600 dark:border-blue-400"
+                          : userMatch
+                            ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm hover:shadow-md cursor-pointer dark:border-blue-500"
+                            : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-sm cursor-pointer"
+                  } ${showResults ? "cursor-default" : ""}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm mt-0.5 ${
-                      isCorrect
-                        ? 'bg-green-500 text-white'
-                        : isWrong
-                        ? 'bg-red-500 text-white'
-                        : isSelected
-                        ? 'bg-blue-600 text-white'
-                        : userMatch
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}>
+                    <div
+                      className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm mt-0.5 ${
+                        isCorrect
+                          ? "bg-green-500 text-white"
+                          : isWrong
+                            ? "bg-red-500 text-white"
+                            : isSelected
+                              ? "bg-blue-600 text-white"
+                              : userMatch
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-900 dark:text-white mb-1">{leftItem}</div>
+                      <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                        {leftItem}
+                      </div>
                       {userMatch && (
                         <div className="flex items-center gap-2 mt-2 text-sm">
-                          <span className={`font-medium px-2 py-1 rounded ${
-                            isCorrect 
-                              ? 'bg-green-200 text-green-800' 
-                              : isWrong 
-                              ? 'bg-red-200 text-red-800' 
-                              : 'bg-blue-200 text-blue-800'
-                          }`}>
+                          <span
+                            className={`font-medium px-2 py-1 rounded ${
+                              isCorrect
+                                ? "bg-green-200 text-green-800"
+                                : isWrong
+                                  ? "bg-red-200 text-red-800"
+                                  : "bg-blue-200 text-blue-800"
+                            }`}
+                          >
                             → {userMatch}
                           </span>
                           {!showResults && (
-                            <span className="text-xs text-gray-500 italic">(click to change)</span>
+                            <span className="text-xs text-gray-500 italic">
+                              (click to change)
+                            </span>
                           )}
                         </div>
                       )}
@@ -312,10 +357,12 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                   {showResults && hasCorrectAnswer && isWrong && (
                     <div className="mt-3 pt-3 border-t border-red-200">
                       <div className="text-sm text-red-700">
-                        <span className="font-semibold">✗ Your answer:</span> {userMatch}
+                        <span className="font-semibold">✗ Your answer:</span>{" "}
+                        {userMatch}
                       </div>
                       <div className="text-sm text-green-700 mt-1">
-                        <span className="font-semibold">✓ Correct:</span> {correctMatch}
+                        <span className="font-semibold">✓ Correct:</span>{" "}
+                        {correctMatch}
                       </div>
                     </div>
                   )}
@@ -333,12 +380,14 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Possible Matches</h3>
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                Possible Matches
+              </h3>
             </div>
             {rightItems.map((rightItem, idx) => {
               const isUsed = Object.values(currentMatches).includes(rightItem);
               const canSelect = !showResults && selectedLeft && !isUsed;
-              
+
               return (
                 <button
                   key={idx}
@@ -351,24 +400,28 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                   disabled={showResults || isUsed || !selectedLeft}
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                     canSelect
-                      ? 'border-indigo-400 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-900/20 hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow-lg hover:scale-[1.02] cursor-pointer dark:border-indigo-500'
+                      ? "border-indigo-400 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-900/20 hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow-lg hover:scale-[1.02] cursor-pointer dark:border-indigo-500"
                       : isUsed
-                      ? 'border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed'
-                      : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                  } ${showResults ? 'cursor-default' : ''}`}
+                        ? "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 opacity-60 cursor-not-allowed"
+                        : "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                  } ${showResults ? "cursor-default" : ""}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm mt-0.5 ${
-                      canSelect
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : isUsed
-                        ? 'bg-gray-300 text-gray-500'
-                        : 'bg-gray-200 text-gray-400'
-                    }`}>
+                    <div
+                      className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm mt-0.5 ${
+                        canSelect
+                          ? "bg-indigo-100 text-indigo-700"
+                          : isUsed
+                            ? "bg-gray-300 text-gray-500"
+                            : "bg-gray-200 text-gray-400"
+                      }`}
+                    >
                       {String.fromCharCode(65 + idx)}
                     </div>
                     <div className="flex-1">
-                      <div className={`font-semibold ${isUsed ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                      <div
+                        className={`font-semibold ${isUsed ? "text-gray-400 dark:text-gray-500" : "text-gray-900 dark:text-white"}`}
+                      >
                         {rightItem}
                       </div>
                       {isUsed && (
@@ -394,10 +447,17 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   };
 
   const renderFillBlank = () => {
-    const userAnswer = typeof selectedAnswer === 'string' ? selectedAnswer : '';
-    const correct = typeof correctAnswer === 'string' ? correctAnswer.toLowerCase().trim() : '';
-    const hasCorrectAnswer = correctAnswer !== undefined && typeof correctAnswer === 'string';
-    const isCorrect = showResults && hasCorrectAnswer && userAnswer.toLowerCase().trim() === correct;
+    const userAnswer = typeof selectedAnswer === "string" ? selectedAnswer : "";
+    const correct =
+      typeof correctAnswer === "string"
+        ? correctAnswer.toLowerCase().trim()
+        : "";
+    const hasCorrectAnswer =
+      correctAnswer !== undefined && typeof correctAnswer === "string";
+    const isCorrect =
+      showResults &&
+      hasCorrectAnswer &&
+      userAnswer.toLowerCase().trim() === correct;
 
     return (
       <div className="space-y-4">
@@ -405,9 +465,9 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           className={`p-4 rounded-lg ${
             showResults && hasCorrectAnswer
               ? isCorrect
-                ? 'bg-green-50 dark:bg-green-900/20'
-                : 'bg-red-50 dark:bg-red-900/20'
-              : 'bg-white dark:bg-gray-800'
+                ? "bg-green-50 dark:bg-green-900/20"
+                : "bg-red-50 dark:bg-red-900/20"
+              : "bg-white dark:bg-gray-800"
           }`}
         >
           <input
@@ -447,16 +507,20 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         </div>
       </div>
 
-      {question.questionType === 'true-false' && renderTrueFalse()}
-      {question.questionType === 'single-select' && renderSingleSelect()}
-      {question.questionType === 'multi-select' && renderMultiSelect()}
-      {question.questionType === 'matching' && renderMatching()}
-      {question.questionType === 'fill-blank' && renderFillBlank()}
+      {question.questionType === "true-false" && renderTrueFalse()}
+      {question.questionType === "single-select" && renderSingleSelect()}
+      {question.questionType === "multi-select" && renderMultiSelect()}
+      {question.questionType === "matching" && renderMatching()}
+      {question.questionType === "fill-blank" && renderFillBlank()}
 
       {showResults && question.explanation && (
         <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
-          <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">💡 Explanation:</p>
-          <p className="text-sm text-blue-800 dark:text-blue-200">{question.explanation}</p>
+          <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
+            💡 Explanation:
+          </p>
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            {question.explanation}
+          </p>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { Trophy, CheckCircle, ArrowRight } from 'lucide-react';
+import { Trophy, CheckCircle, ArrowRight } from "lucide-react";
 
 interface QuizTransitionCardProps {
   quizNumber: number;
@@ -21,11 +21,13 @@ export const QuizTransitionCard: React.FC<QuizTransitionCardProps> = ({
   return (
     <div className="card dark:bg-gray-800 p-8 text-center max-w-2xl mx-auto">
       {/* Icon */}
-      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-        isGoodScore
-          ? 'bg-green-100 dark:bg-green-900/30'
-          : 'bg-blue-100 dark:bg-blue-900/30'
-      }`}>
+      <div
+        className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+          isGoodScore
+            ? "bg-green-100 dark:bg-green-900/30"
+            : "bg-blue-100 dark:bg-blue-900/30"
+        }`}
+      >
         {isGoodScore ? (
           <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
         ) : (
@@ -35,16 +37,18 @@ export const QuizTransitionCard: React.FC<QuizTransitionCardProps> = ({
 
       {/* Title */}
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        {isGoodScore ? 'Great Job!' : 'Quiz Completed!'}
+        {isGoodScore ? "Great Job!" : "Quiz Completed!"}
       </h2>
 
       {/* Score */}
       <div className="mb-6">
-        <div className={`text-5xl font-bold mb-2 ${
-          isGoodScore
-            ? 'text-green-600 dark:text-green-400'
-            : 'text-blue-600 dark:text-blue-400'
-        }`}>
+        <div
+          className={`text-5xl font-bold mb-2 ${
+            isGoodScore
+              ? "text-green-600 dark:text-green-400"
+              : "text-blue-600 dark:text-blue-400"
+          }`}
+        >
           {Math.round(percentage)}%
         </div>
         <div className="text-gray-600 dark:text-gray-400">
@@ -65,10 +69,10 @@ export const QuizTransitionCard: React.FC<QuizTransitionCardProps> = ({
               key={idx}
               className={`w-3 h-3 rounded-full ${
                 idx < quizNumber
-                  ? 'bg-green-500'
+                  ? "bg-green-500"
                   : idx === quizNumber
-                  ? 'bg-blue-500'
-                  : 'bg-gray-300 dark:bg-gray-600'
+                    ? "bg-blue-500"
+                    : "bg-gray-300 dark:bg-gray-600"
               }`}
             />
           ))}

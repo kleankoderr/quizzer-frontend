@@ -1,42 +1,75 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
-} from 'recharts';
-import { 
-  Calendar, Filter, TrendingUp, Award, BookOpen, 
-  Layers, ChevronRight, ArrowLeft 
-} from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import toast from 'react-hot-toast';
-import type { Attempt } from '../types';
-import { useAttempts } from '../hooks';
-import { CardSkeleton, ChartSkeleton, StatCardSkeleton } from '../components/skeletons';
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  Calendar,
+  Filter,
+  TrendingUp,
+  Award,
+  BookOpen,
+  Layers,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
+import { format, parseISO } from "date-fns";
+import toast from "react-hot-toast";
+import type { Attempt } from "../types";
+import { useAttempts } from "../hooks";
+import {
+  CardSkeleton,
+  ChartSkeleton,
+  StatCardSkeleton,
+} from "../components/skeletons";
 
-const COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
+const COLORS = ["#3b82f6", "#10b981", "rgb(236, 72, 153)"];
 
 export function AttemptsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filterType, setFilterType] = useState<'all' | 'quiz' | 'flashcard' | 'challenge'>('all');
-  const [selectedItem, setSelectedItem] = useState<{ id: string; title: string; type: 'quiz' | 'flashcard' | 'challenge' } | null>(null);
+  const [filterType, setFilterType] = useState<
+    "all" | "quiz" | "flashcard" | "challenge"
+  >("all");
+  const [selectedItem, setSelectedItem] = useState<{
+    id: string;
+    title: string;
+    type: "quiz" | "flashcard" | "challenge";
+  } | null>(null);
 
   // Get URL params for filtering
-  const quizId = searchParams.get('quizId');
-  const flashcardId = searchParams.get('flashcardId');
-  const challengeId = searchParams.get('challengeId');
-  const typeParam = searchParams.get('type');
+  const quizId = searchParams.get("quizId");
+  const flashcardId = searchParams.get("flashcardId");
+  const challengeId = searchParams.get("challengeId");
+  const typeParam = searchParams.get("type");
 
   // Sync filter type with URL params
   useEffect(() => {
-    if (typeParam === 'quiz' || typeParam === 'flashcard' || typeParam === 'challenge' || typeParam === 'all') {
+    if (
+      typeParam === "quiz" ||
+      typeParam === "flashcard" ||
+      typeParam === "challenge" ||
+      typeParam === "all"
+    ) {
       setFilterType(typeParam);
     }
   }, [typeParam]);
 
   // Use React Query hook with filters
-  const { data: attemptsData, isLoading: loading, error } = useAttempts({
+  const {
+    data: attemptsData,
+    isLoading: loading,
+    error,
+  } = useAttempts({
     quizId: quizId || undefined,
     flashcardSetId: flashcardId || undefined,
     challengeId: challengeId || undefined,
@@ -47,10 +80,8 @@ export function AttemptsPage() {
 
   // Handle errors
   if (error) {
-    toast.error('Failed to load attempts');
+    toast.error("Failed to load attempts");
   }
-
-
 
   // Sync selected item with URL params
   useEffect(() => {
@@ -61,25 +92,28 @@ export function AttemptsPage() {
 
     if (attempts.length > 0) {
       if (quizId) {
-        const attempt = attempts.find(a => a.quizId === quizId) || attempts[0];
+        const attempt =
+          attempts.find((a) => a.quizId === quizId) || attempts[0];
         setSelectedItem({
           id: quizId,
-          title: attempt.quiz?.title || 'Quiz',
-          type: 'quiz'
+          title: attempt.quiz?.title || "Quiz",
+          type: "quiz",
         });
       } else if (challengeId) {
-        const attempt = attempts.find(a => a.challengeId === challengeId) || attempts[0];
+        const attempt =
+          attempts.find((a) => a.challengeId === challengeId) || attempts[0];
         setSelectedItem({
           id: challengeId,
-          title: attempt.challenge?.title || 'Challenge',
-          type: 'challenge'
+          title: attempt.challenge?.title || "Challenge",
+          type: "challenge",
         });
       } else if (flashcardId) {
-        const attempt = attempts.find(a => a.flashcardSetId === flashcardId) || attempts[0];
+        const attempt =
+          attempts.find((a) => a.flashcardSetId === flashcardId) || attempts[0];
         setSelectedItem({
           id: flashcardId,
-          title: attempt.flashcardSet?.title || 'Flashcard Set',
-          type: 'flashcard'
+          title: attempt.flashcardSet?.title || "Flashcard Set",
+          type: "flashcard",
         });
       }
     }
@@ -87,8 +121,8 @@ export function AttemptsPage() {
 
   // Use useMemo for filtering instead of useEffect
   const filteredAttempts = useMemo(() => {
-    if (filterType === 'all') return attempts;
-    return attempts.filter(attempt => attempt.type === filterType);
+    if (filterType === "all") return attempts;
+    return attempts.filter((attempt) => attempt.type === filterType);
   }, [attempts, filterType]);
 
   if (loading) {
@@ -122,89 +156,114 @@ export function AttemptsPage() {
   // Calculate statistics
   const attemptStats = {
     total: filteredAttempts.length,
-    quizzes: filteredAttempts.filter(a => a.type === 'quiz').length,
-    flashcards: filteredAttempts.filter(a => a.type === 'flashcard').length,
-    challenges: filteredAttempts.filter(a => a.type === 'challenge').length,
-    averageScore: filteredAttempts.length > 0
-      ? Math.round(
-          filteredAttempts
-            .filter(a => a.score !== undefined && a.totalQuestions && a.totalQuestions > 0)
-            .reduce((sum, a) => sum + Math.max(0, (a.score! / a.totalQuestions!) * 100), 0) /
-          filteredAttempts.filter(a => a.score !== undefined && a.totalQuestions && a.totalQuestions > 0).length
-        )
-      : 0,
+    quizzes: filteredAttempts.filter((a) => a.type === "quiz").length,
+    flashcards: filteredAttempts.filter((a) => a.type === "flashcard").length,
+    challenges: filteredAttempts.filter((a) => a.type === "challenge").length,
+    averageScore:
+      filteredAttempts.length > 0
+        ? Math.round(
+            filteredAttempts
+              .filter(
+                (a) =>
+                  a.score !== undefined &&
+                  a.totalQuestions &&
+                  a.totalQuestions > 0,
+              )
+              .reduce(
+                (sum, a) =>
+                  sum + Math.max(0, (a.score! / a.totalQuestions!) * 100),
+                0,
+              ) /
+              filteredAttempts.filter(
+                (a) =>
+                  a.score !== undefined &&
+                  a.totalQuestions &&
+                  a.totalQuestions > 0,
+              ).length,
+          )
+        : 0,
   };
 
   // Prepare chart data - Score trend over time
   const scoreTrendData = filteredAttempts
-    .filter(a => a.score !== undefined && a.totalQuestions && a.totalQuestions > 0)
+    .filter(
+      (a) => a.score !== undefined && a.totalQuestions && a.totalQuestions > 0,
+    )
     .slice(0, 20)
     .reverse()
     .map((attempt, index) => {
       const rawPercent = (attempt.score! / attempt.totalQuestions!) * 100;
       const scorePercent = Math.round(Math.max(0, rawPercent));
       return {
-        name: format(parseISO(attempt.completedAt), 'MMM dd'),
-        fullDate: format(parseISO(attempt.completedAt), 'MMM dd, yyyy h:mm a'),
+        name: format(parseISO(attempt.completedAt), "MMM dd"),
+        fullDate: format(parseISO(attempt.completedAt), "MMM dd, yyyy h:mm a"),
         score: scorePercent,
         type: attempt.type,
         // Color based on performance
-        fill: scorePercent >= 70 ? '#10b981' : scorePercent >= 50 ? '#f59e0b' : '#ef4444',
+        fill:
+          scorePercent >= 70
+            ? "#10b981"
+            : scorePercent >= 50
+              ? "#f59e0b"
+              : "#ef4444",
         attemptNumber: filteredAttempts.length - index,
       };
     });
 
   // Prepare pie chart data - Quiz vs Flashcard distribution
   const typeDistributionData = [
-    { name: 'Quizzes', value: attemptStats.quizzes },
-    { name: 'Flashcards', value: attemptStats.flashcards },
-    { name: 'Challenges', value: attemptStats.challenges },
-  ].filter(item => item.value > 0);
+    { name: "Quizzes", value: attemptStats.quizzes },
+    { name: "Flashcards", value: attemptStats.flashcards },
+    { name: "Challenges", value: attemptStats.challenges },
+  ].filter((item) => item.value > 0);
 
   // Group attempts by item (quiz or flashcard)
-  const groupedAttempts = filteredAttempts.reduce((acc, attempt) => {
-    let key = '';
-    let id = '';
-    let title = '';
-    let topic = '';
-    let quizId = '';
+  const groupedAttempts = filteredAttempts.reduce(
+    (acc, attempt) => {
+      let key = "";
+      let id = "";
+      let title = "";
+      let topic = "";
+      let quizId = "";
 
-    if (attempt.type === 'quiz') {
-      key = `quiz-${attempt.quizId}`;
-      id = attempt.quizId!;
-      title = attempt.quiz?.title || 'Untitled Quiz';
-      topic = attempt.quiz?.topic || 'General';
-    } else if (attempt.type === 'flashcard') {
-      key = `flashcard-${attempt.flashcardSetId}`;
-      id = attempt.flashcardSetId!;
-      title = attempt.flashcardSet?.title || 'Untitled Flashcard Set';
-      topic = attempt.flashcardSet?.topic || 'General';
-    } else if (attempt.type === 'challenge') {
-      key = `challenge-${attempt.challengeId}`;
-      id = attempt.challengeId!;
-      quizId = attempt.quizId!;
-      title = attempt.challenge?.title || 'Untitled Challenge';
-      topic = attempt.quiz?.topic || 'Challenge';
-    }
-    
-    if (!acc[key]) {
-      acc[key] = {
-        id,
-        quizId,
-        title,
-        topic,
-        type: attempt.type,
-        attempts: [],
-      };
-    }
-    acc[key].attempts.push(attempt);
-    return acc;
-  }, {} as Record<string, any>);
+      if (attempt.type === "quiz") {
+        key = `quiz-${attempt.quizId}`;
+        id = attempt.quizId!;
+        title = attempt.quiz?.title || "Untitled Quiz";
+        topic = attempt.quiz?.topic || "General";
+      } else if (attempt.type === "flashcard") {
+        key = `flashcard-${attempt.flashcardSetId}`;
+        id = attempt.flashcardSetId!;
+        title = attempt.flashcardSet?.title || "Untitled Flashcard Set";
+        topic = attempt.flashcardSet?.topic || "General";
+      } else if (attempt.type === "challenge") {
+        key = `challenge-${attempt.challengeId}`;
+        id = attempt.challengeId!;
+        quizId = attempt.quizId!;
+        title = attempt.challenge?.title || "Untitled Challenge";
+        topic = attempt.quiz?.topic || "Challenge";
+      }
+
+      if (!acc[key]) {
+        acc[key] = {
+          id,
+          quizId,
+          title,
+          topic,
+          type: attempt.type,
+          attempts: [],
+        };
+      }
+      acc[key].attempts.push(attempt);
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
 
   const handleItemClick = (item: any) => {
-    if (item.type === 'quiz') {
+    if (item.type === "quiz") {
       setSearchParams({ quizId: item.id });
-    } else if (item.type === 'challenge') {
+    } else if (item.type === "challenge") {
       setSearchParams({ challengeId: item.id });
     } else {
       setSearchParams({ flashcardId: item.id });
@@ -212,12 +271,13 @@ export function AttemptsPage() {
   };
 
   const handleAttemptClick = (attempt: Attempt) => {
-    if ((attempt.type === 'quiz' || attempt.type === 'challenge') && attempt.quizId) {
+    if (
+      (attempt.type === "quiz" || attempt.type === "challenge") &&
+      attempt.quizId
+    ) {
       navigate(`/quiz/${attempt.quizId}/results/${attempt.id}`);
     }
   };
-
-
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -225,15 +285,12 @@ export function AttemptsPage() {
       <div className="mb-8 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-lg text-white">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-3xl font-bold text-white">
-              Attempt History
-            </h1>
+            <h1 className="text-3xl font-bold text-white">Attempt History</h1>
             <p className="text-blue-100 dark:text-blue-200 mt-1 text-lg">
               Track your progress across all quizzes and flashcards
             </p>
           </div>
         </div>
-
       </div>
 
       {/* Breadcrumb */}
@@ -258,7 +315,9 @@ export function AttemptsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Total
+              </p>
               <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
@@ -272,7 +331,9 @@ export function AttemptsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Quizzes</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Quizzes
+              </p>
               <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
                 <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
@@ -286,7 +347,9 @@ export function AttemptsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Flashcards</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Flashcards
+              </p>
               <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                 <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
@@ -300,7 +363,9 @@ export function AttemptsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Challenges</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Challenges
+              </p>
               <div className="p-1.5 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
                 <TrendingUp className="w-4 h-4 text-pink-600 dark:text-pink-400" />
               </div>
@@ -314,7 +379,9 @@ export function AttemptsPage() {
         <div className="col-span-2 md:col-span-1 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Avg Score</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Avg Score
+              </p>
               <div className="p-1.5 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
                 <Award className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
               </div>
@@ -336,30 +403,31 @@ export function AttemptsPage() {
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {(['all', 'quiz', 'flashcard', 'challenge'] as const).map((type) => (
-              <button
-                key={type}
-                onClick={() => {
-                  setFilterType(type);
-                  setSearchParams(prev => {
-                    const newParams = new URLSearchParams(prev);
-                    newParams.set('type', type);
-                    return newParams;
-                  });
-                }}
-                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterType === type
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            {(["all", "quiz", "flashcard", "challenge"] as const).map(
+              (type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setFilterType(type);
+                    setSearchParams((prev) => {
+                      const newParams = new URLSearchParams(prev);
+                      newParams.set("type", type);
+                      return newParams;
+                    });
+                  }}
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filterType === type
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                   }`}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </button>
-              ))}
-            </div>
+              ),
+            )}
           </div>
-        )}
-
+        </div>
+      )}
 
       {/* Charts Section */}
       {filteredAttempts.length > 0 && (
@@ -374,48 +442,60 @@ export function AttemptsPage() {
                 </h2>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Your score progression (most recent {scoreTrendData.length} attempts)
+                Your score progression (most recent {scoreTrendData.length}{" "}
+                attempts)
               </p>
               <div className="flex items-center gap-4 mt-2 text-xs">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Good (≥70%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Good (≥70%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Fair (50-69%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Fair (50-69%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Needs Work (&lt;50%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Needs Work (&lt;50%)
+                  </span>
                 </div>
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={scoreTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="name" 
+                <XAxis
+                  dataKey="name"
                   stroke="#9ca3af"
-                  style={{ fontSize: '11px' }}
+                  style={{ fontSize: "11px" }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
-                <YAxis 
+                <YAxis
                   stroke="#9ca3af"
-                  style={{ fontSize: '12px' }}
+                  style={{ fontSize: "12px" }}
                   domain={[0, 100]}
-                  label={{ value: 'Score (%)', angle: -90, position: 'insideLeft', style: { fill: '#9ca3af' } }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#fff'
+                  label={{
+                    value: "Score (%)",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: { fill: "#9ca3af" },
                   }}
-                  formatter={(value: number) => [`${value}%`, 'Score']}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1f2937",
+                    border: "1px solid #374151",
+                    borderRadius: "8px",
+                    color: "#fff",
+                  }}
+                  formatter={(value: number) => [`${value}%`, "Score"]}
                   labelFormatter={(label, payload) => {
                     if (payload && payload.length > 0) {
                       return `${payload[0].payload.fullDate} (Attempt #${payload[0].payload.attemptNumber})`;
@@ -424,20 +504,20 @@ export function AttemptsPage() {
                   }}
                 />
                 {/* Reference line at 70% */}
-                <line 
-                  x1="0" 
-                  y1="30%" 
-                  x2="100%" 
-                  y2="30%" 
-                  stroke="#10b981" 
-                  strokeDasharray="5 5" 
+                <line
+                  x1="0"
+                  y1="30%"
+                  x2="100%"
+                  y2="30%"
+                  stroke="#10b981"
+                  strokeDasharray="5 5"
                   strokeWidth={1}
                   opacity={0.3}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="#3b82f6" 
+                <Line
+                  type="monotone"
+                  dataKey="score"
+                  stroke="#3b82f6"
                   strokeWidth={2}
                   dot={(props: any) => {
                     const { cx, cy, payload } = props;
@@ -474,35 +554,39 @@ export function AttemptsPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+                  }
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
                   {typeDistributionData.map((entry, index) => {
                     let color = COLORS[0]; // Default
-                    if (entry.name === 'Quizzes') color = '#3b82f6'; // Blue
-                    if (entry.name === 'Flashcards') color = '#10b981'; // Green
-                    if (entry.name === 'Challenges') color = 'rgb(236, 72, 153)'; // Pink
+                    if (entry.name === "Quizzes") color = "#3b82f6"; // Blue
+                    if (entry.name === "Flashcards") color = "#10b981"; // Green
+                    if (entry.name === "Challenges")
+                      color = "rgb(236, 72, 153)"; // Pink
                     return <Cell key={`cell-${index}`} fill={color} />;
                   })}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#ffffff', 
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    color: '#111827',
-                    padding: '8px 12px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    color: "#111827",
+                    padding: "8px 12px",
+                    boxShadow:
+                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   }}
                   itemStyle={{
-                    color: '#111827',
-                    fontWeight: 500
+                    color: "#111827",
+                    fontWeight: 500,
                   }}
                   labelStyle={{
-                    color: '#111827',
-                    fontWeight: 600
+                    color: "#111827",
+                    fontWeight: 600,
                   }}
                 />
               </PieChart>
@@ -529,7 +613,9 @@ export function AttemptsPage() {
                 key={attempt.id}
                 onClick={() => handleAttemptClick(attempt)}
                 className={`p-6 ${
-                  (attempt.type === 'quiz' || attempt.type === 'challenge') ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''
+                  attempt.type === "quiz" || attempt.type === "challenge"
+                    ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    : ""
                 } transition-colors`}
               >
                 <div className="flex items-center justify-between">
@@ -539,21 +625,33 @@ export function AttemptsPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {format(parseISO(attempt.completedAt), 'MMM dd, yyyy • h:mm a')}
+                        {format(
+                          parseISO(attempt.completedAt),
+                          "MMM dd, yyyy • h:mm a",
+                        )}
                       </p>
-                      {attempt.score !== undefined && attempt.totalQuestions && (
-                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                          {attempt.score} / {attempt.totalQuestions} questions
-                        </p>
-                      )}
+                      {attempt.score !== undefined &&
+                        attempt.totalQuestions && (
+                          <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                            {attempt.score} / {attempt.totalQuestions} questions
+                          </p>
+                        )}
                     </div>
                   </div>
                   {attempt.score !== undefined && attempt.totalQuestions && (
                     <div className="text-right">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {Math.round(Math.max(0, (attempt.score / attempt.totalQuestions) * 100))}%
+                        {Math.round(
+                          Math.max(
+                            0,
+                            (attempt.score / attempt.totalQuestions) * 100,
+                          ),
+                        )}
+                        %
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-500">Score</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500">
+                        Score
+                      </p>
                     </div>
                   )}
                 </div>
@@ -575,16 +673,18 @@ export function AttemptsPage() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${
-                    item.type === 'quiz' 
-                      ? 'bg-blue-100 dark:bg-blue-900' 
-                      : item.type === 'challenge'
-                      ? 'bg-pink-100 dark:bg-pink-900'
-                      : 'bg-green-100 dark:bg-green-900'
-                  }`}>
-                    {item.type === 'quiz' ? (
+                  <div
+                    className={`flex items-center justify-center w-12 h-12 rounded-lg ${
+                      item.type === "quiz"
+                        ? "bg-blue-100 dark:bg-blue-900"
+                        : item.type === "challenge"
+                          ? "bg-pink-100 dark:bg-pink-900"
+                          : "bg-green-100 dark:bg-green-900"
+                    }`}
+                  >
+                    {item.type === "quiz" ? (
                       <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    ) : item.type === 'challenge' ? (
+                    ) : item.type === "challenge" ? (
                       <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                     ) : (
                       <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -592,7 +692,7 @@ export function AttemptsPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {item.title || 'Untitled'}
+                      {item.title || "Untitled"}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {item.topic} • {item.attempts.length} attempts
@@ -601,19 +701,38 @@ export function AttemptsPage() {
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
-              
+
               {/* Mini chart for this item */}
               {item.attempts.length > 1 && (
                 <div className="mt-4">
                   <ResponsiveContainer width="100%" height={80}>
-                    <LineChart data={item.attempts.slice(0, 10).reverse().map((a: Attempt, i: number) => ({
-                      name: `#${i + 1}`,
-                      score: a.score && a.totalQuestions ? Math.round(Math.max(0, (a.score / a.totalQuestions) * 100)) : 0,
-                    }))}>
-                      <Line 
-                        type="monotone" 
-                        dataKey="score" 
-                        stroke={item.type === 'quiz' ? '#3b82f6' : item.type === 'challenge' ? 'rgb(236, 72, 153)' : '#10b981'} 
+                    <LineChart
+                      data={item.attempts
+                        .slice(0, 10)
+                        .reverse()
+                        .map((a: Attempt, i: number) => ({
+                          name: `#${i + 1}`,
+                          score:
+                            a.score && a.totalQuestions
+                              ? Math.round(
+                                  Math.max(
+                                    0,
+                                    (a.score / a.totalQuestions) * 100,
+                                  ),
+                                )
+                              : 0,
+                        }))}
+                    >
+                      <Line
+                        type="monotone"
+                        dataKey="score"
+                        stroke={
+                          item.type === "quiz"
+                            ? "#3b82f6"
+                            : item.type === "challenge"
+                              ? "rgb(236, 72, 153)"
+                              : "#10b981"
+                        }
                         strokeWidth={2}
                         dot={false}
                       />
@@ -634,7 +753,7 @@ export function AttemptsPage() {
             No attempts found
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            {filterType !== 'all' 
+            {filterType !== "all"
               ? `You haven't attempted any ${filterType}es yet.`
               : "You haven't attempted any quizzes or flashcards yet."}
           </p>

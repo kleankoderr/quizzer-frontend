@@ -1,16 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { quizService } from '../services/quiz.service';
-import type { QuizGenerateRequest } from '../types';
-import { Brain, Plus, Sparkles, Target, CheckCircle, X, History } from 'lucide-react';
-import { QuizGenerator } from '../components/QuizGenerator';
-import { QuizList } from '../components/QuizList';
-import { Modal } from '../components/Modal';
-import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
-import { ProgressToast } from '../components/ProgressToast';
-import { useQuizzes } from '../hooks';
-import { useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { quizService } from "../services/quiz.service";
+import type { QuizGenerateRequest } from "../types";
+import {
+  Brain,
+  Plus,
+  Sparkles,
+  Target,
+  CheckCircle,
+  X,
+  History,
+} from "lucide-react";
+import { QuizGenerator } from "../components/QuizGenerator";
+import { QuizList } from "../components/QuizList";
+import { Modal } from "../components/Modal";
+import { CardSkeleton, StatCardSkeleton } from "../components/skeletons";
+import { ProgressToast } from "../components/ProgressToast";
+import { useQuizzes } from "../hooks";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
@@ -18,118 +26,140 @@ export const QuizPage = () => {
   const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
   const { data: quizzes = [], isLoading: loading } = useQuizzes();
-  const [initialValues, setInitialValues] = useState<{ 
-    topic?: string; 
-    content?: string; 
-    mode?: 'topic' | 'content' | 'files';
-    sourceId?: string;
-    sourceTitle?: string;
-    contentId?: string;
-    breadcrumb?: any[];
-  } | undefined>(undefined);
-  const [deleteQuizId, setDeleteQuizId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (location.state) {
-      const { topic, contentText, sourceId, sourceTitle, contentId } = location.state as { 
-        topic?: string; 
-        contentText?: string;
+  const [initialValues, setInitialValues] = useState<
+    | {
+        topic?: string;
+        content?: string;
+        mode?: "topic" | "content" | "files";
         sourceId?: string;
         sourceTitle?: string;
         contentId?: string;
         breadcrumb?: any[];
-      };
-      
+      }
+    | undefined
+  >(undefined);
+  const [deleteQuizId, setDeleteQuizId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (location.state) {
+      const { topic, contentText, sourceId, sourceTitle, contentId } =
+        location.state as {
+          topic?: string;
+          contentText?: string;
+          sourceId?: string;
+          sourceTitle?: string;
+          contentId?: string;
+          breadcrumb?: any[];
+        };
+
       if (topic || contentText) {
         setInitialValues({
           topic,
           content: contentText,
-          mode: contentText ? 'content' : 'topic',
+          mode: contentText ? "content" : "topic",
           sourceId,
           sourceTitle,
           contentId,
-          breadcrumb: (location.state as any).breadcrumb
+          breadcrumb: (location.state as any).breadcrumb,
         });
         setShowGenerator(true);
       }
     }
   }, [location.state]);
 
-  const handleGenerate = async (request: QuizGenerateRequest, files?: File[]) => {
+  const handleGenerate = async (
+    request: QuizGenerateRequest,
+    files?: File[],
+  ) => {
     setShowGenerator(false); // Hide generator immediately
-    
+
     // Show initial toast
-    const toastId = toast.custom((t) => (
-      <ProgressToast
-        t={t}
-        title="Generating Quiz"
-        message="Starting generation..."
-        progress={0}
-        status="processing"
-      />
-    ), { duration: Infinity });
-    
+    const toastId = toast.custom(
+      (t) => (
+        <ProgressToast
+          t={t}
+          title="Generating Quiz"
+          message="Starting generation..."
+          progress={0}
+          status="processing"
+        />
+      ),
+      { duration: Infinity },
+    );
+
     try {
       // Start generation
       const { jobId } = await quizService.generate(request, files);
-      
+
       // Poll for completion with progress updates
       const quiz = await quizService.pollForCompletion(jobId, (p) => {
-        toast.custom((t) => (
-          <ProgressToast
-            t={t}
-            title="Generating Quiz"
-            message={`Crafting questions... ${Math.round(p)}%`}
-            progress={p}
-            status="processing"
-          />
-        ), { id: toastId });
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Generating Quiz"
+              message={`Crafting questions... ${Math.round(p)}%`}
+              progress={p}
+              status="processing"
+            />
+          ),
+          { id: toastId },
+        );
       });
-      
+
       // Refresh the quiz list to get the latest quizzes
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await queryClient.invalidateQueries({ queryKey: ["quizzes"] });
 
       // If generated from content, invalidate content query to update quizId
       if (initialValues?.contentId) {
-        await queryClient.invalidateQueries({ queryKey: ['content', initialValues.contentId] });
+        await queryClient.invalidateQueries({
+          queryKey: ["content", initialValues.contentId],
+        });
       }
-      
+
       // Success toast
-      toast.custom((t) => (
-        <ProgressToast
-          t={t}
-          title="Success!"
-          message="Opening your quiz..."
-          progress={100}
-          status="success"
-        />
-      ), { id: toastId, duration: 2000 });
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Success!"
+            message="Opening your quiz..."
+            progress={100}
+            status="success"
+          />
+        ),
+        { id: toastId, duration: 2000 },
+      );
 
       // Navigate to the quiz if we have the quiz object
       if (quiz?.id) {
         setTimeout(() => {
           navigate(`/quiz/${quiz.id}`, {
             state: {
-              breadcrumb: initialValues?.breadcrumb ? [
-                ...initialValues.breadcrumb,
-                { label: quiz.title, path: `/quiz/${quiz.id}` }
-              ] : undefined
-            }
+              breadcrumb: initialValues?.breadcrumb
+                ? [
+                    ...initialValues.breadcrumb,
+                    { label: quiz.title, path: `/quiz/${quiz.id}` },
+                  ]
+                : undefined,
+            },
           });
         }, 500);
       }
-
     } catch (_error) {
       // Error toast
-      toast.custom((t) => (
-        <ProgressToast
-          t={t}
-          title="Generation Failed"
-          message="Failed to generate quiz. Please try again."
-          progress={0}
-          status="error"
-        />
-      ), { id: toastId, duration: 5000 });
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Generation Failed"
+            message="Failed to generate quiz. Please try again."
+            progress={0}
+            status="error"
+          />
+        ),
+        { id: toastId, duration: 5000 },
+      );
     }
   };
 
@@ -140,16 +170,18 @@ export const QuizPage = () => {
   const confirmDeleteQuiz = async () => {
     if (!deleteQuizId) return;
 
-    const loadingToast = toast.loading('Deleting quiz...');
+    const loadingToast = toast.loading("Deleting quiz...");
     try {
       await quizService.delete(deleteQuizId);
-      
+
       // Refresh the quiz list
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-      
-      toast.success('Quiz deleted successfully!', { id: loadingToast });
+      await queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+
+      toast.success("Quiz deleted successfully!", { id: loadingToast });
     } catch (_error) {
-      toast.error('Failed to delete quiz. Please try again.', { id: loadingToast });
+      toast.error("Failed to delete quiz. Please try again.", {
+        id: loadingToast,
+      });
     } finally {
       setDeleteQuizId(null);
     }
@@ -157,9 +189,12 @@ export const QuizPage = () => {
 
   // Calculate stats
   const totalQuizzes = quizzes.length;
-  const totalQuestions = quizzes.reduce((sum, quiz) => sum + quiz.questions.length, 0);
-  const completedQuizzes = quizzes.filter(quiz => 
-    quiz.attempts && quiz.attempts.length > 0
+  const totalQuestions = quizzes.reduce(
+    (sum, quiz) => sum + quiz.questions.length,
+    0,
+  );
+  const completedQuizzes = quizzes.filter(
+    (quiz) => quiz.attempts && quiz.attempts.length > 0,
   ).length;
 
   return (
@@ -173,7 +208,9 @@ export const QuizPage = () => {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">Smart Learning</span>
+            <span className="text-yellow-300 font-semibold text-sm">
+              Smart Learning
+            </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -181,7 +218,9 @@ export const QuizPage = () => {
                 <Brain className="w-10 h-10" />
                 Quiz Generator
               </h1>
-              <p className="text-blue-100 dark:text-blue-200 text-lg">Create intelligent quizzes from any topic, content, or file</p>
+              <p className="text-blue-100 dark:text-blue-200 text-lg">
+                Create intelligent quizzes from any topic, content, or file
+              </p>
             </div>
             {!showGenerator && (
               <button
@@ -210,8 +249,12 @@ export const QuizPage = () => {
                       <Brain className="w-6 h-6 text-white" />
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalQuizzes}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Total Quizzes</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {totalQuizzes}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        Total Quizzes
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -221,8 +264,12 @@ export const QuizPage = () => {
                       <Target className="w-6 h-6 text-white" />
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalQuestions}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Questions Created</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {totalQuestions}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        Questions Created
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -232,18 +279,22 @@ export const QuizPage = () => {
                       <CheckCircle className="w-6 h-6 text-white" />
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{completedQuizzes}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Completed</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {completedQuizzes}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        Completed
+                      </p>
                     </div>
                   </div>
                 </div>
               </>
             )}
           </div>
-          
+
           {/* View All Attempts Button */}
           <button
-            onClick={() => navigate('/attempts?type=quiz')}
+            onClick={() => navigate("/attempts?type=quiz")}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium"
           >
             <History className="w-5 h-5" />
@@ -254,13 +305,17 @@ export const QuizPage = () => {
 
       {showGenerator && (
         <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
-          <button 
+          <button
             onClick={() => setShowGenerator(false)}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
           >
             <X className="w-5 h-5" />
           </button>
-          <QuizGenerator onGenerate={handleGenerate} loading={loading} initialValues={initialValues} />
+          <QuizGenerator
+            onGenerate={handleGenerate}
+            loading={loading}
+            initialValues={initialValues}
+          />
         </div>
       )}
 
@@ -293,9 +348,11 @@ export const QuizPage = () => {
           </>
         }
       >
-        <p>Are you sure you want to delete this quiz? This action cannot be undone.</p>
+        <p>
+          Are you sure you want to delete this quiz? This action cannot be
+          undone.
+        </p>
       </Modal>
-
     </div>
   );
 };

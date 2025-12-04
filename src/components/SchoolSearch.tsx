@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { School as SchoolIcon, Search, Plus } from 'lucide-react';
-import { apiClient } from '../services/api';
+import axios from "axios";
+import { useState, useEffect, useRef } from "react";
+import { School as SchoolIcon, Search, Plus } from "lucide-react";
 
 interface School {
   id: string;
@@ -14,7 +14,12 @@ interface SchoolSearchProps {
   className?: string;
 }
 
-export const SchoolSearch = ({ value, onChange, placeholder = "Search for your school...", className = "" }: SchoolSearchProps) => {
+export const SchoolSearch = ({
+  value,
+  onChange,
+  placeholder = "Search for your school...",
+  className = "",
+}: SchoolSearchProps) => {
   const [query, setQuery] = useState(value);
   const [results, setResults] = useState<School[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -27,33 +32,46 @@ export const SchoolSearch = ({ value, onChange, placeholder = "Search for your s
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
     const searchSchools = async () => {
-      if (query.length < 2) {
+      if (query.length < 3) {
         setResults([]);
         return;
       }
 
       setLoading(true);
       try {
-        const { data } = await apiClient.get(`/schools/search?q=${encodeURIComponent(query)}`);
-        setResults(data);
+        // Using Hipolabs University Domains and Names API as a public source
+        const { data } = await axios.get(
+          `http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`,
+        );
+        // Map the response to our School interface, taking top 10 results
+        const mappedResults = data
+          .slice(0, 10)
+          .map((item: any, index: number) => ({
+            id: `${item.name}-${index}`,
+            name: item.name,
+          }));
+        setResults(mappedResults);
       } catch (error) {
-        console.error('Failed to search schools:', error);
+        console.error("Failed to search schools:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    const debounce = setTimeout(searchSchools, 300);
+    const debounce = setTimeout(searchSchools, 500);
     return () => clearTimeout(debounce);
   }, [query]);
 
@@ -103,7 +121,9 @@ export const SchoolSearch = ({ value, onChange, placeholder = "Search for your s
             </ul>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">No schools found</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                No schools found
+              </p>
               <button
                 onClick={() => handleSelect(query)}
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center justify-center gap-1 mx-auto"

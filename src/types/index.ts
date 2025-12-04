@@ -9,6 +9,7 @@ export interface User {
   grade?: string;
   preferences?: Record<string, any>;
   onboardingCompleted?: boolean;
+  assessmentPopupShown?: boolean;
   createdAt: string;
 }
 

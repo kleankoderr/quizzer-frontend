@@ -1,52 +1,70 @@
-import { useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { quoteService } from '../services/quote.service';
-import { ArrowRight, BookOpen, Clock, TrendingUp, BarChart3, Sparkles, Target, Zap, Brain, Award, Calendar } from 'lucide-react';
-import { StatCardSkeleton, ChartSkeleton } from '../components/skeletons';
-import { useQuery } from '@tanstack/react-query';
-import { studyService } from '../services/study.service';
-import { contentService } from '../services/content.service';
-import { statisticsService } from '../services/statistics.service';
-import { coachingService } from '../services/coaching.service';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, subDays, startOfDay } from 'date-fns';
-
-
+import { useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { quoteService } from "../services/quote.service";
+import {
+  ArrowRight,
+  BookOpen,
+  Clock,
+  TrendingUp,
+  BarChart3,
+  Sparkles,
+  Target,
+  Zap,
+  Brain,
+  Award,
+  Calendar,
+} from "lucide-react";
+import { StatCardSkeleton, ChartSkeleton } from "../components/skeletons";
+import { useQuery } from "@tanstack/react-query";
+import { studyService } from "../services/study.service";
+import { contentService } from "../services/content.service";
+import { statisticsService } from "../services/statistics.service";
+import { coachingService } from "../services/coaching.service";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { format, subDays, startOfDay } from "date-fns";
 
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const { data: dailyQuote } = useQuery({
-    queryKey: ['daily-quote'],
+    queryKey: ["daily-quote"],
     queryFn: quoteService.getDailyQuote,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
-  
+
   const { data: studyInsights, isLoading: insightsLoading } = useQuery({
-    queryKey: ['study-insights'],
+    queryKey: ["study-insights"],
     queryFn: studyService.getInsights,
   });
 
   const { data: statistics, isLoading: statsLoading } = useQuery({
-    queryKey: ['statistics-overview'],
+    queryKey: ["statistics-overview"],
     queryFn: statisticsService.getOverview,
   });
 
   const { data: recentAttemptsData, isLoading: attemptsLoading } = useQuery({
-    queryKey: ['recent-attempts-dashboard'],
+    queryKey: ["recent-attempts-dashboard"],
     queryFn: () => statisticsService.getAttempts({ limit: 5, page: 1 }),
   });
 
   const { data: activityData, isLoading: activityLoading } = useQuery({
-    queryKey: ['activity-heatmap'],
+    queryKey: ["activity-heatmap"],
     queryFn: () => statisticsService.getActivityHeatmap(),
   });
 
   // Fetch recent content for activity feed
   const { data: recentContent, isLoading: contentLoading } = useQuery({
-    queryKey: ['recent-content'],
+    queryKey: ["recent-content"],
     queryFn: async () => {
       const response = await contentService.getAll();
       return response.data.slice(0, 5);
@@ -54,7 +72,7 @@ export const DashboardPage = () => {
   });
 
   const { data: coachingTips } = useQuery({
-    queryKey: ['coaching-tips'],
+    queryKey: ["coaching-tips"],
     queryFn: coachingService.getTips,
     staleTime: 1000 * 60 * 15, // 15 minutes
   });
@@ -70,20 +88,21 @@ export const DashboardPage = () => {
   // Calculate simple stats
   const activeTopics = useMemo(() => {
     if (!recentContent) return 0;
-    const uniqueTopics = new Set(recentContent.map(c => c.topic));
+    const uniqueTopics = new Set(recentContent.map((c) => c.topic));
     return uniqueTopics.size;
   }, [recentContent]);
 
   const retentionLevel = useMemo(() => {
-    if (!studyInsights?.retentionDistribution) return 'Getting Started';
+    if (!studyInsights?.retentionDistribution) return "Getting Started";
     const dist = studyInsights.retentionDistribution;
-    const total = dist.LEARNING + dist.REINFORCEMENT + dist.RECALL + dist.MASTERY;
-    if (total === 0) return 'Getting Started';
-    
+    const total =
+      dist.LEARNING + dist.REINFORCEMENT + dist.RECALL + dist.MASTERY;
+    if (total === 0) return "Getting Started";
+
     const masteryPercent = (dist.MASTERY / total) * 100;
-    if (masteryPercent > 50) return 'Excellent';
-    if (masteryPercent > 25) return 'Improving';
-    return 'Building';
+    if (masteryPercent > 50) return "Excellent";
+    if (masteryPercent > 25) return "Improving";
+    return "Building";
   }, [studyInsights]);
 
   // Prepare activity chart data (last 7 days)
@@ -93,7 +112,7 @@ export const DashboardPage = () => {
       return Array.from({ length: 7 }, (_, i) => {
         const date = startOfDay(subDays(new Date(), 6 - i));
         return {
-          date: format(date, 'MMM dd'),
+          date: format(date, "MMM dd"),
           count: 0,
         };
       });
@@ -102,10 +121,10 @@ export const DashboardPage = () => {
     // Get last 7 days
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = startOfDay(subDays(new Date(), 6 - i));
-      const dateStr = format(date, 'yyyy-MM-dd');
-      const activity = activityData.find(a => a.date === dateStr);
+      const dateStr = format(date, "yyyy-MM-dd");
+      const activity = activityData.find((a) => a.date === dateStr);
       return {
-        date: format(date, 'MMM dd'),
+        date: format(date, "MMM dd"),
         count: activity?.count || 0,
       };
     });
@@ -136,15 +155,17 @@ export const DashboardPage = () => {
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full hidden md:block"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full hidden md:block"></div>
         </div>
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-6 h-6 text-yellow-300" />
-              <span className="text-yellow-300 font-semibold text-sm">Your Learning Hub</span>
+              <span className="text-yellow-300 font-semibold text-sm">
+                Your Learning Hub
+              </span>
             </div>
             <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
-              Welcome back, {user?.name || 'Learner'}! 👋
+              Welcome back, {user?.name || "Learner"}! 👋
             </h1>
             <p className="text-blue-100 dark:text-blue-200 text-lg">
               Track your progress and continue your learning journey
@@ -153,14 +174,14 @@ export const DashboardPage = () => {
 
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <button
-              onClick={() => navigate('/study')}
+              onClick={() => navigate("/study")}
               className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto"
             >
               <BookOpen className="w-5 h-5" />
               Start Studying
             </button>
             <button
-              onClick={() => navigate('/quiz')}
+              onClick={() => navigate("/quiz")}
               className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600/20 text-white hover:bg-blue-600/30 border border-white/20 backdrop-blur-sm rounded-xl font-semibold transition-colors w-full sm:w-auto"
             >
               <Brain className="w-5 h-5" />
@@ -174,7 +195,10 @@ export const DashboardPage = () => {
       {dailyQuote && (
         <div className="px-1 py-2">
           <p className="text-gray-600 dark:text-gray-400 text-sm italic text-center">
-            "{dailyQuote.text}" <span className="text-gray-400 dark:text-gray-500 not-italic ml-2">— {dailyQuote.author}</span>
+            "{dailyQuote.text}"{" "}
+            <span className="text-gray-400 dark:text-gray-500 not-italic ml-2">
+              — {dailyQuote.author}
+            </span>
           </p>
         </div>
       )}
@@ -184,10 +208,15 @@ export const DashboardPage = () => {
         <div className="card p-4 md:p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border-blue-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Total Attempts</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{statistics?.totalAttempts || 0}</p>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                Total Attempts
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {statistics?.totalAttempts || 0}
+              </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {statistics?.quizAttempts || 0} quizzes, {statistics?.flashcardAttempts || 0} flashcards
+                {statistics?.quizAttempts || 0} quizzes,{" "}
+                {statistics?.flashcardAttempts || 0} flashcards
               </p>
             </div>
             <div className="p-3 bg-blue-500 rounded-xl">
@@ -199,11 +228,17 @@ export const DashboardPage = () => {
         <div className="card p-4 md:p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 border-green-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Avg. Accuracy</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {statistics?.averageAccuracy ? `${statistics.averageAccuracy.toFixed(1)}%` : '0%'}
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                Avg. Accuracy
               </p>
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">Keep it up!</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {statistics?.averageAccuracy
+                  ? `${statistics.averageAccuracy.toFixed(1)}%`
+                  : "0%"}
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                Keep it up!
+              </p>
             </div>
             <div className="p-3 bg-green-500 rounded-xl">
               <TrendingUp className="w-6 h-6 text-white" />
@@ -214,9 +249,15 @@ export const DashboardPage = () => {
         <div className="card p-4 md:p-6 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border-orange-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Current Streak</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{statistics?.currentStreak || 0}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">days</p>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                Current Streak
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {statistics?.currentStreak || 0}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                days
+              </p>
             </div>
             <div className="p-3 bg-orange-500 rounded-xl">
               <Award className="w-6 h-6 text-white" />
@@ -230,51 +271,60 @@ export const DashboardPage = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Activity (Last 7 Days)</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Activity (Last 7 Days)
+            </h2>
           </div>
         </div>
-        
+
         {activityLoading ? (
           <div className="h-[200px] flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={activityChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart
+              data={activityChartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#e5e7eb"
+              />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+              <YAxis
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'white', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  padding: '8px 12px'
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "white",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  padding: "8px 12px",
                 }}
               />
-              <Area 
-                type="monotone" 
-                dataKey="count" 
-                stroke="#3b82f6" 
+              <Area
+                type="monotone"
+                dataKey="count"
+                stroke="#3b82f6"
                 strokeWidth={2}
-                fillOpacity={1} 
-                fill="url(#colorActivity)" 
+                fillOpacity={1}
+                fill="url(#colorActivity)"
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -292,23 +342,32 @@ export const DashboardPage = () => {
               <h3 className="text-lg font-bold mb-1">Coach's Tip</h3>
               <div className="space-y-3">
                 {coachingTips.map((tip, index) => (
-                  <div key={index} className="bg-white/10 rounded-lg p-3 backdrop-blur-sm border border-white/10">
+                  <div
+                    key={index}
+                    className="bg-white/10 rounded-lg p-3 backdrop-blur-sm border border-white/10"
+                  >
                     <p className="text-sm font-medium leading-relaxed">
                       {tip.message}
                     </p>
                     {tip.action && (
                       <div className="mt-2 flex justify-end">
-                        <button 
+                        <button
                           onClick={() => {
-                            if (tip.action === 'quiz') navigate('/quiz');
-                            else if (tip.action === 'flashcards') navigate('/study');
-                            else if (tip.action === 'challenge') navigate('/challenges');
+                            if (tip.action === "quiz") navigate("/quiz");
+                            else if (tip.action === "flashcards")
+                              navigate("/study");
+                            else if (tip.action === "challenge")
+                              navigate("/challenges");
                           }}
                           className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-full font-bold hover:bg-indigo-50 transition-colors"
                         >
-                          {tip.action === 'quiz' ? 'Take a Quiz' : 
-                           tip.action === 'flashcards' ? 'Review Flashcards' : 
-                           tip.action === 'challenge' ? 'View Challenges' : 'Go'}
+                          {tip.action === "quiz"
+                            ? "Take a Quiz"
+                            : tip.action === "flashcards"
+                              ? "Review Flashcards"
+                              : tip.action === "challenge"
+                                ? "View Challenges"
+                                : "Go"}
                         </button>
                       </div>
                     )}
@@ -326,20 +385,30 @@ export const DashboardPage = () => {
         <div className="card p-4 md:p-6 dark:bg-gray-800">
           <div className="flex items-center gap-2 mb-4">
             <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Learning Progress</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Learning Progress
+            </h3>
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Active Topics</span>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">{activeTopics}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Active Topics
+              </span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                {activeTopics}
+              </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Retention Level</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Retention Level
+              </span>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-gray-900 dark:text-white">{retentionLevel}</span>
-                {retentionLevel !== 'Getting Started' && (
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                  {retentionLevel}
+                </span>
+                {retentionLevel !== "Getting Started" && (
                   <TrendingUp className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 )}
               </div>
@@ -351,21 +420,30 @@ export const DashboardPage = () => {
                   <span>Mastery Progress</span>
                   <span>
                     {Math.round(
-                      ((studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY) / 
-                      (studyInsights.retentionDistribution.LEARNING + studyInsights.retentionDistribution.REINFORCEMENT + 
-                       studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY || 1)) * 100
-                    )}%
+                      ((studyInsights.retentionDistribution.RECALL +
+                        studyInsights.retentionDistribution.MASTERY) /
+                        (studyInsights.retentionDistribution.LEARNING +
+                          studyInsights.retentionDistribution.REINFORCEMENT +
+                          studyInsights.retentionDistribution.RECALL +
+                          studyInsights.retentionDistribution.MASTERY || 1)) *
+                        100,
+                    )}
+                    %
                   </span>
                 </div>
                 <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
-                    style={{ 
+                    style={{
                       width: `${
-                        ((studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY) / 
-                        (studyInsights.retentionDistribution.LEARNING + studyInsights.retentionDistribution.REINFORCEMENT + 
-                         studyInsights.retentionDistribution.RECALL + studyInsights.retentionDistribution.MASTERY || 1)) * 100
-                      }%` 
+                        ((studyInsights.retentionDistribution.RECALL +
+                          studyInsights.retentionDistribution.MASTERY) /
+                          (studyInsights.retentionDistribution.LEARNING +
+                            studyInsights.retentionDistribution.REINFORCEMENT +
+                            studyInsights.retentionDistribution.RECALL +
+                            studyInsights.retentionDistribution.MASTERY || 1)) *
+                        100
+                      }%`,
                     }}
                   />
                 </div>
@@ -378,7 +456,7 @@ export const DashboardPage = () => {
         {topRecommendation ? (
           <div className="card relative overflow-hidden border-0 shadow-lg group">
             <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
-            
+
             {/* Background decoration */}
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
             <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
@@ -403,21 +481,27 @@ export const DashboardPage = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 {topRecommendation.quizId && (
                   <button
-                    onClick={() => navigate(`/quiz/${topRecommendation.quizId}`)}
+                    onClick={() =>
+                      navigate(`/quiz/${topRecommendation.quizId}`)
+                    }
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
                     <Target className="w-5 h-5" />
                     Take Quiz
                   </button>
                 )}
-                
+
                 {topRecommendation.flashcardSetId && (
                   <button
-                    onClick={() => navigate(`/flashcards/${topRecommendation.flashcardSetId}`)}
+                    onClick={() =>
+                      navigate(
+                        `/flashcards/${topRecommendation.flashcardSetId}`,
+                      )
+                    }
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                      !topRecommendation.quizId 
-                        ? 'bg-white text-blue-600 hover:bg-blue-50' 
-                        : 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
+                      !topRecommendation.quizId
+                        ? "bg-white text-blue-600 hover:bg-blue-50"
+                        : "bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20"
                     }`}
                   >
                     <Brain className="w-5 h-5" />
@@ -425,15 +509,16 @@ export const DashboardPage = () => {
                   </button>
                 )}
 
-                {!topRecommendation.quizId && !topRecommendation.flashcardSetId && (
-                   <button
-                   onClick={() => navigate('/study')}
-                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                 >
-                   <BookOpen className="w-5 h-5" />
-                   Continue Learning
-                 </button>
-                )}
+                {!topRecommendation.quizId &&
+                  !topRecommendation.flashcardSetId && (
+                    <button
+                      onClick={() => navigate("/study")}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      Continue Learning
+                    </button>
+                  )}
               </div>
             </div>
           </div>
@@ -441,13 +526,15 @@ export const DashboardPage = () => {
           <div className="card p-4 md:p-6 dark:bg-gray-800">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Get Started</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Get Started
+              </h3>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Begin your learning journey by creating your first study material!
             </p>
             <button
-              onClick={() => navigate('/study')}
+              onClick={() => navigate("/study")}
               className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
             >
               Create Content
@@ -458,60 +545,81 @@ export const DashboardPage = () => {
       </div>
 
       {/* Recent Attempts */}
-      {!attemptsLoading && recentAttemptsData && recentAttemptsData.attempts.length > 0 && (
-        <div className="card p-4 md:p-6 dark:bg-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Attempts</h3>
-            <button
-              onClick={() => navigate('/statistics')}
-              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1"
-            >
-              View All
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <div className="space-y-2">
-            {recentAttemptsData.attempts.slice(0, 3).map((attempt) => (
-              <div
-                key={attempt.id}
-                onClick={() => {
-                  if (attempt.type === 'quiz' && attempt.quiz?.id) {
-                    navigate(`/attempts?quizId=${attempt.quiz.id}`);
-                  } else if (attempt.type === 'flashcard' && attempt.flashcardSet?.id) {
-                    navigate(`/attempts?flashcardId=${attempt.flashcardSet.id}`);
-                  }
-                }}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group gap-4"
+      {!attemptsLoading &&
+        recentAttemptsData &&
+        recentAttemptsData.attempts.length > 0 && (
+          <div className="card p-4 md:p-6 dark:bg-gray-800">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Recent Attempts
+              </h3>
+              <button
+                onClick={() => navigate("/statistics")}
+                className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1"
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                    {attempt.quiz?.title || attempt.flashcardSet?.title || 'Untitled'}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    <span className="hidden sm:inline">{attempt.type === 'quiz' ? 'Quiz' : 'Flashcards'} • </span>
-                    {new Date(attempt.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </p>
-                </div>
-                {attempt.score !== undefined && attempt.totalQuestions && (
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className={`text-sm font-semibold ${
-                      (attempt.score / attempt.totalQuestions) >= 0.7 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : (attempt.score / attempt.totalQuestions) >= 0.5 
-                        ? 'text-yellow-600 dark:text-yellow-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {Math.round((attempt.score / attempt.totalQuestions) * 100)}%
-                    </span>
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all" />
+                View All
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {recentAttemptsData.attempts.slice(0, 3).map((attempt) => (
+                <div
+                  key={attempt.id}
+                  onClick={() => {
+                    if (attempt.type === "quiz" && attempt.quiz?.id) {
+                      navigate(`/attempts?quizId=${attempt.quiz.id}`);
+                    } else if (
+                      attempt.type === "flashcard" &&
+                      attempt.flashcardSet?.id
+                    ) {
+                      navigate(
+                        `/attempts?flashcardId=${attempt.flashcardSet.id}`,
+                      );
+                    }
+                  }}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group gap-4"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                      {attempt.quiz?.title ||
+                        attempt.flashcardSet?.title ||
+                        "Untitled"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <span className="hidden sm:inline">
+                        {attempt.type === "quiz" ? "Quiz" : "Flashcards"} •{" "}
+                      </span>
+                      {new Date(attempt.completedAt).toLocaleDateString(
+                        undefined,
+                        { month: "short", day: "numeric" },
+                      )}
+                    </p>
                   </div>
-                )}
-              </div>
-            ))}
+                  {attempt.score !== undefined && attempt.totalQuestions && (
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span
+                        className={`text-sm font-semibold ${
+                          attempt.score / attempt.totalQuestions >= 0.7
+                            ? "text-green-600 dark:text-green-400"
+                            : attempt.score / attempt.totalQuestions >= 0.5
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {Math.round(
+                          (attempt.score / attempt.totalQuestions) * 100,
+                        )}
+                        %
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -527,7 +635,9 @@ export const DashboardPage = () => {
               <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                 Create Content
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Start learning</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Start learning
+              </p>
             </div>
             <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
           </div>
@@ -545,7 +655,9 @@ export const DashboardPage = () => {
               <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                 View Analytics
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Track progress</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Track progress
+              </p>
             </div>
             <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
           </div>
@@ -563,7 +675,9 @@ export const DashboardPage = () => {
               <p className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 View Attempts
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Review history</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Review history
+              </p>
             </div>
             <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
           </div>

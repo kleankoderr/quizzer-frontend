@@ -1,17 +1,21 @@
-import { useState } from 'react';
-import { useLeaderboard } from '../hooks';
-import { Trophy, Medal, Crown } from 'lucide-react';
-import { TableSkeleton } from '../components/skeletons';
+import { useState } from "react";
+import { useLeaderboard } from "../hooks";
+import { Trophy, Medal, Crown } from "lucide-react";
+import { TableSkeleton } from "../components/skeletons";
 
 export const LeaderboardPage = () => {
-  const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
+  const [activeTab, setActiveTab] = useState<"global" | "friends">("global");
   const { data: leaderboard, isLoading: loading } = useLeaderboard(activeTab);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="w-6 h-6 text-yellow-500" />;
     if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
     if (rank === 3) return <Medal className="w-6 h-6 text-orange-600" />;
-    return <span className="text-gray-500 dark:text-gray-400 font-semibold">{rank}</span>;
+    return (
+      <span className="text-gray-500 dark:text-gray-400 font-semibold">
+        {rank}
+      </span>
+    );
   };
 
   return (
@@ -22,11 +26,13 @@ export const LeaderboardPage = () => {
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <Trophy className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">Rankings</span>
+            <span className="text-yellow-300 font-semibold text-sm">
+              Rankings
+            </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
             Leaderboard
@@ -41,21 +47,21 @@ export const LeaderboardPage = () => {
       <div className="card dark:bg-gray-800">
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           <button
-            onClick={() => setActiveTab('global')}
-              className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'global'
-                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+            onClick={() => setActiveTab("global")}
+            className={`px-6 py-3 font-medium transition-colors ${
+              activeTab === "global"
+                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             Global
           </button>
           <button
-            onClick={() => setActiveTab('friends')}
-              className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'friends'
-                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+            onClick={() => setActiveTab("friends")}
+            className={`px-6 py-3 font-medium transition-colors ${
+              activeTab === "friends"
+                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             Friends
@@ -76,8 +82,8 @@ export const LeaderboardPage = () => {
                   key={entry.userId}
                   className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                     entry.rank <= 3
-                      ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
                   <div className="flex items-center gap-4 flex-1">
@@ -93,17 +99,21 @@ export const LeaderboardPage = () => {
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold">
-                          {(entry.userName || 'U').charAt(0).toUpperCase()}
+                          {(entry.userName || "U").charAt(0).toUpperCase()}
                         </div>
                       )}
-                      <span className="font-medium text-gray-900 dark:text-white">{entry.userName}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {entry.userName}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                       {entry.score}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">points</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      points
+                    </div>
                   </div>
                 </div>
               ))}
@@ -124,7 +134,9 @@ export const LeaderboardPage = () => {
 
       {leaderboard?.userRank && (
         <div className="card bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800">
-          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Your Rank</h3>
+          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">
+            Your Rank
+          </h3>
           <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
             #{leaderboard.userRank}
           </p>

@@ -14,7 +14,7 @@ export const flashcardService = {
   // Generate flashcards
   generate: async (
     request: FlashcardGenerateRequest,
-    files?: File[]
+    files?: File[],
   ): Promise<{ jobId: string; status: string }> => {
     const formData = new FormData();
 
@@ -38,7 +38,7 @@ export const flashcardService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     return response.data;
   },
@@ -46,7 +46,7 @@ export const flashcardService = {
   // Check job status
   getJobStatus: async (jobId: string): Promise<FlashcardJobStatus> => {
     const response = await apiClient.get<FlashcardJobStatus>(
-      `/flashcards/status/${jobId}`
+      `/flashcards/status/${jobId}`,
     );
     return response.data;
   },
@@ -55,7 +55,7 @@ export const flashcardService = {
   pollForCompletion: async (
     jobId: string,
     onProgress?: (progress: number) => void,
-    maxAttempts = 60
+    maxAttempts = 60,
   ): Promise<FlashcardSet | null> => {
     let attempts = 0;
     let jobFound = false;
@@ -115,7 +115,7 @@ export const flashcardService = {
   // Get all flashcard sets
   getAll: async (): Promise<FlashcardSet[]> => {
     const response = await apiClient.get<FlashcardSet[]>(
-      FLASHCARD_ENDPOINTS.GET_ALL
+      FLASHCARD_ENDPOINTS.GET_ALL,
     );
     return response.data;
   },
@@ -123,7 +123,7 @@ export const flashcardService = {
   // Get flashcard set by ID
   getById: async (id: string): Promise<FlashcardSet> => {
     const response = await apiClient.get<FlashcardSet>(
-      FLASHCARD_ENDPOINTS.GET_BY_ID(id)
+      FLASHCARD_ENDPOINTS.GET_BY_ID(id),
     );
     return response.data;
   },
@@ -134,11 +134,11 @@ export const flashcardService = {
     cardResponses: Array<{
       cardIndex: number;
       response: "know" | "dont-know" | "skipped";
-    }>
+    }>,
   ): Promise<any> => {
     const response = await apiClient.post(
       FLASHCARD_ENDPOINTS.RECORD_SESSION(id),
-      { cardResponses }
+      { cardResponses },
     );
     return response.data;
   },

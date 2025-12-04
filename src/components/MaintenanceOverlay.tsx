@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import { settingsService } from '../services/settingsService';
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { settingsService } from "../services/settingsService";
 
-const DISMISSED_KEY = 'maintenance_dismissed';
+const DISMISSED_KEY = "maintenance_dismissed";
 
 export const MaintenanceBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -26,15 +26,15 @@ export const MaintenanceBanner = () => {
     };
 
     checkMaintenanceMode();
-    
+
     // Poll every 30 minutes (settings rarely change, cache handles freshness)
     const interval = setInterval(checkMaintenanceMode, 30 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem(DISMISSED_KEY, 'true');
+    localStorage.setItem(DISMISSED_KEY, "true");
     setIsVisible(false);
   };
 
@@ -42,7 +42,7 @@ export const MaintenanceBanner = () => {
     return null;
   }
 
-  const message = `⚠️ Maintenance Mode Active - We're performing scheduled maintenance. Some features may be temporarily unavailable.${settings.supportEmail ? ` • Need help? Contact: ${settings.supportEmail}` : ''}`;
+  const message = `⚠️ Maintenance Mode Active - We're performing scheduled maintenance. Some features may be temporarily unavailable.${settings.supportEmail ? ` • Need help? Contact: ${settings.supportEmail}` : ""}`;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600/90 via-blue-700/90 to-blue-600/90 text-white shadow-md">

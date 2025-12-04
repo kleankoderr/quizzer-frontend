@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { Loader2, CheckCircle, XCircle, X } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import React, { useEffect } from "react";
+import { Loader2, CheckCircle, XCircle, X } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 interface ProgressToastProps {
   t: any; // Toast object from react-hot-toast
   title: string;
   message: string;
   progress: number;
-  status: 'processing' | 'success' | 'error';
+  status: "processing" | "success" | "error";
 }
 
 export const ProgressToast: React.FC<ProgressToastProps> = ({
@@ -18,7 +18,7 @@ export const ProgressToast: React.FC<ProgressToastProps> = ({
   status,
 }) => {
   useEffect(() => {
-    if (status === 'success' || status === 'error' || progress === 100) {
+    if (status === "success" || status === "error" || progress === 100) {
       const timer = setTimeout(() => {
         toast.dismiss(t.id);
       }, 3000); // Close after 3 seconds
@@ -29,19 +29,19 @@ export const ProgressToast: React.FC<ProgressToastProps> = ({
   return (
     <div
       className={`${
-        t.visible ? 'animate-enter' : 'animate-leave'
+        t.visible ? "animate-enter" : "animate-leave"
       } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 dark:ring-white dark:ring-opacity-10 overflow-hidden relative`}
     >
       <div className="flex-1 w-0 p-4">
         <div className="flex items-start">
           <div className="flex-shrink-0 pt-0.5">
-            {status === 'processing' && (
+            {status === "processing" && (
               <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
             )}
-            {status === 'success' && (
+            {status === "success" && (
               <CheckCircle className="h-10 w-10 text-green-500" />
             )}
-            {status === 'error' && (
+            {status === "error" && (
               <XCircle className="h-10 w-10 text-red-500" />
             )}
           </div>
@@ -52,7 +52,7 @@ export const ProgressToast: React.FC<ProgressToastProps> = ({
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {message}
             </p>
-            {status === 'processing' && (
+            {status === "processing" && (
               <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300 ease-out"

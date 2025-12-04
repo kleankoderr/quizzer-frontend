@@ -95,7 +95,7 @@ export const adminService = {
   moderateContent: async (
     id: string,
     action: "DELETE" | "HIDE" | "IGNORE",
-    reason?: string
+    reason?: string,
   ) => {
     const response = await api.post(`/admin/content/${id}/moderate`, {
       action,

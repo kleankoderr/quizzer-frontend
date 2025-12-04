@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Breadcrumb } from '../components/Breadcrumb';
-import { challengeService } from '../services';
-import type { Challenge, ChallengeProgress } from '../types';
-import { Trophy, TrendingUp, ArrowLeft, Share2, Eye, Sparkles, Award, Target, Zap } from 'lucide-react';
-import Confetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Breadcrumb } from "../components/Breadcrumb";
+import { challengeService } from "../services";
+import type { Challenge, ChallengeProgress } from "../types";
+import {
+  Trophy,
+  TrendingUp,
+  ArrowLeft,
+  Share2,
+  Eye,
+  Sparkles,
+  Award,
+  Target,
+  Zap,
+} from "lucide-react";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
+import toast from "react-hot-toast";
 
 export const ChallengeResultsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,9 +49,8 @@ export const ChallengeResultsPage = () => {
         setTimeout(() => setShowConfetti(false), 5000);
       }
     } catch (_error) {
-
-      toast.error('Failed to load results');
-      navigate('/challenges');
+      toast.error("Failed to load results");
+      navigate("/challenges");
     } finally {
       setLoading(false);
     }
@@ -50,13 +59,15 @@ export const ChallengeResultsPage = () => {
   const handleShare = () => {
     const text = `I just completed the "${challenge?.title}" challenge and scored ${progress?.finalScore}%! 🎉`;
     if (navigator.share) {
-      navigator.share({
-        title: 'Challenge Completed!',
-        text,
-      }).catch(() => {});
+      navigator
+        .share({
+          title: "Challenge Completed!",
+          text,
+        })
+        .catch(() => {});
     } else {
       navigator.clipboard.writeText(text);
-      toast.success('Results copied to clipboard!');
+      toast.success("Results copied to clipboard!");
     }
   };
 
@@ -79,14 +90,28 @@ export const ChallengeResultsPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Confetti */}
-      {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />}
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={500}
+        />
+      )}
 
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          { label: challenge.category || challenge.type.charAt(0).toUpperCase() + challenge.type.slice(1) + ' Challenges', path: '/challenges' },
+          {
+            label:
+              challenge.category ||
+              challenge.type.charAt(0).toUpperCase() +
+                challenge.type.slice(1) +
+                " Challenges",
+            path: "/challenges",
+          },
           { label: challenge.title, path: `/challenges/${id}` },
-          { label: 'Results' },
+          { label: "Results" },
         ]}
       />
 
@@ -103,19 +128,25 @@ export const ChallengeResultsPage = () => {
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 mb-6 shadow-2xl animate-bounce">
             <Trophy className="w-12 h-12 text-white" />
           </div>
-          
+
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-            {isExcellent ? '🌟 Outstanding!' : isGood ? '🎉 Excellent Work!' : isPass ? '👍 Well Done!' : '💪 Challenge Completed!'}
+            {isExcellent
+              ? "🌟 Outstanding!"
+              : isGood
+                ? "🎉 Excellent Work!"
+                : isPass
+                  ? "👍 Well Done!"
+                  : "💪 Challenge Completed!"}
           </h1>
-          
+
           <p className="text-primary-100 text-lg md:text-xl mb-8 max-w-2xl mx-auto">
             {isExcellent
               ? "You've mastered this challenge with an exceptional score!"
               : isGood
-              ? "You've successfully completed the challenge with a great score!"
-              : isPass
-              ? "You've completed the challenge. Keep practicing to improve!"
-              : "You've completed the challenge. Review the questions and try again!"}
+                ? "You've successfully completed the challenge with a great score!"
+                : isPass
+                  ? "You've completed the challenge. Keep practicing to improve!"
+                  : "You've completed the challenge. Review the questions and try again!"}
           </p>
 
           {/* Score Circle */}
@@ -142,37 +173,52 @@ export const ChallengeResultsPage = () => {
                   strokeDasharray={`${2 * Math.PI * 88}`}
                   strokeDashoffset={`${2 * Math.PI * 88 * (1 - finalScore / 100)}`}
                   className={`${
-                    isExcellent ? 'text-green-400' : isGood ? 'text-yellow-400' : isPass ? 'text-blue-400' : 'text-orange-400'
+                    isExcellent
+                      ? "text-green-400"
+                      : isGood
+                        ? "text-yellow-400"
+                        : isPass
+                          ? "text-blue-400"
+                          : "text-orange-400"
                   } transition-all duration-1000 ease-out`}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-5xl md:text-6xl font-bold text-white">{finalScore}%</div>
-                <div className="text-sm text-primary-100 font-medium">Final Score</div>
+                <div className="text-5xl md:text-6xl font-bold text-white">
+                  {finalScore}%
+                </div>
+                <div className="text-sm text-primary-100 font-medium">
+                  Final Score
+                </div>
               </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4">
               {/* Percentile */}
-              {progress.percentile !== undefined && progress.percentile !== null && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="flex items-center gap-2 mb-1">
-                    <TrendingUp className="w-4 h-4 text-yellow-400" />
-                    <span className="text-xs text-primary-100">Ranking</span>
+              {progress.percentile !== undefined &&
+                progress.percentile !== null && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="w-4 h-4 text-yellow-400" />
+                      <span className="text-xs text-primary-100">Ranking</span>
+                    </div>
+                    <div className="text-2xl font-bold text-white">
+                      Top {Math.round(100 - progress.percentile)}%
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-white">Top {Math.round(100 - progress.percentile)}%</div>
-                </div>
-              )}
-              
+                )}
+
               {/* XP Earned */}
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                 <div className="flex items-center gap-2 mb-1">
                   <Sparkles className="w-4 h-4 text-yellow-400" />
                   <span className="text-xs text-primary-100">XP Earned</span>
                 </div>
-                <div className="text-2xl font-bold text-yellow-400">+{challenge.reward}</div>
+                <div className="text-2xl font-bold text-yellow-400">
+                  +{challenge.reward}
+                </div>
               </div>
 
               {/* Quizzes Completed */}
@@ -181,7 +227,9 @@ export const ChallengeResultsPage = () => {
                   <Target className="w-4 h-4 text-green-400" />
                   <span className="text-xs text-primary-100">Completed</span>
                 </div>
-                <div className="text-2xl font-bold text-white">{progress.completedQuizzes}/{progress.totalQuizzes}</div>
+                <div className="text-2xl font-bold text-white">
+                  {progress.completedQuizzes}/{progress.totalQuizzes}
+                </div>
               </div>
 
               {/* Achievement Badge */}
@@ -191,7 +239,7 @@ export const ChallengeResultsPage = () => {
                   <span className="text-xs text-primary-100">Grade</span>
                 </div>
                 <div className="text-2xl font-bold text-white">
-                  {isExcellent ? 'A+' : isGood ? 'A' : isPass ? 'B' : 'C'}
+                  {isExcellent ? "A+" : isGood ? "A" : isPass ? "B" : "C"}
                 </div>
               </div>
             </div>
@@ -207,13 +255,16 @@ export const ChallengeResultsPage = () => {
               <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
                 <Zap className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Quiz Breakdown</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Quiz Breakdown
+              </h2>
             </div>
             <div className="space-y-4">
               {progress.quizAttempts.map((attempt, index) => {
-                const percentage = (attempt.score / attempt.totalQuestions) * 100;
+                const percentage =
+                  (attempt.score / attempt.totalQuestions) * 100;
                 const quiz = challenge.quizzes?.[index];
-                
+
                 return (
                   <div
                     key={index}
@@ -226,27 +277,36 @@ export const ChallengeResultsPage = () => {
                             {index + 1}
                           </span>
                           <div className="font-bold text-gray-900 dark:text-white">
-                            {quiz?.quiz.title || 'Quiz'}
+                            {quiz?.quiz.title || "Quiz"}
                           </div>
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400 ml-8">
-                          {attempt.score} / {attempt.totalQuestions} correct • {quiz?.quiz.topic}
+                          {attempt.score} / {attempt.totalQuestions} correct •{" "}
+                          {quiz?.quiz.topic}
                         </div>
                       </div>
                       <div className="flex flex-col items-end">
-                        <div className={`text-3xl font-bold ${
-                          percentage >= 90
-                            ? 'text-green-600 dark:text-green-400'
-                            : percentage >= 70
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : percentage >= 50
-                            ? 'text-yellow-600 dark:text-yellow-400'
-                            : 'text-red-600 dark:text-red-400'
-                        }`}>
+                        <div
+                          className={`text-3xl font-bold ${
+                            percentage >= 90
+                              ? "text-green-600 dark:text-green-400"
+                              : percentage >= 70
+                                ? "text-blue-600 dark:text-blue-400"
+                                : percentage >= 50
+                                  ? "text-yellow-600 dark:text-yellow-400"
+                                  : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
                           {Math.round(percentage)}%
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {percentage >= 90 ? 'Excellent' : percentage >= 70 ? 'Good' : percentage >= 50 ? 'Pass' : 'Review'}
+                          {percentage >= 90
+                            ? "Excellent"
+                            : percentage >= 70
+                              ? "Good"
+                              : percentage >= 50
+                                ? "Pass"
+                                : "Review"}
                         </div>
                       </div>
                     </div>
@@ -254,12 +314,12 @@ export const ChallengeResultsPage = () => {
                       <div
                         className={`h-3 rounded-full transition-all duration-1000 ease-out ${
                           percentage >= 90
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                            ? "bg-gradient-to-r from-green-500 to-emerald-500"
                             : percentage >= 70
-                            ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                            : percentage >= 50
-                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
-                            : 'bg-gradient-to-r from-red-500 to-pink-500'
+                              ? "bg-gradient-to-r from-blue-500 to-indigo-500"
+                              : percentage >= 50
+                                ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                                : "bg-gradient-to-r from-red-500 to-pink-500"
                         }`}
                         style={{ width: `${percentage}%` }}
                       ></div>
@@ -274,32 +334,34 @@ export const ChallengeResultsPage = () => {
         {/* Actions Sidebar */}
         <div className="space-y-4">
           <div className="card dark:bg-gray-800">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">Actions</h3>
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">
+              Actions
+            </h3>
             <div className="space-y-3">
               <button
-                onClick={() => navigate('/challenges')}
+                onClick={() => navigate("/challenges")}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back to Challenges
               </button>
-              
+
               <button
-                onClick={() => navigate('/leaderboard')}
+                onClick={() => navigate("/leaderboard")}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 hover:from-yellow-100 hover:to-orange-100 dark:hover:from-yellow-900/30 dark:hover:to-orange-900/30 text-gray-900 dark:text-white font-semibold rounded-xl transition-all border-2 border-yellow-200 dark:border-yellow-800"
               >
                 <TrendingUp className="w-5 h-5" />
                 View Leaderboard
               </button>
-              
+
               <button
-                onClick={() => navigate('/attempts')}
+                onClick={() => navigate("/attempts")}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-xl transition-all"
               >
                 <Eye className="w-5 h-5" />
                 Review Attempts
               </button>
-              
+
               <button
                 onClick={handleShare}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-xl transition-all"

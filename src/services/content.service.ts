@@ -61,7 +61,10 @@ export const contentService = {
     return response.data;
   },
 
-  async createFromFile(file: File): Promise<Content> {
+  async createFromFile(
+    file: File,
+    onProgress?: (progress: number) => void,
+  ): Promise<Content> {
     clearCache();
     const formData = new FormData();
     formData.append("file", file);
@@ -70,6 +73,14 @@ export const contentService = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          onProgress(progress);
+        }
+      },
     });
     return response.data;
   },
@@ -77,7 +88,7 @@ export const contentService = {
   async getAll(
     topic?: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<{
     data: Content[];
     meta: { total: number; page: number; limit: number; totalPages: number };
@@ -133,11 +144,11 @@ export const contentService = {
       endOffset: number;
       note?: string;
       sectionIndex?: number;
-    }
+    },
   ): Promise<unknown> {
     const response = await apiClient.post(
       `/content/${contentId}/highlights`,
-      data
+      data,
     );
     return response.data;
   },
@@ -154,7 +165,7 @@ export const contentService = {
   async generateExplanation(
     contentId: string,
     sectionTitle: string,
-    sectionContent: string
+    sectionContent: string,
   ): Promise<string> {
     const response = await apiClient.post(`/content/${contentId}/explain`, {
       sectionTitle,
@@ -166,7 +177,7 @@ export const contentService = {
   async generateExample(
     contentId: string,
     sectionTitle: string,
-    sectionContent: string
+    sectionContent: string,
   ): Promise<string> {
     const response = await apiClient.post(`/content/${contentId}/example`, {
       sectionTitle,

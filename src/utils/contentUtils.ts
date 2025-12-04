@@ -22,7 +22,7 @@ export const HIGHLIGHT_BORDER_COLORS = {
 export const applyHighlights = (
   markdown: string,
   highlights: Highlight[],
-  currentSectionIndex?: number
+  currentSectionIndex?: number,
 ) => {
   if (!highlights || highlights.length === 0) return markdown;
 
@@ -36,7 +36,7 @@ export const applyHighlights = (
 
   let processed = markdown;
   const sortedHighlights = [...relevantHighlights].sort(
-    (a, b) => b.text.length - a.text.length
+    (a, b) => b.text.length - a.text.length,
   );
   const replacements: Map<string, string> = new Map();
 
@@ -55,13 +55,13 @@ export const applyHighlights = (
             highlight.id
           }" data-note-text="${highlight.note.replace(
             /"/g,
-            "&quot;"
+            "&quot;",
           )}" title="Click to view note">!</span>`
         : "";
 
       replacements.set(
         placeholder,
-        `<mark class="${colorClass} rounded px-0.5" data-highlight-id="${highlight.id}">${match}${noteIndicator}</mark>`
+        `<mark class="${colorClass} rounded px-0.5" data-highlight-id="${highlight.id}">${match}${noteIndicator}</mark>`,
       );
       return placeholder;
     });

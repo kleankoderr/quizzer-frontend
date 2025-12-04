@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
-import { CheckCircle, ChevronRight, Lightbulb, ArrowRight, MessageCircle, Sparkles, Loader2, Brain, BookOpen } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import React, { useState } from "react";
+import {
+  CheckCircle,
+  ChevronRight,
+  Lightbulb,
+  ArrowRight,
+  MessageCircle,
+  Sparkles,
+  Loader2,
+  Brain,
+  BookOpen,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
-import { contentService, type Content } from '../services/content.service';
-import { applyHighlights, type Highlight } from '../utils/contentUtils';
+import { contentService, type Content } from "../services/content.service";
+import { applyHighlights, type Highlight } from "../utils/contentUtils";
 
 interface LearningGuideProps {
-  guide: NonNullable<Content['learningGuide']>;
+  guide: NonNullable<Content["learningGuide"]>;
   title: string;
   highlights?: Highlight[];
   onToggleSectionComplete?: (index: number, isComplete: boolean) => void;
@@ -23,40 +33,44 @@ interface LearningGuideProps {
   onGenerateFlashcards?: () => void;
 }
 
-export const LearningGuide: React.FC<LearningGuideProps> = ({ 
-  guide, 
-  title, 
-  highlights = [], 
+export const LearningGuide: React.FC<LearningGuideProps> = ({
+  guide,
+  title,
+  highlights = [],
   onToggleSectionComplete,
   onContentClick,
   contentRef,
   contentId,
   onGenerateQuiz,
-  onGenerateFlashcards
+  onGenerateFlashcards,
 }) => {
-  const [completedSections, setCompletedSections] = useState<Set<number>>(() => {
-    const initial = new Set<number>();
-    for (const section of guide.sections) {
+  const [completedSections, setCompletedSections] = useState<Set<number>>(
+    () => {
+      const initial = new Set<number>();
+      for (const section of guide.sections) {
         const index = guide.sections.indexOf(section);
-      if (section.completed) initial.add(index);
-    }
+        if (section.completed) initial.add(index);
+      }
       return initial;
-  });
+    },
+  );
 
   // Sync with guide updates
   React.useEffect(() => {
     const newCompleted = new Set<number>();
     for (const section of guide.sections) {
-        const index = guide.sections.indexOf(section);
+      const index = guide.sections.indexOf(section);
       if (section.completed) newCompleted.add(index);
     }
-      setCompletedSections(newCompleted);
+    setCompletedSections(newCompleted);
   }, [guide]);
   const [activeSection, setActiveSection] = useState<number>(0);
-  const [generatedContent, setGeneratedContent] = useState<Record<string, string>>(() => {
+  const [generatedContent, setGeneratedContent] = useState<
+    Record<string, string>
+  >(() => {
     const initial: Record<string, string> = {};
     for (const section of guide.sections) {
-        const index = guide.sections.indexOf(section);
+      const index = guide.sections.indexOf(section);
       if (section.generatedExplanation) {
         initial[`${index}-explain`] = section.generatedExplanation;
       }
@@ -64,22 +78,27 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         initial[`${index}-example`] = section.generatedExample;
       }
     }
-      return initial;
+    return initial;
   });
-  const [visibleContent, setVisibleContent] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    for (const section of guide.sections) {
+  const [visibleContent, setVisibleContent] = useState<Record<string, boolean>>(
+    () => {
+      const initial: Record<string, boolean> = {};
+      for (const section of guide.sections) {
         const index = guide.sections.indexOf(section);
-      if (section.generatedExplanation) {
-        initial[`${index}-explain`] = true;
+        if (section.generatedExplanation) {
+          initial[`${index}-explain`] = true;
+        }
+        if (section.generatedExample) {
+          initial[`${index}-example`] = true;
+        }
       }
-      if (section.generatedExample) {
-        initial[`${index}-example`] = true;
-      }
-    }
       return initial;
-  });
-  const [loadingAction, setLoadingAction] = useState<{section: number, type: 'explain' | 'example'} | null>(null);
+    },
+  );
+  const [loadingAction, setLoadingAction] = useState<{
+    section: number;
+    type: "explain" | "example";
+  } | null>(null);
 
   const toggleSection = (index: number) => {
     setActiveSection(activeSection === index ? -1 : index);
@@ -89,10 +108,10 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     e.stopPropagation();
     const newCompleted = new Set(completedSections);
     const isComplete = !newCompleted.has(index);
-    
+
     if (isComplete) {
       newCompleted.add(index);
-      
+
       // Auto-advance to next section
       if (index === activeSection && index < guide.sections.length - 1) {
         setTimeout(() => {
@@ -102,22 +121,25 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     } else {
       newCompleted.delete(index);
     }
-    
+
     setCompletedSections(newCompleted);
     onToggleSectionComplete?.(index, isComplete);
   };
 
-  const handleAskQuestion = async (sectionIndex: number, type: 'explain' | 'example') => {
+  const handleAskQuestion = async (
+    sectionIndex: number,
+    type: "explain" | "example",
+  ) => {
     const section = guide.sections[sectionIndex];
     if (!section) return;
 
     const key = `${sectionIndex}-${type}`;
-    
+
     // If content exists, just toggle visibility
     if (generatedContent[key]) {
-      setVisibleContent(prev => ({
+      setVisibleContent((prev) => ({
         ...prev,
-        [key]: !prev[key]
+        [key]: !prev[key],
       }));
       return;
     }
@@ -125,73 +147,95 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     setLoadingAction({ section: sectionIndex, type });
 
     try {
-      let result = '';
-      if (type === 'explain') {
-        result = await contentService.generateExplanation(contentId, section.title, section.content);
+      let result = "";
+      if (type === "explain") {
+        result = await contentService.generateExplanation(
+          contentId,
+          section.title,
+          section.content,
+        );
       } else {
-        result = await contentService.generateExample(contentId, section.title, section.content);
+        result = await contentService.generateExample(
+          contentId,
+          section.title,
+          section.content,
+        );
       }
-      
-      setGeneratedContent(prev => ({
+
+      setGeneratedContent((prev) => ({
         ...prev,
-        [key]: result
+        [key]: result,
       }));
-      setVisibleContent(prev => ({
+      setVisibleContent((prev) => ({
         ...prev,
-        [key]: true
+        [key]: true,
       }));
 
       // Persist to backend
       const updatedGuide = structuredClone(guide);
       if (updatedGuide.sections[sectionIndex]) {
-        if (type === 'explain') {
+        if (type === "explain") {
           updatedGuide.sections[sectionIndex].generatedExplanation = result;
         } else {
           updatedGuide.sections[sectionIndex].generatedExample = result;
         }
-        
+
         try {
           await contentService.update(contentId, {
-            learningGuide: updatedGuide
+            learningGuide: updatedGuide,
           });
-        } catch (_err) {
-
-        }
+        } catch (_err) {}
       }
     } catch (_error) {
-
     } finally {
       setLoadingAction(null);
     }
   };
 
-  const toggleContentVisibility = (sectionIndex: number, type: 'explain' | 'example') => {
+  const toggleContentVisibility = (
+    sectionIndex: number,
+    type: "explain" | "example",
+  ) => {
     const key = `${sectionIndex}-${type}`;
-    setVisibleContent(prev => ({
+    setVisibleContent((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
-  const progress = Math.round((completedSections.size / guide.sections.length) * 100);
+  const progress = Math.round(
+    (completedSections.size / guide.sections.length) * 100,
+  );
 
   // Custom heading renderer
   const HeadingRenderer = ({ level, children }: any) => {
-    const text = children?.[0]?.toString() || '';
-    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+    const text = children?.[0]?.toString() || "";
+    const id = text.toLowerCase().replace(/[^\w]+/g, "-");
     const Tag = `h${level}` as React.ElementType;
     return <Tag id={id}>{children}</Tag>;
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500" ref={contentRef} onClick={onContentClick}>
+    <div
+      className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500"
+      ref={contentRef}
+      onClick={onContentClick}
+    >
       {/* Header Section */}
       <div className="bg-white dark:bg-gray-800 sm:rounded-2xl p-4 md:p-6 sm:shadow-sm sm:border border-gray-200 dark:border-gray-700">
         <div className="flex items-start justify-between gap-6 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4" style={{ fontFamily: 'Lexend' }}>{title}</h1>
-            <div className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none" style={{ fontFamily: 'Lexend' }}>
-              <ReactMarkdown 
+            <h1
+              className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4"
+              style={{ fontFamily: "Lexend" }}
+            >
+              {title}
+            </h1>
+            <div
+              className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none"
+              style={{ fontFamily: "Lexend" }}
+            >
+              <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeKatex]}
               >
@@ -236,7 +280,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             <span
               key={idx}
               className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-100 dark:border-primary-800"
-              style={{ fontFamily: 'Lexend' }}
+              style={{ fontFamily: "Lexend" }}
             >
               {concept}
             </span>
@@ -247,7 +291,11 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       {/* Sections */}
       <div className="space-y-4">
         {guide.sections.map((section, idx) => {
-          const processedContent = applyHighlights(section.content, highlights, idx);
+          const processedContent = applyHighlights(
+            section.content,
+            highlights,
+            idx,
+          );
           const isCompleted = completedSections.has(idx);
 
           return (
@@ -256,8 +304,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               data-section-index={idx}
               className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${
                 activeSection === idx
-                  ? 'sm:border-primary-500 sm:shadow-md sm:ring-1 ring-primary-500/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  ? "sm:border-primary-500 sm:shadow-md sm:ring-1 ring-primary-500/20"
+                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
               }`}
             >
               <div
@@ -269,15 +317,20 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                     onClick={(e) => markAsComplete(idx, e)}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
                       isCompleted
-                        ? 'bg-green-500 border-green-500 text-white'
-                        : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500'
+                        ? "bg-green-500 border-green-500 text-white"
+                        : "border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500"
                     }`}
                   >
                     <CheckCircle className="w-4 h-4" />
                   </button>
-                  <h3 className={`text-lg font-semibold transition-colors ${
-                    isCompleted ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'
-                  }`} style={{ fontFamily: 'Lexend' }}>
+                  <h3
+                    className={`text-lg font-semibold transition-colors ${
+                      isCompleted
+                        ? "text-gray-500 dark:text-gray-400"
+                        : "text-gray-900 dark:text-white"
+                    }`}
+                    style={{ fontFamily: "Lexend" }}
+                  >
                     {section.title}
                   </h3>
                 </div>
@@ -287,24 +340,26 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       e.stopPropagation();
                       // Trigger note creation for this section
                       // We can simulate a selection or use a callback
-                      // For now, let's just use the global note handler if possible, 
+                      // For now, let's just use the global note handler if possible,
                       // or we might need to expose a specific handler.
                       // Since the requirement says "Clicking the note icon allows the user to add a note for that section",
                       // and "Do not highlight text when adding a note",
                       // we might need a way to open the note input without text selection.
                       // But the current note input is "InlineNoteInput" which positions based on selection/toolbar.
-                      
-                      // Let's emit a custom event or callback if provided, 
+
+                      // Let's emit a custom event or callback if provided,
                       // or we can rely on the parent to handle "add note to section".
                       // For this iteration, I'll add the button and we can wire it up in ContentPage.
-                      const rect = (e.target as HTMLElement).getBoundingClientRect();
-                      const event = new CustomEvent('add-section-note', { 
-                        detail: { 
-                          sectionIndex: idx, 
+                      const rect = (
+                        e.target as HTMLElement
+                      ).getBoundingClientRect();
+                      const event = new CustomEvent("add-section-note", {
+                        detail: {
+                          sectionIndex: idx,
                           sectionTitle: section.title,
                           x: rect.left,
-                          y: rect.bottom + window.scrollY
-                        } 
+                          y: rect.bottom + window.scrollY,
+                        },
                       });
                       window.dispatchEvent(event);
                     }}
@@ -315,7 +370,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                   </button>
                   <ChevronRight
                     className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
-                      activeSection === idx ? 'rotate-90' : ''
+                      activeSection === idx ? "rotate-90" : ""
                     }`}
                   />
                 </div>
@@ -323,7 +378,9 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
               <div
                 className={`grid transition-all duration-300 ease-in-out ${
-                  activeSection === idx ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  activeSection === idx
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
                 }`}
               >
                 <div className="overflow-hidden">
@@ -334,22 +391,50 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                         rehypePlugins={[
                           rehypeRaw,
                           rehypeKatex,
-                          [rehypeSanitize, {
-                            ...defaultSchema,
-                            tagNames: [...(defaultSchema.tagNames || []), 'mark', 'span', 'div', 'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd'],
-                            attributes: {
-                              ...defaultSchema.attributes,
-                              mark: [['className'], ['data-highlight-id']],
-                              span: [['className'], ['title'], ['style']],
-                              div: [['className']],
-                              math: [['xmlns'], ['display']],
-                            }
-                          }]
+                          [
+                            rehypeSanitize,
+                            {
+                              ...defaultSchema,
+                              tagNames: [
+                                ...(defaultSchema.tagNames || []),
+                                "mark",
+                                "span",
+                                "div",
+                                "math",
+                                "semantics",
+                                "mrow",
+                                "mi",
+                                "mo",
+                                "mn",
+                                "msup",
+                                "msub",
+                                "mfrac",
+                                "msqrt",
+                                "mroot",
+                                "mtable",
+                                "mtr",
+                                "mtd",
+                              ],
+                              attributes: {
+                                ...defaultSchema.attributes,
+                                mark: [["className"], ["data-highlight-id"]],
+                                span: [["className"], ["title"], ["style"]],
+                                div: [["className"]],
+                                math: [["xmlns"], ["display"]],
+                              },
+                            },
+                          ],
                         ]}
                         components={{
-                          h1: (props) => <HeadingRenderer level={1} {...props} />,
-                          h2: (props) => <HeadingRenderer level={2} {...props} />,
-                          h3: (props) => <HeadingRenderer level={3} {...props} />,
+                          h1: (props) => (
+                            <HeadingRenderer level={1} {...props} />
+                          ),
+                          h2: (props) => (
+                            <HeadingRenderer level={2} {...props} />
+                          ),
+                          h3: (props) => (
+                            <HeadingRenderer level={3} {...props} />
+                          ),
                         }}
                       >
                         {processedContent}
@@ -365,14 +450,20 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                               <Lightbulb className="w-4 h-4" />
                             </div>
                             <div>
-                              <h4 className="font-bold text-gray-900 dark:text-white text-sm" style={{ fontFamily: 'Lexend' }}>
+                              <h4
+                                className="font-bold text-gray-900 dark:text-white text-sm"
+                                style={{ fontFamily: "Lexend" }}
+                              >
                                 Key Example
                               </h4>
                             </div>
                           </div>
                           <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20">
-                            <div className="m-0 leading-relaxed text-sm" style={{ fontFamily: 'Lexend' }}>
-                              <ReactMarkdown 
+                            <div
+                              className="m-0 leading-relaxed text-sm"
+                              style={{ fontFamily: "Lexend" }}
+                            >
+                              <ReactMarkdown
                                 remarkPlugins={[remarkGfm, remarkMath]}
                                 rehypePlugins={[rehypeRaw, rehypeKatex]}
                               >
@@ -388,104 +479,132 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       <div className="mt-8 space-y-6">
                         <div className="flex flex-wrap gap-3">
                           <button
-                            onClick={() => handleAskQuestion(idx, 'explain')}
+                            onClick={() => handleAskQuestion(idx, "explain")}
                             disabled={!!loadingAction}
                             className="group relative flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-800 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-1 sm:flex-none justify-center h-auto min-h-[44px]"
                           >
                             <div className="absolute inset-0 bg-purple-50 dark:bg-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            {loadingAction?.section === idx && loadingAction?.type === 'explain' ? (
+                            {loadingAction?.section === idx &&
+                            loadingAction?.type === "explain" ? (
                               <Loader2 className="w-4 h-4 animate-spin relative z-10 flex-shrink-0" />
                             ) : (
                               <MessageCircle className="w-4 h-4 relative z-10 flex-shrink-0" />
                             )}
-                            <span className="relative z-10 font-medium text-sm text-center leading-tight" style={{ fontFamily: 'Lexend' }}>Explain this better</span>
+                            <span
+                              className="relative z-10 font-medium text-sm text-center leading-tight"
+                              style={{ fontFamily: "Lexend" }}
+                            >
+                              Explain this better
+                            </span>
                           </button>
-                          
+
                           <button
-                            onClick={() => handleAskQuestion(idx, 'example')}
+                            onClick={() => handleAskQuestion(idx, "example")}
                             disabled={!!loadingAction}
                             className="group relative flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl hover:text-amber-600 dark:hover:text-amber-400 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-amber-200 dark:hover:border-amber-800 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-1 sm:flex-none justify-center h-auto min-h-[44px]"
                           >
                             <div className="absolute inset-0 bg-amber-50 dark:bg-amber-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            {loadingAction?.section === idx && loadingAction?.type === 'example' ? (
+                            {loadingAction?.section === idx &&
+                            loadingAction?.type === "example" ? (
                               <Loader2 className="w-4 h-4 animate-spin relative z-10 flex-shrink-0" />
                             ) : (
                               <Sparkles className="w-4 h-4 relative z-10 flex-shrink-0" />
                             )}
-                            <span className="relative z-10 font-medium text-sm text-center leading-tight" style={{ fontFamily: 'Lexend' }}>Give more examples</span>
+                            <span
+                              className="relative z-10 font-medium text-sm text-center leading-tight"
+                              style={{ fontFamily: "Lexend" }}
+                            >
+                              Give more examples
+                            </span>
                           </button>
                         </div>
 
                         {/* Generated Content Display */}
-                        {generatedContent[`${idx}-explain`] && visibleContent[`${idx}-explain`] && (
-                          <div className="relative overflow-hidden sm:rounded-2xl sm:border border-purple-100 dark:border-purple-900/50 bg-purple-50/30 sm:bg-gradient-to-br sm:from-purple-50/50 sm:to-white dark:from-purple-900/10 dark:to-gray-800 sm:shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 border-l-4 sm:border-l border-l-purple-500 sm:border-l-purple-100">
-                            <div className="hidden sm:block absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-purple-400 to-purple-600"></div>
-                            <div className="p-4 md:p-6">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-purple-100 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-shrink-0">
-                                    <MessageCircle className="w-5 h-5" />
+                        {generatedContent[`${idx}-explain`] &&
+                          visibleContent[`${idx}-explain`] && (
+                            <div className="relative overflow-hidden sm:rounded-2xl sm:border border-purple-100 dark:border-purple-900/50 bg-purple-50/30 sm:bg-gradient-to-br sm:from-purple-50/50 sm:to-white dark:from-purple-900/10 dark:to-gray-800 sm:shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 border-l-4 sm:border-l border-l-purple-500 sm:border-l-purple-100">
+                              <div className="hidden sm:block absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-purple-400 to-purple-600"></div>
+                              <div className="p-4 md:p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-purple-100 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-shrink-0">
+                                      <MessageCircle className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <h4
+                                        className="font-bold text-gray-900 dark:text-white text-base"
+                                        style={{ fontFamily: "Lexend" }}
+                                      >
+                                        Simpler Explanation
+                                      </h4>
+                                      <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                        Smart Tutor
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-base" style={{ fontFamily: 'Lexend' }}>
-                                      Simpler Explanation
-                                    </h4>
-                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">Smart Tutor</p>
-                                  </div>
+                                  <button
+                                    onClick={() =>
+                                      toggleContentVisibility(idx, "explain")
+                                    }
+                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                  >
+                                    <ChevronRight className="w-5 h-5 rotate-90" />
+                                  </button>
                                 </div>
-                                <button 
-                                  onClick={() => toggleContentVisibility(idx, 'explain')}
-                                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                  <ChevronRight className="w-5 h-5 rotate-90" />
-                                </button>
-                              </div>
-                              <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
-                                <ReactMarkdown 
-                                  remarkPlugins={[remarkGfm, remarkMath]}
-                                  rehypePlugins={[rehypeRaw, rehypeKatex]}
-                                >
-                                  {generatedContent[`${idx}-explain`]}
-                                </ReactMarkdown>
+                                <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                  >
+                                    {generatedContent[`${idx}-explain`]}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        {generatedContent[`${idx}-example`] && visibleContent[`${idx}-example`] && (
-                          <div className="relative overflow-hidden sm:rounded-2xl sm:border border-amber-100 dark:border-amber-900/50 bg-amber-50/30 sm:bg-gradient-to-br sm:from-amber-50/50 sm:to-white dark:from-amber-900/10 dark:to-gray-800 sm:shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 border-l-4 sm:border-l border-l-amber-500 sm:border-l-amber-100">
-                            <div className="hidden sm:block absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-amber-600"></div>
-                            <div className="p-4 md:p-6">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
-                                    <Sparkles className="w-5 h-5" />
+                        {generatedContent[`${idx}-example`] &&
+                          visibleContent[`${idx}-example`] && (
+                            <div className="relative overflow-hidden sm:rounded-2xl sm:border border-amber-100 dark:border-amber-900/50 bg-amber-50/30 sm:bg-gradient-to-br sm:from-amber-50/50 sm:to-white dark:from-amber-900/10 dark:to-gray-800 sm:shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 border-l-4 sm:border-l border-l-amber-500 sm:border-l-amber-100">
+                              <div className="hidden sm:block absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-amber-600"></div>
+                              <div className="p-4 md:p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                      <Sparkles className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <h4
+                                        className="font-bold text-gray-900 dark:text-white text-base"
+                                        style={{ fontFamily: "Lexend" }}
+                                      >
+                                        Real-World Examples
+                                      </h4>
+                                      <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                        Smart Tutor
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-base" style={{ fontFamily: 'Lexend' }}>
-                                      Real-World Examples
-                                    </h4>
-                                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Smart Tutor</p>
-                                  </div>
+                                  <button
+                                    onClick={() =>
+                                      toggleContentVisibility(idx, "example")
+                                    }
+                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                  >
+                                    <ChevronRight className="w-5 h-5 rotate-90" />
+                                  </button>
                                 </div>
-                                <button 
-                                  onClick={() => toggleContentVisibility(idx, 'example')}
-                                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                  <ChevronRight className="w-5 h-5 rotate-90" />
-                                </button>
-                              </div>
-                              <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
-                                <ReactMarkdown 
-                                  remarkPlugins={[remarkGfm, remarkMath]}
-                                  rehypePlugins={[rehypeRaw, rehypeKatex]}
-                                >
-                                  {generatedContent[`${idx}-example`]}
-                                </ReactMarkdown>
+                                <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                  >
+                                    {generatedContent[`${idx}-example`]}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     )}
 
@@ -516,11 +635,18 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2" style={{ fontFamily: 'Lexend' }}>
+          <h2
+            className="text-2xl font-bold text-gray-900 dark:text-white mb-2"
+            style={{ fontFamily: "Lexend" }}
+          >
             Excellent work!
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-8" style={{ fontFamily: 'Lexend' }}>
-            You've completed this learning guide. Here are some recommended next steps:
+          <p
+            className="text-gray-600 dark:text-gray-300 mb-8"
+            style={{ fontFamily: "Lexend" }}
+          >
+            You've completed this learning guide. Here are some recommended next
+            steps:
           </p>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
             {guide.nextSteps.map((step, idx) => (
@@ -531,8 +657,17 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                 <div className="w-8 h-8 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
                   {idx + 1}
                 </div>
-                <div className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none" style={{ fontFamily: 'Lexend' }}>
-                  <ReactMarkdown components={{ p: ({children}) => <span className="m-0">{children}</span> }}>
+                <div
+                  className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none"
+                  style={{ fontFamily: "Lexend" }}
+                >
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <span className="m-0">{children}</span>
+                      ),
+                    }}
+                  >
                     {step}
                   </ReactMarkdown>
                 </div>

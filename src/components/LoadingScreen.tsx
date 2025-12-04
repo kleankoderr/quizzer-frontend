@@ -1,14 +1,13 @@
-import { motion } from 'framer-motion';
-
+import { motion } from "framer-motion";
 
 interface LoadingScreenProps {
   message?: string;
   subMessage?: string;
 }
 
-export const LoadingScreen = ({ 
-  message = "Loading...", 
-  subMessage = "Please wait while we prepare your experience" 
+export const LoadingScreen = ({
+  message = "Loading...",
+  subMessage = "Please wait while we prepare your experience",
 }: LoadingScreenProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
@@ -18,17 +17,15 @@ export const LoadingScreen = ({
         transition={{ duration: 0.5 }}
         className="text-center"
       >
-        <img 
-          src="/quiz-emoji.svg" 
-          alt="Quizzer Logo" 
-          className="w-24 h-24 mx-auto mb-6 shadow-xl rounded-2xl"
+        <img
+          src="/quiz-emoji.svg"
+          alt="Quizzer Logo"
+          className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-6 shadow-xl rounded-2xl"
         />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {message}
         </h2>
-        <p className="text-gray-500 dark:text-gray-400">
-          {subMessage}
-        </p>
+        <p className="text-gray-500 dark:text-gray-400">{subMessage}</p>
       </motion.div>
     </div>
   );

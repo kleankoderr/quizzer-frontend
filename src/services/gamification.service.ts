@@ -1,5 +1,5 @@
-import { streakService, challengeService } from './index';
-import type { Streak, Challenge } from '../types';
+import { streakService, challengeService } from "./index";
+import type { Streak, Challenge } from "../types";
 
 export interface GamificationUpdateResult {
   streak: Streak;
@@ -16,14 +16,14 @@ export const gamificationService = {
    */
   afterQuizSubmission: async (
     score: number,
-    totalQuestions: number
+    totalQuestions: number,
   ): Promise<GamificationUpdateResult> => {
     // Update streak with quiz results
     const streak = await streakService.update({ score, totalQuestions });
-    
+
     // Get updated daily challenges
     const challenges = await challengeService.getDaily();
-    
+
     return { streak, challenges };
   },
 
@@ -33,10 +33,10 @@ export const gamificationService = {
   afterFlashcardSession: async (): Promise<GamificationUpdateResult> => {
     // Update streak (flashcards don't have score/totalQuestions)
     const streak = await streakService.update();
-    
+
     // Get updated daily challenges
     const challenges = await challengeService.getDaily();
-    
+
     return { streak, challenges };
   },
 
@@ -48,7 +48,7 @@ export const gamificationService = {
       streakService.getCurrent(),
       challengeService.getDaily(),
     ]);
-    
+
     return { streak, challenges };
   },
 };

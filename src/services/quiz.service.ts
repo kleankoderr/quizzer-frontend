@@ -28,7 +28,7 @@ export const quizService = {
   // Generate a new quiz
   generate: async (
     request: QuizGenerateRequest,
-    files?: File[]
+    files?: File[],
   ): Promise<{ jobId: string; status: string }> => {
     const formData = new FormData();
 
@@ -63,7 +63,7 @@ export const quizService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     return response.data;
   },
@@ -78,7 +78,7 @@ export const quizService = {
   pollForCompletion: async (
     jobId: string,
     onProgress?: (progress: number) => void,
-    maxAttempts = 60
+    maxAttempts = 60,
   ): Promise<Quiz | null> => {
     let attempts = 0;
     let jobFound = false;
@@ -144,19 +144,19 @@ export const quizService = {
   // Submit quiz answers and get gamification updates
   submit: async (
     id: string,
-    submission: QuizSubmission
+    submission: QuizSubmission,
   ): Promise<QuizSubmitResult> => {
     // Submit quiz
     const response = await apiClient.post<QuizResult>(
       QUIZ_ENDPOINTS.SUBMIT(id),
-      submission
+      submission,
     );
     const result = response.data;
 
     // Get gamification updates (streak and challenges)
     const gamification = await gamificationService.afterQuizSubmission(
       result.score,
-      result.totalQuestions
+      result.totalQuestions,
     );
 
     return { result, gamification };

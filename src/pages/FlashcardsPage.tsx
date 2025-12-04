@@ -1,16 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { flashcardService } from '../services/flashcard.service';
-import type { FlashcardGenerateRequest } from '../types';
-import { CreditCard, Plus, Sparkles, Layers, BookOpen, X, History } from 'lucide-react';
-import { FlashcardGenerator } from '../components/FlashcardGenerator';
-import { FlashcardSetList } from '../components/FlashcardSetList';
-import { Modal } from '../components/Modal';
-import { useFlashcardSets } from '../hooks';
-import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
-import { ProgressToast } from '../components/ProgressToast';
-import { useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { flashcardService } from "../services/flashcard.service";
+import type { FlashcardGenerateRequest } from "../types";
+import {
+  CreditCard,
+  Plus,
+  Sparkles,
+  Layers,
+  BookOpen,
+  X,
+  History,
+} from "lucide-react";
+import { FlashcardGenerator } from "../components/FlashcardGenerator";
+import { FlashcardSetList } from "../components/FlashcardSetList";
+import { Modal } from "../components/Modal";
+import { useFlashcardSets } from "../hooks";
+import { CardSkeleton, StatCardSkeleton } from "../components/skeletons";
+import { ProgressToast } from "../components/ProgressToast";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
@@ -20,83 +28,103 @@ export const FlashcardsPage = () => {
   const { data: flashcardSets = [], isLoading } = useFlashcardSets();
   const [loading, setLoading] = useState(false);
   const [deleteSetId, setDeleteSetId] = useState<string | null>(null);
-  const [initialValues, setInitialValues] = useState<{ 
-    topic?: string; 
-    content?: string; 
-    mode?: 'topic' | 'content' | 'files';
-    contentId?: string;
-  } | undefined>(undefined);
+  const [initialValues, setInitialValues] = useState<
+    | {
+        topic?: string;
+        content?: string;
+        mode?: "topic" | "content" | "files";
+        contentId?: string;
+      }
+    | undefined
+  >(undefined);
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, contentId } = location.state as { 
-        topic?: string; 
+      const { topic, contentText, contentId } = location.state as {
+        topic?: string;
         contentText?: string;
         contentId?: string;
       };
-      
+
       if (topic || contentText) {
         setInitialValues({
           topic,
           content: contentText,
-          mode: contentText ? 'content' : 'topic',
-          contentId
+          mode: contentText ? "content" : "topic",
+          contentId,
         });
         setShowGenerator(true);
       }
     }
   }, [location.state]);
 
-  const handleGenerate = async (request: FlashcardGenerateRequest, files?: File[]) => {
+  const handleGenerate = async (
+    request: FlashcardGenerateRequest,
+    files?: File[],
+  ) => {
     setLoading(true);
     setShowGenerator(false); // Hide generator immediately so user can see toast
-    
+
     // Show initial toast
-    const toastId = toast.custom((t) => (
-      <ProgressToast
-        t={t}
-        title="Generating Flashcards"
-        message="Starting generation..."
-        progress={0}
-        status="processing"
-      />
-    ), { duration: Infinity });
+    const toastId = toast.custom(
+      (t) => (
+        <ProgressToast
+          t={t}
+          title="Generating Flashcards"
+          message="Starting generation..."
+          progress={0}
+          status="processing"
+        />
+      ),
+      { duration: Infinity },
+    );
 
     try {
       // Start generation
       const { jobId } = await flashcardService.generate(request, files);
-      
+
       // Poll for completion with progress updates
-      const flashcardSet = await flashcardService.pollForCompletion(jobId, (p) => {
-        toast.custom((t) => (
-          <ProgressToast
-            t={t}
-            title="Generating Flashcards"
-            message={`Processing content... ${Math.round(p)}%`}
-            progress={p}
-            status="processing"
-          />
-        ), { id: toastId });
-      });
-      
+      const flashcardSet = await flashcardService.pollForCompletion(
+        jobId,
+        (p) => {
+          toast.custom(
+            (t) => (
+              <ProgressToast
+                t={t}
+                title="Generating Flashcards"
+                message={`Processing content... ${Math.round(p)}%`}
+                progress={p}
+                status="processing"
+              />
+            ),
+            { id: toastId },
+          );
+        },
+      );
+
       // Refresh the flashcard list to get the latest sets
-      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      await queryClient.invalidateQueries({ queryKey: ["flashcardSets"] });
 
       // If generated from content, invalidate content query to update flashcardSetId
       if (initialValues?.contentId) {
-        await queryClient.invalidateQueries({ queryKey: ['content', initialValues.contentId] });
+        await queryClient.invalidateQueries({
+          queryKey: ["content", initialValues.contentId],
+        });
       }
-      
+
       // Success toast
-      toast.custom((t) => (
-        <ProgressToast
-          t={t}
-          title="Success!"
-          message="Opening your flashcards..."
-          progress={100}
-          status="success"
-        />
-      ), { id: toastId, duration: 2000 });
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Success!"
+            message="Opening your flashcards..."
+            progress={100}
+            status="success"
+          />
+        ),
+        { id: toastId, duration: 2000 },
+      );
 
       // Navigate to the flashcard set if we have it
       if (flashcardSet?.id) {
@@ -104,18 +132,20 @@ export const FlashcardsPage = () => {
           navigate(`/flashcards/${flashcardSet.id}`);
         }, 500);
       }
-
     } catch (_error) {
       // Error toast
-      toast.custom((t) => (
-        <ProgressToast
-          t={t}
-          title="Generation Failed"
-          message="Failed to generate flashcards. Please try again."
-          progress={0}
-          status="error"
-        />
-      ), { id: toastId, duration: 5000 });
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Generation Failed"
+            message="Failed to generate flashcards. Please try again."
+            progress={0}
+            status="error"
+          />
+        ),
+        { id: toastId, duration: 5000 },
+      );
     } finally {
       setLoading(false);
     }
@@ -128,16 +158,20 @@ export const FlashcardsPage = () => {
   const confirmDeleteSet = async () => {
     if (!deleteSetId) return;
 
-    const loadingToast = toast.loading('Deleting flashcard set...');
+    const loadingToast = toast.loading("Deleting flashcard set...");
     try {
       await flashcardService.delete(deleteSetId);
-      
+
       // Refresh the flashcard list
-      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
-      
-      toast.success('Flashcard set deleted successfully!', { id: loadingToast });
+      await queryClient.invalidateQueries({ queryKey: ["flashcardSets"] });
+
+      toast.success("Flashcard set deleted successfully!", {
+        id: loadingToast,
+      });
     } catch (_error) {
-      toast.error('Failed to delete flashcard set. Please try again.', { id: loadingToast });
+      toast.error("Failed to delete flashcard set. Please try again.", {
+        id: loadingToast,
+      });
     } finally {
       setDeleteSetId(null);
     }
@@ -145,10 +179,11 @@ export const FlashcardsPage = () => {
 
   // Calculate stats
   const totalSets = flashcardSets.length;
-  const totalCards = flashcardSets.reduce((sum, set) => 
-    sum + (Array.isArray(set.cards) ? set.cards.length : 0), 0
+  const totalCards = flashcardSets.reduce(
+    (sum, set) => sum + (Array.isArray(set.cards) ? set.cards.length : 0),
+    0,
   );
-  const studiedSets = flashcardSets.filter(set => set.lastStudiedAt).length;
+  const studiedSets = flashcardSets.filter((set) => set.lastStudiedAt).length;
 
   return (
     <div className="space-y-6 pb-8">
@@ -161,7 +196,9 @@ export const FlashcardsPage = () => {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">Smart Learning Cards</span>
+            <span className="text-yellow-300 font-semibold text-sm">
+              Smart Learning Cards
+            </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -169,7 +206,9 @@ export const FlashcardsPage = () => {
                 <CreditCard className="w-10 h-10" />
                 Flashcard Generator
               </h1>
-              <p className="text-emerald-100 dark:text-emerald-200 text-lg">Transform any content into effective study flashcards</p>
+              <p className="text-emerald-100 dark:text-emerald-200 text-lg">
+                Transform any content into effective study flashcards
+              </p>
             </div>
             {!showGenerator && (
               <button
@@ -197,8 +236,12 @@ export const FlashcardsPage = () => {
                     <Layers className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalSets}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">Total Sets</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {totalSets}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">
+                      Total Sets
+                    </p>
                   </div>
                 </div>
               </div>
@@ -208,8 +251,12 @@ export const FlashcardsPage = () => {
                     <CreditCard className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalCards}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">Total Cards</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {totalCards}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">
+                      Total Cards
+                    </p>
                   </div>
                 </div>
               </div>
@@ -219,8 +266,12 @@ export const FlashcardsPage = () => {
                     <BookOpen className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{studiedSets}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">Studied Sets</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {studiedSets}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">
+                      Studied Sets
+                    </p>
                   </div>
                 </div>
               </div>
@@ -228,11 +279,11 @@ export const FlashcardsPage = () => {
           )}
         </div>
       )}
-      
+
       {/* View All Attempts Button */}
       {(isLoading || totalSets > 0) && (
         <button
-          onClick={() => navigate('/attempts?type=flashcard')}
+          onClick={() => navigate("/attempts?type=flashcard")}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium"
         >
           <History className="w-5 h-5" />
@@ -242,13 +293,17 @@ export const FlashcardsPage = () => {
 
       {showGenerator && (
         <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
-          <button 
+          <button
             onClick={() => setShowGenerator(false)}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
           >
             <X className="w-5 h-5" />
           </button>
-          <FlashcardGenerator onGenerate={handleGenerate} loading={loading} initialValues={initialValues} />
+          <FlashcardGenerator
+            onGenerate={handleGenerate}
+            loading={loading}
+            initialValues={initialValues}
+          />
         </div>
       )}
 
@@ -281,9 +336,11 @@ export const FlashcardsPage = () => {
           </>
         }
       >
-        <p>Are you sure you want to delete this flashcard set? This action cannot be undone.</p>
+        <p>
+          Are you sure you want to delete this flashcard set? This action cannot
+          be undone.
+        </p>
       </Modal>
-
     </div>
   );
 };

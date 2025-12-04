@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { List } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { List } from "lucide-react";
 
 interface TableOfContentsProps {
   content: string;
@@ -11,22 +11,24 @@ interface Heading {
   level: number;
 }
 
-export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
+export const TableOfContents: React.FC<TableOfContentsProps> = ({
+  content,
+}) => {
   const [headings, setHeadings] = useState<Heading[]>([]);
-  const [activeId, setActiveId] = useState<string>('');
+  const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
     // Parse headings from markdown
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     const extractedHeadings: Heading[] = [];
-    
+
     lines.forEach((line) => {
       const match = line.match(/^(#{1,3})\s+(.+)$/);
       if (match) {
         const level = match[1].length;
         const text = match[2].trim();
         // Create a simple ID from text
-        const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+        const id = text.toLowerCase().replace(/[^\w]+/g, "-");
         extractedHeadings.push({ id, text, level });
       }
     });
@@ -43,7 +45,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
           }
         });
       },
-      { rootMargin: '-20% 0px -35% 0px' }
+      { rootMargin: "-20% 0px -35% 0px" },
     );
 
     headings.forEach(({ id }) => {
@@ -57,7 +59,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
       setActiveId(id);
     }
   };
@@ -78,8 +80,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
               onClick={() => scrollToHeading(heading.id)}
               className={`block w-full text-left text-sm py-1.5 px-3 rounded-lg transition-colors duration-200 ${
                 activeId === heading.id
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
               }`}
               style={{ paddingLeft: `${heading.level * 0.75}rem` }}
             >

@@ -1,11 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import {
-  Users,
-  BookOpen,
-  Activity,
-  Trophy,
-} from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { useQuery } from "@tanstack/react-query";
+import { Users, BookOpen, Activity, Trophy } from "lucide-react";
+import { adminService } from "../../services/adminService";
 import {
   LineChart,
   Line,
@@ -20,15 +15,22 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
-import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
+} from "recharts";
+import { StatCardSkeleton } from "../../components/skeletons/StatCardSkeleton";
+import { CardSkeleton } from "../../components/skeletons/CardSkeleton";
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const COLORS = [
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#ec4899",
+];
 
 export const AnalyticsDashboard = () => {
   const { data: analytics, isLoading } = useQuery({
-    queryKey: ['analytics'],
+    queryKey: ["analytics"],
     queryFn: adminService.getAnalytics,
   });
 
@@ -57,15 +59,17 @@ export const AnalyticsDashboard = () => {
     );
   }
 
-  const userRoleData = analytics?.users?.byRole?.map((r: any) => ({
-    name: r.role.replace('_', ' '),
-    value: r.count,
-  })) || [];
+  const userRoleData =
+    analytics?.users?.byRole?.map((r: any) => ({
+      name: r.role.replace("_", " "),
+      value: r.count,
+    })) || [];
 
-  const engagementData = analytics?.engagement?.byType?.map((e: any) => ({
-    name: e.type.charAt(0).toUpperCase() + e.type.slice(1),
-    value: e.count,
-  })) || [];
+  const engagementData =
+    analytics?.engagement?.byType?.map((e: any) => ({
+      name: e.type.charAt(0).toUpperCase() + e.type.slice(1),
+      value: e.count,
+    })) || [];
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -111,8 +115,10 @@ export const AnalyticsDashboard = () => {
                   (analytics?.content?.studyMaterials || 0)}
               </p>
               <p className="mt-1 text-sm text-green-600">
-                +{(analytics?.content?.quizzesLast30Days || 0) +
-                  (analytics?.content?.flashcardsLast30Days || 0)} this month
+                +
+                {(analytics?.content?.quizzesLast30Days || 0) +
+                  (analytics?.content?.flashcardsLast30Days || 0)}{" "}
+                this month
               </p>
             </div>
             <div className="rounded-lg bg-purple-500 p-3">
@@ -150,7 +156,8 @@ export const AnalyticsDashboard = () => {
                 {analytics?.challenges?.active || 0}
               </p>
               <p className="mt-1 text-sm text-blue-600">
-                {analytics?.challenges?.completionRate?.toFixed(1) || 0}% completion rate
+                {analytics?.challenges?.completionRate?.toFixed(1) || 0}%
+                completion rate
               </p>
             </div>
             <div className="rounded-lg bg-green-500 p-3">
@@ -172,7 +179,12 @@ export const AnalyticsDashboard = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }
               />
               <YAxis />
               <Tooltip
@@ -200,7 +212,12 @@ export const AnalyticsDashboard = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }
               />
               <YAxis />
               <Tooltip
@@ -247,13 +264,18 @@ export const AnalyticsDashboard = () => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+                }
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
               >
                 {userRoleData.map((_entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -309,11 +331,15 @@ export const AnalyticsDashboard = () => {
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {quiz.attempts}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">attempts</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    attempts
+                  </p>
                 </div>
               </div>
             )) || (
-              <p className="text-center text-gray-500 dark:text-gray-400">No data available</p>
+              <p className="text-center text-gray-500 dark:text-gray-400">
+                No data available
+              </p>
             )}
           </div>
         </div>
@@ -324,33 +350,39 @@ export const AnalyticsDashboard = () => {
             Top Performing Flashcard Sets
           </h2>
           <div className="space-y-3">
-            {analytics?.content?.topFlashcards?.map((flashcard: any, index: number) => (
-              <div
-                key={flashcard.id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-600 dark:bg-green-900/30 dark:text-green-400">
-                    {index + 1}
+            {analytics?.content?.topFlashcards?.map(
+              (flashcard: any, index: number) => (
+                <div
+                  key={flashcard.id}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {flashcard.title}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {flashcard.topic} • by {flashcard.creator}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {flashcard.title}
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {flashcard.attempts}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {flashcard.topic} • by {flashcard.creator}
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      attempts
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {flashcard.attempts}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">attempts</p>
-                </div>
-              </div>
-            )) || (
-              <p className="text-center text-gray-500 dark:text-gray-400">No data available</p>
+              ),
+            ) || (
+              <p className="text-center text-gray-500 dark:text-gray-400">
+                No data available
+              </p>
             )}
           </div>
         </div>

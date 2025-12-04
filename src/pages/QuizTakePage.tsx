@@ -1,23 +1,35 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import { quizService } from '../services/quiz.service';
-import type { QuizResult, Streak, AnswerValue } from '../types';
-import { ArrowLeft, CheckCircle, XCircle, Brain, Trophy, Target, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
-import { XPProgressBar } from '../components/XPProgressBar';
-import { QuestionRenderer } from '../components/QuestionRenderer';
-import { useQuiz } from '../hooks';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { quizService } from "../services/quiz.service";
+import type { QuizResult, Streak, AnswerValue } from "../types";
+import {
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  Brain,
+  Trophy,
+  Target,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+} from "lucide-react";
+import { XPProgressBar } from "../components/XPProgressBar";
+import { QuestionRenderer } from "../components/QuestionRenderer";
+import { useQuiz } from "../hooks";
 
 export const QuizTakePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const challengeId = searchParams.get('challengeId');
+  const challengeId = searchParams.get("challengeId");
   const { data: quiz, isLoading: loading, error } = useQuiz(id);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<(AnswerValue | null)[]>([]);
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    (AnswerValue | null)[]
+  >([]);
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<QuizResult | null>(null);
   const [streak, setStreak] = useState<Streak | null>(null);
@@ -30,8 +42,8 @@ export const QuizTakePage = () => {
 
   // Handle errors
   if (error) {
-    toast.error('Failed to load quiz');
-    navigate('/quiz');
+    toast.error("Failed to load quiz");
+    navigate("/quiz");
   }
 
   // Restore state from localStorage when quiz loads
@@ -39,15 +51,22 @@ export const QuizTakePage = () => {
     if (!quiz || !id) return;
 
     // Try to restore saved state from localStorage
-    const savedAnswers = localStorage.getItem(getStorageKey('answers'));
-    const savedQuestionIndex = localStorage.getItem(getStorageKey('questionIndex'));
-    const savedTimeRemaining = localStorage.getItem(getStorageKey('timeRemaining'));
-    const savedTimestamp = localStorage.getItem(getStorageKey('timestamp'));
-    
+    const savedAnswers = localStorage.getItem(getStorageKey("answers"));
+    const savedQuestionIndex = localStorage.getItem(
+      getStorageKey("questionIndex"),
+    );
+    const savedTimeRemaining = localStorage.getItem(
+      getStorageKey("timeRemaining"),
+    );
+    const savedTimestamp = localStorage.getItem(getStorageKey("timestamp"));
+
     if (savedAnswers) {
       try {
         const parsedAnswers = JSON.parse(savedAnswers);
-        if (Array.isArray(parsedAnswers) && parsedAnswers.length === quiz.questions.length) {
+        if (
+          Array.isArray(parsedAnswers) &&
+          parsedAnswers.length === quiz.questions.length
+        ) {
           setSelectedAnswers(parsedAnswers);
         } else {
           setSelectedAnswers(new Array(quiz.questions.length).fill(null));
@@ -58,16 +77,16 @@ export const QuizTakePage = () => {
     } else {
       setSelectedAnswers(new Array(quiz.questions.length).fill(null));
     }
-    
+
     if (savedQuestionIndex) {
       const index = parseInt(savedQuestionIndex, 10);
       if (!isNaN(index) && index >= 0 && index < quiz.questions.length) {
         setCurrentQuestionIndex(index);
       }
     }
-    
+
     // Initialize or restore timer for timed quizzes
-    if (quiz.quizType === 'timed' && quiz.timeLimit) {
+    if (quiz.quizType === "timed" && quiz.timeLimit) {
       if (savedTimeRemaining && savedTimestamp) {
         const timeRemaining = parseInt(savedTimeRemaining, 10);
         const timestamp = parseInt(savedTimestamp, 10);
@@ -80,8 +99,6 @@ export const QuizTakePage = () => {
       }
     }
   }, [quiz, id]);
-
-
 
   // Timer effect for timed quizzes
   useEffect(() => {
@@ -96,8 +113,11 @@ export const QuizTakePage = () => {
         }
         const newTime = prev - 1;
         // Save time to localStorage
-        localStorage.setItem(getStorageKey('timeRemaining'), newTime.toString());
-        localStorage.setItem(getStorageKey('timestamp'), Date.now().toString());
+        localStorage.setItem(
+          getStorageKey("timeRemaining"),
+          newTime.toString(),
+        );
+        localStorage.setItem(getStorageKey("timestamp"), Date.now().toString());
         return newTime;
       });
     }, 1000);
@@ -105,28 +125,44 @@ export const QuizTakePage = () => {
     return () => clearInterval(timer);
   }, [timeRemaining, showResults]);
 
-  const checkAnswerCorrect = (questionType: string, userAnswer: AnswerValue | null, correctAnswer: AnswerValue): boolean => {
+  const checkAnswerCorrect = (
+    questionType: string,
+    userAnswer: AnswerValue | null,
+    correctAnswer: AnswerValue,
+  ): boolean => {
     if (userAnswer === null) return false;
 
     switch (questionType) {
-      case 'multi-select': {
-        if (!Array.isArray(userAnswer) || !Array.isArray(correctAnswer)) return false;
+      case "multi-select": {
+        if (!Array.isArray(userAnswer) || !Array.isArray(correctAnswer))
+          return false;
         if (userAnswer.length !== correctAnswer.length) return false;
-        const sortedUser = [...userAnswer].sort((a, b) => Number(a) - Number(b));
-        const sortedCorrect = [...correctAnswer].sort((a, b) => Number(a) - Number(b));
+        const sortedUser = [...userAnswer].sort(
+          (a, b) => Number(a) - Number(b),
+        );
+        const sortedCorrect = [...correctAnswer].sort(
+          (a, b) => Number(a) - Number(b),
+        );
         return sortedUser.every((val, idx) => val === sortedCorrect[idx]);
       }
 
-      case 'matching': {
-        if (typeof userAnswer !== 'object' || typeof correctAnswer !== 'object') return false;
-        if (Array.isArray(userAnswer) || Array.isArray(correctAnswer)) return false;
+      case "matching": {
+        if (typeof userAnswer !== "object" || typeof correctAnswer !== "object")
+          return false;
+        if (Array.isArray(userAnswer) || Array.isArray(correctAnswer))
+          return false;
         const userObj = userAnswer as { [key: string]: string };
         const correctObj = correctAnswer as { [key: string]: string };
-        const userKeys = Object.keys(userObj).sort((a, b) => a.localeCompare(b));
-        const correctKeys = Object.keys(correctObj).sort((a, b) => a.localeCompare(b));
+        const userKeys = Object.keys(userObj).sort((a, b) =>
+          a.localeCompare(b),
+        );
+        const correctKeys = Object.keys(correctObj).sort((a, b) =>
+          a.localeCompare(b),
+        );
         if (userKeys.length !== correctKeys.length) return false;
-        if (!userKeys.every((key, idx) => key === correctKeys[idx])) return false;
-        return userKeys.every(key => userObj[key] === correctObj[key]);
+        if (!userKeys.every((key, idx) => key === correctKeys[idx]))
+          return false;
+        return userKeys.every((key) => userObj[key] === correctObj[key]);
       }
 
       default:
@@ -139,14 +175,14 @@ export const QuizTakePage = () => {
     newAnswers[currentQuestionIndex] = answer;
     setSelectedAnswers(newAnswers);
     // Save to localStorage
-    localStorage.setItem(getStorageKey('answers'), JSON.stringify(newAnswers));
+    localStorage.setItem(getStorageKey("answers"), JSON.stringify(newAnswers));
   };
 
   const handleNext = () => {
     if (quiz && currentQuestionIndex < quiz.questions.length - 1) {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
-      localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
+      localStorage.setItem(getStorageKey("questionIndex"), newIndex.toString());
     }
   };
 
@@ -154,7 +190,7 @@ export const QuizTakePage = () => {
     if (currentQuestionIndex > 0) {
       const newIndex = currentQuestionIndex - 1;
       setCurrentQuestionIndex(newIndex);
-      localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
+      localStorage.setItem(getStorageKey("questionIndex"), newIndex.toString());
     }
   };
 
@@ -163,46 +199,46 @@ export const QuizTakePage = () => {
 
     // If not forced, require all questions to be answered
     if (!force && selectedAnswers.some((answer) => answer === null)) {
-      toast.error('Please answer all questions before submitting.');
+      toast.error("Please answer all questions before submitting.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const { result: submissionResult, gamification } = await quizService.submit(id, {
-        answers: selectedAnswers as AnswerValue[],
-        challengeId: challengeId || undefined,
-      });
+      const { result: submissionResult, gamification } =
+        await quizService.submit(id, {
+          answers: selectedAnswers as AnswerValue[],
+          challengeId: challengeId || undefined,
+        });
       setResult(submissionResult);
       setStreak(gamification.streak);
-      
+
       // Clear saved state from localStorage after submission
-      localStorage.removeItem(getStorageKey('answers'));
-      localStorage.removeItem(getStorageKey('questionIndex'));
-      localStorage.removeItem(getStorageKey('timeRemaining'));
-      localStorage.removeItem(getStorageKey('timestamp'));
-      
-      toast.success(force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!');
-      
+      localStorage.removeItem(getStorageKey("answers"));
+      localStorage.removeItem(getStorageKey("questionIndex"));
+      localStorage.removeItem(getStorageKey("timeRemaining"));
+      localStorage.removeItem(getStorageKey("timestamp"));
+
+      toast.success(
+        force ? "Time is up! Quiz submitted." : "Quiz submitted successfully!",
+      );
+
       // If this is a challenge quiz, handle challenge completion
       if (challengeId) {
         try {
-          const { challengeService } = await import('../services');
-          const challengeCompletionResult = await challengeService.completeQuizInChallenge(
-            challengeId,
-            id,
-            {
+          const { challengeService } = await import("../services");
+          const challengeCompletionResult =
+            await challengeService.completeQuizInChallenge(challengeId, id, {
               score: submissionResult.score,
               totalQuestions: submissionResult.totalQuestions,
               attemptId: submissionResult.attemptId,
-            }
-          );
-          
+            });
+
           setChallengeResult(challengeCompletionResult);
-          
+
           // Invalidate challenges cache
-          await queryClient.invalidateQueries({ queryKey: ['challenges'] });
-          
+          await queryClient.invalidateQueries({ queryKey: ["challenges"] });
+
           // Navigate based on challenge completion status
           if (challengeCompletionResult.completed) {
             // All quizzes completed, go to results
@@ -219,12 +255,12 @@ export const QuizTakePage = () => {
         // Regular quiz, just show results
         setShowResults(true);
       }
-      
+
       // Calculate duration if possible, otherwise 0
       // Calculate duration if possible, otherwise 0
       // const duration = quiz.timeLimit && timeRemaining !== null ? quiz.timeLimit - timeRemaining : 0;
     } catch (_error) {
-      toast.error('Failed to submit quiz. Please try again.');
+      toast.error("Failed to submit quiz. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -244,8 +280,10 @@ export const QuizTakePage = () => {
   if (!quiz) {
     return (
       <div className="card dark:bg-gray-800 text-center py-12">
-        <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Quiz not found</h3>
-        <button onClick={() => navigate('/quiz')} className="btn-primary mt-4">
+        <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+          Quiz not found
+        </h3>
+        <button onClick={() => navigate("/quiz")} className="btn-primary mt-4">
           Back to Quizzes
         </button>
       </div>
@@ -256,7 +294,7 @@ export const QuizTakePage = () => {
     const isPerfect = result.percentage === 100;
     const isExcellent = result.percentage >= 80;
     const isGood = result.percentage >= 60;
-    
+
     return (
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">
         {/* Results Hero */}
@@ -265,14 +303,20 @@ export const QuizTakePage = () => {
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
           </div>
-          
+
           <div className="relative z-10">
             <button
-              onClick={() => challengeId ? navigate(`/challenges/${challengeId}`) : navigate('/quiz')}
+              onClick={() =>
+                challengeId
+                  ? navigate(`/challenges/${challengeId}`)
+                  : navigate("/quiz")
+              }
               className="flex items-center gap-2 text-white hover:text-blue-100 dark:hover:text-blue-200 mb-4 sm:mb-6 transition-colors touch-manipulation"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm sm:text-base">{challengeId ? 'Back to Challenge' : 'Back to Quizzes'}</span>
+              <span className="text-sm sm:text-base">
+                {challengeId ? "Back to Challenge" : "Back to Quizzes"}
+              </span>
             </button>
 
             <div className="text-center py-4 sm:py-8">
@@ -287,60 +331,73 @@ export const QuizTakePage = () => {
                   </div>
                 </div>
                 {/* Decorative ring */}
-                <div className={`absolute inset-0 rounded-full border-3 sm:border-4 ${
-                  isPerfect ? 'border-yellow-400' : isExcellent ? 'border-green-400' : isGood ? 'border-blue-400' : 'border-gray-300'
-                }`}></div>
+                <div
+                  className={`absolute inset-0 rounded-full border-3 sm:border-4 ${
+                    isPerfect
+                      ? "border-yellow-400"
+                      : isExcellent
+                        ? "border-green-400"
+                        : isGood
+                          ? "border-blue-400"
+                          : "border-gray-300"
+                  }`}
+                ></div>
               </div>
-              
+
               {/* Message */}
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
                 {isPerfect
-                  ? '🎉 Perfect Score!'
+                  ? "🎉 Perfect Score!"
                   : isExcellent
-                  ? '🌟 Excellent Work!'
-                  : isGood
-                  ? '👍 Good Job!'
-                  : '💪 Keep Practicing!'}
+                    ? "🌟 Excellent Work!"
+                    : isGood
+                      ? "👍 Good Job!"
+                      : "💪 Keep Practicing!"}
               </h1>
               <p className="text-blue-100 dark:text-blue-200 text-sm sm:text-base md:text-lg px-4">
                 {isPerfect
-                  ? 'You got every question right!'
+                  ? "You got every question right!"
                   : isExcellent
-                  ? 'You really know your stuff!'
-                  : isGood
-                  ? 'Nice work, keep it up!'
-                  : 'Review the answers and try again!'}
+                    ? "You really know your stuff!"
+                    : isGood
+                      ? "Nice work, keep it up!"
+                      : "Review the answers and try again!"}
               </p>
             </div>
           </div>
         </div>
 
         {/* XP and Level Progress */}
-        {streak && (
-          <XPProgressBar streak={streak} showLevelUp={true} />
-        )}
+        {streak && <XPProgressBar streak={streak} showLevelUp={true} />}
 
         {/* Continue to Next Quiz button for challenges */}
         {challengeId && challengeResult && !challengeResult.completed && (
           <div className="card dark:bg-gray-800 p-4 sm:p-6 bg-gradient-to-r from-primary-50 to-indigo-50 dark:from-primary-900/20 dark:to-indigo-900/20 border-primary-200 dark:border-primary-800">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-bold text-gray-900 dark:text-white mb-1">Challenge Progress</h3>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+                  Challenge Progress
+                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Quiz {challengeResult.currentQuizIndex} of {challengeResult.totalQuizzes} completed
+                  Quiz {challengeResult.currentQuizIndex} of{" "}
+                  {challengeResult.totalQuizzes} completed
                 </p>
               </div>
               <button
                 onClick={async () => {
                   try {
-                    const { challengeService } = await import('../services');
-                    const challenge = await challengeService.getChallengeById(challengeId);
-                    const nextQuiz = challenge.quizzes?.[challengeResult.currentQuizIndex];
+                    const { challengeService } = await import("../services");
+                    const challenge =
+                      await challengeService.getChallengeById(challengeId);
+                    const nextQuiz =
+                      challenge.quizzes?.[challengeResult.currentQuizIndex];
                     if (nextQuiz) {
-                      navigate(`/quiz/${nextQuiz.quizId}?challengeId=${challengeId}`);
+                      navigate(
+                        `/quiz/${nextQuiz.quizId}?challengeId=${challengeId}`,
+                      );
                     }
                   } catch (_error) {
-                    toast.error('Failed to load next quiz');
+                    toast.error("Failed to load next quiz");
                   }
                 }}
                 className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl"
@@ -357,23 +414,29 @@ export const QuizTakePage = () => {
             <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg flex-shrink-0">
               <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Review Answers</h2>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+              Review Answers
+            </h2>
           </div>
           <div className="space-y-4 sm:space-y-6">
             {quiz.questions.map((question, index) => {
               const userAnswer = selectedAnswers[index];
               const correctAnswer = result.correctAnswers[index];
-              
+
               // Determine if answer is correct based on question type
-              const isCorrect = checkAnswerCorrect(question.questionType, userAnswer, correctAnswer);
+              const isCorrect = checkAnswerCorrect(
+                question.questionType,
+                userAnswer,
+                correctAnswer,
+              );
 
               return (
                 <div
                   key={index}
                   className={`p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 transition-all ${
-                    isCorrect 
-                      ? 'border-green-300 dark:border-green-700 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20' 
-                      : 'border-red-300 dark:border-red-700 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20'
+                    isCorrect
+                      ? "border-green-300 dark:border-green-700 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
+                      : "border-red-300 dark:border-red-700 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20"
                   }`}
                 >
                   <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -404,9 +467,10 @@ export const QuizTakePage = () => {
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const answeredCount = selectedAnswers.filter((a) => a !== null).length;
-  const progressPercentage = quiz.questions.length > 0 
-    ? (answeredCount / quiz.questions.length) * 100 
-    : 0;
+  const progressPercentage =
+    quiz.questions.length > 0
+      ? (answeredCount / quiz.questions.length) * 100
+      : 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">
@@ -416,14 +480,16 @@ export const QuizTakePage = () => {
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
-        
+
         <div className="relative z-10">
           <button
-            onClick={() => navigate('/quiz')}
+            onClick={() => navigate("/quiz")}
             className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm mb-3 sm:mb-4 transition-all touch-manipulation w-fit"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base font-medium">Back to Quizzes</span>
+            <span className="text-sm sm:text-base font-medium">
+              Back to Quizzes
+            </span>
           </button>
 
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -432,7 +498,9 @@ export const QuizTakePage = () => {
                 <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 break-words">{quiz.title}</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 break-words">
+                  {quiz.title}
+                </h1>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-primary-100 dark:text-primary-200">
                   <span className="truncate">{quiz.topic}</span>
                   {quiz.difficulty && (
@@ -446,15 +514,16 @@ export const QuizTakePage = () => {
                 </div>
               </div>
             </div>
-            {quiz.quizType === 'timed' && timeRemaining !== null && (
-              <div className={`flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto ${
-                timeRemaining < 60 
-                  ? 'animate-pulse' 
-                  : ''
-              }`}>
+            {quiz.quizType === "timed" && timeRemaining !== null && (
+              <div
+                className={`flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto ${
+                  timeRemaining < 60 ? "animate-pulse" : ""
+                }`}
+              >
                 <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white flex-shrink-0" />
                 <span className="font-mono font-bold text-white text-xl sm:text-2xl md:text-4xl">
-                  {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                  {Math.floor(timeRemaining / 60)}:
+                  {(timeRemaining % 60).toString().padStart(2, "0")}
                 </span>
               </div>
             )}
@@ -481,7 +550,7 @@ export const QuizTakePage = () => {
       </div>
 
       {/* Question */}
-      <div 
+      <div
         className="card dark:bg-gray-800 border border-primary-200 dark:border-primary-700 shadow-lg p-4 sm:p-6 select-none"
         onCopy={(e) => e.preventDefault()}
         onCut={(e) => e.preventDefault()}
@@ -508,8 +577,8 @@ export const QuizTakePage = () => {
           </button>
 
           {currentQuestionIndex === quiz.questions.length - 1 ? (
-            <button 
-              onClick={() => handleSubmit()} 
+            <button
+              onClick={() => handleSubmit()}
               disabled={submitting}
               className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg touch-manipulation text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -526,8 +595,8 @@ export const QuizTakePage = () => {
               )}
             </button>
           ) : (
-            <button 
-              onClick={handleNext} 
+            <button
+              onClick={handleNext}
               className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg touch-manipulation text-sm sm:text-base"
             >
               <span>Next</span>

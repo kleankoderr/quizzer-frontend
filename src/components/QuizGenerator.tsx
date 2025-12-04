@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
-import type { QuizGenerateRequest, QuizType, QuestionType } from '../types';
-import { Brain, Sparkles, BookOpen } from 'lucide-react';
+import { useState, useRef } from "react";
+import type { QuizGenerateRequest, QuizType, QuestionType } from "../types";
+import { Brain, Sparkles, BookOpen } from "lucide-react";
 
 interface QuizGeneratorProps {
   onGenerate: (request: QuizGenerateRequest, files?: File[]) => void;
@@ -8,23 +8,33 @@ interface QuizGeneratorProps {
   initialValues?: {
     topic?: string;
     content?: string;
-    mode?: 'topic' | 'content' | 'files';
+    mode?: "topic" | "content" | "files";
     sourceId?: string;
     sourceTitle?: string;
     contentId?: string;
   };
 }
 
-export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loading, initialValues }) => {
-  const [mode, setMode] = useState<'topic' | 'content' | 'files'>(initialValues?.mode || 'topic');
-  const [topic, setTopic] = useState(initialValues?.topic || '');
-  const [content, setContent] = useState(initialValues?.content || '');
+export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
+  onGenerate,
+  loading,
+  initialValues,
+}) => {
+  const [mode, setMode] = useState<"topic" | "content" | "files">(
+    initialValues?.mode || "topic",
+  );
+  const [topic, setTopic] = useState(initialValues?.topic || "");
+  const [content, setContent] = useState(initialValues?.content || "");
   const [files, setFiles] = useState<File[]>([]);
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [quizType, setQuizType] = useState<QuizType>('standard');
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
+    "medium",
+  );
+  const [quizType, setQuizType] = useState<QuizType>("standard");
   const [timeLimit, setTimeLimit] = useState(300); // 5 minutes default
-  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<QuestionType[]>(['single-select', 'true-false']);
+  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<
+    QuestionType[]
+  >(["single-select", "true-false"]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,7 +58,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const droppedFiles = Array.from(e.dataTransfer.files);
     setFiles((prev) => [...prev, ...droppedFiles]);
   };
@@ -59,41 +69,42 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const request: QuizGenerateRequest = {
       numberOfQuestions,
       difficulty,
       quizType,
-      timeLimit: quizType === 'timed' ? timeLimit : undefined,
-      questionTypes: selectedQuestionTypes.length > 0 ? selectedQuestionTypes : undefined,
-      contentId: initialValues?.contentId
+      timeLimit: quizType === "timed" ? timeLimit : undefined,
+      questionTypes:
+        selectedQuestionTypes.length > 0 ? selectedQuestionTypes : undefined,
+      contentId: initialValues?.contentId,
     };
 
-    if (mode === 'topic' && topic.trim()) {
+    if (mode === "topic" && topic.trim()) {
       onGenerate({ ...request, topic });
-    } else if (mode === 'content' && content.trim()) {
+    } else if (mode === "content" && content.trim()) {
       onGenerate({ ...request, topic: content.substring(0, 50), content });
-    } else if (mode === 'files' && files.length > 0) {
+    } else if (mode === "files" && files.length > 0) {
       onGenerate(request, files);
     }
   };
 
   const toggleQuestionType = (type: QuestionType) => {
-    setSelectedQuestionTypes(prev => {
+    setSelectedQuestionTypes((prev) => {
       if (prev.includes(type)) {
         // Must have at least one type selected
-        return prev.length > 1 ? prev.filter(t => t !== type) : prev;
+        return prev.length > 1 ? prev.filter((t) => t !== type) : prev;
       }
       return [...prev, type];
     });
   };
 
   const questionTypeLabels: Record<QuestionType, string> = {
-    'true-false': 'True/False',
-    'single-select': 'Single Select',
-    'multi-select': 'Multi Select',
-    'matching': 'Matching',
-    'fill-blank': 'Fill in the Blank',
+    "true-false": "True/False",
+    "single-select": "Single Select",
+    "multi-select": "Multi Select",
+    matching: "Matching",
+    "fill-blank": "Fill in the Blank",
   };
 
   const formatFileSize = (bytes: number) => {
@@ -108,7 +119,9 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         <div className="p-2 bg-primary-100 rounded-lg">
           <Brain className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Generate New Quiz</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Generate New Quiz
+        </h2>
       </div>
 
       {initialValues?.sourceTitle && (
@@ -122,33 +135,33 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
       <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto pb-1 scrollbar-hide">
         <button
           type="button"
-          onClick={() => setMode('topic')}
+          onClick={() => setMode("topic")}
           className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
-            mode === 'topic'
-              ? 'text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+            mode === "topic"
+              ? "text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
           From Topic
         </button>
         <button
           type="button"
-          onClick={() => setMode('content')}
+          onClick={() => setMode("content")}
           className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
-            mode === 'content'
-              ? 'text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+            mode === "content"
+              ? "text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
           From Content
         </button>
         <button
           type="button"
-          onClick={() => setMode('files')}
+          onClick={() => setMode("files")}
           className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
-            mode === 'files'
-              ? 'text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+            mode === "files"
+              ? "text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400"
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
           From Files
@@ -156,9 +169,12 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === 'topic' && (
+        {mode === "topic" && (
           <div>
-            <label htmlFor="topic" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="topic"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Topic
             </label>
             <input
@@ -173,9 +189,12 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
           </div>
         )}
 
-        {mode === 'content' && (
+        {mode === "content" && (
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="content"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Content
             </label>
             <textarea
@@ -187,17 +206,18 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
               required
             />
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              The system will analyze your content and generate relevant questions
+              The system will analyze your content and generate relevant
+              questions
             </p>
           </div>
         )}
 
-        {mode === 'files' && (
+        {mode === "files" && (
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Upload Files
             </label>
-            
+
             {/* Drag and Drop Zone */}
             <div
               onDragOver={handleDragOver}
@@ -206,8 +226,8 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                 isDragging
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                  : "border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
               }`}
             >
               <svg
@@ -256,13 +276,21 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
                   >
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
-                        {file.type === 'application/pdf' ? (
-                          <svg className="h-8 w-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z"/>
+                        {file.type === "application/pdf" ? (
+                          <svg
+                            className="h-8 w-8 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z" />
                           </svg>
                         ) : (
-                          <svg className="h-8 w-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z"/>
+                          <svg
+                            className="h-8 w-8 text-blue-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z" />
                           </svg>
                         )}
                       </div>
@@ -280,8 +308,18 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
                       onClick={() => removeFile(index)}
                       className="ml-4 text-red-600 hover:text-red-800 transition-colors"
                     >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -292,7 +330,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         )}
 
         <div>
-          <label htmlFor="questions" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label
+            htmlFor="questions"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Number of Questions: {numberOfQuestions}
           </label>
           <input
@@ -301,7 +342,9 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
             min="3"
             max="20"
             value={numberOfQuestions}
-            onChange={(e) => setNumberOfQuestions(Number.parseInt(e.target.value))}
+            onChange={(e) =>
+              setNumberOfQuestions(Number.parseInt(e.target.value))
+            }
             className="w-full"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -311,17 +354,19 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Difficulty
+          </label>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {(['easy', 'medium', 'hard'] as const).map((level) => (
+            {(["easy", "medium", "hard"] as const).map((level) => (
               <button
                 key={level}
                 type="button"
                 onClick={() => setDifficulty(level)}
                 className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
                   difficulty === level
-                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                    ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium"
+                    : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300"
                 }`}
               >
                 {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -331,17 +376,19 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Type</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Quiz Type
+          </label>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {(['standard', 'timed', 'scenario'] as const).map((type) => (
+            {(["standard", "timed", "scenario"] as const).map((type) => (
               <button
                 key={type}
                 type="button"
                 onClick={() => setQuizType(type)}
                 className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
                   quizType === type
-                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                    ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+                    : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300"
                 }`}
               >
                 {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -349,16 +396,21 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
             ))}
           </div>
           <div className="text-xs text-gray-500 mt-2">
-            {quizType === 'standard' && 'Standard quiz with no time constraints'}
-            {quizType === 'timed' && 'Quiz with a time limit to complete'}
-            {quizType === 'scenario' && 'Real-world scenario-based questions'}
+            {quizType === "standard" &&
+              "Standard quiz with no time constraints"}
+            {quizType === "timed" && "Quiz with a time limit to complete"}
+            {quizType === "scenario" && "Real-world scenario-based questions"}
           </div>
         </div>
 
-        {quizType === 'timed' && (
+        {quizType === "timed" && (
           <div>
-            <label htmlFor="timeLimit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Time Limit: {Math.floor(timeLimit / 60)}:{(timeLimit % 60).toString().padStart(2, '0')}
+            <label
+              htmlFor="timeLimit"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Time Limit: {Math.floor(timeLimit / 60)}:
+              {(timeLimit % 60).toString().padStart(2, "0")}
             </label>
             <input
               id="timeLimit"
@@ -389,8 +441,8 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
                 onClick={() => toggleQuestionType(type)}
                 className={`py-2 px-4 rounded-lg border-2 text-sm transition-colors ${
                   selectedQuestionTypes.includes(type)
-                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                    ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-medium"
+                    : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300"
                 }`}
               >
                 {questionTypeLabels[type]}
@@ -398,7 +450,8 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onGenerate, loadin
             ))}
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Select at least one question type. Questions will be distributed evenly.
+            Select at least one question type. Questions will be distributed
+            evenly.
           </p>
         </div>
 

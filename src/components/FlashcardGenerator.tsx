@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import type { FlashcardGenerateRequest } from '../types';
-import { Layers, Sparkles } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import type { FlashcardGenerateRequest } from "../types";
+import { Layers, Sparkles } from "lucide-react";
 
 interface FlashcardGeneratorProps {
   onGenerate: (request: FlashcardGenerateRequest, files?: File[]) => void;
@@ -8,7 +8,7 @@ interface FlashcardGeneratorProps {
   initialValues?: {
     topic?: string;
     content?: string;
-    mode?: 'topic' | 'content' | 'files';
+    mode?: "topic" | "content" | "files";
     contentId?: string;
   };
 }
@@ -18,9 +18,9 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   loading,
   initialValues,
 }) => {
-  const [mode, setMode] = useState<'topic' | 'content' | 'files'>('topic');
-  const [topic, setTopic] = useState('');
-  const [content, setContent] = useState('');
+  const [mode, setMode] = useState<"topic" | "content" | "files">("topic");
+  const [topic, setTopic] = useState("");
+  const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [numberOfCards, setNumberOfCards] = useState(10);
   const [isDragging, setIsDragging] = useState(false);
@@ -54,7 +54,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const droppedFiles = Array.from(e.dataTransfer.files);
     setFiles((prev) => [...prev, ...droppedFiles]);
   };
@@ -67,11 +67,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     e.preventDefault();
     const contentId = initialValues?.contentId;
 
-    if (mode === 'topic' && topic.trim()) {
+    if (mode === "topic" && topic.trim()) {
       onGenerate({ topic, numberOfCards, contentId });
-    } else if (mode === 'content' && content.trim()) {
+    } else if (mode === "content" && content.trim()) {
       onGenerate({ content, numberOfCards, contentId });
-    } else if (mode === 'files' && files.length > 0) {
+    } else if (mode === "files" && files.length > 0) {
       onGenerate({ numberOfCards, contentId }, files);
     }
   };
@@ -88,39 +88,41 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div className="p-2 bg-primary-100 rounded-lg">
           <Layers className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Generate New Flashcard Set</h2>
+        <h2 className="text-2xl font-bold text-gray-900">
+          Generate New Flashcard Set
+        </h2>
       </div>
 
       <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-1 scrollbar-hide">
         <button
           type="button"
-          onClick={() => setMode('topic')}
+          onClick={() => setMode("topic")}
           className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
-            mode === 'topic'
-              ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            mode === "topic"
+              ? "text-primary-600 border-b-3 border-primary-600 bg-primary-50"
+              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
           }`}
         >
           From Topic
         </button>
         <button
           type="button"
-          onClick={() => setMode('content')}
+          onClick={() => setMode("content")}
           className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
-            mode === 'content'
-              ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            mode === "content"
+              ? "text-primary-600 border-b-3 border-primary-600 bg-primary-50"
+              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
           }`}
         >
           From Content
         </button>
         <button
           type="button"
-          onClick={() => setMode('files')}
+          onClick={() => setMode("files")}
           className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
-            mode === 'files'
-              ? 'text-primary-600 border-b-3 border-primary-600 bg-primary-50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            mode === "files"
+              ? "text-primary-600 border-b-3 border-primary-600 bg-primary-50"
+              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
           }`}
         >
           From Files
@@ -128,9 +130,12 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === 'topic' ? (
+        {mode === "topic" ? (
           <div>
-            <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="topic"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Topic
             </label>
             <input
@@ -143,9 +148,12 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               required
             />
           </div>
-        ) : mode === 'content' ? (
+        ) : mode === "content" ? (
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="content"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Content
             </label>
             <textarea
@@ -157,7 +165,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               required
             />
             <p className="text-sm text-gray-500 mt-1">
-              The system will extract key concepts and create flashcards automatically
+              The system will extract key concepts and create flashcards
+              automatically
             </p>
           </div>
         ) : (
@@ -165,7 +174,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload Files
             </label>
-            
+
             {/* Drag and Drop Zone */}
             <div
               onDragOver={handleDragOver}
@@ -174,8 +183,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                 isDragging
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+                  ? "border-primary-500 bg-primary-50"
+                  : "border-gray-300 hover:border-primary-400 hover:bg-gray-50"
               }`}
             >
               <svg
@@ -224,13 +233,21 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                   >
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
-                        {file.type === 'application/pdf' ? (
-                          <svg className="h-8 w-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z"/>
+                        {file.type === "application/pdf" ? (
+                          <svg
+                            className="h-8 w-8 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z" />
                           </svg>
                         ) : (
-                          <svg className="h-8 w-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z"/>
+                          <svg
+                            className="h-8 w-8 text-blue-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z" />
                           </svg>
                         )}
                       </div>
@@ -248,8 +265,18 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                       onClick={() => removeFile(index)}
                       className="ml-4 text-red-600 hover:text-red-800 transition-colors"
                     >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -260,7 +287,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         )}
 
         <div>
-          <label htmlFor="cards" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="cards"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Number of Cards: {numberOfCards}
           </label>
           <input
@@ -278,7 +308,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+        >
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

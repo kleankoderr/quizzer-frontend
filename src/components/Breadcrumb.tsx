@@ -1,5 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight, Home } from 'lucide-react';
+import { Link, useLocation } from "react-router-dom";
+import { ChevronRight, Home } from "lucide-react";
 
 export interface BreadcrumbItem {
   label: string;
@@ -12,14 +12,16 @@ interface BreadcrumbProps {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
   const location = useLocation();
-  
+
   // Determine if we're on an admin route
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const homePath = isAdminRoute ? '/admin' : '/dashboard';
-  
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const homePath = isAdminRoute ? "/admin" : "/dashboard";
+
   return (
-    <nav className="flex items-center space-x-1 sm:space-x-2 text-sm mb-6 w-full overflow-hidden" aria-label="Breadcrumb">
-      
+    <nav
+      className="flex items-center space-x-1 sm:space-x-2 text-sm mb-6 w-full overflow-hidden"
+      aria-label="Breadcrumb"
+    >
       {/* Home */}
       <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-shrink">
         <Link
@@ -36,7 +38,10 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
         const isLast = index === items.length - 1;
 
         return (
-          <div key={index} className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-shrink">
+          <div
+            key={index}
+            className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-shrink"
+          >
             <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-600 flex-shrink-0" />
 
             {item.path && !isLast ? (
@@ -50,8 +55,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
               <span
                 className={`${
                   isLast
-                    ? 'text-gray-900 dark:text-white font-semibold'
-                    : 'text-gray-600 dark:text-gray-400'
+                    ? "text-gray-900 dark:text-white font-semibold"
+                    : "text-gray-600 dark:text-gray-400"
                 } truncate`}
               >
                 {item.label}

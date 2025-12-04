@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Save, X } from 'lucide-react';
+import React, { useEffect, useRef } from "react";
+import { Save, X } from "lucide-react";
 
 interface InlineNoteInputProps {
   value: string;

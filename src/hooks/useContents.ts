@@ -4,7 +4,7 @@ import { contentService } from "../services";
 export const useContents = (
   topic?: string,
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
 ) => {
   return useQuery({
     queryKey: ["contents", topic, page, limit],

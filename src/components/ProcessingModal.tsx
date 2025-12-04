@@ -46,10 +46,8 @@ export const ProcessingModal: React.FC<ProcessingModalProps> = ({
               <Loader2 className="w-16 h-16 text-indigo-600 dark:text-indigo-400 animate-spin relative z-10" />
             </div>
           ) : null}
-          
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            {message}
-          </p>
+
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{message}</p>
 
           {/* Progress Bar */}
           {isProcessing && progress > 0 && (
@@ -59,31 +57,31 @@ export const ProcessingModal: React.FC<ProcessingModalProps> = ({
                 <span>{Math.round(progress)}%</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                <div 
+                <div
                   className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
             </div>
           )}
-          
+
           {isProcessing && (
             <p className="text-sm text-gray-400 dark:text-gray-500">
               You can safely navigate away, we'll notify you when it's ready.
             </p>
           )}
         </div>
-        
+
         {/* Footer (optional actions could go here) */}
         {!isProcessing && (
-           <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-end">
-             <button
-               onClick={onClose}
-               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-             >
-               Close
-             </button>
-           </div>
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Close
+            </button>
+          </div>
         )}
       </div>
     </div>

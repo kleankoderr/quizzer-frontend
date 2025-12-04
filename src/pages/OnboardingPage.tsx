@@ -1,27 +1,47 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { ArrowRight, Check, BookOpen, GraduationCap } from 'lucide-react';
-import { apiClient } from '../services/api';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SchoolSearch } from '../components/SchoolSearch';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { ArrowRight, Check, BookOpen, GraduationCap } from "lucide-react";
+import { apiClient } from "../services/api";
+import { motion, AnimatePresence } from "framer-motion";
+import { SchoolSearch } from "../components/SchoolSearch";
 
 const GRADES = [
-  "High School Freshman", "High School Sophomore", "High School Junior", "High School Senior",
-  "Undergraduate Year 1", "Undergraduate Year 2", "Undergraduate Year 3", "Undergraduate Year 4",
-  "Graduate Student", "Lifelong Learner"
+  "Primary School",
+  "Junior Secondary School (JSS)",
+  "Senior Secondary School (SSS)",
+  "Undergraduate",
+  "Graduate Student",
+  "Lifelong Learner",
 ];
 
 const SUBJECTS = [
-  "Mathematics", "Physics", "Chemistry", "Biology", 
-  "History", "Geography", "Literature", "Computer Science", 
-  "Economics", "Psychology", "Sociology", "Philosophy", 
-  "Art History", "Political Science"
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "History",
+  "Geography",
+  "Literature",
+  "Computer Science",
+  "Economics",
+  "Psychology",
+  "Sociology",
+  "Philosophy",
+  "Art",
+  "Business Studies",
+  "Environmental Science",
+  "Health Education",
+  "Medicine",
+  "Engineering",
+  "Law",
+  "Architecture",
+  "Political Science",
 ];
 
 const USER_TYPES = [
-  { id: 'student', label: 'Student', icon: GraduationCap },
-  { id: 'teacher', label: 'Teacher', icon: BookOpen },
+  { id: "student", label: "Student", icon: GraduationCap },
+  { id: "teacher", label: "Teacher", icon: BookOpen },
 ];
 
 export const OnboardingPage = () => {
@@ -31,45 +51,45 @@ export const OnboardingPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    userType: 'student',
-    grade: '',
-    schoolName: '',
+    userType: "student",
+    grade: "",
+    schoolName: "",
     subjects: [] as string[],
   });
 
   const handleNext = () => {
-    setStep(prev => prev + 1);
+    setStep((prev) => prev + 1);
   };
 
   const handleBack = () => {
-    setStep(prev => prev - 1);
+    setStep((prev) => prev - 1);
   };
 
   const toggleSubject = (subject: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       subjects: prev.subjects.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...prev.subjects, subject]
+        ? prev.subjects.filter((s) => s !== subject)
+        : [...prev.subjects, subject],
     }));
   };
 
   const handleFinish = async () => {
     setLoading(true);
     try {
-      await apiClient.post('/onboarding/finish', formData);
-      
+      await apiClient.post("/onboarding/finish", formData);
+
       // Update local user context to reflect onboarding completion
       if (user) {
         login({ ...user, onboardingCompleted: true });
       }
-      
+
       // Move to completion step (Step 4) which will auto-redirect
       setStep(4);
     } catch (error) {
-      console.error('Onboarding failed:', error);
+      console.error("Onboarding failed:", error);
       // Even if it fails, try to redirect to dashboard to avoid getting stuck
-      navigate('/dashboard');
+      navigate("/dashboard");
     } finally {
       setLoading(false);
     }
@@ -79,30 +99,32 @@ export const OnboardingPage = () => {
     setLoading(true);
     try {
       // Send empty data to trigger default assessment
-      await apiClient.post('/onboarding/finish', {});
+      await apiClient.post("/onboarding/finish", {});
       if (user) {
         login({ ...user, onboardingCompleted: true });
       }
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (_error) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   };
-
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">Welcome to Quizzer!</h1>
-          <p className="text-gray-600 dark:text-gray-400">Let's personalize your experience</p>
+          <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">
+            Welcome to Quizzer!
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Let's personalize your experience
+          </p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
           {/* Progress Bar */}
           <div className="h-2 bg-gray-100 dark:bg-gray-700">
-            <div 
+            <div
               className="h-full bg-primary-600 transition-all duration-500 ease-out"
               style={{ width: `${(step / 4) * 100}%` }}
             />
@@ -119,17 +141,21 @@ export const OnboardingPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Tell us about yourself</h2>
-                  
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    Tell us about yourself
+                  </h2>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {USER_TYPES.map((type) => (
                       <button
                         key={type.id}
-                        onClick={() => setFormData({ ...formData, userType: type.id })}
+                        onClick={() =>
+                          setFormData({ ...formData, userType: type.id })
+                        }
                         className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
                           formData.userType === type.id
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 text-gray-600 dark:text-gray-400'
+                            ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600"
+                            : "border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 text-gray-600 dark:text-gray-400"
                         }`}
                       >
                         <type.icon className="w-8 h-8" />
@@ -149,8 +175,10 @@ export const OnboardingPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Current Grade / Level</h2>
-                  
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    Current Grade / Level
+                  </h2>
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -158,23 +186,29 @@ export const OnboardingPage = () => {
                       </label>
                       <select
                         value={formData.grade}
-                        onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, grade: e.target.value })
+                        }
                         className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
                         <option value="">Select your level</option>
-                        {GRADES.map(grade => (
-                          <option key={grade} value={grade}>{grade}</option>
+                        {GRADES.map((grade) => (
+                          <option key={grade} value={grade}>
+                            {grade}
+                          </option>
                         ))}
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        School / Institution <span className="text-gray-400">(Optional)</span>
+                        School / Institution
                       </label>
                       <SchoolSearch
                         value={formData.schoolName}
-                        onChange={(value) => setFormData({ ...formData, schoolName: value })}
+                        onChange={(value) =>
+                          setFormData({ ...formData, schoolName: value })
+                        }
                       />
                     </div>
                   </div>
@@ -190,8 +224,12 @@ export const OnboardingPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">What are you interested in?</h2>
-                  <p className="text-gray-600 dark:text-gray-400">Select subjects you'd like to improve in.</p>
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    What are you interested in?
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Select subjects you'd like to improve in.
+                  </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
                     {SUBJECTS.map((subject) => (
@@ -200,12 +238,14 @@ export const OnboardingPage = () => {
                         onClick={() => toggleSubject(subject)}
                         className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
                           formData.subjects.includes(subject)
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300'
+                            ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600"
+                            : "border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300"
                         }`}
                       >
                         <span className="text-sm font-medium">{subject}</span>
-                        {formData.subjects.includes(subject) && <Check className="w-4 h-4" />}
+                        {formData.subjects.includes(subject) && (
+                          <Check className="w-4 h-4" />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -221,14 +261,12 @@ export const OnboardingPage = () => {
                   exit={{ opacity: 0, scale: 1.05 }}
                   className="text-center space-y-8 py-12"
                 >
-
-                  
                   <div className="space-y-4">
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                      You're all set, {user?.name?.split(' ')[0] || 'Learner'}!
+                      You're all set, {user?.name?.split(" ")[0] || "Learner"}!
                     </h2>
                     <p className="text-lg text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed">
-                      We're crafting a personalized learning path just for you. 
+                      We're crafting a personalized learning path just for you.
                       Get ready to unlock your full potential!
                     </p>
                   </div>
@@ -238,9 +276,9 @@ export const OnboardingPage = () => {
                       <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" />
                       Assessment generated successfully!
                     </div>
-                    
+
                     <button
-                      onClick={() => navigate('/dashboard')}
+                      onClick={() => navigate("/dashboard")}
                       className="bg-primary-600 text-white px-8 py-3 rounded-xl font-semibold text-lg hover:bg-primary-700 transition-all shadow-lg hover:shadow-primary-500/25 flex items-center gap-2 transform hover:-translate-y-0.5"
                     >
                       Go to Dashboard
@@ -284,7 +322,7 @@ export const OnboardingPage = () => {
                     disabled={loading}
                     className="bg-primary-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    {loading ? 'Finishing...' : 'Finish'}
+                    {loading ? "Finishing..." : "Finish"}
                     {!loading && <ArrowRight className="w-4 h-4" />}
                   </button>
                 )}

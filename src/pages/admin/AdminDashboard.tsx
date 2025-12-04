@@ -1,47 +1,61 @@
-import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  Users, 
-  BookOpen, 
-  Activity, 
-  TrendingUp, 
-  UserPlus, 
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Users,
+  BookOpen,
+  Activity,
+  TrendingUp,
+  UserPlus,
   FileText,
   Layers,
   SettingsIcon,
   Brain,
   Trophy,
-} from 'lucide-react';
-import { adminService } from '../../services/adminService';
-import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
-import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
-import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
+} from "lucide-react";
+import { adminService } from "../../services/adminService";
+import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
+import { StatCardSkeleton } from "../../components/skeletons/StatCardSkeleton";
+import { CardSkeleton } from "../../components/skeletons/CardSkeleton";
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['systemStats'],
+    queryKey: ["systemStats"],
     queryFn: adminService.getSystemStats,
   });
-  
+
   const queryClient = useQueryClient();
 
-  const ChallengeGenerateButton = ({ type, label, description }: { type: string; label: string; description: string }) => {
+  const ChallengeGenerateButton = ({
+    type,
+    label,
+    description,
+  }: {
+    type: string;
+    label: string;
+    description: string;
+  }) => {
     const [isGenerating, setIsGenerating] = useState(false);
 
     const handleGenerate = async () => {
       setIsGenerating(true);
       try {
         let result;
-        if (type === 'daily') result = await adminService.generateDailyChallenges();
-        else if (type === 'weekly') result = await adminService.generateWeeklyChallenges();
-        else if (type === 'monthly') result = await adminService.generateMonthlyChallenges();
-        else if (type === 'hot') result = await adminService.generateHotChallenges();
-        
-        toast.success(result.message || 'Challenges generated successfully');
-        queryClient.invalidateQueries({ queryKey: ['systemStats'] });
+        if (type === "daily")
+          result = await adminService.generateDailyChallenges();
+        else if (type === "weekly")
+          result = await adminService.generateWeeklyChallenges();
+        else if (type === "monthly")
+          result = await adminService.generateMonthlyChallenges();
+        else if (type === "hot")
+          result = await adminService.generateHotChallenges();
+
+        toast.success(result.message || "Challenges generated successfully");
+        queryClient.invalidateQueries({ queryKey: ["systemStats"] });
       } catch (error: any) {
-        toast.error(error.response?.data?.message || 'Failed to generate challenges');
+        toast.error(
+          error.response?.data?.message || "Failed to generate challenges",
+        );
       } finally {
         setIsGenerating(false);
       }
@@ -61,7 +75,9 @@ export const AdminDashboard = () => {
         )}
         <div className="text-center">
           <p className="font-medium text-gray-900 dark:text-white">{label}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{isGenerating ? 'Generating...' : 'Generate'}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {isGenerating ? "Generating..." : "Generate"}
+          </p>
         </div>
       </button>
     );
@@ -71,7 +87,9 @@ export const AdminDashboard = () => {
     return (
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Admin Dashboard
+          </h1>
         </div>
 
         {/* Stat Cards Skeleton */}
@@ -82,7 +100,7 @@ export const AdminDashboard = () => {
         {/* Quick Actions and Content Overview Skeleton */}
         <div className="grid gap-6 lg:grid-cols-2">
           <CardSkeleton count={2} />
-          
+
           {/* Challenge Generation Skeleton */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <div className="mb-4">
@@ -93,7 +111,10 @@ export const AdminDashboard = () => {
             </div>
             <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                >
                   <div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                   <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                   <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -108,31 +129,31 @@ export const AdminDashboard = () => {
 
   const statCards = [
     {
-      title: 'Total Users',
+      title: "Total Users",
       value: stats?.users.total || 0,
       icon: Users,
-      color: 'bg-blue-500',
+      color: "bg-blue-500",
       trend: `+${stats?.users.newLast7Days || 0} this week`,
     },
     {
-      title: 'Active Users',
+      title: "Active Users",
       value: stats?.users.active || 0,
       icon: Activity,
-      color: 'bg-green-500',
-      trend: 'Currently active',
+      color: "bg-green-500",
+      trend: "Currently active",
     },
     {
-      title: 'Total Quizzes',
+      title: "Total Quizzes",
       value: stats?.content.quizzes || 0,
       icon: BookOpen,
-      color: 'bg-purple-500',
-      trend: 'Platform wide',
+      color: "bg-purple-500",
+      trend: "Platform wide",
     },
     {
-      title: 'Total Attempts',
+      title: "Total Attempts",
       value: stats?.engagement.totalAttempts || 0,
       icon: TrendingUp,
-      color: 'bg-orange-500',
+      color: "bg-orange-500",
       trend: `+${stats?.engagement.attemptsLast7Days || 0} this week`,
     },
   ];
@@ -140,7 +161,9 @@ export const AdminDashboard = () => {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Admin Dashboard
+        </h1>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Last updated: {new Date().toLocaleTimeString()}
         </div>
@@ -186,8 +209,12 @@ export const AdminDashboard = () => {
                 <UserPlus className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Manage Users</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">View and edit users</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Manage Users
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  View and edit users
+                </p>
               </div>
             </Link>
             <Link
@@ -198,8 +225,12 @@ export const AdminDashboard = () => {
                 <Layers className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Manage Content</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Review platform content</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Manage Content
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Review platform content
+                </p>
               </div>
             </Link>
             <Link
@@ -210,8 +241,12 @@ export const AdminDashboard = () => {
                 <Brain className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Generation Management</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Generation stats & prompts</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Generation Management
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Generation stats & prompts
+                </p>
               </div>
             </Link>
             <Link
@@ -222,8 +257,12 @@ export const AdminDashboard = () => {
                 <Activity className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Analytics</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Insights & metrics</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Analytics
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Insights & metrics
+                </p>
               </div>
             </Link>
             <Link
@@ -234,8 +273,12 @@ export const AdminDashboard = () => {
                 <SettingsIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Settings</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Platform configuration</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Settings
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Platform configuration
+                </p>
               </div>
             </Link>
           </div>
@@ -252,8 +295,12 @@ export const AdminDashboard = () => {
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Quizzes</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total created</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Quizzes
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Total created
+                  </p>
                 </div>
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -266,8 +313,12 @@ export const AdminDashboard = () => {
                   <Layers className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Flashcards</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total sets</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Flashcards
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Total sets
+                  </p>
                 </div>
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -280,8 +331,12 @@ export const AdminDashboard = () => {
                   <FileText className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Study Materials</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Generated content</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Study Materials
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Generated content
+                  </p>
                 </div>
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">

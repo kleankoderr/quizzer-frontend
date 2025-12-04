@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useSyncExternalStore, useMemo, useCallback } from 'react';
-import type { User } from '../types';
-import { authService } from '../services/auth.service';
+import React, {
+  createContext,
+  useContext,
+  useSyncExternalStore,
+  useMemo,
+  useCallback,
+} from "react";
+import type { User } from "../types";
+import { authService } from "../services/auth.service";
 
 interface AuthContextType {
   user: User | null;
@@ -30,7 +36,7 @@ const authStore = {
   },
   setState(newState: Partial<typeof authState>) {
     authState = { ...authState, ...newState };
-    listeners.forEach(listener => listener());
+    listeners.forEach((listener) => listener());
   },
 };
 
@@ -53,8 +59,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const state = useSyncExternalStore(
     authStore.subscribe,
     authStore.getSnapshot,
-    authStore.getSnapshot
+    authStore.getSnapshot,
   );
+
+  React.useEffect(() => {
+    const syncUser = async () => {
+      if (state.user) {
+        try {
+          const freshUser = await authService.getCurrentUser();
+          authStore.setState({ user: freshUser });
+          authService.saveAuthData(freshUser);
+        } catch (error) {
+          console.error("Failed to sync user:", error);
+          // If 401, maybe logout? But api interceptor handles that.
+        }
+      }
+    };
+    syncUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = useCallback((userData: User) => {
     authStore.setState({ user: userData });
@@ -65,21 +88,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     authStore.setState({ user: null });
   }, []);
 
-  const value = useMemo(() => ({
-    user: state.user,
-    loading: state.loading,
-    login,
-    logout,
-    isAuthenticated: !!state.user,
-  }), [state.user, state.loading, login, logout]);
+  const value = useMemo(
+    () => ({
+      user: state.user,
+      loading: state.loading,
+      login,
+      logout,
+      isAuthenticated: !!state.user,
+    }),
+    [state.user, state.loading, login, logout],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

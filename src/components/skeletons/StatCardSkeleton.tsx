@@ -1,11 +1,13 @@
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface StatCardSkeletonProps {
   count?: number;
 }
 
-export const StatCardSkeleton: React.FC<StatCardSkeletonProps> = ({ count = 1 }) => {
+export const StatCardSkeleton: React.FC<StatCardSkeletonProps> = ({
+  count = 1,
+}) => {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (

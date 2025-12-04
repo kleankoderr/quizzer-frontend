@@ -12,7 +12,7 @@ export interface CoachingTip {
 export const coachingService = {
   getTips: async (): Promise<CoachingTip[]> => {
     const response = await apiClient.get<CoachingTip[]>(
-      COACHING_ENDPOINTS.GET_TIPS
+      COACHING_ENDPOINTS.GET_TIPS,
     );
     return response.data;
   },
