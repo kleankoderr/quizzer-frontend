@@ -224,7 +224,7 @@ export const FlashcardsPage = () => {
       </header>
 
       {/* Stats Overview */}
-      {(isLoading || totalSets > 0) && (
+      {!showGenerator && (isLoading || totalSets > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {isLoading ? (
             <StatCardSkeleton count={3} />
@@ -281,7 +281,7 @@ export const FlashcardsPage = () => {
       )}
 
       {/* View All Attempts Button */}
-      {(isLoading || totalSets > 0) && (
+      {!showGenerator && (isLoading || totalSets > 0) && (
         <button
           onClick={() => navigate("/attempts?type=flashcard")}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium"
@@ -307,13 +307,14 @@ export const FlashcardsPage = () => {
         </div>
       )}
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <CardSkeleton count={6} />
-        </div>
-      ) : (
-        <FlashcardSetList sets={flashcardSets} onDelete={handleDelete} />
-      )}
+      {!showGenerator &&
+        (isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CardSkeleton count={6} />
+          </div>
+        ) : (
+          <FlashcardSetList sets={flashcardSets} onDelete={handleDelete} />
+        ))}
 
       <Modal
         isOpen={!!deleteSetId}

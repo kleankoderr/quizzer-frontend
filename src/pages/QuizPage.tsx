@@ -236,7 +236,7 @@ export const QuizPage = () => {
       </header>
 
       {/* Stats Overview */}
-      {(loading || totalQuizzes > 0) && (
+      {!showGenerator && (loading || totalQuizzes > 0) && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {loading ? (
@@ -319,13 +319,14 @@ export const QuizPage = () => {
         </div>
       )}
 
-      {loading && quizzes.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <CardSkeleton count={6} />
-        </div>
-      ) : (
-        <QuizList quizzes={quizzes} onDelete={handleDelete} />
-      )}
+      {!showGenerator &&
+        (loading && quizzes.length === 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardSkeleton count={6} />
+          </div>
+        ) : (
+          <QuizList quizzes={quizzes} onDelete={handleDelete} />
+        ))}
 
       <Modal
         isOpen={!!deleteQuizId}

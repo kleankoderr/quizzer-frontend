@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { QuizQuestion, AnswerValue } from "../types";
+import { Check, X, AlertTriangle } from "lucide-react";
 
 interface QuestionRendererProps {
   question: QuizQuestion;
@@ -61,14 +62,16 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                 {option}
               </span>
               {showResults && isCorrect && (
-                <span className="ml-auto text-green-700 font-semibold text-sm sm:text-base">
-                  ✓ Correct
-                </span>
+                <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-green-700 font-semibold">
+                  <Check className="w-5 h-5" />
+                  <span className="hidden sm:inline text-sm">Correct</span>
+                </div>
               )}
               {showResults && isWrong && (
-                <span className="ml-auto text-red-700 font-semibold text-sm sm:text-base">
-                  ✗ Your answer
-                </span>
+                <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-red-700 font-semibold">
+                  <X className="w-5 h-5" />
+                  <span className="hidden sm:inline text-sm">Your answer</span>
+                </div>
               )}
             </div>
           </button>
@@ -118,14 +121,16 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                 {option}
               </span>
               {showResults && isCorrect && (
-                <span className="ml-auto text-green-700 font-semibold text-sm sm:text-base">
-                  ✓ Correct
-                </span>
+                <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-green-700 font-semibold">
+                  <Check className="w-5 h-5" />
+                  <span className="hidden sm:inline text-sm">Correct</span>
+                </div>
               )}
               {showResults && isWrong && (
-                <span className="ml-auto text-red-700 font-semibold text-sm sm:text-base">
-                  ✗ Your answer
-                </span>
+                <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-red-700 font-semibold">
+                  <X className="w-5 h-5" />
+                  <span className="hidden sm:inline text-sm">Your answer</span>
+                </div>
               )}
             </div>
           </button>
@@ -199,9 +204,10 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                     {option}
                   </span>
                   {isMissed && (
-                    <span className="ml-auto text-orange-700 font-semibold text-sm sm:text-base">
-                      ⚠ Missed
-                    </span>
+                    <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-orange-700 font-semibold">
+                      <AlertTriangle className="w-5 h-5" />
+                      <span className="hidden sm:inline text-sm">Missed</span>
+                    </div>
                   )}
                 </div>
               </button>

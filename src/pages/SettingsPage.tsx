@@ -182,26 +182,27 @@ export const SettingsPage = () => {
       </header>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400"
-                    : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-4 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-1 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
+                activeTab === tab.id
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+              }`}
+            >
+              <Icon className="w-5 h-5 md:w-5 md:h-5" />
+              <span className="text-[10px] md:text-base text-center leading-tight">
+                <span className="md:hidden">{tab.label.split(" ")[0]}</span>
+                <span className="hidden md:inline">{tab.label}</span>
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab Content */}

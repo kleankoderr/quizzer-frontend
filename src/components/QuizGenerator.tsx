@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import type { QuizGenerateRequest, QuizType, QuestionType } from "../types";
-import { Brain, Sparkles, BookOpen } from "lucide-react";
+import { Brain, Sparkles, BookOpen, FileText, Upload } from "lucide-react";
 
 interface QuizGeneratorProps {
   onGenerate: (request: QuizGenerateRequest, files?: File[]) => void;
@@ -132,39 +132,51 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         </div>
       )}
 
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={() => setMode("topic")}
-          className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
+          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
             mode === "topic"
-              ? "text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
           }`}
         >
-          From Topic
+          <Sparkles className="w-5 h-5 md:w-5 md:h-5" />
+          <span className="text-xs md:text-base">
+            <span className="md:hidden">Topic</span>
+            <span className="hidden md:inline">From Topic</span>
+          </span>
         </button>
         <button
           type="button"
           onClick={() => setMode("content")}
-          className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
+          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
             mode === "content"
-              ? "text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
           }`}
         >
-          From Content
+          <FileText className="w-5 h-5 md:w-5 md:h-5" />
+          <span className="text-xs md:text-base">
+            <span className="md:hidden">Content</span>
+            <span className="hidden md:inline">From Content</span>
+          </span>
         </button>
         <button
           type="button"
           onClick={() => setMode("files")}
-          className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
+          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
             mode === "files"
-              ? "text-blue-600 border-b-3 border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-400"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
           }`}
         >
-          From Files
+          <Upload className="w-5 h-5 md:w-5 md:h-5" />
+          <span className="text-xs md:text-base">
+            <span className="md:hidden">Files</span>
+            <span className="hidden md:inline">From Files</span>
+          </span>
         </button>
       </div>
 
@@ -363,7 +375,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                 key={level}
                 type="button"
                 onClick={() => setDifficulty(level)}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
+                className={`w-full flex items-center justify-center py-2 px-2 sm:px-4 rounded-lg border-2 text-sm sm:text-base transition-colors ${
                   difficulty === level
                     ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium"
                     : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300"
@@ -385,7 +397,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                 key={type}
                 type="button"
                 onClick={() => setQuizType(type)}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-colors ${
+                className={`w-full flex items-center justify-center py-2 px-2 sm:px-4 rounded-lg border-2 text-sm sm:text-base transition-colors ${
                   quizType === type
                     ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
                     : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300"

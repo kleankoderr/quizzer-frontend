@@ -203,6 +203,93 @@ export const DashboardPage = () => {
         </div>
       )}
 
+      {/* Smart Recommendation - High Priority Action */}
+      {topRecommendation ? (
+        <div className="card relative overflow-hidden border-0 shadow-lg group">
+          <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
+
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
+
+          <div className="relative z-10 p-4 md:p-6 text-white">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Sparkles className="w-5 h-5 text-yellow-300" />
+              </div>
+              <h3 className="text-sm font-bold tracking-wider uppercase text-blue-100">
+                Recommended for You
+              </h3>
+            </div>
+
+            <h4 className="text-xl md:text-2xl font-bold mb-2 text-white">
+              {topRecommendation.topic}
+            </h4>
+            <p className="text-blue-100 mb-6 text-sm leading-relaxed opacity-90">
+              {topRecommendation.reason}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              {topRecommendation.quizId && (
+                <button
+                  onClick={() => navigate(`/quiz/${topRecommendation.quizId}`)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  <Target className="w-5 h-5" />
+                  Take Quiz
+                </button>
+              )}
+
+              {topRecommendation.flashcardSetId && (
+                <button
+                  onClick={() =>
+                    navigate(`/flashcards/${topRecommendation.flashcardSetId}`)
+                  }
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
+                    !topRecommendation.quizId
+                      ? "bg-white text-blue-600 hover:bg-blue-50"
+                      : "bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20"
+                  }`}
+                >
+                  <Brain className="w-5 h-5" />
+                  Review Cards
+                </button>
+              )}
+
+              {!topRecommendation.quizId &&
+                !topRecommendation.flashcardSetId && (
+                  <button
+                    onClick={() => navigate("/study")}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Continue Learning
+                  </button>
+                )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="card p-4 md:p-6 dark:bg-gray-800">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Get Started
+            </h3>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Begin your learning journey by creating your first study material!
+          </p>
+          <button
+            onClick={() => navigate("/study")}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
+          >
+            Create Content
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card p-4 md:p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border-blue-200 dark:border-gray-700">
@@ -262,6 +349,157 @@ export const DashboardPage = () => {
             <div className="p-3 bg-orange-500 rounded-xl">
               <Award className="w-6 h-6 text-white" />
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Grid: Recent Attempts & Learning Progress */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Attempts */}
+        {!attemptsLoading &&
+          recentAttemptsData &&
+          recentAttemptsData.attempts.length > 0 && (
+            <div className="card p-4 md:p-6 dark:bg-gray-800">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Recent Attempts
+                </h3>
+                <button
+                  onClick={() => navigate("/statistics")}
+                  className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1"
+                >
+                  View All
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {recentAttemptsData.attempts.slice(0, 3).map((attempt) => (
+                  <div
+                    key={attempt.id}
+                    onClick={() => {
+                      if (attempt.type === "quiz" && attempt.quiz?.id) {
+                        navigate(`/attempts?quizId=${attempt.quiz.id}`);
+                      } else if (
+                        attempt.type === "flashcard" &&
+                        attempt.flashcardSet?.id
+                      ) {
+                        navigate(
+                          `/attempts?flashcardId=${attempt.flashcardSet.id}`
+                        );
+                      }
+                    }}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group gap-4"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        {attempt.quiz?.title ||
+                          attempt.flashcardSet?.title ||
+                          "Untitled"}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <span className="hidden sm:inline">
+                          {attempt.type === "quiz" ? "Quiz" : "Flashcards"} •{" "}
+                        </span>
+                        {new Date(attempt.completedAt).toLocaleDateString(
+                          undefined,
+                          { month: "short", day: "numeric" }
+                        )}
+                      </p>
+                    </div>
+                    {attempt.score !== undefined && attempt.totalQuestions && (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span
+                          className={`text-sm font-semibold ${
+                            attempt.score / attempt.totalQuestions >= 0.7
+                              ? "text-green-600 dark:text-green-400"
+                              : attempt.score / attempt.totalQuestions >= 0.5
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {Math.round(
+                            (attempt.score / attempt.totalQuestions) * 100
+                          )}
+                          %
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* Learning Progress */}
+        <div className="card p-4 md:p-6 dark:bg-gray-800">
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Learning Progress
+            </h3>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Active Topics
+              </span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                {activeTopics}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Retention Level
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                  {retentionLevel}
+                </span>
+                {retentionLevel !== "Getting Started" && (
+                  <TrendingUp className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                )}
+              </div>
+            </div>
+
+            {studyInsights?.retentionDistribution && (
+              <div className="pt-2">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <span>Mastery Progress</span>
+                  <span>
+                    {Math.round(
+                      ((studyInsights.retentionDistribution.RECALL +
+                        studyInsights.retentionDistribution.MASTERY) /
+                        (studyInsights.retentionDistribution.LEARNING +
+                          studyInsights.retentionDistribution.REINFORCEMENT +
+                          studyInsights.retentionDistribution.RECALL +
+                          studyInsights.retentionDistribution.MASTERY || 1)) *
+                        100
+                    )}
+                    %
+                  </span>
+                </div>
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${
+                        ((studyInsights.retentionDistribution.RECALL +
+                          studyInsights.retentionDistribution.MASTERY) /
+                          (studyInsights.retentionDistribution.LEARNING +
+                            studyInsights.retentionDistribution.REINFORCEMENT +
+                            studyInsights.retentionDistribution.RECALL +
+                            studyInsights.retentionDistribution.MASTERY || 1)) *
+                        100
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -378,248 +616,6 @@ export const DashboardPage = () => {
           </div>
         </div>
       )}
-
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Learning Progress */}
-        <div className="card p-4 md:p-6 dark:bg-gray-800">
-          <div className="flex items-center gap-2 mb-4">
-            <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Learning Progress
-            </h3>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Active Topics
-              </span>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
-                {activeTopics}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Retention Level
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  {retentionLevel}
-                </span>
-                {retentionLevel !== "Getting Started" && (
-                  <TrendingUp className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                )}
-              </div>
-            </div>
-
-            {studyInsights?.retentionDistribution && (
-              <div className="pt-2">
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  <span>Mastery Progress</span>
-                  <span>
-                    {Math.round(
-                      ((studyInsights.retentionDistribution.RECALL +
-                        studyInsights.retentionDistribution.MASTERY) /
-                        (studyInsights.retentionDistribution.LEARNING +
-                          studyInsights.retentionDistribution.REINFORCEMENT +
-                          studyInsights.retentionDistribution.RECALL +
-                          studyInsights.retentionDistribution.MASTERY || 1)) *
-                        100,
-                    )}
-                    %
-                  </span>
-                </div>
-                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${
-                        ((studyInsights.retentionDistribution.RECALL +
-                          studyInsights.retentionDistribution.MASTERY) /
-                          (studyInsights.retentionDistribution.LEARNING +
-                            studyInsights.retentionDistribution.REINFORCEMENT +
-                            studyInsights.retentionDistribution.RECALL +
-                            studyInsights.retentionDistribution.MASTERY || 1)) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Smart Recommendation */}
-        {topRecommendation ? (
-          <div className="card relative overflow-hidden border-0 shadow-lg group">
-            <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
-
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
-
-            <div className="relative z-10 p-4 md:p-6 text-white">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                  <Sparkles className="w-5 h-5 text-yellow-300" />
-                </div>
-                <h3 className="text-sm font-bold tracking-wider uppercase text-blue-100">
-                  Recommended for You
-                </h3>
-              </div>
-
-              <h4 className="text-xl md:text-2xl font-bold mb-2 text-white">
-                {topRecommendation.topic}
-              </h4>
-              <p className="text-blue-100 mb-6 text-sm leading-relaxed opacity-90">
-                {topRecommendation.reason}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                {topRecommendation.quizId && (
-                  <button
-                    onClick={() =>
-                      navigate(`/quiz/${topRecommendation.quizId}`)
-                    }
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    <Target className="w-5 h-5" />
-                    Take Quiz
-                  </button>
-                )}
-
-                {topRecommendation.flashcardSetId && (
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/flashcards/${topRecommendation.flashcardSetId}`,
-                      )
-                    }
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                      !topRecommendation.quizId
-                        ? "bg-white text-blue-600 hover:bg-blue-50"
-                        : "bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20"
-                    }`}
-                  >
-                    <Brain className="w-5 h-5" />
-                    Review Cards
-                  </button>
-                )}
-
-                {!topRecommendation.quizId &&
-                  !topRecommendation.flashcardSetId && (
-                    <button
-                      onClick={() => navigate("/study")}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                      <BookOpen className="w-5 h-5" />
-                      Continue Learning
-                    </button>
-                  )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="card p-4 md:p-6 dark:bg-gray-800">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Get Started
-              </h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Begin your learning journey by creating your first study material!
-            </p>
-            <button
-              onClick={() => navigate("/study")}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
-            >
-              Create Content
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Recent Attempts */}
-      {!attemptsLoading &&
-        recentAttemptsData &&
-        recentAttemptsData.attempts.length > 0 && (
-          <div className="card p-4 md:p-6 dark:bg-gray-800">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Recent Attempts
-              </h3>
-              <button
-                onClick={() => navigate("/statistics")}
-                className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1"
-              >
-                View All
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {recentAttemptsData.attempts.slice(0, 3).map((attempt) => (
-                <div
-                  key={attempt.id}
-                  onClick={() => {
-                    if (attempt.type === "quiz" && attempt.quiz?.id) {
-                      navigate(`/attempts?quizId=${attempt.quiz.id}`);
-                    } else if (
-                      attempt.type === "flashcard" &&
-                      attempt.flashcardSet?.id
-                    ) {
-                      navigate(
-                        `/attempts?flashcardId=${attempt.flashcardSet.id}`,
-                      );
-                    }
-                  }}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group gap-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                      {attempt.quiz?.title ||
-                        attempt.flashcardSet?.title ||
-                        "Untitled"}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      <span className="hidden sm:inline">
-                        {attempt.type === "quiz" ? "Quiz" : "Flashcards"} •{" "}
-                      </span>
-                      {new Date(attempt.completedAt).toLocaleDateString(
-                        undefined,
-                        { month: "short", day: "numeric" },
-                      )}
-                    </p>
-                  </div>
-                  {attempt.score !== undefined && attempt.totalQuestions && (
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span
-                        className={`text-sm font-semibold ${
-                          attempt.score / attempt.totalQuestions >= 0.7
-                            ? "text-green-600 dark:text-green-400"
-                            : attempt.score / attempt.totalQuestions >= 0.5
-                              ? "text-yellow-600 dark:text-yellow-400"
-                              : "text-red-600 dark:text-red-400"
-                        }`}
-                      >
-                        {Math.round(
-                          (attempt.score / attempt.totalQuestions) * 100,
-                        )}
-                        %
-                      </span>
-                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

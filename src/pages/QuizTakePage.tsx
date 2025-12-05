@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { quizService } from "../services/quiz.service";
-import type { QuizResult, Streak, AnswerValue } from "../types";
+import type { QuizResult, AnswerValue } from "../types";
 import {
   ArrowLeft,
   CheckCircle,
@@ -15,7 +15,7 @@ import {
   ChevronRight,
   Clock,
 } from "lucide-react";
-import { XPProgressBar } from "../components/XPProgressBar";
+
 import { QuestionRenderer } from "../components/QuestionRenderer";
 import { useQuiz } from "../hooks";
 
@@ -32,7 +32,7 @@ export const QuizTakePage = () => {
   >([]);
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<QuizResult | null>(null);
-  const [streak, setStreak] = useState<Streak | null>(null);
+
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [challengeResult, setChallengeResult] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -205,13 +205,13 @@ export const QuizTakePage = () => {
 
     setSubmitting(true);
     try {
-      const { result: submissionResult, gamification } =
+      const { result: submissionResult } =
         await quizService.submit(id, {
           answers: selectedAnswers as AnswerValue[],
           challengeId: challengeId || undefined,
         });
       setResult(submissionResult);
-      setStreak(gamification.streak);
+
 
       // Clear saved state from localStorage after submission
       localStorage.removeItem(getStorageKey("answers"));
@@ -355,20 +355,33 @@ export const QuizTakePage = () => {
                       : "💪 Keep Practicing!"}
               </h1>
               <p className="text-blue-100 dark:text-blue-200 text-sm sm:text-base md:text-lg px-4">
-                {isPerfect
-                  ? "You got every question right!"
-                  : isExcellent
-                    ? "You really know your stuff!"
-                    : isGood
-                      ? "Nice work, keep it up!"
-                      : "Review the answers and try again!"}
+                {(() => {
+                  const message =
+                    result.feedback?.message ||
+                    (isPerfect
+                      ? "You got every question right!"
+                      : isExcellent
+                        ? "You really know your stuff!"
+                        : isGood
+                          ? "Nice work, keep it up!"
+                          : "Review the answers and try again!");
+
+                  return message.split("**").map((part, index) =>
+                    index % 2 === 1 ? (
+                      <strong key={index} className="font-bold text-white">
+                        {part}
+                      </strong>
+                    ) : (
+                      part
+                    ),
+                  );
+                })()}
               </p>
             </div>
           </div>
         </div>
 
-        {/* XP and Level Progress */}
-        {streak && <XPProgressBar streak={streak} showLevelUp={true} />}
+
 
         {/* Continue to Next Quiz button for challenges */}
         {challengeId && challengeResult && !challengeResult.completed && (

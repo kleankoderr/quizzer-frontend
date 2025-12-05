@@ -132,15 +132,15 @@ export const ChallengesPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-600 to-red-700 dark:from-orange-800 dark:to-red-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-blue-600 dark:bg-blue-800 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <Flame className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">
+            <Flame className="w-6 h-6 text-blue-200" />
+            <span className="text-blue-200 font-semibold text-sm">
               Global Competition
             </span>
           </div>
@@ -150,7 +150,7 @@ export const ChallengesPage = () => {
                 <Trophy className="w-10 h-10" />
                 Challenges
               </h1>
-              <p className="text-primary-100 dark:text-primary-200 text-lg">
+              <p className="text-blue-100 dark:text-blue-200 text-lg">
                 Compete in Daily, Weekly, and Monthly challenges
               </p>
             </div>
@@ -163,13 +163,13 @@ export const ChallengesPage = () => {
                     ).length
                   }
                 </div>
-                <div className="text-xs text-primary-100">Available</div>
+                <div className="text-xs text-blue-200">Available</div>
               </div>
               <div className="text-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                 <div className="text-2xl font-bold text-white">
                   {challenges.filter((c) => c.completed).length}
                 </div>
-                <div className="text-xs text-primary-100 dark:text-primary-200">
+                <div className="text-xs text-blue-200 dark:text-blue-300">
                   Completed
                 </div>
               </div>
@@ -244,20 +244,20 @@ export const ChallengesPage = () => {
                       key={challenge.id}
                       className={`p-4 sm:p-5 rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
                         isCompleted
-                          ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800"
+                          ? "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800"
                           : isJoined
-                            ? "bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700"
-                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600"
+                            ? "bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700"
+                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <div
                           className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-md ${
                             isCompleted
-                              ? "bg-gradient-to-br from-green-500 to-emerald-600"
+                              ? "bg-green-600"
                               : isJoined
-                                ? "bg-gradient-to-br from-orange-500 to-red-600"
-                                : "bg-gradient-to-br from-gray-500 to-gray-600"
+                                ? "bg-blue-600"
+                                : "bg-gray-500"
                           }`}
                         >
                           {isCompleted ? (
@@ -289,7 +289,7 @@ export const ChallengesPage = () => {
                                   </span>
                                 )}
                                 {!isCompleted && isJoined && (
-                                  <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs font-semibold flex items-center gap-1">
+                                  <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold flex items-center gap-1">
                                     <Flame className="w-3 h-3" />
                                     Active
                                   </span>
@@ -300,7 +300,7 @@ export const ChallengesPage = () => {
                               </p>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-bold shadow-sm border border-white/20">
+                              <div className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-full text-sm font-bold shadow-sm border border-white/20">
                                 <Trophy className="w-4 h-4" />
                                 {challenge.reward}
                               </div>
@@ -310,7 +310,7 @@ export const ChallengesPage = () => {
                                   onClick={() =>
                                     navigate(`/challenges/${challenge.id}`)
                                   }
-                                  className="flex items-center gap-1 px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+                                  className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
                                 >
                                   <Zap className="w-3 h-3" />
                                   {challenge.progress > 0
@@ -325,7 +325,7 @@ export const ChallengesPage = () => {
                                     handleJoinChallenge(challenge.id)
                                   }
                                   disabled={joiningChallengeId === challenge.id}
-                                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                                 >
                                   {joiningChallengeId === challenge.id ? (
                                     <>
@@ -361,7 +361,7 @@ export const ChallengesPage = () => {
                             <div className="flex items-center justify-between text-xs">
                               <span className="text-gray-600 dark:text-gray-400">
                                 <span
-                                  className={`font-bold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-orange-600 dark:text-orange-400" : "text-primary-600 dark:text-primary-400"}`}
+                                  className={`font-bold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-blue-600 dark:text-blue-400" : "text-primary-600 dark:text-primary-400"}`}
                                 >
                                   {challenge.progress || 0}
                                 </span>
@@ -382,7 +382,7 @@ export const ChallengesPage = () => {
                                   </span>
                                 )}
                                 <span
-                                  className={`font-semibold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-orange-600 dark:text-orange-400" : "text-primary-600 dark:text-primary-400"}`}
+                                  className={`font-semibold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-blue-600 dark:text-blue-400" : "text-primary-600 dark:text-primary-400"}`}
                                 >
                                   {Math.round(percentage)}%
                                 </span>
@@ -393,7 +393,7 @@ export const ChallengesPage = () => {
                                 isCompleted
                                   ? "bg-green-200 dark:bg-green-900/30"
                                   : isJoined
-                                    ? "bg-orange-200 dark:bg-orange-900/30"
+                                    ? "bg-blue-200 dark:bg-blue-900/30"
                                     : "bg-gray-200 dark:bg-gray-700"
                               }`}
                             >
@@ -402,7 +402,7 @@ export const ChallengesPage = () => {
                                   isCompleted
                                     ? "bg-gradient-to-r from-green-400 to-emerald-500"
                                     : isJoined
-                                      ? "bg-gradient-to-r from-orange-400 to-red-500"
+                                      ? "bg-blue-500"
                                       : "bg-primary-500"
                                 }`}
                                 style={{ width: `${percentage}%` }}
@@ -452,15 +452,15 @@ export const ChallengesPage = () => {
 
                   if (entry.rank === 1) {
                     rankStyle =
-                      "bg-gradient-to-br from-yellow-400 to-yellow-600 text-white border-yellow-400 shadow-md";
+                      "bg-yellow-400 text-white border-yellow-400 shadow-md";
                     rankIcon = <Crown className="w-4 h-4" />;
                   } else if (entry.rank === 2) {
                     rankStyle =
-                      "bg-gradient-to-br from-gray-300 to-gray-500 text-white border-gray-300 shadow-md";
+                      "bg-gray-400 text-white border-gray-400 shadow-md";
                     rankIcon = <Medal className="w-4 h-4" />;
                   } else if (entry.rank === 3) {
                     rankStyle =
-                      "bg-gradient-to-br from-orange-400 to-orange-600 text-white border-orange-400 shadow-md";
+                      "bg-orange-500 text-white border-orange-500 shadow-md";
                     rankIcon = <Medal className="w-4 h-4" />;
                   }
 
@@ -532,7 +532,7 @@ export const ChallengesPage = () => {
 
           {/* Info Cards */}
           <div className="space-y-4">
-            <div className="card bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800 p-4 md:p-6">
+            <div className="card bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 p-4 md:p-6">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Trophy className="w-5 h-5 text-blue-600 dark:text-blue-400" />

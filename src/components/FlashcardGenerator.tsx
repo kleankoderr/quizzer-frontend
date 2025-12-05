@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import type { FlashcardGenerateRequest } from "../types";
-import { Layers, Sparkles } from "lucide-react";
+import { Layers, Sparkles, FileText, Upload } from "lucide-react";
 
 interface FlashcardGeneratorProps {
   onGenerate: (request: FlashcardGenerateRequest, files?: File[]) => void;
@@ -83,49 +83,61 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   };
 
   return (
-    <div className="card border border-primary-200 shadow-sm p-4 md:p-6">
+    <div className="card border border-primary-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 p-4 md:p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-primary-100 rounded-lg">
           <Layers className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Generate New Flashcard Set
         </h2>
       </div>
 
-      <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={() => setMode("topic")}
-          className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
+          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
             mode === "topic"
-              ? "text-primary-600 border-b-3 border-primary-600 bg-primary-50"
-              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
           }`}
         >
-          From Topic
+          <Sparkles className="w-5 h-5 md:w-5 md:h-5" />
+          <span className="text-xs md:text-base">
+            <span className="md:hidden">Topic</span>
+            <span className="hidden md:inline">From Topic</span>
+          </span>
         </button>
         <button
           type="button"
           onClick={() => setMode("content")}
-          className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
+          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
             mode === "content"
-              ? "text-primary-600 border-b-3 border-primary-600 bg-primary-50"
-              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
           }`}
         >
-          From Content
+          <FileText className="w-5 h-5 md:w-5 md:h-5" />
+          <span className="text-xs md:text-base">
+            <span className="md:hidden">Content</span>
+            <span className="hidden md:inline">From Content</span>
+          </span>
         </button>
         <button
           type="button"
           onClick={() => setMode("files")}
-          className={`px-4 md:px-6 py-3 font-semibold transition-all rounded-t-lg whitespace-nowrap ${
+          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
             mode === "files"
-              ? "text-primary-600 border-b-3 border-primary-600 bg-primary-50"
-              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
           }`}
         >
-          From Files
+          <Upload className="w-5 h-5 md:w-5 md:h-5" />
+          <span className="text-xs md:text-base">
+            <span className="md:hidden">Files</span>
+            <span className="hidden md:inline">From Files</span>
+          </span>
         </button>
       </div>
 
@@ -134,7 +146,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           <div>
             <label
               htmlFor="topic"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Topic
             </label>
@@ -152,7 +164,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           <div>
             <label
               htmlFor="content"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Content
             </label>
@@ -164,14 +176,14 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               className="input-field min-h-[200px] resize-y"
               required
             />
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               The system will extract key concepts and create flashcards
               automatically
             </p>
           </div>
         ) : (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Upload Files
             </label>
 
@@ -183,8 +195,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                 isDragging
-                  ? "border-primary-500 bg-primary-50"
-                  : "border-gray-300 hover:border-primary-400 hover:bg-gray-50"
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                  : "border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
               }`}
             >
               <svg
@@ -202,10 +214,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                 />
               </svg>
               <div className="mt-4">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
                   Drop PDF files here or click to browse
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   PDF files only (max 5MB each, up to 5 files)
                 </p>
               </div>
@@ -223,13 +235,13 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             {/* File List */}
             {files.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium text-gray-700">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Selected files ({files.length})
                 </p>
                 {files.map((file, index) => (
                   <div
                     key={`${file.name}-${index}`}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
                   >
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
@@ -252,10 +264,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
                           {file.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {formatFileSize(file.size)}
                         </p>
                       </div>
@@ -289,7 +301,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div>
           <label
             htmlFor="cards"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Number of Cards: {numberOfCards}
           </label>

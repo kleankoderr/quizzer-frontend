@@ -39,8 +39,8 @@ export const Sidebar = ({
     { path: "/flashcards", icon: Layers, label: "Flashcards" },
     { path: "/challenges", icon: Trophy, label: "Challenges" },
     { path: "/leaderboard", icon: Medal, label: "Leaderboard" },
-    { path: "/statistics", icon: BarChart3, label: "Analytics" },
     { path: "/attempts", icon: Calendar, label: "Attempts" },
+    { path: "/statistics", icon: BarChart3, label: "Analytics" },
     { path: "/profile", icon: User, label: "Profile" },
     { path: "/settings", icon: Settings, label: "Settings" },
   ];

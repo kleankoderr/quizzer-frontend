@@ -1,11 +1,6 @@
-import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { School as SchoolIcon, Search, Plus } from "lucide-react";
-
-interface School {
-  id: string;
-  name: string;
-}
+import { schoolService, type School } from "../services/school.service";
 
 interface SchoolSearchProps {
   value: string;
@@ -52,18 +47,8 @@ export const SchoolSearch = ({
 
       setLoading(true);
       try {
-        // Using Hipolabs University Domains and Names API as a public source
-        const { data } = await axios.get(
-          `http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`,
-        );
-        // Map the response to our School interface, taking top 10 results
-        const mappedResults = data
-          .slice(0, 10)
-          .map((item: any, index: number) => ({
-            id: `${item.name}-${index}`,
-            name: item.name,
-          }));
-        setResults(mappedResults);
+        const data = await schoolService.searchSchools(query);
+        setResults(data);
       } catch (error) {
         console.error("Failed to search schools:", error);
       } finally {

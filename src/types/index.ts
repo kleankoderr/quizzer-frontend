@@ -112,6 +112,12 @@ export interface QuizResult {
   totalQuestions: number;
   percentage: number;
   correctAnswers: AnswerValue[];
+  feedback?: {
+    message: string;
+    percentile?: number;
+    dailyRank?: number;
+    streakMessage?: string;
+  };
 }
 
 // Flashcard types
