@@ -610,10 +610,20 @@ export const QuizTakePage = () => {
           ) : (
             <button
               onClick={handleNext}
-              className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg touch-manipulation text-sm sm:text-base"
+              disabled={submitting}
+              className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg touch-manipulation text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Next</span>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              {submitting ? (
+                 <>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                </>
+              )}
             </button>
           )}
         </div>

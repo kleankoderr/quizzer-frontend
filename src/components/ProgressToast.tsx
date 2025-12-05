@@ -36,7 +36,12 @@ export const ProgressToast: React.FC<ProgressToastProps> = ({
         <div className="flex items-start">
           <div className="flex-shrink-0 pt-0.5">
             {status === "processing" && (
-              <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
+              <div className="relative flex items-center justify-center">
+                <Loader2 className="h-12 w-12 text-indigo-500 animate-spin" />
+                <span className="absolute text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
+                  {Math.round(progress)}%
+                </span>
+              </div>
             )}
             {status === "success" && (
               <CheckCircle className="h-10 w-10 text-green-500" />
