@@ -26,12 +26,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Redirect to onboarding if not completed and required
   // Admins bypass this check
+  // Also bypass if the user is accessing challenges (deep link support)
   if (
     user &&
     !user.onboardingCompleted &&
     user.role !== "ADMIN" &&
     user.role !== "SUPER_ADMIN" &&
-    location.pathname !== "/onboarding"
+    location.pathname !== "/onboarding" &&
+    !location.pathname.startsWith("/challenges")
   ) {
     return <Navigate to="/onboarding" replace />;
   }

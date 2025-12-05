@@ -257,6 +257,7 @@ export interface Challenge {
   quizId?: string; // Legacy single quiz support
   quizzes?: ChallengeQuiz[]; // Multi-quiz support
   participantCount?: number;
+  maxParticipants?: number;
   joined?: boolean;
 }
 

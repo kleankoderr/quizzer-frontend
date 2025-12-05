@@ -85,7 +85,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logout = useCallback(async () => {
-    authStore.setState({ user: null });
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      authStore.setState({ user: null });
+    }
   }, []);
 
   const value = useMemo(

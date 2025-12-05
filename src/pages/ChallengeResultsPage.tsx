@@ -270,8 +270,8 @@ export const ChallengeResultsPage = () => {
                     key={index}
                     className="group relative p-5 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 transition-all hover:shadow-lg"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3 sm:gap-0">
+                      <div className="flex-1 w-full">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold">
                             {index + 1}
@@ -285,7 +285,7 @@ export const ChallengeResultsPage = () => {
                           {quiz?.quiz.topic}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end">
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start w-full sm:w-auto ml-8 sm:ml-0">
                         <div
                           className={`text-3xl font-bold ${
                             percentage >= 90

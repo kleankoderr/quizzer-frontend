@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { authService } from "../services/auth.service";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -26,6 +26,7 @@ export const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const handleSignupSuccess = useCallback(
@@ -37,13 +38,23 @@ export const SignupPage = () => {
 
       if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
         navigate("/admin", { replace: true });
-      } else if (user.onboardingCompleted) {
+        return;
+      }
+
+      const from = (location.state as any)?.from;
+      if (from) {
+        const redirectPath = `${from.pathname}${from.search}${from.hash}`;
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+
+      if (user.onboardingCompleted) {
         navigate("/dashboard", { replace: true });
       } else {
         navigate("/onboarding", { replace: true });
       }
     },
-    [login, navigate],
+    [login, navigate, location],
   );
 
   const googleLogin = useGoogleLogin({
@@ -284,6 +295,7 @@ export const SignupPage = () => {
               Already have an account?{" "}
               <Link
                 to="/login"
+                state={{ from: (location.state as any)?.from }}
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 Sign In

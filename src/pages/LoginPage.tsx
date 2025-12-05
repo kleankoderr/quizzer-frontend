@@ -37,13 +37,23 @@ export const LoginPage = () => {
 
       if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
         navigate("/admin", { replace: true });
-      } else if (user.onboardingCompleted) {
+        return;
+      }
+
+      const from = (location.state as any)?.from;
+      if (from) {
+        const redirectPath = `${from.pathname}${from.search}${from.hash}`;
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+
+      if (user.onboardingCompleted) {
         navigate("/dashboard", { replace: true });
       } else {
         navigate("/onboarding", { replace: true });
       }
     },
-    [login, navigate],
+    [login, navigate, location],
   );
 
   useEffect(() => {
@@ -299,6 +309,7 @@ export const LoginPage = () => {
               Don't have an account?{" "}
               <Link
                 to="/signup"
+                state={{ from: (location.state as any)?.from }}
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 Sign Up

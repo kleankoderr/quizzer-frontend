@@ -359,7 +359,27 @@ export const ChallengesPage = () => {
 
                           <div className="mt-3 space-y-2">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-gray-600 dark:text-gray-400">
+                              <span className="text-gray-600 dark:text-gray-400 font-medium">
+                                Your Progress
+                              </span>
+                              <div className="flex items-center gap-3">
+                                {challenge.timeLimit && (
+                                  <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-medium bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {Math.round(challenge.timeLimit / 60)}m Limit
+                                  </span>
+                                )}
+                                {!isCompleted && (
+                                  <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400" title="Time remaining for challenge">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {timeLeft}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-xs mb-1">
+                               <span className="text-gray-600 dark:text-gray-400">
                                 <span
                                   className={`font-bold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-blue-600 dark:text-blue-400" : "text-primary-600 dark:text-primary-400"}`}
                                 >
@@ -367,27 +387,16 @@ export const ChallengesPage = () => {
                                 </span>
                                 <span className="text-gray-500 dark:text-gray-500">
                                   {" "}
-                                  / {challenge.target}
+                                  / {challenge.target} pts
                                 </span>
                               </span>
-                              <div className="flex items-center gap-3">
-                                <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                  <Users className="w-3.5 h-3.5" />
-                                  {challenge.participantCount || 0}
-                                </span>
-                                {!isCompleted && (
-                                  <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    {timeLeft}
-                                  </span>
-                                )}
-                                <span
-                                  className={`font-semibold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-blue-600 dark:text-blue-400" : "text-primary-600 dark:text-primary-400"}`}
-                                >
-                                  {Math.round(percentage)}%
-                                </span>
-                              </div>
+                              <span
+                                className={`font-semibold ${isCompleted ? "text-green-600 dark:text-green-400" : isJoined ? "text-blue-600 dark:text-blue-400" : "text-primary-600 dark:text-primary-400"}`}
+                              >
+                                {Math.round(percentage)}%
+                              </span>
                             </div>
+
                             <div
                               className={`relative w-full rounded-full h-2.5 overflow-hidden ${
                                 isCompleted
@@ -407,6 +416,13 @@ export const ChallengesPage = () => {
                                 }`}
                                 style={{ width: `${percentage}%` }}
                               ></div>
+                            </div>
+
+                            <div className="flex items-center justify-end mt-1">
+                                <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-md">
+                                  <Users className="w-3.5 h-3.5" />
+                                  {challenge.participantCount || 0} Participants
+                                </span>
                             </div>
                           </div>
                         </div>
