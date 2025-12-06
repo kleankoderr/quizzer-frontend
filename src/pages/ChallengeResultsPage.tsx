@@ -318,7 +318,6 @@ export const ChallengeResultsPage = () => {
     );
   }
 
-  const strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - finalScore / 100);
 
   return (
     <div className="space-y-6 pb-8 md:pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
