@@ -244,14 +244,14 @@ export const ChallengeResultsPage = () => {
   useEffect(() => {
     if (!breadcrumbItems) return;
     
-    const currentBreadcrumb = (location.state as any)?.breadcrumb;
+    const currentBreadcrumb = (location.state)?.breadcrumb;
     if (JSON.stringify(currentBreadcrumb) === JSON.stringify(breadcrumbItems)) {
       return;
     }
 
     navigate(".", {
       replace: true,
-      state: { ...(location.state as any), breadcrumb: breadcrumbItems },
+      state: { ...(location.state), breadcrumb: breadcrumbItems },
     });
   }, [breadcrumbItems, location.state, navigate]);
 
@@ -394,16 +394,20 @@ export const ChallengeResultsPage = () => {
                       fill="transparent"
                       className="text-white/10"
                     />
-                    <circle
+                   <circle
                       cx="50%"
                       cy="50%"
                       r="42%"
                       stroke={getGradeColorHex(gradeInfo.grade)}
                       strokeWidth="10"
                       fill="transparent"
-                      strokeDasharray={CIRCLE_CIRCUMFERENCE}
-                      strokeDashoffset={strokeDashoffset}
-                      className={`transition-all duration-1000 ease-out shadow-[0_0_10px_currentColor] ${gradeInfo.color}`}
+                      strokeDasharray={`${2 * Math.PI * (window.innerWidth < 768 ? 80 : 96)}`}
+                      style={{
+                        strokeDasharray: "280",
+                        strokeDashoffset: `${280 * (1 - finalScore / 100)}`,
+                      }}
+                      pathLength={280}
+                      className={`${gradeInfo.color} transition-all duration-1000 ease-out shadow-[0_0_10px_currentColor]`}
                       strokeLinecap="round"
                     />
                   </svg>
