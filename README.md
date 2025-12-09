@@ -36,9 +36,6 @@ React + TypeScript + TailwindCSS frontend for the Quizzer application.
 # Install dependencies
 npm install
 
-# Copy environment variables
-cp .env.example .env
-
 # Update .env with your backend URL
 VITE_API_BASE_URL=http://localhost:3000
 ```
