@@ -82,8 +82,11 @@ export function AttemptsPage() {
     challengeId: challengeId || undefined,
   });
 
-  // Extract attempts array from paginated response
-  const attempts = attemptsData?.attempts || [];
+  // Extract attempts array from paginated response (memoized to prevent dependency issues)
+  const attempts = useMemo(
+    () => attemptsData?.attempts || [],
+    [attemptsData?.attempts]
+  );
 
   // Handle errors
   if (error) {
