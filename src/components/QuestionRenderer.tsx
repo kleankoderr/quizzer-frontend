@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react';
 import type { QuizQuestion, AnswerValue } from '../types';
 import { Check, X, AlertTriangle } from 'lucide-react';
-import { shuffleMatchingOptions, isAcceptableFillBlankAnswer } from '../utils/shuffleUtils';
+import {
+  shuffleMatchingOptions,
+  isAcceptableFillBlankAnswer,
+} from '../utils/shuffleUtils';
 
 interface QuestionRendererProps {
   question: QuizQuestion;
@@ -23,7 +26,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   showExplanation = true,
 }) => {
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
-  
+
   // Shuffle matching options once when component mounts (only for matching questions)
   const shuffledQuestion = useMemo(() => {
     if (question.questionType === 'matching' && !showResults) {
@@ -31,9 +34,10 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     }
     return question;
   }, [question, showResults]); // Re-shuffle if question or showResults changes
-  
+
   // Use shuffled question for rendering
-  const displayQuestion = question.questionType === 'matching' ? shuffledQuestion : question;
+  const displayQuestion =
+    question.questionType === 'matching' ? shuffledQuestion : question;
 
   const renderTrueFalse = () => (
     <div className="space-y-3">
@@ -471,7 +475,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     const userAnswer = typeof selectedAnswer === 'string' ? selectedAnswer : '';
     const hasCorrectAnswer =
       correctAnswer !== undefined && typeof correctAnswer === 'string';
-    
+
     // Use intelligent matching for fill-blank questions
     const isCorrect =
       showResults &&

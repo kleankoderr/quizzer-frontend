@@ -193,7 +193,10 @@ export const QuizTakePage = () => {
   };
 
   const handleNext = () => {
-    if (shuffledQuestions && currentQuestionIndex < shuffledQuestions.length - 1) {
+    if (
+      shuffledQuestions &&
+      currentQuestionIndex < shuffledQuestions.length - 1
+    ) {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
       localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
