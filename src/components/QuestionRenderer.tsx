@@ -1,10 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import type { QuizQuestion, AnswerValue } from '../types';
 import { Check, X, AlertTriangle } from 'lucide-react';
-import {
-  shuffleMatchingOptions,
-  isAcceptableFillBlankAnswer,
-} from '../utils/shuffleUtils';
 
 interface QuestionRendererProps {
   question: QuizQuestion;
@@ -26,18 +22,6 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   showExplanation = true,
 }) => {
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
-
-  // Shuffle matching options once when component mounts (only for matching questions)
-  const shuffledQuestion = useMemo(() => {
-    if (question.questionType === 'matching' && !showResults) {
-      return shuffleMatchingOptions(question);
-    }
-    return question;
-  }, [question, showResults]); // Re-shuffle if question or showResults changes
-
-  // Use shuffled question for rendering
-  const displayQuestion =
-    question.questionType === 'matching' ? shuffledQuestion : question;
 
   const renderTrueFalse = () => (
     <div className="space-y-3">
@@ -237,9 +221,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   };
 
   const renderMatching = () => {
-    // Use shuffled question for matching
-    const leftItems = displayQuestion.leftColumn || [];
-    const rightItems = displayQuestion.rightColumn || [];
+    const leftItems = question.leftColumn || [];
+    const rightItems = question.rightColumn || [];
     const correctMatches =
       typeof correctAnswer === 'object' && !Array.isArray(correctAnswer)
         ? correctAnswer
@@ -476,11 +459,11 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     const hasCorrectAnswer =
       correctAnswer !== undefined && typeof correctAnswer === 'string';
 
-    // Use intelligent matching for fill-blank questions
+    // Simple case-insensitive comparison for fill-blank questions
     const isCorrect =
       showResults &&
       hasCorrectAnswer &&
-      isAcceptableFillBlankAnswer(userAnswer, correctAnswer as string);
+      userAnswer.trim().toLowerCase() === (correctAnswer as string).trim().toLowerCase();
 
     return (
       <div className="space-y-4">
@@ -530,24 +513,24 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white break-words">
-            {displayQuestion.question}
+            {question.question}
           </h2>
         </div>
       </div>
 
-      {displayQuestion.questionType === 'true-false' && renderTrueFalse()}
-      {displayQuestion.questionType === 'single-select' && renderSingleSelect()}
-      {displayQuestion.questionType === 'multi-select' && renderMultiSelect()}
-      {displayQuestion.questionType === 'matching' && renderMatching()}
-      {displayQuestion.questionType === 'fill-blank' && renderFillBlank()}
+      {question.questionType === 'true-false' && renderTrueFalse()}
+      {question.questionType === 'single-select' && renderSingleSelect()}
+      {question.questionType === 'multi-select' && renderMultiSelect()}
+      {question.questionType === 'matching' && renderMatching()}
+      {question.questionType === 'fill-blank' && renderFillBlank()}
 
-      {showResults && showExplanation && displayQuestion.explanation && (
+      {showResults && showExplanation && question.explanation && (
         <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
           <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
             💡 Explanation:
           </p>
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            {displayQuestion.explanation}
+            {question.explanation}
           </p>
         </div>
       )}

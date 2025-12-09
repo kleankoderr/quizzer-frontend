@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { quizService } from '../services/quiz.service';
 import type { QuizResult, AnswerValue } from '../types';
-import { shuffleQuestions } from '../utils/shuffleUtils';
 import {
   ArrowLeft,
   Brain,
@@ -36,11 +35,8 @@ export const QuizTakePage = () => {
   const [challengeResult, setChallengeResult] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Shuffle questions once when quiz loads (memoized to prevent re-shuffling)
-  const shuffledQuestions = useMemo(() => {
-    if (!quiz?.questions) return [];
-    return shuffleQuestions(quiz.questions);
-  }, [quiz?.questions]);
+  // Use questions directly from the API without shuffling
+  const questions = quiz?.questions || [];
 
   // Get localStorage key for this quiz (memoized to prevent dependency issues)
   const getStorageKey = useCallback((key: string) => `quiz_${id}_${key}`, [id]);
@@ -206,22 +202,22 @@ export const QuizTakePage = () => {
         const parsedAnswers = JSON.parse(savedAnswers);
         if (
           Array.isArray(parsedAnswers) &&
-          parsedAnswers.length === shuffledQuestions.length
+          parsedAnswers.length === questions.length
         ) {
           setSelectedAnswers(parsedAnswers);
         } else {
-          setSelectedAnswers(new Array(shuffledQuestions.length).fill(null));
+          setSelectedAnswers(new Array(questions.length).fill(null));
         }
       } catch {
-        setSelectedAnswers(new Array(shuffledQuestions.length).fill(null));
+        setSelectedAnswers(new Array(questions.length).fill(null));
       }
     } else {
-      setSelectedAnswers(new Array(shuffledQuestions.length).fill(null));
+      setSelectedAnswers(new Array(questions.length).fill(null));
     }
 
     if (savedQuestionIndex) {
       const index = parseInt(savedQuestionIndex, 10);
-      if (!isNaN(index) && index >= 0 && index < shuffledQuestions.length) {
+      if (!isNaN(index) && index >= 0 && index < questions.length) {
         setCurrentQuestionIndex(index);
       }
     }
@@ -239,7 +235,7 @@ export const QuizTakePage = () => {
         setTimeRemaining(quiz.timeLimit);
       }
     }
-  }, [quiz, id, attemptId, shuffledQuestions, getStorageKey]);
+  }, [quiz, id, attemptId, questions, getStorageKey]);
 
   // Timer effect for timed quizzes
   useEffect(() => {
@@ -276,8 +272,8 @@ export const QuizTakePage = () => {
 
   const handleNext = () => {
     if (
-      shuffledQuestions &&
-      currentQuestionIndex < shuffledQuestions.length - 1
+      questions &&
+      currentQuestionIndex < questions.length - 1
     ) {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
@@ -457,11 +453,11 @@ export const QuizTakePage = () => {
     );
   }
 
-  const currentQuestion = shuffledQuestions[currentQuestionIndex];
+  const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = selectedAnswers.filter((a) => a !== null).length;
   const progressPercentage =
-    shuffledQuestions.length > 0
-      ? (answeredCount / shuffledQuestions.length) * 100
+    questions.length > 0
+      ? (answeredCount / questions.length) * 100
       : 0;
 
   return (
@@ -525,10 +521,10 @@ export const QuizTakePage = () => {
           <div className="mt-4 sm:mt-6">
             <div className="flex justify-between text-xs sm:text-sm text-white mb-2">
               <span className="font-medium">
-                Q {currentQuestionIndex + 1}/{shuffledQuestions.length}
+                Q {currentQuestionIndex + 1}/{questions.length}
               </span>
               <span className="font-medium">
-                {answeredCount}/{shuffledQuestions.length} answered
+                {answeredCount}/{questions.length} answered
               </span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-2 sm:h-2.5 overflow-hidden">
@@ -568,7 +564,7 @@ export const QuizTakePage = () => {
             <span className="sm:hidden">Prev</span>
           </button>
 
-          {currentQuestionIndex === shuffledQuestions.length - 1 ? (
+          {currentQuestionIndex === questions.length - 1 ? (
             <button
               onClick={() => handleSubmit()}
               disabled={submitting}
