@@ -46,75 +46,86 @@ export const QuizTakePage = () => {
   const getStorageKey = useCallback((key: string) => `quiz_${id}_${key}`, [id]);
 
   // Handle submit (defined early to be used in timer useEffect)
-  const handleSubmit = useCallback(async (force = false) => {
-    if (!quiz || !id) return;
+  const handleSubmit = useCallback(
+    async (force = false) => {
+      if (!quiz || !id) return;
 
-    // If not forced, require all questions to be answered
-    if (!force && selectedAnswers.some((answer) => answer === null)) {
-      toast.error('Please answer all questions before submitting.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const { result: submissionResult } = await quizService.submit(id, {
-        answers: selectedAnswers as AnswerValue[],
-        challengeId: challengeId || undefined,
-      });
-      setResult(submissionResult);
-
-      // Clear saved state from localStorage after submission
-      localStorage.removeItem(getStorageKey('answers'));
-      localStorage.removeItem(getStorageKey('questionIndex'));
-      localStorage.removeItem(getStorageKey('timeRemaining'));
-      localStorage.removeItem(getStorageKey('timestamp'));
-
-      toast.success(
-        force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!'
-      );
-
-      // If this is a challenge quiz, handle challenge completion
-      if (challengeId) {
-        try {
-          const { challengeService } = await import('../services');
-          const challengeCompletionResult =
-            await challengeService.completeQuizInChallenge(challengeId, id, {
-              score: submissionResult.score,
-              totalQuestions: submissionResult.totalQuestions,
-              attemptId: submissionResult.attemptId,
-            });
-
-          setChallengeResult(challengeCompletionResult);
-
-          // Invalidate challenges cache
-          await queryClient.invalidateQueries({ queryKey: ['challenges'] });
-
-          // Navigate based on challenge completion status
-          if (challengeCompletionResult.completed) {
-            // All quizzes completed, go to results
-            navigate(`/challenges/${challengeId}/results`);
-          } else {
-            // More quizzes to complete, show results first then user can continue
-            setShowResults(true);
-          }
-        } catch (_error) {
-          // Still show results even if challenge update fails
-          setShowResults(true);
-        }
-      } else {
-        // Regular quiz, just show results
-        setShowResults(true);
+      // If not forced, require all questions to be answered
+      if (!force && selectedAnswers.some((answer) => answer === null)) {
+        toast.error('Please answer all questions before submitting.');
+        return;
       }
 
-      // Calculate duration if possible, otherwise 0
-      // Calculate duration if possible, otherwise 0
-      // const duration = quiz.timeLimit && timeRemaining !== null ? quiz.timeLimit - timeRemaining : 0;
-    } catch (_error) {
-      toast.error('Failed to submit quiz. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  }, [quiz, id, selectedAnswers, challengeId, getStorageKey, queryClient, navigate]);
+      setSubmitting(true);
+      try {
+        const { result: submissionResult } = await quizService.submit(id, {
+          answers: selectedAnswers as AnswerValue[],
+          challengeId: challengeId || undefined,
+        });
+        setResult(submissionResult);
+
+        // Clear saved state from localStorage after submission
+        localStorage.removeItem(getStorageKey('answers'));
+        localStorage.removeItem(getStorageKey('questionIndex'));
+        localStorage.removeItem(getStorageKey('timeRemaining'));
+        localStorage.removeItem(getStorageKey('timestamp'));
+
+        toast.success(
+          force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!'
+        );
+
+        // If this is a challenge quiz, handle challenge completion
+        if (challengeId) {
+          try {
+            const { challengeService } = await import('../services');
+            const challengeCompletionResult =
+              await challengeService.completeQuizInChallenge(challengeId, id, {
+                score: submissionResult.score,
+                totalQuestions: submissionResult.totalQuestions,
+                attemptId: submissionResult.attemptId,
+              });
+
+            setChallengeResult(challengeCompletionResult);
+
+            // Invalidate challenges cache
+            await queryClient.invalidateQueries({ queryKey: ['challenges'] });
+
+            // Navigate based on challenge completion status
+            if (challengeCompletionResult.completed) {
+              // All quizzes completed, go to results
+              navigate(`/challenges/${challengeId}/results`);
+            } else {
+              // More quizzes to complete, show results first then user can continue
+              setShowResults(true);
+            }
+          } catch (_error) {
+            // Still show results even if challenge update fails
+            setShowResults(true);
+          }
+        } else {
+          // Regular quiz, just show results
+          setShowResults(true);
+        }
+
+        // Calculate duration if possible, otherwise 0
+        // Calculate duration if possible, otherwise 0
+        // const duration = quiz.timeLimit && timeRemaining !== null ? quiz.timeLimit - timeRemaining : 0;
+      } catch (_error) {
+        toast.error('Failed to submit quiz. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [
+      quiz,
+      id,
+      selectedAnswers,
+      challengeId,
+      getStorageKey,
+      queryClient,
+      navigate,
+    ]
+  );
 
   // Handle errors
   if (error) {
@@ -281,8 +292,6 @@ export const QuizTakePage = () => {
       localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
     }
   };
-
-
 
   if (loading) {
     return (
