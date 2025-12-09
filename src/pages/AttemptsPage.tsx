@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { useNavigate, useSearchParams, useParams } from "react-router-dom";
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import {
   LineChart,
   Line,
@@ -11,7 +11,7 @@ import {
   PieChart,
   Pie,
   Cell,
-} from "recharts";
+} from 'recharts';
 import {
   Calendar,
   Filter,
@@ -21,51 +21,51 @@ import {
   Layers,
   ChevronRight,
   ArrowLeft,
-} from "lucide-react";
-import { format, parseISO } from "date-fns";
-import toast from "react-hot-toast";
-import type { Attempt } from "../types";
-import { useAttempts } from "../hooks";
+} from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import toast from 'react-hot-toast';
+import type { Attempt } from '../types';
+import { useAttempts } from '../hooks';
 import {
   CardSkeleton,
   ChartSkeleton,
   StatCardSkeleton,
-} from "../components/skeletons";
+} from '../components/skeletons';
 
-const COLORS = ["#3b82f6", "#10b981", "rgb(236, 72, 153)"];
+const COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
 
 export function AttemptsPage() {
   const navigate = useNavigate();
   const { id: routeChallengeId } = useParams(); // Get ID from URL path if present
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterType, setFilterType] = useState<
-    "all" | "quiz" | "flashcard" | "challenge"
-  >("all");
+    'all' | 'quiz' | 'flashcard' | 'challenge'
+  >('all');
   const [selectedItem, setSelectedItem] = useState<{
     id: string;
     title: string;
-    type: "quiz" | "flashcard" | "challenge";
+    type: 'quiz' | 'flashcard' | 'challenge';
   } | null>(null);
 
   // Get URL params for filtering
-  const quizId = searchParams.get("quizId");
-  const flashcardId = searchParams.get("flashcardId");
+  const quizId = searchParams.get('quizId');
+  const flashcardId = searchParams.get('flashcardId');
   // PRIORITIZE route params for challenges:
-  const challengeId = routeChallengeId || searchParams.get("challengeId");
-  const typeParam = searchParams.get("type");
+  const challengeId = routeChallengeId || searchParams.get('challengeId');
+  const typeParam = searchParams.get('type');
 
   // Sync filter type with URL params or Route params
   useEffect(() => {
     if (routeChallengeId) {
-      setFilterType("challenge");
+      setFilterType('challenge');
       return;
     }
 
     if (
-      typeParam === "quiz" ||
-      typeParam === "flashcard" ||
-      typeParam === "challenge" ||
-      typeParam === "all"
+      typeParam === 'quiz' ||
+      typeParam === 'flashcard' ||
+      typeParam === 'challenge' ||
+      typeParam === 'all'
     ) {
       setFilterType(typeParam);
     }
@@ -87,7 +87,7 @@ export function AttemptsPage() {
 
   // Handle errors
   if (error) {
-    toast.error("Failed to load attempts");
+    toast.error('Failed to load attempts');
   }
 
   // Sync selected item with URL params
@@ -103,24 +103,24 @@ export function AttemptsPage() {
           attempts.find((a) => a.quizId === quizId) || attempts[0];
         setSelectedItem({
           id: quizId,
-          title: attempt.quiz?.title || "Quiz",
-          type: "quiz",
+          title: attempt.quiz?.title || 'Quiz',
+          type: 'quiz',
         });
       } else if (challengeId) {
         const attempt =
           attempts.find((a) => a.challengeId === challengeId) || attempts[0];
         setSelectedItem({
           id: challengeId,
-          title: attempt.challenge?.title || "Challenge",
-          type: "challenge",
+          title: attempt.challenge?.title || 'Challenge',
+          type: 'challenge',
         });
       } else if (flashcardId) {
         const attempt =
           attempts.find((a) => a.flashcardSetId === flashcardId) || attempts[0];
         setSelectedItem({
           id: flashcardId,
-          title: attempt.flashcardSet?.title || "Flashcard Set",
-          type: "flashcard",
+          title: attempt.flashcardSet?.title || 'Flashcard Set',
+          type: 'flashcard',
         });
       }
     }
@@ -128,7 +128,7 @@ export function AttemptsPage() {
 
   // Use useMemo for filtering instead of useEffect
   const filteredAttempts = useMemo(() => {
-    if (filterType === "all") return attempts;
+    if (filterType === 'all') return attempts;
     return attempts.filter((attempt) => attempt.type === filterType);
   }, [attempts, filterType]);
 
@@ -163,9 +163,9 @@ export function AttemptsPage() {
   // Calculate statistics
   const attemptStats = {
     total: filteredAttempts.length,
-    quizzes: filteredAttempts.filter((a) => a.type === "quiz").length,
-    flashcards: filteredAttempts.filter((a) => a.type === "flashcard").length,
-    challenges: filteredAttempts.filter((a) => a.type === "challenge").length,
+    quizzes: filteredAttempts.filter((a) => a.type === 'quiz').length,
+    flashcards: filteredAttempts.filter((a) => a.type === 'flashcard').length,
+    challenges: filteredAttempts.filter((a) => a.type === 'challenge').length,
     averageScore:
       filteredAttempts.length > 0
         ? Math.round(
@@ -174,19 +174,19 @@ export function AttemptsPage() {
                 (a) =>
                   a.score !== undefined &&
                   a.totalQuestions &&
-                  a.totalQuestions > 0,
+                  a.totalQuestions > 0
               )
               .reduce(
                 (sum, a) =>
                   sum + Math.max(0, (a.score! / a.totalQuestions!) * 100),
-                0,
+                0
               ) /
               filteredAttempts.filter(
                 (a) =>
                   a.score !== undefined &&
                   a.totalQuestions &&
-                  a.totalQuestions > 0,
-              ).length,
+                  a.totalQuestions > 0
+              ).length
           )
         : 0,
   };
@@ -194,7 +194,7 @@ export function AttemptsPage() {
   // Prepare chart data - Score trend over time
   const scoreTrendData = filteredAttempts
     .filter(
-      (a) => a.score !== undefined && a.totalQuestions && a.totalQuestions > 0,
+      (a) => a.score !== undefined && a.totalQuestions && a.totalQuestions > 0
     )
     .slice(0, 20)
     .reverse()
@@ -202,53 +202,53 @@ export function AttemptsPage() {
       const rawPercent = (attempt.score! / attempt.totalQuestions!) * 100;
       const scorePercent = Math.round(Math.max(0, rawPercent));
       return {
-        name: format(parseISO(attempt.completedAt), "MMM dd"),
-        fullDate: format(parseISO(attempt.completedAt), "MMM dd, yyyy h:mm a"),
+        name: format(parseISO(attempt.completedAt), 'MMM dd'),
+        fullDate: format(parseISO(attempt.completedAt), 'MMM dd, yyyy h:mm a'),
         score: scorePercent,
         type: attempt.type,
         // Color based on performance
         fill:
           scorePercent >= 70
-            ? "#10b981"
+            ? '#10b981'
             : scorePercent >= 50
-              ? "#f59e0b"
-              : "#ef4444",
+              ? '#f59e0b'
+              : '#ef4444',
         attemptNumber: filteredAttempts.length - index,
       };
     });
 
   // Prepare pie chart data - Quiz vs Flashcard distribution
   const typeDistributionData = [
-    { name: "Quizzes", value: attemptStats.quizzes },
-    { name: "Flashcards", value: attemptStats.flashcards },
-    { name: "Challenges", value: attemptStats.challenges },
+    { name: 'Quizzes', value: attemptStats.quizzes },
+    { name: 'Flashcards', value: attemptStats.flashcards },
+    { name: 'Challenges', value: attemptStats.challenges },
   ].filter((item) => item.value > 0);
 
   // Group attempts by item (quiz or flashcard)
   const groupedAttempts = filteredAttempts.reduce(
     (acc, attempt) => {
-      let key = "";
-      let id = "";
-      let title = "";
-      let topic = "";
-      let quizId = "";
+      let key = '';
+      let id = '';
+      let title = '';
+      let topic = '';
+      let quizId = '';
 
-      if (attempt.type === "quiz") {
+      if (attempt.type === 'quiz') {
         key = `quiz-${attempt.quizId}`;
         id = attempt.quizId!;
-        title = attempt.quiz?.title || "Untitled Quiz";
-        topic = attempt.quiz?.topic || "General";
-      } else if (attempt.type === "flashcard") {
+        title = attempt.quiz?.title || 'Untitled Quiz';
+        topic = attempt.quiz?.topic || 'General';
+      } else if (attempt.type === 'flashcard') {
         key = `flashcard-${attempt.flashcardSetId}`;
         id = attempt.flashcardSetId!;
-        title = attempt.flashcardSet?.title || "Untitled Flashcard Set";
-        topic = attempt.flashcardSet?.topic || "General";
-      } else if (attempt.type === "challenge") {
+        title = attempt.flashcardSet?.title || 'Untitled Flashcard Set';
+        topic = attempt.flashcardSet?.topic || 'General';
+      } else if (attempt.type === 'challenge') {
         key = `challenge-${attempt.challengeId}`;
         id = attempt.challengeId!;
         quizId = attempt.quizId!;
-        title = attempt.challenge?.title || "Untitled Challenge";
-        topic = attempt.quiz?.topic || "Challenge";
+        title = attempt.challenge?.title || 'Untitled Challenge';
+        topic = attempt.quiz?.topic || 'Challenge';
       }
 
       if (!acc[key]) {
@@ -264,13 +264,13 @@ export function AttemptsPage() {
       acc[key].attempts.push(attempt);
       return acc;
     },
-    {} as Record<string, any>,
+    {} as Record<string, any>
   );
 
   const handleItemClick = (item: any) => {
-    if (item.type === "quiz") {
+    if (item.type === 'quiz') {
       setSearchParams({ quizId: item.id });
-    } else if (item.type === "challenge") {
+    } else if (item.type === 'challenge') {
       setSearchParams({ challengeId: item.id });
     } else {
       setSearchParams({ flashcardId: item.id });
@@ -279,7 +279,7 @@ export function AttemptsPage() {
 
   const handleAttemptClick = (attempt: Attempt) => {
     if (
-      (attempt.type === "quiz" || attempt.type === "challenge") &&
+      (attempt.type === 'quiz' || attempt.type === 'challenge') &&
       attempt.quizId
     ) {
       navigate(`/quiz/${attempt.quizId}/results/${attempt.id}`);
@@ -410,7 +410,7 @@ export function AttemptsPage() {
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {(["all", "quiz", "flashcard", "challenge"] as const).map(
+            {(['all', 'quiz', 'flashcard', 'challenge'] as const).map(
               (type) => (
                 <button
                   key={type}
@@ -418,19 +418,19 @@ export function AttemptsPage() {
                     setFilterType(type);
                     setSearchParams((prev) => {
                       const newParams = new URLSearchParams(prev);
-                      newParams.set("type", type);
+                      newParams.set('type', type);
                       return newParams;
                     });
                   }}
                   className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
                     filterType === type
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </button>
-              ),
+              )
             )}
           </div>
         </div>
@@ -449,7 +449,7 @@ export function AttemptsPage() {
                 </h2>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Your score progression (most recent {scoreTrendData.length}{" "}
+                Your score progression (most recent {scoreTrendData.length}{' '}
                 attempts)
               </p>
               <div className="flex items-center gap-4 mt-2 text-xs">
@@ -479,30 +479,30 @@ export function AttemptsPage() {
                 <XAxis
                   dataKey="name"
                   stroke="#9ca3af"
-                  style={{ fontSize: "11px" }}
+                  style={{ fontSize: '11px' }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
                 <YAxis
                   stroke="#9ca3af"
-                  style={{ fontSize: "12px" }}
+                  style={{ fontSize: '12px' }}
                   domain={[0, 100]}
                   label={{
-                    value: "Score (%)",
+                    value: 'Score (%)',
                     angle: -90,
-                    position: "insideLeft",
-                    style: { fill: "#9ca3af" },
+                    position: 'insideLeft',
+                    style: { fill: '#9ca3af' },
                   }}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1f2937",
-                    border: "1px solid #374151",
-                    borderRadius: "8px",
-                    color: "#fff",
+                    backgroundColor: '#1f2937',
+                    border: '1px solid #374151',
+                    borderRadius: '8px',
+                    color: '#fff',
                   }}
-                  formatter={(value: number) => [`${value}%`, "Score"]}
+                  formatter={(value: number) => [`${value}%`, 'Score']}
                   labelFormatter={(label, payload) => {
                     if (payload && payload.length > 0) {
                       return `${payload[0].payload.fullDate} (Attempt #${payload[0].payload.attemptNumber})`;
@@ -570,29 +570,29 @@ export function AttemptsPage() {
                 >
                   {typeDistributionData.map((entry, index) => {
                     let color = COLORS[0]; // Default
-                    if (entry.name === "Quizzes") color = "#3b82f6"; // Blue
-                    if (entry.name === "Flashcards") color = "#10b981"; // Green
-                    if (entry.name === "Challenges")
-                      color = "rgb(236, 72, 153)"; // Pink
+                    if (entry.name === 'Quizzes') color = '#3b82f6'; // Blue
+                    if (entry.name === 'Flashcards') color = '#10b981'; // Green
+                    if (entry.name === 'Challenges')
+                      color = 'rgb(236, 72, 153)'; // Pink
                     return <Cell key={`cell-${index}`} fill={color} />;
                   })}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    color: "#111827",
-                    padding: "8px 12px",
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    color: '#111827',
+                    padding: '8px 12px',
                     boxShadow:
-                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
                   }}
                   itemStyle={{
-                    color: "#111827",
+                    color: '#111827',
                     fontWeight: 500,
                   }}
                   labelStyle={{
-                    color: "#111827",
+                    color: '#111827',
                     fontWeight: 600,
                   }}
                 />
@@ -620,9 +620,9 @@ export function AttemptsPage() {
                 key={attempt.id}
                 onClick={() => handleAttemptClick(attempt)}
                 className={`p-6 ${
-                  attempt.type === "quiz" || attempt.type === "challenge"
-                    ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-                    : ""
+                  attempt.type === 'quiz' || attempt.type === 'challenge'
+                    ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700'
+                    : ''
                 } transition-colors`}
               >
                 <div className="flex items-center justify-between">
@@ -634,7 +634,7 @@ export function AttemptsPage() {
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {format(
                           parseISO(attempt.completedAt),
-                          "MMM dd, yyyy • h:mm a",
+                          'MMM dd, yyyy • h:mm a'
                         )}
                       </p>
                       {attempt.score !== undefined &&
@@ -651,8 +651,8 @@ export function AttemptsPage() {
                         {Math.round(
                           Math.max(
                             0,
-                            (attempt.score / attempt.totalQuestions) * 100,
-                          ),
+                            (attempt.score / attempt.totalQuestions) * 100
+                          )
                         )}
                         %
                       </p>
@@ -682,16 +682,16 @@ export function AttemptsPage() {
                 <div className="flex items-center gap-4">
                   <div
                     className={`flex items-center justify-center w-12 h-12 rounded-lg ${
-                      item.type === "quiz"
-                        ? "bg-blue-100 dark:bg-blue-900"
-                        : item.type === "challenge"
-                          ? "bg-pink-100 dark:bg-pink-900"
-                          : "bg-green-100 dark:bg-green-900"
+                      item.type === 'quiz'
+                        ? 'bg-blue-100 dark:bg-blue-900'
+                        : item.type === 'challenge'
+                          ? 'bg-pink-100 dark:bg-pink-900'
+                          : 'bg-green-100 dark:bg-green-900'
                     }`}
                   >
-                    {item.type === "quiz" ? (
+                    {item.type === 'quiz' ? (
                       <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    ) : item.type === "challenge" ? (
+                    ) : item.type === 'challenge' ? (
                       <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                     ) : (
                       <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -699,7 +699,7 @@ export function AttemptsPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {item.title || "Untitled"}
+                      {item.title || 'Untitled'}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {item.topic} • {item.attempts.length} attempts
@@ -724,8 +724,8 @@ export function AttemptsPage() {
                               ? Math.round(
                                   Math.max(
                                     0,
-                                    (a.score / a.totalQuestions) * 100,
-                                  ),
+                                    (a.score / a.totalQuestions) * 100
+                                  )
                                 )
                               : 0,
                         }))}
@@ -734,11 +734,11 @@ export function AttemptsPage() {
                         type="monotone"
                         dataKey="score"
                         stroke={
-                          item.type === "quiz"
-                            ? "#3b82f6"
-                            : item.type === "challenge"
-                              ? "rgb(236, 72, 153)"
-                              : "#10b981"
+                          item.type === 'quiz'
+                            ? '#3b82f6'
+                            : item.type === 'challenge'
+                              ? 'rgb(236, 72, 153)'
+                              : '#10b981'
                         }
                         strokeWidth={2}
                         dot={false}
@@ -760,7 +760,7 @@ export function AttemptsPage() {
             No attempts found
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            {filterType !== "all"
+            {filterType !== 'all'
               ? `You haven't attempted any ${filterType}es yet.`
               : "You haven't attempted any quizzes or flashcards yet."}
           </p>

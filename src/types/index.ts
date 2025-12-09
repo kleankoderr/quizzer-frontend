@@ -4,7 +4,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  role: "USER" | "ADMIN" | "SUPER_ADMIN";
+  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
   schoolName?: string;
   grade?: string;
   preferences?: Record<string, any>;
@@ -49,13 +49,13 @@ export interface AuthResponse {
 }
 
 // Quiz types
-export type QuizType = "standard" | "timed" | "scenario";
+export type QuizType = 'standard' | 'timed' | 'scenario';
 export type QuestionType =
-  | "true-false"
-  | "single-select"
-  | "multi-select"
-  | "matching"
-  | "fill-blank";
+  | 'true-false'
+  | 'single-select'
+  | 'multi-select'
+  | 'matching'
+  | 'fill-blank';
 export type AnswerValue =
   | number
   | number[]
@@ -94,7 +94,7 @@ export interface QuizGenerateRequest {
   topic?: string;
   content?: string;
   numberOfQuestions: number;
-  difficulty?: "easy" | "medium" | "hard";
+  difficulty?: 'easy' | 'medium' | 'hard';
   quizType?: QuizType;
   timeLimit?: number;
   questionTypes?: QuestionType[];
@@ -232,7 +232,7 @@ export interface Challenge {
   id: string;
   title: string;
   description: string;
-  type: "daily" | "weekly" | "monthly" | "hot";
+  type: 'daily' | 'weekly' | 'monthly' | 'hot';
   category?: string;
   target: number;
   reward: number;
@@ -304,7 +304,7 @@ export interface ChallengeLeaderboard {
 export interface Recommendation {
   topic: string;
   reason: string;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
 }
 
 // Attempt types
@@ -314,7 +314,7 @@ export interface Attempt {
   quizId?: string;
   flashcardSetId?: string;
   challengeId?: string;
-  type: "quiz" | "flashcard" | "challenge";
+  type: 'quiz' | 'flashcard' | 'challenge';
   score?: number;
   totalQuestions?: number;
   completedAt: string;

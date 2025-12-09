@@ -1,47 +1,47 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { ArrowRight, Check, BookOpen, GraduationCap } from "lucide-react";
-import { apiClient } from "../services/api";
-import { motion, AnimatePresence } from "framer-motion";
-import { SchoolSearch } from "../components/SchoolSearch";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { ArrowRight, Check, BookOpen, GraduationCap } from 'lucide-react';
+import { apiClient } from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SchoolSearch } from '../components/SchoolSearch';
 
 const GRADES = [
-  "Primary School",
-  "Junior Secondary School (JSS)",
-  "Senior Secondary School (SSS)",
-  "Undergraduate",
-  "Graduate Student",
-  "Lifelong Learner",
+  'Primary School',
+  'Junior Secondary School (JSS)',
+  'Senior Secondary School (SSS)',
+  'Undergraduate',
+  'Graduate Student',
+  'Lifelong Learner',
 ];
 
 const SUBJECTS = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "History",
-  "Geography",
-  "Literature",
-  "Computer Science",
-  "Economics",
-  "Psychology",
-  "Sociology",
-  "Philosophy",
-  "Art",
-  "Business Studies",
-  "Environmental Science",
-  "Health Education",
-  "Medicine",
-  "Engineering",
-  "Law",
-  "Architecture",
-  "Political Science",
+  'Mathematics',
+  'Physics',
+  'Chemistry',
+  'Biology',
+  'History',
+  'Geography',
+  'Literature',
+  'Computer Science',
+  'Economics',
+  'Psychology',
+  'Sociology',
+  'Philosophy',
+  'Art',
+  'Business Studies',
+  'Environmental Science',
+  'Health Education',
+  'Medicine',
+  'Engineering',
+  'Law',
+  'Architecture',
+  'Political Science',
 ];
 
 const USER_TYPES = [
-  { id: "student", label: "Student", icon: GraduationCap },
-  { id: "teacher", label: "Teacher", icon: BookOpen },
+  { id: 'student', label: 'Student', icon: GraduationCap },
+  { id: 'teacher', label: 'Teacher', icon: BookOpen },
 ];
 
 export const OnboardingPage = () => {
@@ -51,9 +51,9 @@ export const OnboardingPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    userType: "student",
-    grade: "",
-    schoolName: "",
+    userType: 'student',
+    grade: '',
+    schoolName: '',
     subjects: [] as string[],
   });
 
@@ -77,7 +77,7 @@ export const OnboardingPage = () => {
   const handleFinish = async () => {
     setLoading(true);
     try {
-      await apiClient.post("/onboarding/finish", formData);
+      await apiClient.post('/onboarding/finish', formData);
 
       // Update local user context to reflect onboarding completion
       if (user) {
@@ -87,9 +87,9 @@ export const OnboardingPage = () => {
       // Move to completion step (Step 4) which will auto-redirect
       setStep(4);
     } catch (error) {
-      console.error("Onboarding failed:", error);
+      console.error('Onboarding failed:', error);
       // Even if it fails, try to redirect to dashboard to avoid getting stuck
-      navigate("/dashboard");
+      navigate('/dashboard');
     } finally {
       setLoading(false);
     }
@@ -99,13 +99,13 @@ export const OnboardingPage = () => {
     setLoading(true);
     try {
       // Send empty data to trigger default assessment
-      await apiClient.post("/onboarding/finish", {});
+      await apiClient.post('/onboarding/finish', {});
       if (user) {
         login({ ...user, onboardingCompleted: true });
       }
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (_error) {
-      navigate("/dashboard");
+      navigate('/dashboard');
     }
   };
 
@@ -154,8 +154,8 @@ export const OnboardingPage = () => {
                         }
                         className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
                           formData.userType === type.id
-                            ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600"
-                            : "border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 text-gray-600 dark:text-gray-400"
+                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 text-gray-600 dark:text-gray-400'
                         }`}
                       >
                         <type.icon className="w-8 h-8" />
@@ -238,8 +238,8 @@ export const OnboardingPage = () => {
                         onClick={() => toggleSubject(subject)}
                         className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
                           formData.subjects.includes(subject)
-                            ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600"
-                            : "border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300"
+                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300'
                         }`}
                       >
                         <span className="text-sm font-medium">{subject}</span>
@@ -263,7 +263,7 @@ export const OnboardingPage = () => {
                 >
                   <div className="space-y-4">
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                      You're all set, {user?.name?.split(" ")[0] || "Learner"}!
+                      You're all set, {user?.name?.split(' ')[0] || 'Learner'}!
                     </h2>
                     <p className="text-lg text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed">
                       We're crafting a personalized learning path just for you.
@@ -278,7 +278,7 @@ export const OnboardingPage = () => {
                     </div>
 
                     <button
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigate('/dashboard')}
                       className="bg-primary-600 text-white px-8 py-3 rounded-xl font-semibold text-lg hover:bg-primary-700 transition-all shadow-lg hover:shadow-primary-500/25 flex items-center gap-2 transform hover:-translate-y-0.5"
                     >
                       Go to Dashboard
@@ -322,7 +322,7 @@ export const OnboardingPage = () => {
                     disabled={loading}
                     className="bg-primary-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    {loading ? "Finishing..." : "Finish"}
+                    {loading ? 'Finishing...' : 'Finish'}
                     {!loading && <ArrowRight className="w-4 h-4" />}
                   </button>
                 )}

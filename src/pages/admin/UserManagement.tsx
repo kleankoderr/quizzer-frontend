@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Shield,
@@ -8,16 +8,16 @@ import {
   UserX,
   UserCheck,
   Trash2,
-} from "lucide-react";
-import { adminService, type User } from "../../services/adminService";
-import { format } from "date-fns";
-import toast from "react-hot-toast";
-import { Modal } from "../../components/Modal";
-import { TableSkeleton } from "../../components/skeletons/TableSkeleton";
+} from 'lucide-react';
+import { adminService, type User } from '../../services/adminService';
+import { format } from 'date-fns';
+import toast from 'react-hot-toast';
+import { Modal } from '../../components/Modal';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 export const UserManagement = () => {
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(1);
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -28,8 +28,8 @@ export const UserManagement = () => {
     confirmColor?: string;
   }>({
     isOpen: false,
-    title: "",
-    message: "",
+    title: '',
+    message: '',
     onConfirm: () => {},
   });
 
@@ -37,7 +37,7 @@ export const UserManagement = () => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["users", page, search, roleFilter],
+    queryKey: ['users', page, search, roleFilter],
     queryFn: () =>
       adminService.getUsers({
         page,
@@ -51,12 +51,12 @@ export const UserManagement = () => {
     mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
       adminService.updateUserStatus(userId, isActive),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User status updated");
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('User status updated');
       closeModal();
     },
     onError: () => {
-      toast.error("Failed to update user status");
+      toast.error('Failed to update user status');
       closeModal();
     },
   });
@@ -64,12 +64,12 @@ export const UserManagement = () => {
   const deleteUserMutation = useMutation({
     mutationFn: adminService.deleteUser,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User deleted");
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('User deleted');
       closeModal();
     },
     onError: () => {
-      toast.error("Failed to delete user");
+      toast.error('Failed to delete user');
       closeModal();
     },
   });
@@ -81,12 +81,12 @@ export const UserManagement = () => {
   const handleStatusUpdate = (userId: string, isActive: boolean) => {
     setModalConfig({
       isOpen: true,
-      title: isActive ? "Activate User" : "Suspend User",
-      message: `Are you sure you want to ${isActive ? "activate" : "suspend"} this user?`,
-      confirmText: isActive ? "Activate" : "Suspend",
+      title: isActive ? 'Activate User' : 'Suspend User',
+      message: `Are you sure you want to ${isActive ? 'activate' : 'suspend'} this user?`,
+      confirmText: isActive ? 'Activate' : 'Suspend',
       confirmColor: isActive
-        ? "bg-green-600 hover:bg-green-700"
-        : "bg-yellow-600 hover:bg-yellow-700",
+        ? 'bg-green-600 hover:bg-green-700'
+        : 'bg-yellow-600 hover:bg-yellow-700',
       onConfirm: () => updateStatusMutation.mutate({ userId, isActive }),
     });
   };
@@ -94,11 +94,11 @@ export const UserManagement = () => {
   const handleDelete = (userId: string) => {
     setModalConfig({
       isOpen: true,
-      title: "Delete User",
+      title: 'Delete User',
       message:
-        "Are you sure you want to delete this user? This action cannot be undone.",
-      confirmText: "Delete",
-      confirmColor: "bg-red-600 hover:bg-red-700",
+        'Are you sure you want to delete this user? This action cannot be undone.',
+      confirmText: 'Delete',
+      confirmColor: 'bg-red-600 hover:bg-red-700',
       onConfirm: () => deleteUserMutation.mutate(userId),
     });
   };
@@ -198,35 +198,35 @@ export const UserManagement = () => {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          user.role === "SUPER_ADMIN"
-                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
-                            : user.role === "ADMIN"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                          user.role === 'SUPER_ADMIN'
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                            : user.role === 'ADMIN'
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
                         }`}
                       >
-                        {user.role === "SUPER_ADMIN" && (
+                        {user.role === 'SUPER_ADMIN' && (
                           <ShieldAlert className="mr-1 h-3 w-3" />
                         )}
-                        {user.role === "ADMIN" && (
+                        {user.role === 'ADMIN' && (
                           <Shield className="mr-1 h-3 w-3" />
                         )}
-                        {user.role.replace("_", " ")}
+                        {user.role.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           user.isActive
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                         }`}
                       >
-                        {user.isActive ? "Active" : "Suspended"}
+                        {user.isActive ? 'Active' : 'Suspended'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                      {format(new Date(user.createdAt), "MMM d, yyyy")}
+                      {format(new Date(user.createdAt), 'MMM d, yyyy')}
                     </td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                       <div className="flex flex-col text-xs">
@@ -239,7 +239,7 @@ export const UserManagement = () => {
                         className="flex justify-end gap-2"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {user.role !== "SUPER_ADMIN" && (
+                        {user.role !== 'SUPER_ADMIN' && (
                           <>
                             <button
                               onClick={() =>
@@ -247,11 +247,11 @@ export const UserManagement = () => {
                               }
                               className={`p-1.5 rounded-lg transition-colors ${
                                 user.isActive
-                                  ? "text-yellow-600 hover:bg-yellow-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
-                                  : "text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                                  ? 'text-yellow-600 hover:bg-yellow-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
+                                  : 'text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20'
                               }`}
                               title={
-                                user.isActive ? "Suspend User" : "Activate User"
+                                user.isActive ? 'Suspend User' : 'Activate User'
                               }
                             >
                               {user.isActive ? (
@@ -282,11 +282,11 @@ export const UserManagement = () => {
         {data?.meta && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 dark:border-gray-700">
             <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
-              Showing <span className="font-medium">{(page - 1) * 10 + 1}</span>{" "}
-              to{" "}
+              Showing <span className="font-medium">{(page - 1) * 10 + 1}</span>{' '}
+              to{' '}
               <span className="font-medium">
                 {Math.min(page * 10, data.meta.total)}
-              </span>{" "}
+              </span>{' '}
               of <span className="font-medium">{data.meta.total}</span> results
             </div>
             <div className="flex gap-2">
@@ -331,7 +331,7 @@ export const UserManagement = () => {
               disabled={
                 updateStatusMutation.isPending || deleteUserMutation.isPending
               }
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50 ${modalConfig.confirmColor || "bg-primary-600 hover:bg-primary-700"}`}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50 ${modalConfig.confirmColor || 'bg-primary-600 hover:bg-primary-700'}`}
             >
               {updateStatusMutation.isPending ||
               deleteUserMutation.isPending ? (
@@ -340,7 +340,7 @@ export const UserManagement = () => {
                   Processing...
                 </>
               ) : (
-                modalConfig.confirmText || "Confirm"
+                modalConfig.confirmText || 'Confirm'
               )}
             </button>
           </div>

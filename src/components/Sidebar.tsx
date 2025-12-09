@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from 'react-router-dom';
 import {
   Home,
   BookOpen,
@@ -13,8 +13,8 @@ import {
   Settings,
   Brain,
   Calendar,
-} from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+} from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -33,31 +33,31 @@ export const Sidebar = ({
   const location = useLocation();
 
   const navItems = [
-    { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/study", icon: BookOpen, label: "Study" },
-    { path: "/quiz", icon: Brain, label: "Quizzes" },
-    { path: "/flashcards", icon: Layers, label: "Flashcards" },
-    { path: "/challenges", icon: Trophy, label: "Challenges" },
-    { path: "/leaderboard", icon: Medal, label: "Leaderboard" },
-    { path: "/attempts", icon: Calendar, label: "Attempts" },
-    { path: "/statistics", icon: BarChart3, label: "Analytics" },
-    { path: "/profile", icon: User, label: "Profile" },
-    { path: "/settings", icon: Settings, label: "Settings" },
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/study', icon: BookOpen, label: 'Study' },
+    { path: '/quiz', icon: Brain, label: 'Quizzes' },
+    { path: '/flashcards', icon: Layers, label: 'Flashcards' },
+    { path: '/challenges', icon: Trophy, label: 'Challenges' },
+    { path: '/leaderboard', icon: Medal, label: 'Leaderboard' },
+    { path: '/attempts', icon: Calendar, label: 'Attempts' },
+    { path: '/statistics', icon: BarChart3, label: 'Analytics' },
+    { path: '/profile', icon: User, label: 'Profile' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
   const { user } = useAuth();
-  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
   let filteredNavItems = [...navItems];
 
   if (isAdmin) {
     // For admins, show Admin Dashboard, Users, Content, Analytics, and Settings
     filteredNavItems = [
-      { path: "/admin", icon: Home, label: "Dashboard" },
-      { path: "/admin/users", icon: User, label: "Users" },
-      { path: "/admin/content", icon: Layers, label: "Content" },
-      { path: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-      { path: "/admin/settings", icon: Settings, label: "Settings" },
+      { path: '/admin', icon: Home, label: 'Dashboard' },
+      { path: '/admin/users', icon: User, label: 'Users' },
+      { path: '/admin/content', icon: Layers, label: 'Content' },
+      { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+      { path: '/admin/settings', icon: Settings, label: 'Settings' },
     ];
   } else {
     // For regular users, show standard navigation
@@ -68,10 +68,10 @@ export const Sidebar = ({
     if (location.pathname === path) return true;
 
     // Prevent /admin or /dashboard from matching sub-routes incorrectly
-    if (path === "/admin" || path === "/dashboard") return false;
+    if (path === '/admin' || path === '/dashboard') return false;
 
     // Map content pages to Study section
-    if (path === "/study" && location.pathname.startsWith("/content"))
+    if (path === '/study' && location.pathname.startsWith('/content'))
       return true;
 
     return location.pathname.startsWith(`${path}/`);
@@ -92,8 +92,8 @@ export const Sidebar = ({
         className={`
           fixed lg:static inset-y-0 left-0 z-[100]
           bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-600 flex flex-col transition-all duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          ${isCollapsed ? "w-20" : "w-64"}
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isCollapsed ? 'w-20' : 'w-64'}
         `}
       >
         {/* Logo */}
@@ -135,21 +135,21 @@ export const Sidebar = ({
                   flex items-center gap-3 px-3 py-3 sm:py-2 rounded-lg transition-all relative touch-manipulation
                   ${
                     active
-                      ? "bg-blue-50 dark:bg-blue-900/50 text-primary-700 dark:text-blue-300"
-                      : "text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                      ? 'bg-blue-50 dark:bg-blue-900/50 text-primary-700 dark:text-blue-300'
+                      : 'text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                   }
                 `}
-                title={isCollapsed ? item.label : ""}
+                title={isCollapsed ? item.label : ''}
               >
                 {active && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 rounded-r-full"></div>
                 )}
                 <Icon
-                  className={`w-5 h-5 flex-shrink-0 ${active ? "text-primary-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-300"}`}
+                  className={`w-5 h-5 flex-shrink-0 ${active ? 'text-primary-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-300'}`}
                 />
                 {!isCollapsed && (
                   <span
-                    className={`font-medium ${active ? "font-semibold" : ""}`}
+                    className={`font-medium ${active ? 'font-semibold' : ''}`}
                   >
                     {item.label}
                   </span>
@@ -165,7 +165,7 @@ export const Sidebar = ({
             onClick={logout}
             className={`
               flex items-center gap-3 px-3 py-3 sm:py-2 w-full rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors touch-manipulation
-              ${isCollapsed ? "justify-center" : ""}
+              ${isCollapsed ? 'justify-center' : ''}
             `}
             title="Logout"
           >

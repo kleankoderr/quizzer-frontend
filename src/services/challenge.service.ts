@@ -1,46 +1,46 @@
-import { apiClient } from "./api";
-import { CHALLENGE_ENDPOINTS } from "../config/api";
-import type { Challenge, CompleteChallengeRequest } from "../types";
+import { apiClient } from './api';
+import { CHALLENGE_ENDPOINTS } from '../config/api';
+import type { Challenge, CompleteChallengeRequest } from '../types';
 
 export const challengeService = {
   getAll: async (): Promise<Challenge[]> => {
     const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_ALL,
+      CHALLENGE_ENDPOINTS.GET_ALL
     );
     return response.data;
   },
 
   getDaily: async (): Promise<Challenge[]> => {
     const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_DAILY,
+      CHALLENGE_ENDPOINTS.GET_DAILY
     );
     return response.data;
   },
 
   getHot: async (): Promise<Challenge[]> => {
     const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_HOT,
+      CHALLENGE_ENDPOINTS.GET_HOT
     );
     return response.data;
   },
 
   getWeekly: async (): Promise<Challenge[]> => {
     const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_WEEKLY,
+      CHALLENGE_ENDPOINTS.GET_WEEKLY
     );
     return response.data;
   },
 
   getMonthly: async (): Promise<Challenge[]> => {
     const response = await apiClient.get<Challenge[]>(
-      CHALLENGE_ENDPOINTS.GET_MONTHLY,
+      CHALLENGE_ENDPOINTS.GET_MONTHLY
     );
     return response.data;
   },
 
   getById: async (id: string): Promise<Challenge> => {
     const response = await apiClient.get<Challenge>(
-      CHALLENGE_ENDPOINTS.GET_BY_ID(id),
+      CHALLENGE_ENDPOINTS.GET_BY_ID(id)
     );
     return response.data;
   },
@@ -48,7 +48,7 @@ export const challengeService = {
   complete: async (data: CompleteChallengeRequest): Promise<Challenge> => {
     const response = await apiClient.post<Challenge>(
       CHALLENGE_ENDPOINTS.COMPLETE,
-      data,
+      data
     );
     return response.data;
   },
@@ -79,11 +79,11 @@ export const challengeService = {
   completeQuizInChallenge: async (
     challengeId: string,
     quizId: string,
-    attemptData: { score: number; totalQuestions: number; attemptId: string },
+    attemptData: { score: number; totalQuestions: number; attemptId: string }
   ): Promise<any> => {
     const response = await apiClient.post<any>(
       `/challenges/${challengeId}/quiz/${quizId}/complete`,
-      attemptData,
+      attemptData
     );
     return response.data;
   },

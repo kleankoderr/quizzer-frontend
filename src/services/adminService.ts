@@ -1,4 +1,4 @@
-import { apiClient as api } from "./api";
+import { apiClient as api } from './api';
 
 export interface SystemStats {
   users: {
@@ -22,7 +22,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  role: "USER" | "ADMIN" | "SUPER_ADMIN";
+  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
   isActive: boolean;
   schoolName?: string;
   grade?: string;
@@ -44,12 +44,12 @@ export interface UserFilter {
 
 export const adminService = {
   getSystemStats: async (): Promise<SystemStats> => {
-    const response = await api.get("/admin/stats");
+    const response = await api.get('/admin/stats');
     return response.data;
   },
 
   getUsers: async (filter: UserFilter) => {
-    const response = await api.get("/admin/users", { params: filter });
+    const response = await api.get('/admin/users', { params: filter });
     return response.data;
   },
 
@@ -83,19 +83,19 @@ export const adminService = {
   },
 
   getAllContent: async (filter: any) => {
-    const response = await api.get("/admin/content", { params: filter });
+    const response = await api.get('/admin/content', { params: filter });
     return response.data;
   },
 
   getReportedContent: async () => {
-    const response = await api.get("/admin/content/reports");
+    const response = await api.get('/admin/content/reports');
     return response.data;
   },
 
   moderateContent: async (
     id: string,
-    action: "DELETE" | "HIDE" | "IGNORE",
-    reason?: string,
+    action: 'DELETE' | 'HIDE' | 'IGNORE',
+    reason?: string
   ) => {
     const response = await api.post(`/admin/content/${id}/moderate`, {
       action,
@@ -115,12 +115,12 @@ export const adminService = {
   },
 
   getSchools: async () => {
-    const response = await api.get("/admin/schools");
+    const response = await api.get('/admin/schools');
     return response.data;
   },
 
   createSchool: async (data: any) => {
-    const response = await api.post("/admin/schools", data);
+    const response = await api.post('/admin/schools', data);
     return response.data;
   },
 
@@ -130,17 +130,17 @@ export const adminService = {
   },
 
   getAiAnalytics: async () => {
-    const response = await api.get("/admin/ai-analytics");
+    const response = await api.get('/admin/ai-analytics');
     return response.data;
   },
 
   getSettings: async () => {
-    const response = await api.get("/admin/settings");
+    const response = await api.get('/admin/settings');
     return response.data;
   },
 
   updateSettings: async (data: any) => {
-    const response = await api.patch("/admin/settings", data);
+    const response = await api.patch('/admin/settings', data);
     return response.data;
   },
 
@@ -150,7 +150,7 @@ export const adminService = {
   },
 
   createChallenge: async (data: any) => {
-    const response = await api.post("/admin/challenges", data);
+    const response = await api.post('/admin/challenges', data);
     return response.data;
   },
 
@@ -160,37 +160,37 @@ export const adminService = {
   },
 
   getAnalytics: async () => {
-    const response = await api.get("/admin/analytics");
+    const response = await api.get('/admin/analytics');
     return response.data;
   },
 
   getAllChallenges: async (filter?: any) => {
-    const response = await api.get("/admin/challenges", { params: filter });
+    const response = await api.get('/admin/challenges', { params: filter });
     return response.data;
   },
 
   getAllFlashcards: async (filter?: any) => {
-    const response = await api.get("/admin/flashcards", { params: filter });
+    const response = await api.get('/admin/flashcards', { params: filter });
     return response.data;
   },
 
   generateDailyChallenges: async () => {
-    const response = await api.post("/admin/challenges/generate/daily");
+    const response = await api.post('/admin/challenges/generate/daily');
     return response.data;
   },
 
   generateWeeklyChallenges: async () => {
-    const response = await api.post("/admin/challenges/generate/weekly");
+    const response = await api.post('/admin/challenges/generate/weekly');
     return response.data;
   },
 
   generateMonthlyChallenges: async () => {
-    const response = await api.post("/admin/challenges/generate/monthly");
+    const response = await api.post('/admin/challenges/generate/monthly');
     return response.data;
   },
 
   generateHotChallenges: async () => {
-    const response = await api.post("/admin/challenges/generate/hot");
+    const response = await api.post('/admin/challenges/generate/hot');
     return response.data;
   },
 };

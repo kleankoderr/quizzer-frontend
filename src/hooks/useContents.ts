@@ -1,13 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { contentService } from "../services";
+import { useQuery } from '@tanstack/react-query';
+import { contentService } from '../services';
 
 export const useContents = (
   topic?: string,
   page: number = 1,
-  limit: number = 10,
+  limit: number = 10
 ) => {
   return useQuery({
-    queryKey: ["contents", topic, page, limit],
+    queryKey: ['contents', topic, page, limit],
     queryFn: async () => {
       const response = await contentService.getAll(topic, page, limit);
       if (Array.isArray(response)) {

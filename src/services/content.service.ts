@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { apiClient } from './api';
 
 export interface Content {
   id: string;
@@ -44,39 +44,39 @@ const clearCache = () => {
 };
 
 export interface UpdateContentDto extends Partial<CreateContentDto> {
-  learningGuide?: Content["learningGuide"];
+  learningGuide?: Content['learningGuide'];
   lastReadPosition?: number;
 }
 
 export const contentService = {
-  async generateFromTopic(topic: string): Promise<{ taskId: string }> {
+  async generateFromTopic(topic: string): Promise<{ jobId: string }> {
     clearCache();
-    const response = await apiClient.post("/content/generate", { topic });
+    const response = await apiClient.post('/content/generate', { topic });
     return response.data;
   },
 
   async createFromText(data: CreateContentDto): Promise<Content> {
     clearCache();
-    const response = await apiClient.post("/content", data);
+    const response = await apiClient.post('/content', data);
     return response.data;
   },
 
   async createFromFile(
     file: File,
-    onProgress?: (progress: number) => void,
+    onProgress?: (progress: number) => void
   ): Promise<Content> {
     clearCache();
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
-    const response = await apiClient.post("/content/upload", formData, {
+    const response = await apiClient.post('/content/upload', formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        'Content-Type': 'multipart/form-data',
       },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total,
+            (progressEvent.loaded * 100) / progressEvent.total
           );
           onProgress(progress);
         }
@@ -88,12 +88,12 @@ export const contentService = {
   async getAll(
     topic?: string,
     page: number = 1,
-    limit: number = 10,
+    limit: number = 10
   ): Promise<{
     data: Content[];
     meta: { total: number; page: number; limit: number; totalPages: number };
   }> {
-    const cacheKey = `content-${topic || "all"}-${page}-${limit}`;
+    const cacheKey = `content-${topic || 'all'}-${page}-${limit}`;
     const cached = cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -113,7 +113,7 @@ export const contentService = {
       page,
       limit,
     };
-    const response = await apiClient.get("/content", { params });
+    const response = await apiClient.get('/content', { params });
 
     cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     return response.data;
@@ -144,11 +144,11 @@ export const contentService = {
       endOffset: number;
       note?: string;
       sectionIndex?: number;
-    },
+    }
   ): Promise<unknown> {
     const response = await apiClient.post(
       `/content/${contentId}/highlights`,
-      data,
+      data
     );
     return response.data;
   },
@@ -158,14 +158,14 @@ export const contentService = {
   },
 
   async getPopularTopics(): Promise<string[]> {
-    const response = await apiClient.get("/content/popular-topics");
+    const response = await apiClient.get('/content/popular-topics');
     return response.data;
   },
 
   async generateExplanation(
     contentId: string,
     sectionTitle: string,
-    sectionContent: string,
+    sectionContent: string
   ): Promise<string> {
     const response = await apiClient.post(`/content/${contentId}/explain`, {
       sectionTitle,
@@ -177,7 +177,7 @@ export const contentService = {
   async generateExample(
     contentId: string,
     sectionTitle: string,
-    sectionContent: string,
+    sectionContent: string
   ): Promise<string> {
     const response = await apiClient.post(`/content/${contentId}/example`, {
       sectionTitle,

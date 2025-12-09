@@ -1,20 +1,20 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save } from "lucide-react";
-import { adminService } from "../../services/adminService";
-import toast from "react-hot-toast";
-import { useState, useEffect } from "react";
-import { CardSkeleton } from "../../components/skeletons/CardSkeleton";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Save } from 'lucide-react';
+import { adminService } from '../../services/adminService';
+import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
 
 export const PlatformSettings = () => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     allowRegistration: true,
     maintenanceMode: false,
-    supportEmail: "",
+    supportEmail: '',
   });
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ["platformSettings"],
+    queryKey: ['platformSettings'],
     queryFn: adminService.getSettings,
   });
 
@@ -23,7 +23,7 @@ export const PlatformSettings = () => {
       setFormData({
         allowRegistration: settings.allowRegistration,
         maintenanceMode: settings.maintenanceMode,
-        supportEmail: settings.supportEmail || "",
+        supportEmail: settings.supportEmail || '',
       });
     }
   }, [settings]);
@@ -31,11 +31,11 @@ export const PlatformSettings = () => {
   const updateMutation = useMutation({
     mutationFn: adminService.updateSettings,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["platformSettings"] });
-      toast.success("Settings updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+      toast.success('Settings updated successfully');
     },
     onError: () => {
-      toast.error("Failed to update settings");
+      toast.error('Failed to update settings');
     },
   });
 
@@ -146,7 +146,7 @@ export const PlatformSettings = () => {
             className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
-            {updateMutation.isPending ? "Saving..." : "Save Settings"}
+            {updateMutation.isPending ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       </form>

@@ -1,6 +1,6 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { LoadingScreen } from "./LoadingScreen";
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { LoadingScreen } from './LoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -30,10 +30,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (
     user &&
     !user.onboardingCompleted &&
-    user.role !== "ADMIN" &&
-    user.role !== "SUPER_ADMIN" &&
-    location.pathname !== "/onboarding" &&
-    !location.pathname.startsWith("/challenges")
+    user.role !== 'ADMIN' &&
+    user.role !== 'SUPER_ADMIN' &&
+    location.pathname !== '/onboarding' &&
+    !location.pathname.startsWith('/challenges')
   ) {
     return <Navigate to="/onboarding" replace />;
   }

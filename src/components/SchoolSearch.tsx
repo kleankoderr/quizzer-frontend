@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { School as SchoolIcon, Search, Plus } from "lucide-react";
-import { schoolService, type School } from "../services/school.service";
+import { useState, useEffect, useRef } from 'react';
+import { School as SchoolIcon, Search, Plus } from 'lucide-react';
+import { schoolService, type School } from '../services/school.service';
 
 interface SchoolSearchProps {
   value: string;
@@ -12,8 +12,8 @@ interface SchoolSearchProps {
 export const SchoolSearch = ({
   value,
   onChange,
-  placeholder = "Search for your school...",
-  className = "",
+  placeholder = 'Search for your school...',
+  className = '',
 }: SchoolSearchProps) => {
   const [query, setQuery] = useState(value);
   const [results, setResults] = useState<School[]>([]);
@@ -34,8 +34,8 @@ export const SchoolSearch = ({
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const SchoolSearch = ({
         const data = await schoolService.searchSchools(query);
         setResults(data);
       } catch (error) {
-        console.error("Failed to search schools:", error);
+        console.error('Failed to search schools:', error);
       } finally {
         setLoading(false);
       }

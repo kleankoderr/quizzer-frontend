@@ -4,9 +4,9 @@ import React, {
   useSyncExternalStore,
   useMemo,
   useCallback,
-} from "react";
-import type { User } from "../types";
-import { authService } from "../services/auth.service";
+} from 'react';
+import type { User } from '../types';
+import { authService } from '../services/auth.service';
 
 interface AuthContextType {
   user: User | null;
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const state = useSyncExternalStore(
     authStore.subscribe,
     authStore.getSnapshot,
-    authStore.getSnapshot,
+    authStore.getSnapshot
   );
 
   React.useEffect(() => {
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           authStore.setState({ user: freshUser });
           authService.saveAuthData(freshUser);
         } catch (error) {
-          console.error("Failed to sync user:", error);
+          console.error('Failed to sync user:', error);
           // If 401, maybe logout? But api interceptor handles that.
         }
       }
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await authService.logout();
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     } finally {
       authStore.setState({ user: null });
     }
@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       logout,
       isAuthenticated: !!state.user,
     }),
-    [state.user, state.loading, login, logout],
+    [state.user, state.loading, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

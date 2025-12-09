@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 interface LoadingScreenProps {
   message?: string;
@@ -6,8 +6,8 @@ interface LoadingScreenProps {
 }
 
 export const LoadingScreen = ({
-  message = "Loading...",
-  subMessage = "Please wait while we prepare your experience",
+  message = 'Loading...',
+  subMessage = 'Please wait while we prepare your experience',
 }: LoadingScreenProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">

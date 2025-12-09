@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { X, Trophy, Crown, Medal, Zap } from "lucide-react";
-import { challengeService } from "../services";
-import type { ChallengeLeaderboard } from "../types";
+import { useState, useEffect } from 'react';
+import { X, Trophy, Crown, Medal, Zap } from 'lucide-react';
+import { challengeService } from '../services';
+import type { ChallengeLeaderboard } from '../types';
 
 interface ChallengeLeaderboardModalProps {
   challengeId: string;
@@ -14,7 +14,7 @@ export const ChallengeLeaderboardModal: React.FC<
   ChallengeLeaderboardModalProps
 > = ({ challengeId, challengeTitle, isOpen, onClose }) => {
   const [leaderboard, setLeaderboard] = useState<ChallengeLeaderboard | null>(
-    null,
+    null
   );
   const [loading, setLoading] = useState(true);
 
@@ -81,17 +81,17 @@ export const ChallengeLeaderboardModal: React.FC<
             <div className="space-y-2">
               {leaderboard.entries.map((entry) => {
                 let rankStyle =
-                  "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
+                  'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
                 let rankIcon = <span className="font-bold">{entry.rank}</span>;
 
                 if (entry.rank === 1) {
-                  rankStyle = "bg-yellow-500 text-white";
+                  rankStyle = 'bg-yellow-500 text-white';
                   rankIcon = <Crown className="w-5 h-5" />;
                 } else if (entry.rank === 2) {
-                  rankStyle = "bg-gray-400 text-white";
+                  rankStyle = 'bg-gray-400 text-white';
                   rankIcon = <Medal className="w-5 h-5" />;
                 } else if (entry.rank === 3) {
-                  rankStyle = "bg-orange-500 text-white";
+                  rankStyle = 'bg-orange-500 text-white';
                   rankIcon = <Medal className="w-5 h-5" />;
                 }
 
@@ -103,8 +103,8 @@ export const ChallengeLeaderboardModal: React.FC<
                     key={entry.userId}
                     className={`flex items-center gap-3 p-4 rounded-xl transition-all ${
                       isCurrentUser
-                        ? "bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-500 dark:border-primary-600"
-                        : "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? 'bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-500 dark:border-primary-600'
+                        : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
                     {/* Rank */}
@@ -119,8 +119,8 @@ export const ChallengeLeaderboardModal: React.FC<
                       <p
                         className={`font-semibold truncate ${
                           isCurrentUser
-                            ? "text-primary-700 dark:text-primary-300"
-                            : "text-gray-900 dark:text-white"
+                            ? 'text-primary-700 dark:text-primary-300'
+                            : 'text-gray-900 dark:text-white'
                         }`}
                       >
                         {entry.userName}
@@ -147,7 +147,7 @@ export const ChallengeLeaderboardModal: React.FC<
               {/* Current User (if not in top 11) */}
               {leaderboard.currentUser &&
                 !leaderboard.entries.some(
-                  (e) => e.userId === leaderboard.currentUser?.userId,
+                  (e) => e.userId === leaderboard.currentUser?.userId
                 ) && (
                   <>
                     <div className="flex items-center justify-center py-2">
@@ -170,7 +170,7 @@ export const ChallengeLeaderboardModal: React.FC<
                         {leaderboard.currentUser.completedAt && (
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(
-                              leaderboard.currentUser.completedAt,
+                              leaderboard.currentUser.completedAt
                             ).toLocaleDateString()}
                           </p>
                         )}

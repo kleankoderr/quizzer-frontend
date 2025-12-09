@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useLeaderboard } from "../hooks";
-import { Trophy, Medal, Crown } from "lucide-react";
-import { TableSkeleton } from "../components/skeletons";
+import { useState } from 'react';
+import { useLeaderboard } from '../hooks';
+import { Trophy, Medal, Crown } from 'lucide-react';
+import { TableSkeleton } from '../components/skeletons';
 
 export const LeaderboardPage = () => {
-  const [activeTab, setActiveTab] = useState<"global" | "friends">("global");
+  const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
   const { data: leaderboard, isLoading: loading } = useLeaderboard(activeTab);
 
   const getRankIcon = (rank: number) => {
@@ -47,21 +47,21 @@ export const LeaderboardPage = () => {
       <div className="card dark:bg-gray-800">
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           <button
-            onClick={() => setActiveTab("global")}
+            onClick={() => setActiveTab('global')}
             className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === "global"
-                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              activeTab === 'global'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             Global
           </button>
           <button
-            onClick={() => setActiveTab("friends")}
+            onClick={() => setActiveTab('friends')}
             className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === "friends"
-                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              activeTab === 'friends'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             Friends
@@ -82,8 +82,8 @@ export const LeaderboardPage = () => {
                   key={entry.userId}
                   className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                     entry.rank <= 3
-                      ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                      ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   <div className="flex items-center gap-4 flex-1">
@@ -99,7 +99,7 @@ export const LeaderboardPage = () => {
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold">
-                          {(entry.userName || "U").charAt(0).toUpperCase()}
+                          {(entry.userName || 'U').charAt(0).toUpperCase()}
                         </div>
                       )}
                       <span className="font-medium text-gray-900 dark:text-white">

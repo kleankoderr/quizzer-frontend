@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { authService } from "../services/auth.service";
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { authService } from '../services/auth.service';
 import {
   Mail,
   Lock,
@@ -10,19 +10,19 @@ import {
   EyeOff,
   AlertCircle,
   CheckCircle,
-} from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
-import { motion, AnimatePresence } from "framer-motion";
-import type { User } from "../types";
-import { useGoogleLogin } from "@react-oauth/google";
+} from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { User } from '../types';
+import { useGoogleLogin } from '@react-oauth/google';
 
 export const LoginPage = () => {
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { login } = useAuth();
@@ -35,8 +35,8 @@ export const LoginPage = () => {
       // Small delay to ensure state is updated and user sees the success state
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
-        navigate("/admin", { replace: true });
+      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        navigate('/admin', { replace: true });
         return;
       }
 
@@ -48,12 +48,12 @@ export const LoginPage = () => {
       }
 
       if (user.onboardingCompleted) {
-        navigate("/dashboard", { replace: true });
+        navigate('/dashboard', { replace: true });
       } else {
-        navigate("/onboarding", { replace: true });
+        navigate('/onboarding', { replace: true });
       }
     },
-    [login, navigate, location],
+    [login, navigate, location]
   );
 
   useEffect(() => {
@@ -63,16 +63,16 @@ export const LoginPage = () => {
       // Clear the message from location state
       window.history.replaceState({}, document.title);
       // Auto-hide success message after 5 seconds
-      const timer = setTimeout(() => setSuccessMessage(""), 5000);
+      const timer = setTimeout(() => setSuccessMessage(''), 5000);
       return () => clearTimeout(timer);
     }
   }, [location]);
 
   const googleLogin = useGoogleLogin({
-    scope: "email profile openid",
+    scope: 'email profile openid',
     onSuccess: async (tokenResponse) => {
-      setError("");
-      setSuccessMessage("");
+      setError('');
+      setSuccessMessage('');
       setGoogleLoading(true);
 
       try {
@@ -82,13 +82,13 @@ export const LoginPage = () => {
       } catch (err: any) {
         const errorMessage =
           err.response?.data?.message ||
-          "Google sign-in failed. Please try again.";
+          'Google sign-in failed. Please try again.';
         setError(errorMessage);
         setGoogleLoading(false);
       }
     },
     onError: () => {
-      const errorMessage = "Google sign-in failed. Please try again.";
+      const errorMessage = 'Google sign-in failed. Please try again.';
       setError(errorMessage);
       setGoogleLoading(false);
     },
@@ -97,8 +97,8 @@ export const LoginPage = () => {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setError("");
-      setSuccessMessage("");
+      setError('');
+      setSuccessMessage('');
       setLoading(true);
 
       try {
@@ -107,12 +107,12 @@ export const LoginPage = () => {
       } catch (err: any) {
         const errorMessage =
           err.response?.data?.message ||
-          "Authentication failed. Please try again.";
+          'Authentication failed. Please try again.';
         setError(errorMessage);
         setLoading(false);
       }
     },
-    [email, password, handleLoginSuccess],
+    [email, password, handleLoginSuccess]
   );
 
   return (
@@ -154,7 +154,7 @@ export const LoginPage = () => {
                     googleLogin();
                   }}
                   disabled={googleLoading || loading}
-                  className={`w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${googleLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${googleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <FcGoogle className="w-5 h-5" />
                   {googleLoading ? (
@@ -165,7 +165,7 @@ export const LoginPage = () => {
                       </span>
                     </>
                   ) : (
-                    "Continue with Google"
+                    'Continue with Google'
                   )}
                 </button>
 
@@ -173,7 +173,7 @@ export const LoginPage = () => {
                 <button
                   onClick={() => setShowEmailForm(true)}
                   disabled={googleLoading || loading}
-                  className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Mail className="w-5 h-5" />
                   Continue with Email
@@ -199,8 +199,8 @@ export const LoginPage = () => {
                   onSubmit={handleSubmit}
                   className="space-y-4"
                   onClick={() => {
-                    if (error) setError("");
-                    if (successMessage) setSuccessMessage("");
+                    if (error) setError('');
+                    if (successMessage) setSuccessMessage('');
                   }}
                 >
                   <div>
@@ -218,7 +218,7 @@ export const LoginPage = () => {
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value);
-                          if (error) setError("");
+                          if (error) setError('');
                         }}
                         className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="you@example.com"
@@ -238,11 +238,11 @@ export const LoginPage = () => {
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                       <input
                         id="password"
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => {
                           setPassword(e.target.value);
-                          if (error) setError("");
+                          if (error) setError('');
                         }}
                         className="w-full pl-10 pr-12 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="••••••••"
@@ -253,7 +253,7 @@ export const LoginPage = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 z-10"
                         aria-label={
-                          showPassword ? "Hide password" : "Show password"
+                          showPassword ? 'Hide password' : 'Show password'
                         }
                       >
                         {showPassword ? (
@@ -296,7 +296,7 @@ export const LoginPage = () => {
                     disabled={loading || googleLoading}
                     className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {loading ? "Signing In..." : "Sign In"}
+                    {loading ? 'Signing In...' : 'Sign In'}
                     {!loading && <ArrowRight className="w-5 h-5" />}
                   </button>
                 </form>
@@ -306,7 +306,7 @@ export const LoginPage = () => {
 
           <div className="text-center pt-4 border-t border-gray-100 dark:border-gray-700">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <Link
                 to="/signup"
                 state={{ from: (location.state as any)?.from }}

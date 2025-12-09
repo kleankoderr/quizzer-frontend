@@ -1,5 +1,5 @@
-import React from "react";
-import { X, Loader2 } from "lucide-react";
+import React from 'react';
+import { X, Loader2 } from 'lucide-react';
 
 interface ProcessingModalProps {
   isOpen: boolean;
@@ -13,8 +13,8 @@ interface ProcessingModalProps {
 export const ProcessingModal: React.FC<ProcessingModalProps> = ({
   isOpen,
   onClose,
-  title = "Processing...",
-  message = "Please wait while we generate your content. This may take a few moments.",
+  title = 'Processing...',
+  message = 'Please wait while we generate your content. This may take a few moments.',
   isProcessing = true,
   progress = 0,
 }) => {

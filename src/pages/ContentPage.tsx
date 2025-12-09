@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
   Highlighter,
@@ -11,31 +11,31 @@ import {
   Check,
   X,
   MoreVertical,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import { format } from "date-fns";
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import { format } from 'date-fns';
 
-import { contentService, type Content } from "../services/content.service";
-import toast from "react-hot-toast";
-import { Modal } from "../components/Modal";
-import { InlineNoteInput } from "../components/InlineNoteInput";
-import { LearningGuide } from "../components/LearningGuide";
+import { contentService, type Content } from '../services/content.service';
+import toast from 'react-hot-toast';
+import { Modal } from '../components/Modal';
+import { InlineNoteInput } from '../components/InlineNoteInput';
+import { LearningGuide } from '../components/LearningGuide';
 
-import "./ContentPage.css";
-import { useContent } from "../hooks";
-import { useQueryClient } from "@tanstack/react-query";
+import './ContentPage.css';
+import { useContent } from '../hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Highlight {
   id: string;
   text: string;
   note?: string;
-  color: "yellow" | "green" | "pink";
+  color: 'yellow' | 'green' | 'pink';
   createdAt: string;
 }
 
@@ -44,15 +44,15 @@ interface ExtendedContent extends Content {
 }
 
 const HIGHLIGHT_COLORS = {
-  yellow: "bg-yellow-200 dark:bg-yellow-900/50",
-  green: "bg-green-200 dark:bg-green-900/50",
-  pink: "bg-pink-200 dark:bg-pink-900/50",
+  yellow: 'bg-yellow-200 dark:bg-yellow-900/50',
+  green: 'bg-green-200 dark:bg-green-900/50',
+  pink: 'bg-pink-200 dark:bg-pink-900/50',
 };
 
 const HIGHLIGHT_BORDER_COLORS = {
-  yellow: "border-yellow-400 dark:border-yellow-700",
-  green: "border-green-400 dark:border-green-700",
-  pink: "border-pink-400 dark:border-pink-700",
+  yellow: 'border-yellow-400 dark:border-yellow-700',
+  green: 'border-green-400 dark:border-green-700',
+  pink: 'border-pink-400 dark:border-pink-700',
 };
 
 // Markdown Content Component with Scroll Tracking
@@ -69,8 +69,8 @@ const MarkdownContent = ({
 
   // Custom heading renderer to add IDs
   const HeadingRenderer = ({ level, children }: any) => {
-    const text = children?.[0]?.toString() || "";
-    const id = text.toLowerCase().replace(/[^\w]+/g, "-");
+    const text = children?.[0]?.toString() || '';
+    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
     const Tag = `h${level}` as React.ElementType;
     return <Tag id={id}>{children}</Tag>;
   };
@@ -81,7 +81,7 @@ const MarkdownContent = ({
       const scrollHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       const targetScroll = (initialProgress / 100) * scrollHeight;
-      window.scrollTo({ top: targetScroll, behavior: "smooth" });
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
       setRestored(true);
     }
   }, [initialProgress, restored]);
@@ -100,15 +100,15 @@ const MarkdownContent = ({
 
         const progress = Math.min(
           100,
-          Math.max(0, (scrollTop / scrollHeight) * 100),
+          Math.max(0, (scrollTop / scrollHeight) * 100)
         );
         onProgressUpdate(progress);
       }, 500); // Debounce by 500ms
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
       clearTimeout(timeoutId);
     };
   }, [onProgressUpdate]);
@@ -126,30 +126,30 @@ const MarkdownContent = ({
               ...defaultSchema,
               tagNames: [
                 ...(defaultSchema.tagNames || []),
-                "mark",
-                "span",
-                "div",
-                "math",
-                "semantics",
-                "mrow",
-                "mi",
-                "mo",
-                "mn",
-                "msup",
-                "msub",
-                "mfrac",
-                "msqrt",
-                "mroot",
-                "mtable",
-                "mtr",
-                "mtd",
+                'mark',
+                'span',
+                'div',
+                'math',
+                'semantics',
+                'mrow',
+                'mi',
+                'mo',
+                'mn',
+                'msup',
+                'msub',
+                'mfrac',
+                'msqrt',
+                'mroot',
+                'mtable',
+                'mtr',
+                'mtd',
               ],
               attributes: {
                 ...defaultSchema.attributes,
-                mark: [["className"], ["data-highlight-id"]],
-                span: [["className"], ["title"], ["style"]],
-                div: [["className"]],
-                math: [["xmlns"], ["display"]],
+                mark: [['className'], ['data-highlight-id']],
+                span: [['className'], ['title'], ['style']],
+                div: [['className']],
+                math: [['xmlns'], ['display']],
               },
             },
           ],
@@ -177,7 +177,7 @@ export const ContentPage = () => {
     refetch,
   } = useContent(id);
   const content = contentData as ExtendedContent | undefined;
-  const [selectedText, setSelectedText] = useState("");
+  const [selectedText, setSelectedText] = useState('');
   const [toolbarPosition, setToolbarPosition] = useState<{
     x: number;
     y: number;
@@ -185,8 +185,8 @@ export const ContentPage = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [showNotes, setShowNotes] = useState(window.innerWidth >= 1280);
   const [selectedColor, setSelectedColor] = useState<
-    "yellow" | "green" | "pink"
-  >("yellow");
+    'yellow' | 'green' | 'pink'
+  >('yellow');
 
   // Inline Note States
   const [inlineNote, setInlineNote] = useState<{
@@ -197,7 +197,7 @@ export const ContentPage = () => {
 
   // Modal states
   const [deleteHighlightId, setDeleteHighlightId] = useState<string | null>(
-    null,
+    null
   );
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] =
     useState(false);
@@ -207,8 +207,8 @@ export const ContentPage = () => {
 
   // Handle errors
   if (error) {
-    toast.error("Failed to load content");
-    navigate("/dashboard");
+    toast.error('Failed to load content');
+    navigate('/dashboard');
   }
 
   useEffect(() => {
@@ -229,11 +229,11 @@ export const ContentPage = () => {
           anchorNode instanceof Element
             ? anchorNode
             : anchorNode?.parentElement;
-        const sectionNode = element?.closest("[data-section-index]");
+        const sectionNode = element?.closest('[data-section-index]');
         if (sectionNode) {
           const index = parseInt(
-            sectionNode.getAttribute("data-section-index") || "0",
-            10,
+            sectionNode.getAttribute('data-section-index') || '0',
+            10
           );
           setSelectedSectionIndex(index);
         } else {
@@ -251,23 +251,23 @@ export const ContentPage = () => {
       }
     };
 
-    document.addEventListener("mouseup", handleSelection);
-    return () => document.removeEventListener("mouseup", handleSelection);
+    document.addEventListener('mouseup', handleSelection);
+    return () => document.removeEventListener('mouseup', handleSelection);
   }, [inlineNote]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (
-        !target.closest(".floating-toolbar") &&
-        !target.closest(".inline-note-input") &&
+        !target.closest('.floating-toolbar') &&
+        !target.closest('.inline-note-input') &&
         window.getSelection()?.toString().length === 0
       ) {
         setToolbarPosition(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -276,20 +276,20 @@ export const ContentPage = () => {
       const { sectionIndex, x, y } = customEvent.detail;
       setSelectedSectionIndex(sectionIndex);
       setInlineNote({
-        text: "",
+        text: '',
         position: { x, y },
       });
-      setSelectedText(""); // Clear selected text to indicate section note
+      setSelectedText(''); // Clear selected text to indicate section note
       window.getSelection()?.removeAllRanges();
     };
 
-    window.addEventListener("add-section-note", handleAddSectionNote);
+    window.addEventListener('add-section-note', handleAddSectionNote);
     return () =>
-      window.removeEventListener("add-section-note", handleAddSectionNote);
+      window.removeEventListener('add-section-note', handleAddSectionNote);
   }, []);
 
   const handleHighlight = async (
-    color: "yellow" | "green" | "pink" = selectedColor,
+    color: 'yellow' | 'green' | 'pink' = selectedColor
   ) => {
     if (!selectedText || !id) return;
 
@@ -301,10 +301,10 @@ export const ContentPage = () => {
         color: color,
         sectionIndex: selectedSectionIndex,
       });
-      toast.success("Text highlighted");
+      toast.success('Text highlighted');
       refetch(); // Refresh to show new highlight
     } catch (_error) {
-      toast.error("Failed to save highlight");
+      toast.error('Failed to save highlight');
     } finally {
       setToolbarPosition(null);
       window.getSelection()?.removeAllRanges();
@@ -314,7 +314,7 @@ export const ContentPage = () => {
   const handleAddNote = () => {
     if (!selectedText || !id || !toolbarPosition) return;
     setInlineNote({
-      text: "",
+      text: '',
       position: toolbarPosition,
     });
     setToolbarPosition(null);
@@ -334,17 +334,17 @@ export const ContentPage = () => {
       }
 
       await contentService.addHighlight(id, {
-        text: textToSave || "Note",
+        text: textToSave || 'Note',
         startOffset: 0,
         endOffset: 0,
         note: inlineNote.text,
-        color: "yellow",
+        color: 'yellow',
         sectionIndex: selectedSectionIndex,
       });
-      toast.success("Note added");
+      toast.success('Note added');
       refetch();
     } catch (_error) {
-      toast.error("Failed to add note");
+      toast.error('Failed to add note');
     } finally {
       setInlineNote(null);
       window.getSelection()?.removeAllRanges();
@@ -359,10 +359,10 @@ export const ContentPage = () => {
     if (!deleteHighlightId) return;
     try {
       await contentService.deleteHighlight(deleteHighlightId);
-      toast.success("Highlight removed");
+      toast.success('Highlight removed');
       refetch();
     } catch (_error) {
-      toast.error("Failed to delete highlight");
+      toast.error('Failed to delete highlight');
     } finally {
       setDeleteHighlightId(null);
     }
@@ -379,10 +379,10 @@ export const ContentPage = () => {
     const maxContentLength = 5000;
     const contentText =
       content.content.length > maxContentLength
-        ? content.content.substring(0, maxContentLength) + "..."
+        ? content.content.substring(0, maxContentLength) + '...'
         : content.content;
 
-    navigate("/quiz", {
+    navigate('/quiz', {
       state: {
         topic: content.topic,
         contentText: contentText,
@@ -390,9 +390,9 @@ export const ContentPage = () => {
         sourceTitle: content.title,
         contentId: content.id,
         breadcrumb: [
-          { label: "Study", path: "/study" },
+          { label: 'Study', path: '/study' },
           { label: content.title, path: `/content/${content.id}` },
-          { label: "Generate Quiz" },
+          { label: 'Generate Quiz' },
         ],
       },
     });
@@ -409,10 +409,10 @@ export const ContentPage = () => {
     const maxContentLength = 5000;
     const contentText =
       content.content.length > maxContentLength
-        ? content.content.substring(0, maxContentLength) + "..."
+        ? content.content.substring(0, maxContentLength) + '...'
         : content.content;
 
-    navigate("/flashcards", {
+    navigate('/flashcards', {
       state: {
         topic: content.topic,
         contentText: contentText,
@@ -420,9 +420,9 @@ export const ContentPage = () => {
         sourceTitle: content.title,
         contentId: content.id,
         breadcrumb: [
-          { label: "Study", path: "/study" },
+          { label: 'Study', path: '/study' },
           { label: content.title, path: `/content/${content.id}` },
-          { label: "Generate Flashcards" },
+          { label: 'Generate Flashcards' },
         ],
       },
     });
@@ -435,15 +435,15 @@ export const ContentPage = () => {
   const confirmDeleteContent = async () => {
     if (!id) return;
 
-    const loadingToast = toast.loading("Deleting content...");
+    const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(id);
-      toast.success("Content deleted successfully!", { id: loadingToast });
+      toast.success('Content deleted successfully!', { id: loadingToast });
       // Invalidate contents list to remove deleted item
-      await queryClient.invalidateQueries({ queryKey: ["contents"] });
-      navigate("/study");
+      await queryClient.invalidateQueries({ queryKey: ['contents'] });
+      navigate('/study');
     } catch (_error) {
-      toast.error("Failed to delete content", { id: loadingToast });
+      toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setIsDeleteContentModalOpen(false);
     }
@@ -474,17 +474,17 @@ export const ContentPage = () => {
             >
               <div
                 className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl ${
-                  highlight.color === "yellow"
-                    ? "bg-yellow-400"
-                    : highlight.color === "green"
-                      ? "bg-green-400"
-                      : "bg-pink-400"
+                  highlight.color === 'yellow'
+                    ? 'bg-yellow-400'
+                    : highlight.color === 'green'
+                      ? 'bg-green-400'
+                      : 'bg-pink-400'
                 }`}
               ></div>
 
               <div className="flex justify-between items-start mb-2 pl-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  {highlight.note ? "Note" : "Highlight"}
+                  {highlight.note ? 'Note' : 'Highlight'}
                 </span>
                 <button
                   onClick={() => handleDeleteHighlight(highlight.id)}
@@ -507,7 +507,7 @@ export const ContentPage = () => {
               )}
 
               <div className="mt-2 text-xs text-gray-400 pl-2">
-                {format(new Date(highlight.createdAt), "MMM d, h:mm a")}
+                {format(new Date(highlight.createdAt), 'MMM d, h:mm a')}
               </div>
             </div>
           ))
@@ -530,27 +530,27 @@ export const ContentPage = () => {
 
     let processed = markdown;
     const sortedHighlights = [...highlights].sort(
-      (a, b) => b.text.length - a.text.length,
+      (a, b) => b.text.length - a.text.length
     );
     const replacements: Map<string, string> = new Map();
 
     sortedHighlights.forEach((highlight) => {
-      const escapedText = highlight.text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp(escapedText, "g");
+      const escapedText = highlight.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escapedText, 'g');
 
       const colorKey = highlight.color as keyof typeof HIGHLIGHT_COLORS;
       const colorClass =
-        HIGHLIGHT_COLORS[colorKey] || "bg-yellow-200 dark:bg-yellow-900/50";
+        HIGHLIGHT_COLORS[colorKey] || 'bg-yellow-200 dark:bg-yellow-900/50';
 
       processed = processed.replace(regex, (match) => {
         const placeholder = `__HL_${replacements.size}__`;
         const noteIndicator = highlight.note
-          ? `<span class="note-indicator inline-flex items-center justify-center w-4 h-4 ml-1 text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-full align-top cursor-pointer transition-colors" data-note-id="${highlight.id}" data-note-text="${highlight.note.replace(/"/g, "&quot;")}" title="Click to view note">!</span>`
-          : "";
+          ? `<span class="note-indicator inline-flex items-center justify-center w-4 h-4 ml-1 text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-full align-top cursor-pointer transition-colors" data-note-id="${highlight.id}" data-note-text="${highlight.note.replace(/"/g, '&quot;')}" title="Click to view note">!</span>`
+          : '';
 
         replacements.set(
           placeholder,
-          `<mark class="${colorClass} rounded px-0.5" data-highlight-id="${highlight.id}">${match}${noteIndicator}</mark>`,
+          `<mark class="${colorClass} rounded px-0.5" data-highlight-id="${highlight.id}">${match}${noteIndicator}</mark>`
         );
         return placeholder;
       });
@@ -564,16 +564,16 @@ export const ContentPage = () => {
   };
 
   const processedContent = useMemo(() => {
-    if (!content?.content) return "";
+    if (!content?.content) return '';
     return applyHighlights(content.content, content.highlights || []);
   }, [content]);
 
   // Handle note indicator clicks
   const handleContentClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.classList.contains("note-indicator")) {
-      const noteText = target.getAttribute("data-note-text");
-      const noteId = target.getAttribute("data-note-id");
+    if (target.classList.contains('note-indicator')) {
+      const noteText = target.getAttribute('data-note-text');
+      const noteId = target.getAttribute('data-note-id');
       if (noteText) {
         // Show note in a tooltip or modal
         const rect = target.getBoundingClientRect();
@@ -632,7 +632,7 @@ export const ContentPage = () => {
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  {format(new Date(content.createdAt), "MMM d")}
+                  {format(new Date(content.createdAt), 'MMM d')}
                 </span>
               </div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-md">
@@ -688,7 +688,7 @@ export const ContentPage = () => {
               <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
               <button
                 onClick={() => setShowNotes(!showNotes)}
-                className={`p-2 rounded-lg transition-colors ${showNotes ? "text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-primary-900/20" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                className={`p-2 rounded-lg transition-colors ${showNotes ? 'text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-primary-900/20' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                 title="Toggle Notes"
               >
                 <StickyNote className="w-5 h-5" />
@@ -712,8 +712,8 @@ export const ContentPage = () => {
                   onClick={() => setShowNotes(!showNotes)}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                 >
-                  <StickyNote className="w-4 h-4" />{" "}
-                  {showNotes ? "Hide Notes" : "Show Notes"}
+                  <StickyNote className="w-4 h-4" />{' '}
+                  {showNotes ? 'Hide Notes' : 'Show Notes'}
                 </button>
                 <button
                   onClick={handleDelete}
@@ -751,13 +751,13 @@ export const ContentPage = () => {
                   if (!content?.learningGuide) return;
 
                   const previousContent = queryClient.getQueryData([
-                    "content",
+                    'content',
                     id,
                   ]);
 
                   // Calculate new progress
                   const updatedGuide = JSON.parse(
-                    JSON.stringify(content.learningGuide),
+                    JSON.stringify(content.learningGuide)
                   );
                   if (updatedGuide.sections[index]) {
                     updatedGuide.sections[index].completed = isComplete;
@@ -765,15 +765,15 @@ export const ContentPage = () => {
 
                   const totalSections = updatedGuide.sections.length;
                   const completedCount = updatedGuide.sections.filter(
-                    (s: any) => s.completed,
+                    (s: any) => s.completed
                   ).length;
                   const newProgress = Math.round(
-                    (completedCount / totalSections) * 100,
+                    (completedCount / totalSections) * 100
                   );
 
                   // Optimistic update
                   queryClient.setQueryData(
-                    ["content", id],
+                    ['content', id],
                     (old: ExtendedContent | undefined) => {
                       if (!old || !old.learningGuide) return old;
                       return {
@@ -781,7 +781,7 @@ export const ContentPage = () => {
                         learningGuide: updatedGuide,
                         lastReadPosition: newProgress,
                       };
-                    },
+                    }
                   );
 
                   try {
@@ -791,8 +791,8 @@ export const ContentPage = () => {
                     });
                   } catch (_error) {
                     // Revert
-                    queryClient.setQueryData(["content", id], previousContent);
-                    toast.error("Failed to save progress");
+                    queryClient.setQueryData(['content', id], previousContent);
+                    toast.error('Failed to save progress');
                   }
                 }}
               />
@@ -851,7 +851,7 @@ export const ContentPage = () => {
           style={{ left: toolbarPosition.x, top: toolbarPosition.y }}
         >
           <div className="flex items-center gap-1 pr-2 border-r border-gray-700 mr-2">
-            {(["yellow", "green", "pink"] as const).map((color) => (
+            {(['yellow', 'green', 'pink'] as const).map((color) => (
               <button
                 key={color}
                 onClick={() => {
@@ -859,12 +859,12 @@ export const ContentPage = () => {
                   handleHighlight(color);
                 }}
                 className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${
-                  color === "yellow"
-                    ? "bg-yellow-400"
-                    : color === "green"
-                      ? "bg-green-400"
-                      : "bg-pink-400"
-                } ${selectedColor === color ? "ring-2 ring-white" : ""}`}
+                  color === 'yellow'
+                    ? 'bg-yellow-400'
+                    : color === 'green'
+                      ? 'bg-green-400'
+                      : 'bg-pink-400'
+                } ${selectedColor === color ? 'ring-2 ring-white' : ''}`}
               >
                 {selectedColor === color && (
                   <Check className="w-3 h-3 text-black/50" />

@@ -1,7 +1,7 @@
-import { Search, Menu, Sun, Moon } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
+import { Search, Menu, Sun, Moon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -32,11 +32,11 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
 
       <div className="flex items-center gap-2 sm:gap-4">
         <button
-          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors"
           aria-label="Toggle theme"
         >
-          {resolvedTheme === "dark" ? (
+          {resolvedTheme === 'dark' ? (
             <Sun className="w-5 h-5" />
           ) : (
             <Moon className="w-5 h-5" />
@@ -49,14 +49,14 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
         >
           <div className="text-right hidden sm:block">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {user?.name || "Guest"}
+              {user?.name || 'Guest'}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {user?.schoolName || "Student"}
+              {user?.schoolName || 'Student'}
             </p>
           </div>
           <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-medium">
-            {user?.name?.[0] || "U"}
+            {user?.name?.[0] || 'U'}
           </div>
         </Link>
       </div>

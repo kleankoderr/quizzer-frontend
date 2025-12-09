@@ -1,5 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, Home } from "lucide-react";
+import { Link, useLocation } from 'react-router-dom';
+import { ChevronRight, Home } from 'lucide-react';
 
 export interface BreadcrumbItem {
   label: string;
@@ -14,8 +14,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
   const location = useLocation();
 
   // Determine if we're on an admin route
-  const isAdminRoute = location.pathname.startsWith("/admin");
-  const homePath = isAdminRoute ? "/admin" : "/dashboard";
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const homePath = isAdminRoute ? '/admin' : '/dashboard';
 
   return (
     <nav
@@ -55,8 +55,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
               <span
                 className={`${
                   isLast
-                    ? "text-gray-900 dark:text-white font-semibold"
-                    : "text-gray-600 dark:text-gray-400"
+                    ? 'text-gray-900 dark:text-white font-semibold'
+                    : 'text-gray-600 dark:text-gray-400'
                 } truncate`}
               >
                 {item.label}

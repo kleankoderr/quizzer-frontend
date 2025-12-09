@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Brain, Sparkles, Code, Save } from "lucide-react";
-import { adminService } from "../../services/adminService";
-import toast from "react-hot-toast";
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Brain, Sparkles, Code, Save } from 'lucide-react';
+import { adminService } from '../../services/adminService';
+import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 
 const DEFAULT_PROMPTS = {
   quiz: `Generate a quiz with multiple-choice questions based on the following content. Each question should have 4 options with only one correct answer.`,
@@ -13,15 +13,15 @@ const DEFAULT_PROMPTS = {
 export const AiAnalytics = () => {
   const queryClient = useQueryClient();
   const [prompts, setPrompts] = useState(DEFAULT_PROMPTS);
-  const [activeTab, setActiveTab] = useState<"stats" | "prompts">("stats");
+  const [activeTab, setActiveTab] = useState<'stats' | 'prompts'>('stats');
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["aiAnalytics"],
+    queryKey: ['aiAnalytics'],
     queryFn: adminService.getAiAnalytics,
   });
 
   const { data: settings, isLoading: settingsLoading } = useQuery({
-    queryKey: ["platformSettings"],
+    queryKey: ['platformSettings'],
     queryFn: adminService.getSettings,
   });
 
@@ -34,11 +34,11 @@ export const AiAnalytics = () => {
   const updateMutation = useMutation({
     mutationFn: (data: any) => adminService.updateSettings(data),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["platformSettings"] });
-      toast.success("AI prompts updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+      toast.success('AI prompts updated successfully');
     },
     onError: () => {
-      toast.error("Failed to update AI prompts");
+      toast.error('Failed to update AI prompts');
     },
   });
 
@@ -59,22 +59,22 @@ export const AiAnalytics = () => {
 
   const statCards = [
     {
-      title: "Total Generations",
+      title: 'Total Generations',
       value: stats?.totalGenerations || 0,
       icon: Brain,
-      color: "bg-purple-500",
+      color: 'bg-purple-500',
     },
     {
-      title: "Failed Generations",
+      title: 'Failed Generations',
       value: stats?.failedGenerations || 0,
       icon: Sparkles,
-      color: "bg-red-500",
+      color: 'bg-red-500',
     },
     {
-      title: "Success Rate",
+      title: 'Success Rate',
       value: `${stats?.successRate?.toFixed(1) || 0}%`,
       icon: Sparkles,
-      color: "bg-green-500",
+      color: 'bg-green-500',
     },
   ];
 
@@ -86,21 +86,21 @@ export const AiAnalytics = () => {
         </h1>
         <div className="flex gap-2">
           <button
-            onClick={() => setActiveTab("stats")}
+            onClick={() => setActiveTab('stats')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "stats"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              activeTab === 'stats'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
           >
             Statistics
           </button>
           <button
-            onClick={() => setActiveTab("prompts")}
+            onClick={() => setActiveTab('prompts')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "prompts"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              activeTab === 'prompts'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
           >
             Prompts
@@ -108,7 +108,7 @@ export const AiAnalytics = () => {
         </div>
       </div>
 
-      {activeTab === "stats" ? (
+      {activeTab === 'stats' ? (
         <>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {statCards.map((stat, index) => (
@@ -230,7 +230,7 @@ export const AiAnalytics = () => {
                 className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
-                {updateMutation.isPending ? "Saving..." : "Save Prompts"}
+                {updateMutation.isPending ? 'Saving...' : 'Save Prompts'}
               </button>
             </div>
           </div>

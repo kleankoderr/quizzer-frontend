@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { challengeService } from "../services";
-import { useChallenges, useLeaderboard } from "../hooks";
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { challengeService } from '../services';
+import { useChallenges, useLeaderboard } from '../hooks';
 import {
   Trophy,
   Target,
@@ -14,8 +14,8 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-} from "lucide-react";
-import { CardSkeleton, TableSkeleton } from "../components/skeletons";
+} from 'lucide-react';
+import { CardSkeleton, TableSkeleton } from '../components/skeletons';
 
 export const ChallengesPage = () => {
   const navigate = useNavigate();
@@ -25,41 +25,41 @@ export const ChallengesPage = () => {
     refetch: refetchChallenges,
   } = useChallenges();
   const { data: leaderboardData, isLoading: leaderboardLoading } =
-    useLeaderboard("global");
+    useLeaderboard('global');
 
-  const [filter, setFilter] = useState<"all" | "available" | "completed">(
-    "all",
+  const [filter, setFilter] = useState<'all' | 'available' | 'completed'>(
+    'all'
   );
   const [joiningChallengeId, setJoiningChallengeId] = useState<string | null>(
-    null,
+    null
   );
 
   const loading = challengesLoading || leaderboardLoading;
   const leaderboard = useMemo(
     () => leaderboardData?.entries.slice(0, 10) ?? [],
-    [leaderboardData],
+    [leaderboardData]
   );
 
   // Track which challenges user has joined (based on progress > 0 or completed)
   const joinedChallenges = useMemo(() => {
     return new Set(
-      challenges.filter((c) => c.progress > 0 || c.completed).map((c) => c.id),
+      challenges.filter((c) => c.progress > 0 || c.completed).map((c) => c.id)
     );
   }, [challenges]);
 
   const filteredChallenges = useMemo(() => {
     let result = challenges;
 
-    if (filter === "available") {
+    if (filter === 'available') {
       result = challenges.filter(
-        (c) => !c.completed && !joinedChallenges.has(c.id),
+        (c) => !c.completed && !joinedChallenges.has(c.id)
       );
-    } else if (filter === "completed") {
+    } else if (filter === 'completed') {
       result = challenges.filter((c) => c.completed);
     }
 
     // Sort: Completed first if "all" is selected (as per user request), otherwise standard sort
-    if (filter === "all") {
+    if (filter === 'all') {
       return [...result].sort((a, b) => {
         if (a.completed && !b.completed) return -1;
         if (!a.completed && b.completed) return 1;
@@ -75,7 +75,7 @@ export const ChallengesPage = () => {
       setJoiningChallengeId(challengeId);
       try {
         await challengeService.join(challengeId);
-        toast.success("Challenge joined successfully!");
+        toast.success('Challenge joined successfully!');
         await refetchChallenges();
 
         // Navigate to challenge details page
@@ -83,31 +83,31 @@ export const ChallengesPage = () => {
       } catch (error: any) {
         toast.error(
           error?.response?.data?.message ||
-            "Failed to join challenge. Please try again.",
+            'Failed to join challenge. Please try again.'
         );
       } finally {
         setJoiningChallengeId(null);
       }
     },
-    [refetchChallenges, navigate],
+    [refetchChallenges, navigate]
   );
 
   const handleLeaveChallenge = useCallback(
     async (challengeId: string) => {
-      if (!window.confirm("Are you sure you want to leave this challenge?"))
+      if (!window.confirm('Are you sure you want to leave this challenge?'))
         return;
 
       try {
         await challengeService.leave(challengeId);
-        toast.success("Left challenge successfully.");
+        toast.success('Left challenge successfully.');
         await refetchChallenges();
       } catch (error: any) {
         toast.error(
-          error?.response?.data?.message || "Failed to leave challenge.",
+          error?.response?.data?.message || 'Failed to leave challenge.'
         );
       }
     },
-    [refetchChallenges],
+    [refetchChallenges]
   );
 
   if (loading) {
@@ -158,7 +158,7 @@ export const ChallengesPage = () => {
                 <div className="text-2xl font-bold text-white">
                   {
                     challenges.filter(
-                      (c) => !c.completed && !joinedChallenges.has(c.id),
+                      (c) => !c.completed && !joinedChallenges.has(c.id)
                     ).length
                   }
                 </div>
@@ -197,20 +197,20 @@ export const ChallengesPage = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
-                {(["all", "available", "completed"] as const).map(
+                {(['all', 'available', 'completed'] as const).map(
                   (filterType) => (
                     <button
                       key={filterType}
                       onClick={() => setFilter(filterType)}
                       className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all whitespace-nowrap ${
                         filter === filterType
-                          ? "bg-white dark:bg-gray-600 text-primary-600 dark:text-primary-400 shadow-sm"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                          ? 'bg-white dark:bg-gray-600 text-primary-600 dark:text-primary-400 shadow-sm'
+                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
                       {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
                     </button>
-                  ),
+                  )
                 )}
               </div>
             </div>
@@ -234,7 +234,7 @@ export const ChallengesPage = () => {
                   const isCompleted = challenge.completed;
                   const percentage = Math.min(
                     ((challenge.progress || 0) / challenge.target) * 100,
-                    100,
+                    100
                   );
 
                   return (
@@ -242,10 +242,10 @@ export const ChallengesPage = () => {
                       key={challenge.id}
                       className={`p-4 sm:p-5 rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
                         isCompleted
-                          ? "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800"
+                          ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
                           : isJoined
-                            ? "bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700"
-                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+                            ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700'
+                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
                       }`}
                     >
                       <div className="flex flex-col h-full relative">
@@ -257,10 +257,10 @@ export const ChallengesPage = () => {
                               <div
                                 className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${
                                   isCompleted
-                                    ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                                    ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
                                     : isJoined
-                                      ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                                      : "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                                      ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                      : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                                 }`}
                               >
                                 {isCompleted ? (
@@ -273,7 +273,7 @@ export const ChallengesPage = () => {
                                 <h3 className="font-bold text-lg text-gray-900 dark:text-white leading-tight flex items-center gap-2">
                                   {challenge.title}
                                   {challenge.format &&
-                                    challenge.format !== "STANDARD" && (
+                                    challenge.format !== 'STANDARD' && (
                                       <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px] font-bold uppercase tracking-wider">
                                         {challenge.format}
                                       </span>
@@ -304,7 +304,7 @@ export const ChallengesPage = () => {
                                 <span className="font-medium">
                                   {challenge.timeLimit
                                     ? `${Math.round(challenge.timeLimit / 60)}m`
-                                    : "No Limit"}
+                                    : 'No Limit'}
                                 </span>
                               </div>
                               <div
@@ -369,8 +369,8 @@ export const ChallengesPage = () => {
                                   className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                 >
                                   {joiningChallengeId === challenge.id
-                                    ? "Joining..."
-                                    : "Join Challenge"}
+                                    ? 'Joining...'
+                                    : 'Join Challenge'}
                                 </button>
                               )}
 
@@ -391,7 +391,7 @@ export const ChallengesPage = () => {
                                 <button
                                   onClick={() =>
                                     navigate(
-                                      `/challenges/${challenge.id}/results`,
+                                      `/challenges/${challenge.id}/results`
                                     )
                                   }
                                   className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all whitespace-nowrap"
@@ -476,22 +476,22 @@ export const ChallengesPage = () => {
               <div className="space-y-2">
                 {leaderboard.map((entry) => {
                   let rankStyle =
-                    "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800";
+                    'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800';
                   let rankIcon = (
                     <span className="font-bold">{entry.rank}</span>
                   );
 
                   if (entry.rank === 1) {
                     rankStyle =
-                      "bg-yellow-400 text-white border-yellow-400 shadow-md";
+                      'bg-yellow-400 text-white border-yellow-400 shadow-md';
                     rankIcon = <Crown className="w-4 h-4" />;
                   } else if (entry.rank === 2) {
                     rankStyle =
-                      "bg-gray-400 text-white border-gray-400 shadow-md";
+                      'bg-gray-400 text-white border-gray-400 shadow-md';
                     rankIcon = <Medal className="w-4 h-4" />;
                   } else if (entry.rank === 3) {
                     rankStyle =
-                      "bg-orange-500 text-white border-orange-500 shadow-md";
+                      'bg-orange-500 text-white border-orange-500 shadow-md';
                     rankIcon = <Medal className="w-4 h-4" />;
                   }
 
@@ -526,7 +526,7 @@ export const ChallengesPage = () => {
                 {/* Current User Rank if not in top list */}
                 {leaderboardData?.currentUser &&
                   !leaderboard.some(
-                    (e) => e.userId === leaderboardData.currentUser?.userId,
+                    (e) => e.userId === leaderboardData.currentUser?.userId
                   ) && (
                     <>
                       <div className="flex items-center justify-center py-2">

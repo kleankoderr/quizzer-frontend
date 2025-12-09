@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import type { Quiz } from "../types";
+import { Link } from 'react-router-dom';
+import type { Quiz } from '../types';
 import {
   Calendar,
   FileText,
@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   Trash2,
   Plus,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface QuizListProps {
   quizzes: Quiz[];
@@ -59,7 +59,7 @@ export const QuizList: React.FC<QuizListProps> = ({
           Your Quizzes
         </h2>
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {quizzes.length} quiz{quizzes.length === 1 ? "" : "zes"}
+          {quizzes.length} quiz{quizzes.length === 1 ? '' : 'zes'}
         </span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -130,15 +130,15 @@ export const QuizList: React.FC<QuizListProps> = ({
                     {quiz.questions.length} questions
                   </span>
                   <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md text-xs font-medium">
-                    {quiz.difficulty || "Medium"}
+                    {quiz.difficulty || 'Medium'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(quiz.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
+                    {new Date(quiz.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
                     })}
                   </span>
                   {latestAttempt && (
@@ -152,7 +152,7 @@ export const QuizList: React.FC<QuizListProps> = ({
               {/* Action hint */}
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Click to {hasAttempts ? "retake" : "start"}
+                  Click to {hasAttempts ? 'retake' : 'start'}
                 </span>
                 <Play className="w-4 h-4 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>

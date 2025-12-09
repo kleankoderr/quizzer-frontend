@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { challengeService } from "../services";
-import type { Challenge } from "../types";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { challengeService } from '../services';
+import type { Challenge } from '../types';
 import {
   Trophy,
   Clock,
@@ -11,8 +11,8 @@ import {
   ArrowLeft,
   TrendingUp,
   CheckCircle,
-} from "lucide-react";
-import toast from "react-hot-toast";
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const ChallengeDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +29,8 @@ export const ChallengeDetailsPage = () => {
         const data = await challengeService.getChallengeById(id!);
         setChallenge(data);
       } catch (_error) {
-        toast.error("Failed to load challenge details");
-        navigate("/challenges");
+        toast.error('Failed to load challenge details');
+        navigate('/challenges');
       } finally {
         setLoading(false);
       }
@@ -57,7 +57,7 @@ export const ChallengeDetailsPage = () => {
       // Check if challenge has quizzes
       if (result.totalQuizzes === 0) {
         toast.error(
-          "This challenge has no quizzes associated. Please contact support.",
+          'This challenge has no quizzes associated. Please contact support.'
         );
         setStarting(false);
         return;
@@ -71,10 +71,10 @@ export const ChallengeDetailsPage = () => {
         // Legacy single quiz support
         navigate(`/quiz/${challenge.quizId}?challengeId=${id}`);
       } else {
-        toast.error("Unable to start challenge. No quiz found.");
+        toast.error('Unable to start challenge. No quiz found.');
       }
     } catch (_error) {
-      toast.error("Failed to start challenge");
+      toast.error('Failed to start challenge');
     } finally {
       setStarting(false);
     }
@@ -104,7 +104,7 @@ export const ChallengeDetailsPage = () => {
     <div className="space-y-6 pb-8">
       {/* Back Button */}
       <button
-        onClick={() => navigate("/challenges")}
+        onClick={() => navigate('/challenges')}
         className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -126,7 +126,7 @@ export const ChallengeDetailsPage = () => {
                 <p className="text-primary-100 text-sm">
                   {challenge.category ||
                     challenge.type.charAt(0).toUpperCase() +
-                      challenge.type.slice(1)}{" "}
+                      challenge.type.slice(1)}{' '}
                   Challenge
                 </p>
               </div>
@@ -139,7 +139,7 @@ export const ChallengeDetailsPage = () => {
               <Trophy className="w-5 h-5" />
               <span>{challenge.reward} XP</span>
             </div>
-            {challenge.format && challenge.format !== "STANDARD" && (
+            {challenge.format && challenge.format !== 'STANDARD' && (
               <span className="px-3 py-1 bg-red-500 text-white rounded-full text-xs font-semibold">
                 {challenge.format}
               </span>
@@ -225,8 +225,8 @@ export const ChallengeDetailsPage = () => {
                       key={cq.id}
                       className={`p-3 rounded-lg border ${
                         index < completedQuizzes
-                          ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                          : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                          : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -234,8 +234,8 @@ export const ChallengeDetailsPage = () => {
                           <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
                               index < completedQuizzes
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300"
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                             }`}
                           >
                             {index < completedQuizzes ? (
@@ -315,15 +315,15 @@ export const ChallengeDetailsPage = () => {
                     <>
                       <Zap className="w-5 h-5" />
                       {challenge.joined && completedQuizzes > 0
-                        ? "Continue Challenge"
-                        : "Start Challenge"}
+                        ? 'Continue Challenge'
+                        : 'Start Challenge'}
                     </>
                   )}
                 </button>
               )}
 
               <button
-                onClick={() => navigate("/leaderboard")}
+                onClick={() => navigate('/leaderboard')}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg transition-all"
               >
                 <TrendingUp className="w-5 h-5" />
@@ -340,7 +340,7 @@ export const ChallengeDetailsPage = () => {
                   Top Ranked
                 </h3>
                 <button
-                  onClick={() => navigate("/leaderboard")}
+                  onClick={() => navigate('/leaderboard')}
                   className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   View All
@@ -358,12 +358,12 @@ export const ChallengeDetailsPage = () => {
                         <div
                           className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
                             index === 0
-                              ? "bg-yellow-100 text-yellow-700"
+                              ? 'bg-yellow-100 text-yellow-700'
                               : index === 1
-                                ? "bg-gray-100 text-gray-700"
+                                ? 'bg-gray-100 text-gray-700'
                                 : index === 2
-                                  ? "bg-orange-100 text-orange-700"
-                                  : "bg-gray-100 text-gray-500"
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-gray-100 text-gray-500'
                           }`}
                         >
                           {index + 1}
@@ -383,13 +383,13 @@ export const ChallengeDetailsPage = () => {
                   !leaderboard.entries
                     .slice(0, 3)
                     .find(
-                      (e: any) => e.userId === leaderboard.currentUser.userId,
+                      (e: any) => e.userId === leaderboard.currentUser.userId
                     ) && (
                     <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex items-center justify-between p-2 rounded bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800">
                         <div className="flex items-center gap-3">
                           <div className="w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold bg-primary-100 text-primary-700">
-                            {leaderboard.currentUser.rank || "-"}
+                            {leaderboard.currentUser.rank || '-'}
                           </div>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             You
@@ -428,7 +428,7 @@ function getTimeLeft(endDate: string | Date): string {
   const end = new Date(endDate);
   const diff = end.getTime() - now.getTime();
 
-  if (diff <= 0) return "Expired";
+  if (diff <= 0) return 'Expired';
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
-import { userService } from "../services";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { userService } from '../services';
 import {
   User,
   Lock,
@@ -11,27 +11,27 @@ import {
   AlertTriangle,
   Save,
   Palette,
-} from "lucide-react";
-import { Modal } from "../components/Modal";
-import { useProfile } from "../hooks";
-import { SchoolSearch } from "../components/SchoolSearch";
+} from 'lucide-react';
+import { Modal } from '../components/Modal';
+import { useProfile } from '../hooks';
+import { SchoolSearch } from '../components/SchoolSearch';
 
-type TabType = "account" | "security" | "theme" | "danger";
+type TabType = 'account' | 'security' | 'theme' | 'danger';
 
 export const SettingsPage = () => {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabType>("account");
+  const [activeTab, setActiveTab] = useState<TabType>('account');
   const [loading, setLoading] = useState(false);
 
   // Use React Query for profile data
   const { data: profileData, refetch } = useProfile();
 
   // Account form
-  const [name, setName] = useState(profileData?.name || "");
-  const [schoolName, setSchoolName] = useState(profileData?.schoolName || "");
-  const [grade, setGrade] = useState(profileData?.grade || "");
+  const [name, setName] = useState(profileData?.name || '');
+  const [schoolName, setSchoolName] = useState(profileData?.schoolName || '');
+  const [grade, setGrade] = useState(profileData?.grade || '');
 
   // Preferences form (excluding theme which is now in ThemeContext)
   const [preferences, setPreferences] = useState({
@@ -39,19 +39,19 @@ export const SettingsPage = () => {
   });
 
   // Password form
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Delete confirmation
-  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Update local state when profile data changes
   if (profileData && !name) {
     setName(profileData.name);
-    setSchoolName(profileData.schoolName || "");
-    setGrade(profileData.grade || "");
+    setSchoolName(profileData.schoolName || '');
+    setGrade(profileData.grade || '');
     if (profileData.preferences) {
       setPreferences((prev) => ({ ...prev, ...profileData.preferences }));
     }
@@ -67,10 +67,10 @@ export const SettingsPage = () => {
         schoolName: schoolName || undefined,
         grade: grade || undefined,
       });
-      toast.success("Profile updated successfully!");
+      toast.success('Profile updated successfully!');
       refetch();
     } catch (_error) {
-      toast.error("Failed to update profile");
+      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -84,9 +84,9 @@ export const SettingsPage = () => {
       await userService.updateSettings({
         preferences,
       });
-      toast.success("Preferences updated successfully!");
+      toast.success('Preferences updated successfully!');
     } catch (_error) {
-      toast.error("Failed to update preferences");
+      toast.error('Failed to update preferences');
     } finally {
       setLoading(false);
     }
@@ -96,12 +96,12 @@ export const SettingsPage = () => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error('New passwords do not match');
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters long");
+      toast.error('Password must be at least 6 characters long');
       return;
     }
 
@@ -112,13 +112,13 @@ export const SettingsPage = () => {
         currentPassword,
         newPassword,
       });
-      toast.success("Password changed successfully!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      toast.success('Password changed successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Failed to change password";
+        error.response?.data?.message || 'Failed to change password';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -126,8 +126,8 @@ export const SettingsPage = () => {
   };
 
   const handleDeleteAccountClick = () => {
-    if (deleteConfirmation !== "DELETE") {
-      toast.error("Please type DELETE to confirm");
+    if (deleteConfirmation !== 'DELETE') {
+      toast.error('Please type DELETE to confirm');
       return;
     }
     setIsDeleteModalOpen(true);
@@ -138,11 +138,11 @@ export const SettingsPage = () => {
 
     try {
       await userService.deleteAccount();
-      toast.success("Account deleted successfully");
+      toast.success('Account deleted successfully');
       logout();
-      navigate("/login");
+      navigate('/login');
     } catch (_error) {
-      toast.error("Failed to delete account");
+      toast.error('Failed to delete account');
       setLoading(false);
     } finally {
       setIsDeleteModalOpen(false);
@@ -150,10 +150,10 @@ export const SettingsPage = () => {
   };
 
   const tabs = [
-    { id: "account" as TabType, label: "Account", icon: User },
-    { id: "security" as TabType, label: "Security", icon: Lock },
-    { id: "theme" as TabType, label: "Theme", icon: Palette },
-    { id: "danger" as TabType, label: "Danger Zone", icon: AlertTriangle },
+    { id: 'account' as TabType, label: 'Account', icon: User },
+    { id: 'security' as TabType, label: 'Security', icon: Lock },
+    { id: 'theme' as TabType, label: 'Theme', icon: Palette },
+    { id: 'danger' as TabType, label: 'Danger Zone', icon: AlertTriangle },
   ];
 
   return (
@@ -191,13 +191,13 @@ export const SettingsPage = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-1 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
                 activeTab === tab.id
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
               }`}
             >
               <Icon className="w-5 h-5 md:w-5 md:h-5" />
               <span className="text-[10px] md:text-base text-center leading-tight">
-                <span className="md:hidden">{tab.label.split(" ")[0]}</span>
+                <span className="md:hidden">{tab.label.split(' ')[0]}</span>
                 <span className="hidden md:inline">{tab.label}</span>
               </span>
             </button>
@@ -208,7 +208,7 @@ export const SettingsPage = () => {
       {/* Tab Content */}
       <div className="card dark:bg-gray-800">
         {/* Account Settings */}
-        {activeTab === "account" && (
+        {activeTab === 'account' && (
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Account Information
@@ -233,7 +233,7 @@ export const SettingsPage = () => {
                 </label>
                 <input
                   type="email"
-                  value={user?.email || ""}
+                  value={user?.email || ''}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                   disabled
                 />
@@ -271,14 +271,14 @@ export const SettingsPage = () => {
                 className="flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
               >
                 <Save className="w-4 h-4" />
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? 'Saving...' : 'Save Changes'}
               </button>
             </form>
           </div>
         )}
 
         {/* Security Settings */}
-        {activeTab === "security" && (
+        {activeTab === 'security' && (
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Change Password
@@ -334,14 +334,14 @@ export const SettingsPage = () => {
                 className="flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
               >
                 <Lock className="w-4 h-4" />
-                {loading ? "Changing..." : "Change Password"}
+                {loading ? 'Changing...' : 'Change Password'}
               </button>
             </form>
           </div>
         )}
 
         {/* Theme Settings */}
-        {activeTab === "theme" && (
+        {activeTab === 'theme' && (
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Theme Settings
@@ -352,15 +352,15 @@ export const SettingsPage = () => {
                   Theme
                 </label>
                 <div className="flex gap-4">
-                  {(["light", "dark", "system"] as const).map((themeOption) => (
+                  {(['light', 'dark', 'system'] as const).map((themeOption) => (
                     <button
                       key={themeOption}
                       type="button"
                       onClick={() => setTheme(themeOption)}
                       className={`px-4 py-2 rounded-lg border-2 capitalize ${
                         theme === themeOption
-                          ? "border-primary-600 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
-                          : "border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                          ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                          : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
                       }`}
                     >
                       {themeOption}
@@ -395,14 +395,14 @@ export const SettingsPage = () => {
                 className="flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
               >
                 <Save className="w-4 h-4" />
-                {loading ? "Saving..." : "Save Preferences"}
+                {loading ? 'Saving...' : 'Save Preferences'}
               </button>
             </form>
           </div>
         )}
 
         {/* Danger Zone */}
-        {activeTab === "danger" && (
+        {activeTab === 'danger' && (
           <div>
             <h2 className="text-xl font-bold text-red-600 dark:text-red-500 mb-4">
               Danger Zone
@@ -433,10 +433,10 @@ export const SettingsPage = () => {
 
                 <button
                   onClick={handleDeleteAccountClick}
-                  disabled={loading || deleteConfirmation !== "DELETE"}
+                  disabled={loading || deleteConfirmation !== 'DELETE'}
                   className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
                 >
-                  {loading ? "Deleting..." : "Delete My Account"}
+                  {loading ? 'Deleting...' : 'Delete My Account'}
                 </button>
               </div>
             </div>
@@ -460,7 +460,7 @@ export const SettingsPage = () => {
               onClick={confirmDeleteAccount}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              {loading ? "Deleting..." : "Yes, Delete My Account"}
+              {loading ? 'Deleting...' : 'Yes, Delete My Account'}
             </button>
           </>
         }

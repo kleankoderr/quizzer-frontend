@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { apiClient } from './api';
 
 export interface School {
   id: string;
@@ -9,7 +9,7 @@ export const schoolService = {
   searchSchools: async (query: string): Promise<School[]> => {
     if (!query || query.length < 2) return [];
     const response = await apiClient.get<School[]>(
-      `/schools/search?q=${encodeURIComponent(query)}`,
+      `/schools/search?q=${encodeURIComponent(query)}`
     );
     return response.data;
   },

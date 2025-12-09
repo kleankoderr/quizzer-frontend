@@ -1,9 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { statisticsService } from "../services/statistics.service";
+import { useQuery } from '@tanstack/react-query';
+import { statisticsService } from '../services/statistics.service';
 
 export const useStatistics = (page: number = 1) => {
   return useQuery({
-    queryKey: ["statistics", page],
+    queryKey: ['statistics', page],
     queryFn: async () => {
       const [overviewData, attemptsData, performanceData] = await Promise.all([
         statisticsService.getOverview(),

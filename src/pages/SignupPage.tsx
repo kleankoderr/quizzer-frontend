@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { authService } from "../services/auth.service";
-import { useAuth } from "../contexts/AuthContext";
+import { useState, useCallback } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { authService } from '../services/auth.service';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Mail,
   Lock,
@@ -10,19 +10,19 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-} from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
-import { motion, AnimatePresence } from "framer-motion";
-import type { User as UserType } from "../types";
-import { useGoogleLogin } from "@react-oauth/google";
+} from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { User as UserType } from '../types';
+import { useGoogleLogin } from '@react-oauth/google';
 
 export const SignupPage = () => {
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
@@ -36,8 +36,8 @@ export const SignupPage = () => {
       // Small delay to ensure state is updated
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
-        navigate("/admin", { replace: true });
+      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        navigate('/admin', { replace: true });
         return;
       }
 
@@ -49,18 +49,18 @@ export const SignupPage = () => {
       }
 
       if (user.onboardingCompleted) {
-        navigate("/dashboard", { replace: true });
+        navigate('/dashboard', { replace: true });
       } else {
-        navigate("/onboarding", { replace: true });
+        navigate('/onboarding', { replace: true });
       }
     },
-    [login, navigate, location],
+    [login, navigate, location]
   );
 
   const googleLogin = useGoogleLogin({
-    scope: "email profile openid",
+    scope: 'email profile openid',
     onSuccess: async (tokenResponse) => {
-      setError("");
+      setError('');
       setGoogleLoading(true);
 
       try {
@@ -69,13 +69,13 @@ export const SignupPage = () => {
       } catch (err: any) {
         const errorMessage =
           err.response?.data?.message ||
-          "Google sign-up failed. Please try again.";
+          'Google sign-up failed. Please try again.';
         setError(errorMessage);
         setGoogleLoading(false);
       }
     },
     onError: () => {
-      const errorMessage = "Google sign-up failed. Please try again.";
+      const errorMessage = 'Google sign-up failed. Please try again.';
       setError(errorMessage);
       setGoogleLoading(false);
     },
@@ -83,7 +83,7 @@ export const SignupPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     try {
@@ -91,7 +91,7 @@ export const SignupPage = () => {
       await handleSignupSuccess(user);
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message || "Failed to create account";
+        err.response?.data?.message || 'Failed to create account';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -128,7 +128,7 @@ export const SignupPage = () => {
                     googleLogin();
                   }}
                   disabled={googleLoading || loading}
-                  className={`w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${googleLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${googleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <FcGoogle className="w-5 h-5" />
                   {googleLoading ? (
@@ -139,7 +139,7 @@ export const SignupPage = () => {
                       </span>
                     </>
                   ) : (
-                    "Continue with Google"
+                    'Continue with Google'
                   )}
                 </button>
 
@@ -147,7 +147,7 @@ export const SignupPage = () => {
                 <button
                   onClick={() => setShowEmailForm(true)}
                   disabled={googleLoading || loading}
-                  className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Mail className="w-5 h-5" />
                   Continue with Email
@@ -172,7 +172,7 @@ export const SignupPage = () => {
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-4"
-                  onClick={() => error && setError("")}
+                  onClick={() => error && setError('')}
                 >
                   <div>
                     <label
@@ -189,7 +189,7 @@ export const SignupPage = () => {
                         value={name}
                         onChange={(e) => {
                           setName(e.target.value);
-                          if (error) setError("");
+                          if (error) setError('');
                         }}
                         className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="John Doe"
@@ -213,7 +213,7 @@ export const SignupPage = () => {
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value);
-                          if (error) setError("");
+                          if (error) setError('');
                         }}
                         className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="you@example.com"
@@ -233,11 +233,11 @@ export const SignupPage = () => {
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                       <input
                         id="password"
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => {
                           setPassword(e.target.value);
-                          if (error) setError("");
+                          if (error) setError('');
                         }}
                         className="w-full pl-10 pr-12 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="••••••••"
@@ -249,7 +249,7 @@ export const SignupPage = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 z-10"
                         aria-label={
-                          showPassword ? "Hide password" : "Show password"
+                          showPassword ? 'Hide password' : 'Show password'
                         }
                       >
                         {showPassword ? (
@@ -282,7 +282,7 @@ export const SignupPage = () => {
                     disabled={loading || googleLoading}
                     className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {loading ? "Creating Account..." : "Sign Up"}
+                    {loading ? 'Creating Account...' : 'Sign Up'}
                     {!loading && <ArrowRight className="w-5 h-5" />}
                   </button>
                 </form>
@@ -292,7 +292,7 @@ export const SignupPage = () => {
 
           <div className="text-center pt-4 border-t border-gray-100 dark:border-gray-700">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Link
                 to="/login"
                 state={{ from: (location.state as any)?.from }}

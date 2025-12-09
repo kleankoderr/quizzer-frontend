@@ -1,6 +1,6 @@
-import { apiClient /*, setCsrfToken */ } from "./api";
-import { AUTH_ENDPOINTS } from "../config/api";
-import type { User } from "../types";
+import { apiClient /*, setCsrfToken */ } from './api';
+import { AUTH_ENDPOINTS } from '../config/api';
+import type { User } from '../types';
 
 export const authService = {
   // Email/password login
@@ -24,7 +24,7 @@ export const authService = {
   signup: async (
     email: string,
     password: string,
-    name: string,
+    name: string
   ): Promise<User> => {
     const response = await apiClient.post<{
       user: User;
@@ -45,7 +45,7 @@ export const authService = {
   // Detect if device is mobile
   isMobileDevice: (): boolean => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent,
+      navigator.userAgent
     );
   },
 
@@ -53,7 +53,7 @@ export const authService = {
   googleSignIn: async (idToken: string): Promise<User> => {
     const response = await apiClient.post<{ user: User; accessToken: string }>(
       AUTH_ENDPOINTS.GOOGLE_LOGIN,
-      { idToken },
+      { idToken }
     );
 
     // Save user data and token to localStorage for persistence
@@ -72,22 +72,27 @@ export const authService = {
   // Logout
   logout: async (): Promise<void> => {
     await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
   },
 
   // Save auth data (only user info now)
   // Save auth data
   saveAuthData: (user: User, accessToken?: string) => {
     if (accessToken) {
-      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem('accessToken', accessToken);
     }
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem('user', JSON.stringify(user));
   },
 
   // Get stored user
   getStoredUser: (): User | null => {
-    const userStr = localStorage.getItem("user");
+    const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
+  },
+
+  // Get stored token
+  getToken: (): string | null => {
+    return localStorage.getItem('accessToken');
   },
 };

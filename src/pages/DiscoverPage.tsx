@@ -1,5 +1,5 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   Sparkles,
   FileText,
@@ -9,43 +9,43 @@ import {
   Lightbulb,
   Brain,
   Zap,
-} from "lucide-react";
+} from 'lucide-react';
 
 export const DiscoverPage = () => {
-  const [activeTab, setActiveTab] = useState<"topic" | "text" | "file">(
-    "topic",
+  const [activeTab, setActiveTab] = useState<'topic' | 'text' | 'file'>(
+    'topic'
   );
-  const [topic, setTopic] = useState("");
-  const [textContent, setTextContent] = useState("");
-  const [textTitle, setTextTitle] = useState("");
-  const [textTopic, setTextTopic] = useState("");
+  const [topic, setTopic] = useState('');
+  const [textContent, setTextContent] = useState('');
+  const [textTitle, setTextTitle] = useState('');
+  const [textTopic, setTextTopic] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const popularTopics = [
-    "Biology",
-    "Chemistry",
-    "Physics",
-    "Mathematics",
-    "History",
-    "Geography",
-    "Literature",
-    "Computer Science",
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'Mathematics',
+    'History',
+    'Geography',
+    'Literature',
+    'Computer Science',
   ];
 
   const handleGenerateFromTopic = async () => {
     if (!topic.trim()) {
-      toast.error("Please enter a topic");
+      toast.error('Please enter a topic');
       return;
     }
 
     setLoading(true);
     try {
       // TODO: Integrate with content service
-      toast.success("Content generated successfully!");
+      toast.success('Content generated successfully!');
       // navigate to content page
     } catch (_error) {
-      toast.error("Failed to generate content");
+      toast.error('Failed to generate content');
     } finally {
       setLoading(false);
     }
@@ -53,19 +53,19 @@ export const DiscoverPage = () => {
 
   const handleCreateFromText = async () => {
     if (!textTitle.trim() || !textContent.trim() || !textTopic.trim()) {
-      toast.error("Please fill in all fields");
+      toast.error('Please fill in all fields');
       return;
     }
 
     setLoading(true);
     try {
       // TODO: Integrate with content service
-      toast.success("Content created successfully!");
-      setTextTitle("");
-      setTextContent("");
-      setTextTopic("");
+      toast.success('Content created successfully!');
+      setTextTitle('');
+      setTextContent('');
+      setTextTopic('');
     } catch (_error) {
-      toast.error("Failed to create content");
+      toast.error('Failed to create content');
     } finally {
       setLoading(false);
     }
@@ -73,17 +73,17 @@ export const DiscoverPage = () => {
 
   const handleFileUpload = async () => {
     if (!file) {
-      toast.error("Please select a file");
+      toast.error('Please select a file');
       return;
     }
 
     setLoading(true);
     try {
       // TODO: Integrate with content service
-      toast.success("File uploaded successfully!");
+      toast.success('File uploaded successfully!');
       setFile(null);
     } catch (_error) {
-      toast.error("Failed to upload file");
+      toast.error('Failed to upload file');
     } finally {
       setLoading(false);
     }
@@ -124,33 +124,33 @@ export const DiscoverPage = () => {
       <div className="card dark:bg-gray-800">
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 mb-6">
           <button
-            onClick={() => setActiveTab("topic")}
+            onClick={() => setActiveTab('topic')}
             className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
-              activeTab === "topic"
-                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              activeTab === 'topic'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             <Brain className="w-5 h-5" />
             From Topic
           </button>
           <button
-            onClick={() => setActiveTab("text")}
+            onClick={() => setActiveTab('text')}
             className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
-              activeTab === "text"
-                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              activeTab === 'text'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             <FileText className="w-5 h-5" />
             From Text
           </button>
           <button
-            onClick={() => setActiveTab("file")}
+            onClick={() => setActiveTab('file')}
             className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
-              activeTab === "file"
-                ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              activeTab === 'file'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             <Upload className="w-5 h-5" />
@@ -159,7 +159,7 @@ export const DiscoverPage = () => {
         </div>
 
         {/* From Topic */}
-        {activeTab === "topic" && (
+        {activeTab === 'topic' && (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -180,7 +180,7 @@ export const DiscoverPage = () => {
               className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50"
             >
               <Zap className="w-5 h-5" />
-              {loading ? "Generating..." : "Generate Content"}
+              {loading ? 'Generating...' : 'Generate Content'}
             </button>
 
             <div>
@@ -203,7 +203,7 @@ export const DiscoverPage = () => {
         )}
 
         {/* From Text */}
-        {activeTab === "text" && (
+        {activeTab === 'text' && (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -250,13 +250,13 @@ export const DiscoverPage = () => {
               className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50"
             >
               <BookOpen className="w-5 h-5" />
-              {loading ? "Creating..." : "Create Content"}
+              {loading ? 'Creating...' : 'Create Content'}
             </button>
           </div>
         )}
 
         {/* From File */}
-        {activeTab === "file" && (
+        {activeTab === 'file' && (
           <div className="space-y-6">
             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
               <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
@@ -312,7 +312,7 @@ export const DiscoverPage = () => {
               className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50"
             >
               <Upload className="w-5 h-5" />
-              {loading ? "Uploading..." : "Upload & Process"}
+              {loading ? 'Uploading...' : 'Upload & Process'}
             </button>
           </div>
         )}

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { flashcardService } from "../services/flashcard.service";
-import type { FlashcardGenerateRequest } from "../types";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { flashcardService } from '../services/flashcard.service';
+import type { FlashcardGenerateRequest } from '../types';
+import type { AppEvent } from '../types/events';
 import {
   CreditCard,
   Plus,
@@ -11,14 +12,15 @@ import {
   BookOpen,
   X,
   History,
-} from "lucide-react";
-import { FlashcardGenerator } from "../components/FlashcardGenerator";
-import { FlashcardSetList } from "../components/FlashcardSetList";
-import { Modal } from "../components/Modal";
-import { useFlashcardSets } from "../hooks";
-import { CardSkeleton, StatCardSkeleton } from "../components/skeletons";
-import { ProgressToast } from "../components/ProgressToast";
-import { useQueryClient } from "@tanstack/react-query";
+} from 'lucide-react';
+import { FlashcardGenerator } from '../components/FlashcardGenerator';
+import { FlashcardSetList } from '../components/FlashcardSetList';
+import { Modal } from '../components/Modal';
+import { useFlashcardSets } from '../hooks';
+import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
+import { ProgressToast } from '../components/ProgressToast';
+import { useQueryClient } from '@tanstack/react-query';
+import { useSSEEvent } from '../hooks/useSSE';
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
@@ -32,11 +34,15 @@ export const FlashcardsPage = () => {
     | {
         topic?: string;
         content?: string;
-        mode?: "topic" | "content" | "files";
+        mode?: 'topic' | 'content' | 'files';
         contentId?: string;
       }
     | undefined
   >(undefined);
+
+  // Use refs to avoid race conditions with SSE events
+  const currentJobIdRef = useRef<string | null>(null);
+  const toastIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (location.state) {
@@ -50,7 +56,7 @@ export const FlashcardsPage = () => {
         setInitialValues({
           topic,
           content: contentText,
-          mode: contentText ? "content" : "topic",
+          mode: contentText ? 'content' : 'topic',
           contentId,
         });
         setShowGenerator(true);
@@ -58,96 +64,155 @@ export const FlashcardsPage = () => {
     }
   }, [location.state]);
 
+  const handleProgress = useCallback((event: AppEvent) => {
+    if (event.eventType === 'flashcard.progress' && currentJobIdRef.current) {
+      const progressEvent = event as any;
+      console.log('Progress event received:', {
+        jobId: progressEvent.jobId,
+        currentJobId: currentJobIdRef.current,
+        percentage: progressEvent.percentage,
+        step: progressEvent.step,
+        toastId: toastIdRef.current,
+      });
+
+      if (
+        progressEvent.jobId === currentJobIdRef.current &&
+        toastIdRef.current
+      ) {
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Creating Flashcards"
+              message={progressEvent.step || progressEvent.message}
+              progress={progressEvent.percentage}
+              status="processing"
+            />
+          ),
+          { id: toastIdRef.current }
+        );
+      }
+    }
+  }, []);
+
+  const handleCompleted = useCallback(
+    async (event: AppEvent) => {
+      if (
+        event.eventType === 'flashcard.completed' &&
+        currentJobIdRef.current &&
+        toastIdRef.current
+      ) {
+        const completedEvent = event as any;
+
+        await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+
+        if (initialValues?.contentId) {
+          await queryClient.invalidateQueries({
+            queryKey: ['content', initialValues.contentId],
+          });
+        }
+
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Flashcards Ready!"
+              message="Opening your flashcards..."
+              progress={100}
+              status="success"
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
+
+        setTimeout(() => {
+          navigate(`/flashcards/${completedEvent.flashcardSetId}`);
+        }, 500);
+
+        setLoading(false);
+        currentJobIdRef.current = null;
+        toastIdRef.current = null;
+      }
+    },
+    [queryClient, initialValues, navigate]
+  );
+
+  const handleFailed = useCallback((event: AppEvent) => {
+    if (
+      event.eventType === 'flashcard.failed' &&
+      currentJobIdRef.current &&
+      toastIdRef.current
+    ) {
+      const failedEvent = event as any;
+      if (failedEvent.jobId === currentJobIdRef.current) {
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Creation Failed"
+              message={failedEvent.error}
+              progress={0}
+              status="error"
+            />
+          ),
+          { id: toastIdRef.current, duration: 5000 }
+        );
+
+        setLoading(false);
+        currentJobIdRef.current = null;
+        toastIdRef.current = null;
+      }
+    }
+  }, []);
+
+  useSSEEvent('flashcard.progress', handleProgress);
+  useSSEEvent('flashcard.completed', handleCompleted);
+  useSSEEvent('flashcard.failed', handleFailed);
+
   const handleGenerate = async (
     request: FlashcardGenerateRequest,
-    files?: File[],
+    files?: File[]
   ) => {
     setLoading(true);
-    setShowGenerator(false); // Hide generator immediately so user can see toast
+    setShowGenerator(false);
 
-    // Show initial toast
     const toastId = toast.custom(
       (t) => (
         <ProgressToast
           t={t}
-          title="Generating Flashcards"
-          message="Starting generation..."
+          title="Creating Flashcards"
+          message="Preparing your study materials..."
           progress={0}
           status="processing"
         />
       ),
-      { duration: Infinity },
+      { duration: Infinity }
     );
 
+    toastIdRef.current = toastId;
+    console.log('Initial toast created:', toastId);
+
     try {
-      // Start generation
       const { jobId } = await flashcardService.generate(request, files);
-
-      // Poll for completion with progress updates
-      const flashcardSet = await flashcardService.pollForCompletion(
-        jobId,
-        (p) => {
-          toast.custom(
-            (t) => (
-              <ProgressToast
-                t={t}
-                title="Generating Flashcards"
-                message={`Processing content... ${Math.round(p)}%`}
-                progress={p}
-                status="processing"
-              />
-            ),
-            { id: toastId },
-          );
-        },
-      );
-
-      // Refresh the flashcard list to get the latest sets
-      await queryClient.invalidateQueries({ queryKey: ["flashcardSets"] });
-
-      // If generated from content, invalidate content query to update flashcardSetId
-      if (initialValues?.contentId) {
-        await queryClient.invalidateQueries({
-          queryKey: ["content", initialValues.contentId],
-        });
-      }
-
-      // Success toast
-      toast.custom(
-        (t) => (
-          <ProgressToast
-            t={t}
-            title="Success!"
-            message="Opening your flashcards..."
-            progress={100}
-            status="success"
-          />
-        ),
-        { id: toastId, duration: 2000 },
-      );
-
-      // Navigate to the flashcard set if we have it
-      if (flashcardSet?.id) {
-        setTimeout(() => {
-          navigate(`/flashcards/${flashcardSet.id}`);
-        }, 500);
-      }
+      currentJobIdRef.current = jobId;
+      console.log('Job started:', { jobId, toastId });
     } catch (_error) {
-      // Error toast
+      console.error('Failed to start job:', _error);
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
-            title="Generation Failed"
-            message="Failed to generate flashcards. Please try again."
+            title="Unable to Create Flashcards"
+            message="Something went wrong"
             progress={0}
             status="error"
           />
         ),
-        { id: toastId, duration: 5000 },
+        { id: toastId, duration: 5000 }
       );
-    } finally {
       setLoading(false);
+      currentJobIdRef.current = null;
+      toastIdRef.current = null;
     }
   };
 
@@ -158,18 +223,18 @@ export const FlashcardsPage = () => {
   const confirmDeleteSet = async () => {
     if (!deleteSetId) return;
 
-    const loadingToast = toast.loading("Deleting flashcard set...");
+    const loadingToast = toast.loading('Deleting flashcard set...');
     try {
       await flashcardService.delete(deleteSetId);
 
       // Refresh the flashcard list
-      await queryClient.invalidateQueries({ queryKey: ["flashcardSets"] });
+      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
 
-      toast.success("Flashcard set deleted successfully!", {
+      toast.success('Flashcard set deleted successfully!', {
         id: loadingToast,
       });
     } catch (_error) {
-      toast.error("Failed to delete flashcard set. Please try again.", {
+      toast.error('Failed to delete flashcard set. Please try again.', {
         id: loadingToast,
       });
     } finally {
@@ -181,7 +246,7 @@ export const FlashcardsPage = () => {
   const totalSets = flashcardSets.length;
   const totalCards = flashcardSets.reduce(
     (sum, set) => sum + (Array.isArray(set.cards) ? set.cards.length : 0),
-    0,
+    0
   );
   const studiedSets = flashcardSets.filter((set) => set.lastStudiedAt).length;
 
@@ -283,7 +348,7 @@ export const FlashcardsPage = () => {
       {/* View All Attempts Button */}
       {!showGenerator && (isLoading || totalSets > 0) && (
         <button
-          onClick={() => navigate("/attempts?type=flashcard")}
+          onClick={() => navigate('/attempts?type=flashcard')}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium"
         >
           <History className="w-5 h-5" />

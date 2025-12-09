@@ -1,5 +1,5 @@
-import { useMemo, useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   TrendingUp,
@@ -8,7 +8,7 @@ import {
   BookOpen,
   Layers,
   ArrowRight,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -21,28 +21,28 @@ import {
   Tooltip,
   ResponsiveContainer,
   LabelList,
-} from "recharts";
-import { format, formatDistanceToNow } from "date-fns";
-import { useStatistics } from "../hooks";
+} from 'recharts';
+import { format, formatDistanceToNow } from 'date-fns';
+import { useStatistics } from '../hooks';
 import type {
   Attempt,
   PerformanceByTopic,
-} from "../services/statistics.service";
+} from '../services/statistics.service';
 import {
   StatCardSkeleton,
   ChartSkeleton,
   TableSkeleton,
-} from "../components/skeletons";
+} from '../components/skeletons';
 
 const COLORS = [
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-  "#f59e0b",
-  "#10b981",
-  "#6366f1",
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#6366f1',
 ];
-const ACTIVITY_COLORS = ["#3b82f6", "#10b981", "#ec4899"];
+const ACTIVITY_COLORS = ['#3b82f6', '#10b981', '#ec4899'];
 
 export const StatisticsPage = () => {
   const navigate = useNavigate();
@@ -54,34 +54,34 @@ export const StatisticsPage = () => {
   const totalPages = useMemo(() => data?.totalPages ?? 1, [data?.totalPages]);
   const performanceByTopic = useMemo(
     () => data?.performanceByTopic ?? [],
-    [data?.performanceByTopic],
+    [data?.performanceByTopic]
   );
 
   const handleAttemptClick = useCallback(
     (attempt: Attempt) => {
-      if (attempt.type === "quiz" && attempt.quiz?.id) {
+      if (attempt.type === 'quiz' && attempt.quiz?.id) {
         navigate(`/attempts?quizId=${attempt.quiz.id}`);
-      } else if (attempt.type === "flashcard" && attempt.flashcardSet?.id) {
+      } else if (attempt.type === 'flashcard' && attempt.flashcardSet?.id) {
         navigate(`/attempts?flashcardId=${attempt.flashcardSet.id}`);
-      } else if (attempt.type === "challenge" && attempt.challenge?.id) {
+      } else if (attempt.type === 'challenge' && attempt.challenge?.id) {
         navigate(`/attempts?challengeId=${attempt.challenge.id}`);
       }
     },
-    [navigate],
+    [navigate]
   );
 
   // Prepare data for charts with memoization - MUST be before conditional returns
   const typeDistributionData = useMemo(
     () => [
-      { name: "Quizzes", value: overview?.quizAttempts || 0 },
-      { name: "Flashcards", value: overview?.flashcardAttempts || 0 },
-      { name: "Challenges", value: overview?.challengeAttempts || 0 },
+      { name: 'Quizzes', value: overview?.quizAttempts || 0 },
+      { name: 'Flashcards', value: overview?.flashcardAttempts || 0 },
+      { name: 'Challenges', value: overview?.challengeAttempts || 0 },
     ],
     [
       overview?.quizAttempts,
       overview?.flashcardAttempts,
       overview?.challengeAttempts,
-    ],
+    ]
   );
 
   const performanceChartData = useMemo(
@@ -89,12 +89,12 @@ export const StatisticsPage = () => {
       performanceByTopic.slice(0, 5).map((topic: PerformanceByTopic) => ({
         name:
           topic.topic.length > 15
-            ? topic.topic.substring(0, 15) + "..."
+            ? topic.topic.substring(0, 15) + '...'
             : topic.topic,
         accuracy: Math.round(topic.accuracy),
         attempts: topic.attempts,
       })),
-    [performanceByTopic],
+    [performanceByTopic]
   );
 
   if (loading) {
@@ -157,7 +157,7 @@ export const StatisticsPage = () => {
             {overview?.totalAttempts || 0}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
-            {overview?.quizAttempts || 0} quizzes •{" "}
+            {overview?.quizAttempts || 0} quizzes •{' '}
             {overview?.flashcardAttempts || 0} flashcards
           </p>
         </div>
@@ -174,7 +174,7 @@ export const StatisticsPage = () => {
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {overview?.averageAccuracy
               ? `${overview.averageAccuracy.toFixed(1)}%`
-              : "0%"}
+              : '0%'}
           </p>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> Keep it up!
@@ -193,12 +193,12 @@ export const StatisticsPage = () => {
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {overview?.totalTimeSpent
               ? `${Math.floor(overview.totalTimeSpent / 60)}h`
-              : "0h"}
+              : '0h'}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
             {overview?.totalTimeSpent
               ? `${overview.totalTimeSpent % 60}m this month`
-              : "Start studying!"}
+              : 'Start studying!'}
           </p>
         </div>
 
@@ -253,20 +253,20 @@ export const StatisticsPage = () => {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    color: "#111827",
-                    padding: "8px 12px",
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    color: '#111827',
+                    padding: '8px 12px',
                     boxShadow:
-                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
                   }}
                   itemStyle={{
-                    color: "#111827",
+                    color: '#111827',
                     fontWeight: 500,
                   }}
                   labelStyle={{
-                    color: "#111827",
+                    color: '#111827',
                     fontWeight: 600,
                   }}
                 />
@@ -297,28 +297,28 @@ export const StatisticsPage = () => {
                 />
                 <XAxis
                   dataKey="name"
-                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
                   axisLine={false}
                   tickLine={false}
                   dy={10}
                 />
                 <YAxis
                   domain={[0, 100]}
-                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip
-                  cursor={{ fill: "#f3f4f6" }}
+                  cursor={{ fill: '#f3f4f6' }}
                   contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    padding: "12px",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  formatter={(value: number) => [`${value}%`, "Accuracy"]}
+                  formatter={(value: number) => [`${value}%`, 'Accuracy']}
                 />
                 <Bar dataKey="accuracy" radius={[8, 8, 0, 0]} barSize={40}>
                   {performanceChartData.map((_, index) => (
@@ -352,7 +352,7 @@ export const StatisticsPage = () => {
               data={performanceByTopic.map((topic) => ({
                 topic:
                   topic.topic.length > 25
-                    ? topic.topic.substring(0, 25) + "..."
+                    ? topic.topic.substring(0, 25) + '...'
                     : topic.topic,
                 fullTopic: topic.topic,
                 accuracy: Math.round(topic.accuracy * 10) / 10,
@@ -367,8 +367,8 @@ export const StatisticsPage = () => {
                 domain={[0, 100]}
                 tick={{ fontSize: 12 }}
                 label={{
-                  value: "Accuracy (%)",
-                  position: "insideBottom",
+                  value: 'Accuracy (%)',
+                  position: 'insideBottom',
                   offset: -5,
                 }}
               />
@@ -381,14 +381,14 @@ export const StatisticsPage = () => {
               <Tooltip
                 cursor={false}
                 contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "8px",
-                  padding: "12px",
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '12px',
                 }}
                 formatter={(value: number, name: string) => {
-                  if (name === "accuracy") {
-                    return [`${value}%`, "Accuracy"];
+                  if (name === 'accuracy') {
+                    return [`${value}%`, 'Accuracy'];
                   }
                   return [value, name];
                 }}
@@ -410,12 +410,12 @@ export const StatisticsPage = () => {
                     key={`cell-${index}`}
                     fill={
                       topic.accuracy >= 80
-                        ? "#10b981"
+                        ? '#10b981'
                         : topic.accuracy >= 60
-                          ? "#3b82f6"
+                          ? '#3b82f6'
                           : topic.accuracy >= 40
-                            ? "#f59e0b"
-                            : "#ef4444"
+                            ? '#f59e0b'
+                            : '#ef4444'
                     }
                   />
                 ))}
@@ -433,7 +433,7 @@ export const StatisticsPage = () => {
           </h2>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate("/attempts")}
+              onClick={() => navigate('/attempts')}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
             >
               View All Attempts
@@ -488,16 +488,16 @@ export const StatisticsPage = () => {
                       <td className="py-3 px-4">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                            attempt.type === "quiz"
-                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                              : attempt.type === "challenge"
-                                ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300"
-                                : "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                            attempt.type === 'quiz'
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                              : attempt.type === 'challenge'
+                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                                : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                           }`}
                         >
-                          {attempt.type === "quiz" ? (
+                          {attempt.type === 'quiz' ? (
                             <BookOpen className="w-3 h-3" />
-                          ) : attempt.type === "challenge" ? (
+                          ) : attempt.type === 'challenge' ? (
                             <Flame className="w-3 h-3" />
                           ) : (
                             <Layers className="w-3 h-3" />
@@ -508,12 +508,12 @@ export const StatisticsPage = () => {
                       <td className="py-3 px-4 font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                         {attempt.quiz?.title ||
                           attempt.flashcardSet?.title ||
-                          "Untitled"}
+                          'Untitled'}
                       </td>
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-400">
                         {attempt.quiz?.topic ||
                           attempt.flashcardSet?.topic ||
-                          "-"}
+                          '-'}
                       </td>
                       <td className="py-3 px-4">
                         {attempt.score !== undefined &&
@@ -525,18 +525,18 @@ export const StatisticsPage = () => {
                                   Math.max(0, attempt.score) /
                                     attempt.totalQuestions >=
                                   0.7
-                                    ? "text-green-600"
+                                    ? 'text-green-600'
                                     : Math.max(0, attempt.score) /
                                           attempt.totalQuestions >=
                                         0.5
-                                      ? "text-yellow-600"
-                                      : "text-red-600"
+                                      ? 'text-yellow-600'
+                                      : 'text-red-600'
                                 }`}
                               >
                                 {Math.round(
                                   (Math.max(0, attempt.score) /
                                     attempt.totalQuestions) *
-                                    100,
+                                    100
                                 )}
                                 %
                               </span>
@@ -547,12 +547,12 @@ export const StatisticsPage = () => {
                                   Math.max(0, attempt.score) /
                                     attempt.totalQuestions >=
                                   0.7
-                                    ? "bg-green-500"
+                                    ? 'bg-green-500'
                                     : Math.max(0, attempt.score) /
                                           attempt.totalQuestions >=
                                         0.5
-                                      ? "bg-yellow-500"
-                                      : "bg-red-500"
+                                      ? 'bg-yellow-500'
+                                      : 'bg-red-500'
                                 }`}
                                 style={{
                                   width: `${Math.round((Math.max(0, attempt.score) / attempt.totalQuestions) * 100)}%`,
@@ -571,13 +571,13 @@ export const StatisticsPage = () => {
                           <span className="text-sm text-gray-900 dark:text-gray-200">
                             {format(
                               new Date(attempt.completedAt),
-                              "MMM d, yyyy",
+                              'MMM d, yyyy'
                             )}
                           </span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             {formatDistanceToNow(
                               new Date(attempt.completedAt),
-                              { addSuffix: true },
+                              { addSuffix: true }
                             )}
                           </span>
                         </div>
@@ -599,16 +599,16 @@ export const StatisticsPage = () => {
                   <div className="flex items-start justify-between mb-3">
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                        attempt.type === "quiz"
-                          ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                          : attempt.type === "challenge"
-                            ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300"
-                            : "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                        attempt.type === 'quiz'
+                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : attempt.type === 'challenge'
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                            : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                       }`}
                     >
-                      {attempt.type === "quiz" ? (
+                      {attempt.type === 'quiz' ? (
                         <BookOpen className="w-3 h-3" />
-                      ) : attempt.type === "challenge" ? (
+                      ) : attempt.type === 'challenge' ? (
                         <Flame className="w-3 h-3" />
                       ) : (
                         <Layers className="w-3 h-3" />
@@ -625,15 +625,15 @@ export const StatisticsPage = () => {
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
                     {attempt.quiz?.title ||
                       attempt.flashcardSet?.title ||
-                      "Untitled"}
+                      'Untitled'}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {attempt.quiz?.topic || attempt.flashcardSet?.topic || "-"}
+                    {attempt.quiz?.topic || attempt.flashcardSet?.topic || '-'}
                   </p>
 
                   <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {format(new Date(attempt.completedAt), "MMM d, yyyy")}
+                      {format(new Date(attempt.completedAt), 'MMM d, yyyy')}
                     </span>
                     {attempt.score !== undefined && attempt.totalQuestions ? (
                       <div className="flex items-center gap-2">
@@ -643,12 +643,12 @@ export const StatisticsPage = () => {
                               Math.max(0, attempt.score) /
                                 attempt.totalQuestions >=
                               0.7
-                                ? "bg-green-500"
+                                ? 'bg-green-500'
                                 : Math.max(0, attempt.score) /
                                       attempt.totalQuestions >=
                                     0.5
-                                  ? "bg-yellow-500"
-                                  : "bg-red-500"
+                                  ? 'bg-yellow-500'
+                                  : 'bg-red-500'
                             }`}
                             style={{
                               width: `${Math.round((Math.max(0, attempt.score) / attempt.totalQuestions) * 100)}%`,
@@ -660,18 +660,18 @@ export const StatisticsPage = () => {
                             Math.max(0, attempt.score) /
                               attempt.totalQuestions >=
                             0.7
-                              ? "text-green-600"
+                              ? 'text-green-600'
                               : Math.max(0, attempt.score) /
                                     attempt.totalQuestions >=
                                   0.5
-                                ? "text-yellow-600"
-                                : "text-red-600"
+                                ? 'text-yellow-600'
+                                : 'text-red-600'
                           }`}
                         >
                           {Math.round(
                             (Math.max(0, attempt.score) /
                               attempt.totalQuestions) *
-                              100,
+                              100
                           )}
                           %
                         </span>
@@ -715,8 +715,8 @@ export const StatisticsPage = () => {
                       }}
                       className={`px-3 py-1 text-sm font-medium rounded-md ${
                         page === p
-                          ? "bg-primary-600 text-white"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? 'bg-primary-600 text-white'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
                     >
                       {p}

@@ -1,34 +1,34 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { School, Plus, Edit2 } from "lucide-react";
-import { adminService } from "../../services/adminService";
-import toast from "react-hot-toast";
-import { useState } from "react";
-import { Modal } from "../../components/Modal";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { School, Plus, Edit2 } from 'lucide-react';
+import { adminService } from '../../services/adminService';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
+import { Modal } from '../../components/Modal';
 
 export const SchoolManagement = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSchool, setEditingSchool] = useState<any>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    address: "",
-    contactEmail: "",
+    name: '',
+    address: '',
+    contactEmail: '',
   });
   const queryClient = useQueryClient();
 
   const { data: schools, isLoading } = useQuery({
-    queryKey: ["schools"],
+    queryKey: ['schools'],
     queryFn: adminService.getSchools,
   });
 
   const createMutation = useMutation({
     mutationFn: adminService.createSchool,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["schools"] });
-      toast.success("School created successfully");
+      await queryClient.invalidateQueries({ queryKey: ['schools'] });
+      toast.success('School created successfully');
       closeModal();
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to create school");
+      toast.error(error.response?.data?.message || 'Failed to create school');
     },
   });
 
@@ -36,28 +36,28 @@ export const SchoolManagement = () => {
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       adminService.updateSchool(id, data),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["schools"] });
-      toast.success("School updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ['schools'] });
+      toast.success('School updated successfully');
       setEditingSchool(null);
       closeModal(); // Keep closeModal to reset form and modal state
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to update school");
+      toast.error(error.response?.data?.message || 'Failed to update school');
     },
   });
 
   const openCreateModal = () => {
     setEditingSchool(null);
-    setFormData({ name: "", address: "", contactEmail: "" });
+    setFormData({ name: '', address: '', contactEmail: '' });
     setModalOpen(true);
   };
 
   const openEditModal = (school: any) => {
     setEditingSchool(school);
     setFormData({
-      name: school.name || "",
-      address: school.address || "",
-      contactEmail: school.contactEmail || "",
+      name: school.name || '',
+      address: school.address || '',
+      contactEmail: school.contactEmail || '',
     });
     setModalOpen(true);
   };
@@ -65,7 +65,7 @@ export const SchoolManagement = () => {
   const closeModal = () => {
     setModalOpen(false);
     setEditingSchool(null);
-    setFormData({ name: "", address: "", contactEmail: "" });
+    setFormData({ name: '', address: '', contactEmail: '' });
   };
 
   const handleSubmit = () => {
@@ -140,7 +140,7 @@ export const SchoolManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={closeModal}
-        title={editingSchool ? "Edit School" : "Add School"}
+        title={editingSchool ? 'Edit School' : 'Add School'}
         footer={
           <div className="flex justify-end gap-3">
             <button
@@ -153,7 +153,7 @@ export const SchoolManagement = () => {
               onClick={handleSubmit}
               className="rounded-lg px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"
             >
-              {editingSchool ? "Update" : "Create"}
+              {editingSchool ? 'Update' : 'Create'}
             </button>
           </div>
         }

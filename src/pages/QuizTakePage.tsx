@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
-import { quizService } from "../services/quiz.service";
-import type { QuizResult, AnswerValue } from "../types";
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { quizService } from '../services/quiz.service';
+import type { QuizResult, AnswerValue } from '../types';
+import { shuffleQuestions } from '../utils/shuffleUtils';
 import {
   ArrowLeft,
   Brain,
@@ -11,18 +12,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { QuestionRenderer } from "../components/QuestionRenderer";
-import { QuizReview } from "../components/quiz/QuizReview";
-import { useQuiz } from "../hooks";
+import { QuestionRenderer } from '../components/QuestionRenderer';
+import { QuizReview } from '../components/quiz/QuizReview';
+import { useQuiz } from '../hooks';
 
 export const QuizTakePage = () => {
   const { id, attemptId } = useParams<{ id: string; attemptId?: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const challengeId = searchParams.get("challengeId");
+  const challengeId = searchParams.get('challengeId');
   const { data: quiz, isLoading: loading, error } = useQuiz(id);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<
@@ -35,13 +36,19 @@ export const QuizTakePage = () => {
   const [challengeResult, setChallengeResult] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Shuffle questions once when quiz loads (memoized to prevent re-shuffling)
+  const shuffledQuestions = useMemo(() => {
+    if (!quiz?.questions) return [];
+    return shuffleQuestions(quiz.questions);
+  }, [quiz?.questions]);
+
   // Get localStorage key for this quiz
   const getStorageKey = (key: string) => `quiz_${id}_${key}`;
 
   // Handle errors
   if (error) {
-    toast.error("Failed to load quiz");
-    navigate("/quiz");
+    toast.error('Failed to load quiz');
+    navigate('/quiz');
   }
 
   // Effect to load attempt for review if attemptId is present
@@ -64,7 +71,7 @@ export const QuizTakePage = () => {
                 ? Math.round((score / totalQuestions) * 100)
                 : 0,
             correctAnswers: quiz.questions.map((q) => q.correctAnswer),
-            feedback: { message: "Reviewing past attempt" }, // Simplified feedback
+            feedback: { message: 'Reviewing past attempt' }, // Simplified feedback
           };
 
           setResult(mockResult);
@@ -77,7 +84,7 @@ export const QuizTakePage = () => {
           if ((attempt as any).answers) {
             const answers = (attempt as any).answers;
             // If answer is string/json, parse it
-            if (typeof answers === "string") {
+            if (typeof answers === 'string') {
               try {
                 setSelectedAnswers(JSON.parse(answers));
               } catch {
@@ -90,7 +97,7 @@ export const QuizTakePage = () => {
 
           setShowResults(true);
         } catch (_error) {
-          toast.error("Failed to load attempt details");
+          toast.error('Failed to load attempt details');
         }
       };
 
@@ -103,42 +110,42 @@ export const QuizTakePage = () => {
     if (!quiz || !id || attemptId) return;
 
     // Try to restore saved state from localStorage
-    const savedAnswers = localStorage.getItem(getStorageKey("answers"));
+    const savedAnswers = localStorage.getItem(getStorageKey('answers'));
     const savedQuestionIndex = localStorage.getItem(
-      getStorageKey("questionIndex"),
+      getStorageKey('questionIndex')
     );
     const savedTimeRemaining = localStorage.getItem(
-      getStorageKey("timeRemaining"),
+      getStorageKey('timeRemaining')
     );
-    const savedTimestamp = localStorage.getItem(getStorageKey("timestamp"));
+    const savedTimestamp = localStorage.getItem(getStorageKey('timestamp'));
 
     if (savedAnswers) {
       try {
         const parsedAnswers = JSON.parse(savedAnswers);
         if (
           Array.isArray(parsedAnswers) &&
-          parsedAnswers.length === quiz.questions.length
+          parsedAnswers.length === shuffledQuestions.length
         ) {
           setSelectedAnswers(parsedAnswers);
         } else {
-          setSelectedAnswers(new Array(quiz.questions.length).fill(null));
+          setSelectedAnswers(new Array(shuffledQuestions.length).fill(null));
         }
       } catch {
-        setSelectedAnswers(new Array(quiz.questions.length).fill(null));
+        setSelectedAnswers(new Array(shuffledQuestions.length).fill(null));
       }
     } else {
-      setSelectedAnswers(new Array(quiz.questions.length).fill(null));
+      setSelectedAnswers(new Array(shuffledQuestions.length).fill(null));
     }
 
     if (savedQuestionIndex) {
       const index = parseInt(savedQuestionIndex, 10);
-      if (!isNaN(index) && index >= 0 && index < quiz.questions.length) {
+      if (!isNaN(index) && index >= 0 && index < shuffledQuestions.length) {
         setCurrentQuestionIndex(index);
       }
     }
 
     // Initialize or restore timer for timed quizzes
-    if (quiz.quizType === "timed" && quiz.timeLimit) {
+    if (quiz.quizType === 'timed' && quiz.timeLimit) {
       if (savedTimeRemaining && savedTimestamp) {
         const timeRemaining = parseInt(savedTimeRemaining, 10);
         const timestamp = parseInt(savedTimestamp, 10);
@@ -150,7 +157,7 @@ export const QuizTakePage = () => {
         setTimeRemaining(quiz.timeLimit);
       }
     }
-  }, [quiz, id, attemptId]);
+  }, [quiz, id, attemptId, shuffledQuestions]);
 
   // Timer effect for timed quizzes
   useEffect(() => {
@@ -166,10 +173,10 @@ export const QuizTakePage = () => {
         const newTime = prev - 1;
         // Save time to localStorage
         localStorage.setItem(
-          getStorageKey("timeRemaining"),
-          newTime.toString(),
+          getStorageKey('timeRemaining'),
+          newTime.toString()
         );
-        localStorage.setItem(getStorageKey("timestamp"), Date.now().toString());
+        localStorage.setItem(getStorageKey('timestamp'), Date.now().toString());
         return newTime;
       });
     }, 1000);
@@ -182,14 +189,14 @@ export const QuizTakePage = () => {
     newAnswers[currentQuestionIndex] = answer;
     setSelectedAnswers(newAnswers);
     // Save to localStorage
-    localStorage.setItem(getStorageKey("answers"), JSON.stringify(newAnswers));
+    localStorage.setItem(getStorageKey('answers'), JSON.stringify(newAnswers));
   };
 
   const handleNext = () => {
-    if (quiz && currentQuestionIndex < quiz.questions.length - 1) {
+    if (shuffledQuestions && currentQuestionIndex < shuffledQuestions.length - 1) {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
-      localStorage.setItem(getStorageKey("questionIndex"), newIndex.toString());
+      localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
     }
   };
 
@@ -197,7 +204,7 @@ export const QuizTakePage = () => {
     if (currentQuestionIndex > 0) {
       const newIndex = currentQuestionIndex - 1;
       setCurrentQuestionIndex(newIndex);
-      localStorage.setItem(getStorageKey("questionIndex"), newIndex.toString());
+      localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
     }
   };
 
@@ -206,7 +213,7 @@ export const QuizTakePage = () => {
 
     // If not forced, require all questions to be answered
     if (!force && selectedAnswers.some((answer) => answer === null)) {
-      toast.error("Please answer all questions before submitting.");
+      toast.error('Please answer all questions before submitting.');
       return;
     }
 
@@ -219,19 +226,19 @@ export const QuizTakePage = () => {
       setResult(submissionResult);
 
       // Clear saved state from localStorage after submission
-      localStorage.removeItem(getStorageKey("answers"));
-      localStorage.removeItem(getStorageKey("questionIndex"));
-      localStorage.removeItem(getStorageKey("timeRemaining"));
-      localStorage.removeItem(getStorageKey("timestamp"));
+      localStorage.removeItem(getStorageKey('answers'));
+      localStorage.removeItem(getStorageKey('questionIndex'));
+      localStorage.removeItem(getStorageKey('timeRemaining'));
+      localStorage.removeItem(getStorageKey('timestamp'));
 
       toast.success(
-        force ? "Time is up! Quiz submitted." : "Quiz submitted successfully!",
+        force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!'
       );
 
       // If this is a challenge quiz, handle challenge completion
       if (challengeId) {
         try {
-          const { challengeService } = await import("../services");
+          const { challengeService } = await import('../services');
           const challengeCompletionResult =
             await challengeService.completeQuizInChallenge(challengeId, id, {
               score: submissionResult.score,
@@ -242,7 +249,7 @@ export const QuizTakePage = () => {
           setChallengeResult(challengeCompletionResult);
 
           // Invalidate challenges cache
-          await queryClient.invalidateQueries({ queryKey: ["challenges"] });
+          await queryClient.invalidateQueries({ queryKey: ['challenges'] });
 
           // Navigate based on challenge completion status
           if (challengeCompletionResult.completed) {
@@ -265,7 +272,7 @@ export const QuizTakePage = () => {
       // Calculate duration if possible, otherwise 0
       // const duration = quiz.timeLimit && timeRemaining !== null ? quiz.timeLimit - timeRemaining : 0;
     } catch (_error) {
-      toast.error("Failed to submit quiz. Please try again.");
+      toast.error('Failed to submit quiz. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -288,7 +295,7 @@ export const QuizTakePage = () => {
         <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
           Quiz not found
         </h3>
-        <button onClick={() => navigate("/quiz")} className="btn-primary mt-4">
+        <button onClick={() => navigate('/quiz')} className="btn-primary mt-4">
           Back to Quizzes
         </button>
       </div>
@@ -314,13 +321,13 @@ export const QuizTakePage = () => {
               onClick={() =>
                 challengeId
                   ? navigate(`/challenges/${challengeId}`)
-                  : navigate("/quiz")
+                  : navigate('/quiz')
               }
               className="flex items-center gap-2 text-white hover:text-blue-100 dark:hover:text-blue-200 mb-4 sm:mb-6 transition-colors touch-manipulation"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="text-sm sm:text-base">
-                {challengeId ? "Back to Challenge" : "Back to Quizzes"}
+                {challengeId ? 'Back to Challenge' : 'Back to Quizzes'}
               </span>
             </button>
 
@@ -339,12 +346,12 @@ export const QuizTakePage = () => {
                 <div
                   className={`absolute inset-0 rounded-full border-3 sm:border-4 ${
                     isPerfect
-                      ? "border-yellow-400"
+                      ? 'border-yellow-400'
                       : isExcellent
-                        ? "border-green-400"
+                        ? 'border-green-400'
                         : isGood
-                          ? "border-blue-400"
-                          : "border-gray-300"
+                          ? 'border-blue-400'
+                          : 'border-gray-300'
                   }`}
                 ></div>
               </div>
@@ -352,33 +359,33 @@ export const QuizTakePage = () => {
               {/* Message */}
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
                 {isPerfect
-                  ? "🎉 Perfect Score!"
+                  ? '🎉 Perfect Score!'
                   : isExcellent
-                    ? "🌟 Excellent Work!"
+                    ? '🌟 Excellent Work!'
                     : isGood
-                      ? "👍 Good Job!"
-                      : "💪 Keep Practicing!"}
+                      ? '👍 Good Job!'
+                      : '💪 Keep Practicing!'}
               </h1>
               <p className="text-blue-100 dark:text-blue-200 text-sm sm:text-base md:text-lg px-4">
                 {(() => {
                   const message =
                     result.feedback?.message ||
                     (isPerfect
-                      ? "You got every question right!"
+                      ? 'You got every question right!'
                       : isExcellent
-                        ? "You really know your stuff!"
+                        ? 'You really know your stuff!'
                         : isGood
-                          ? "Nice work, keep it up!"
-                          : "Review the answers and try again!");
+                          ? 'Nice work, keep it up!'
+                          : 'Review the answers and try again!');
 
-                  return message.split("**").map((part, index) =>
+                  return message.split('**').map((part, index) =>
                     index % 2 === 1 ? (
                       <strong key={index} className="font-bold text-white">
                         {part}
                       </strong>
                     ) : (
                       part
-                    ),
+                    )
                   );
                 })()}
               </p>
@@ -395,25 +402,25 @@ export const QuizTakePage = () => {
                   Challenge Progress
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Quiz {challengeResult.currentQuizIndex} of{" "}
+                  Quiz {challengeResult.currentQuizIndex} of{' '}
                   {challengeResult.totalQuizzes} completed
                 </p>
               </div>
               <button
                 onClick={async () => {
                   try {
-                    const { challengeService } = await import("../services");
+                    const { challengeService } = await import('../services');
                     const challenge =
                       await challengeService.getChallengeById(challengeId);
                     const nextQuiz =
                       challenge.quizzes?.[challengeResult.currentQuizIndex];
                     if (nextQuiz) {
                       navigate(
-                        `/quiz/${nextQuiz.quizId}?challengeId=${challengeId}`,
+                        `/quiz/${nextQuiz.quizId}?challengeId=${challengeId}`
                       );
                     }
                   } catch (_error) {
-                    toast.error("Failed to load next quiz");
+                    toast.error('Failed to load next quiz');
                   }
                 }}
                 className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl"
@@ -435,11 +442,11 @@ export const QuizTakePage = () => {
     );
   }
 
-  const currentQuestion = quiz.questions[currentQuestionIndex];
+  const currentQuestion = shuffledQuestions[currentQuestionIndex];
   const answeredCount = selectedAnswers.filter((a) => a !== null).length;
   const progressPercentage =
-    quiz.questions.length > 0
-      ? (answeredCount / quiz.questions.length) * 100
+    shuffledQuestions.length > 0
+      ? (answeredCount / shuffledQuestions.length) * 100
       : 0;
 
   return (
@@ -453,7 +460,7 @@ export const QuizTakePage = () => {
 
         <div className="relative z-10">
           <button
-            onClick={() => navigate("/quiz")}
+            onClick={() => navigate('/quiz')}
             className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm mb-3 sm:mb-4 transition-all touch-manipulation w-fit"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -484,16 +491,16 @@ export const QuizTakePage = () => {
                 </div>
               </div>
             </div>
-            {quiz.quizType === "timed" && timeRemaining !== null && (
+            {quiz.quizType === 'timed' && timeRemaining !== null && (
               <div
                 className={`flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto ${
-                  timeRemaining < 60 ? "animate-pulse" : ""
+                  timeRemaining < 60 ? 'animate-pulse' : ''
                 }`}
               >
                 <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white flex-shrink-0" />
                 <span className="font-mono font-bold text-white text-xl sm:text-2xl md:text-4xl">
                   {Math.floor(timeRemaining / 60)}:
-                  {(timeRemaining % 60).toString().padStart(2, "0")}
+                  {(timeRemaining % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             )}
@@ -503,10 +510,10 @@ export const QuizTakePage = () => {
           <div className="mt-4 sm:mt-6">
             <div className="flex justify-between text-xs sm:text-sm text-white mb-2">
               <span className="font-medium">
-                Q {currentQuestionIndex + 1}/{quiz.questions.length}
+                Q {currentQuestionIndex + 1}/{shuffledQuestions.length}
               </span>
               <span className="font-medium">
-                {answeredCount}/{quiz.questions.length} answered
+                {answeredCount}/{shuffledQuestions.length} answered
               </span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-2 sm:h-2.5 overflow-hidden">
@@ -546,7 +553,7 @@ export const QuizTakePage = () => {
             <span className="sm:hidden">Prev</span>
           </button>
 
-          {currentQuestionIndex === quiz.questions.length - 1 ? (
+          {currentQuestionIndex === shuffledQuestions.length - 1 ? (
             <button
               onClick={() => handleSubmit()}
               disabled={submitting}

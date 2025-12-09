@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import type { FlashcardGenerateRequest } from "../types";
-import { Layers, Sparkles, FileText, Upload } from "lucide-react";
+import { useState, useRef, useEffect } from 'react';
+import type { FlashcardGenerateRequest } from '../types';
+import { Layers, Sparkles, FileText, Upload } from 'lucide-react';
 
 interface FlashcardGeneratorProps {
   onGenerate: (request: FlashcardGenerateRequest, files?: File[]) => void;
@@ -8,7 +8,7 @@ interface FlashcardGeneratorProps {
   initialValues?: {
     topic?: string;
     content?: string;
-    mode?: "topic" | "content" | "files";
+    mode?: 'topic' | 'content' | 'files';
     contentId?: string;
   };
 }
@@ -18,9 +18,9 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   loading,
   initialValues,
 }) => {
-  const [mode, setMode] = useState<"topic" | "content" | "files">("topic");
-  const [topic, setTopic] = useState("");
-  const [content, setContent] = useState("");
+  const [mode, setMode] = useState<'topic' | 'content' | 'files'>('topic');
+  const [topic, setTopic] = useState('');
+  const [content, setContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [numberOfCards, setNumberOfCards] = useState(10);
   const [isDragging, setIsDragging] = useState(false);
@@ -67,11 +67,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     e.preventDefault();
     const contentId = initialValues?.contentId;
 
-    if (mode === "topic" && topic.trim()) {
+    if (mode === 'topic' && topic.trim()) {
       onGenerate({ topic, numberOfCards, contentId });
-    } else if (mode === "content" && content.trim()) {
+    } else if (mode === 'content' && content.trim()) {
       onGenerate({ content, numberOfCards, contentId });
-    } else if (mode === "files" && files.length > 0) {
+    } else if (mode === 'files' && files.length > 0) {
       onGenerate({ numberOfCards, contentId }, files);
     }
   };
@@ -96,11 +96,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
         <button
           type="button"
-          onClick={() => setMode("topic")}
+          onClick={() => setMode('topic')}
           className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-            mode === "topic"
-              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+            mode === 'topic'
+              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
           }`}
         >
           <Sparkles className="w-5 h-5 md:w-5 md:h-5" />
@@ -111,11 +111,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         </button>
         <button
           type="button"
-          onClick={() => setMode("content")}
+          onClick={() => setMode('content')}
           className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-            mode === "content"
-              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+            mode === 'content'
+              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
           }`}
         >
           <FileText className="w-5 h-5 md:w-5 md:h-5" />
@@ -126,11 +126,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         </button>
         <button
           type="button"
-          onClick={() => setMode("files")}
+          onClick={() => setMode('files')}
           className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-            mode === "files"
-              ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+            mode === 'files'
+              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
           }`}
         >
           <Upload className="w-5 h-5 md:w-5 md:h-5" />
@@ -142,7 +142,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === "topic" ? (
+        {mode === 'topic' ? (
           <div>
             <label
               htmlFor="topic"
@@ -160,7 +160,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               required
             />
           </div>
-        ) : mode === "content" ? (
+        ) : mode === 'content' ? (
           <div>
             <label
               htmlFor="content"
@@ -195,8 +195,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                 isDragging
-                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                  : "border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
               }`}
             >
               <svg
@@ -245,7 +245,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                   >
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
-                        {file.type === "application/pdf" ? (
+                        {file.type === 'application/pdf' ? (
                           <svg
                             className="h-8 w-8 text-red-500"
                             fill="currentColor"

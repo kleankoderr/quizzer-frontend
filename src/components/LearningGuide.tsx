@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   CheckCircle,
   ChevronRight,
@@ -9,19 +9,19 @@ import {
   Loader2,
   Brain,
   BookOpen,
-} from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
+} from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
-import { contentService, type Content } from "../services/content.service";
-import { applyHighlights, type Highlight } from "../utils/contentUtils";
+import { contentService, type Content } from '../services/content.service';
+import { applyHighlights, type Highlight } from '../utils/contentUtils';
 
 interface LearningGuideProps {
-  guide: NonNullable<Content["learningGuide"]>;
+  guide: NonNullable<Content['learningGuide']>;
   title: string;
   highlights?: Highlight[];
   onToggleSectionComplete?: (index: number, isComplete: boolean) => void;
@@ -52,7 +52,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         if (section.completed) initial.add(index);
       }
       return initial;
-    },
+    }
   );
 
   // Sync with guide updates
@@ -93,11 +93,11 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         }
       }
       return initial;
-    },
+    }
   );
   const [loadingAction, setLoadingAction] = useState<{
     section: number;
-    type: "explain" | "example";
+    type: 'explain' | 'example';
   } | null>(null);
 
   const toggleSection = (index: number) => {
@@ -128,7 +128,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
   const handleAskQuestion = async (
     sectionIndex: number,
-    type: "explain" | "example",
+    type: 'explain' | 'example'
   ) => {
     const section = guide.sections[sectionIndex];
     if (!section) return;
@@ -147,18 +147,18 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     setLoadingAction({ section: sectionIndex, type });
 
     try {
-      let result = "";
-      if (type === "explain") {
+      let result = '';
+      if (type === 'explain') {
         result = await contentService.generateExplanation(
           contentId,
           section.title,
-          section.content,
+          section.content
         );
       } else {
         result = await contentService.generateExample(
           contentId,
           section.title,
-          section.content,
+          section.content
         );
       }
 
@@ -174,7 +174,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       // Persist to backend
       const updatedGuide = structuredClone(guide);
       if (updatedGuide.sections[sectionIndex]) {
-        if (type === "explain") {
+        if (type === 'explain') {
           updatedGuide.sections[sectionIndex].generatedExplanation = result;
         } else {
           updatedGuide.sections[sectionIndex].generatedExample = result;
@@ -194,7 +194,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
   const toggleContentVisibility = (
     sectionIndex: number,
-    type: "explain" | "example",
+    type: 'explain' | 'example'
   ) => {
     const key = `${sectionIndex}-${type}`;
     setVisibleContent((prev) => ({
@@ -204,13 +204,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   };
 
   const progress = Math.round(
-    (completedSections.size / guide.sections.length) * 100,
+    (completedSections.size / guide.sections.length) * 100
   );
 
   // Custom heading renderer
   const HeadingRenderer = ({ level, children }: any) => {
-    const text = children?.[0]?.toString() || "";
-    const id = text.toLowerCase().replace(/[^\w]+/g, "-");
+    const text = children?.[0]?.toString() || '';
+    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
     const Tag = `h${level}` as React.ElementType;
     return <Tag id={id}>{children}</Tag>;
   };
@@ -227,13 +227,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           <div>
             <h1
               className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4"
-              style={{ fontFamily: "Lexend" }}
+              style={{ fontFamily: 'Lexend' }}
             >
               {title}
             </h1>
             <div
               className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none"
-              style={{ fontFamily: "Lexend" }}
+              style={{ fontFamily: 'Lexend' }}
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
@@ -280,7 +280,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             <span
               key={idx}
               className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-100 dark:border-primary-800"
-              style={{ fontFamily: "Lexend" }}
+              style={{ fontFamily: 'Lexend' }}
             >
               {concept}
             </span>
@@ -294,7 +294,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           const processedContent = applyHighlights(
             section.content,
             highlights,
-            idx,
+            idx
           );
           const isCompleted = completedSections.has(idx);
 
@@ -304,8 +304,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               data-section-index={idx}
               className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${
                 activeSection === idx
-                  ? "sm:border-primary-500 sm:shadow-md sm:ring-1 ring-primary-500/20"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                  ? 'sm:border-primary-500 sm:shadow-md sm:ring-1 ring-primary-500/20'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               <div
@@ -317,8 +317,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                     onClick={(e) => markAsComplete(idx, e)}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
                       isCompleted
-                        ? "bg-green-500 border-green-500 text-white"
-                        : "border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500"
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500'
                     }`}
                   >
                     <CheckCircle className="w-4 h-4" />
@@ -326,10 +326,10 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                   <h3
                     className={`text-lg font-semibold transition-colors ${
                       isCompleted
-                        ? "text-gray-500 dark:text-gray-400"
-                        : "text-gray-900 dark:text-white"
+                        ? 'text-gray-500 dark:text-gray-400'
+                        : 'text-gray-900 dark:text-white'
                     }`}
-                    style={{ fontFamily: "Lexend" }}
+                    style={{ fontFamily: 'Lexend' }}
                   >
                     {section.title}
                   </h3>
@@ -353,7 +353,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       const rect = (
                         e.target as HTMLElement
                       ).getBoundingClientRect();
-                      const event = new CustomEvent("add-section-note", {
+                      const event = new CustomEvent('add-section-note', {
                         detail: {
                           sectionIndex: idx,
                           sectionTitle: section.title,
@@ -370,7 +370,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                   </button>
                   <ChevronRight
                     className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
-                      activeSection === idx ? "rotate-90" : ""
+                      activeSection === idx ? 'rotate-90' : ''
                     }`}
                   />
                 </div>
@@ -379,8 +379,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               <div
                 className={`grid transition-all duration-300 ease-in-out ${
                   activeSection === idx
-                    ? "grid-rows-[1fr] opacity-100"
-                    : "grid-rows-[0fr] opacity-0"
+                    ? 'grid-rows-[1fr] opacity-100'
+                    : 'grid-rows-[0fr] opacity-0'
                 }`}
               >
                 <div className="overflow-hidden">
@@ -397,30 +397,30 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                               ...defaultSchema,
                               tagNames: [
                                 ...(defaultSchema.tagNames || []),
-                                "mark",
-                                "span",
-                                "div",
-                                "math",
-                                "semantics",
-                                "mrow",
-                                "mi",
-                                "mo",
-                                "mn",
-                                "msup",
-                                "msub",
-                                "mfrac",
-                                "msqrt",
-                                "mroot",
-                                "mtable",
-                                "mtr",
-                                "mtd",
+                                'mark',
+                                'span',
+                                'div',
+                                'math',
+                                'semantics',
+                                'mrow',
+                                'mi',
+                                'mo',
+                                'mn',
+                                'msup',
+                                'msub',
+                                'mfrac',
+                                'msqrt',
+                                'mroot',
+                                'mtable',
+                                'mtr',
+                                'mtd',
                               ],
                               attributes: {
                                 ...defaultSchema.attributes,
-                                mark: [["className"], ["data-highlight-id"]],
-                                span: [["className"], ["title"], ["style"]],
-                                div: [["className"]],
-                                math: [["xmlns"], ["display"]],
+                                mark: [['className'], ['data-highlight-id']],
+                                span: [['className'], ['title'], ['style']],
+                                div: [['className']],
+                                math: [['xmlns'], ['display']],
                               },
                             },
                           ],
@@ -452,7 +452,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                             <div>
                               <h4
                                 className="font-bold text-gray-900 dark:text-white text-sm"
-                                style={{ fontFamily: "Lexend" }}
+                                style={{ fontFamily: 'Lexend' }}
                               >
                                 Key Example
                               </h4>
@@ -461,7 +461,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                           <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20">
                             <div
                               className="m-0 leading-relaxed text-sm"
-                              style={{ fontFamily: "Lexend" }}
+                              style={{ fontFamily: 'Lexend' }}
                             >
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm, remarkMath]}
@@ -479,40 +479,40 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       <div className="mt-8 space-y-6">
                         <div className="flex flex-wrap gap-3">
                           <button
-                            onClick={() => handleAskQuestion(idx, "explain")}
+                            onClick={() => handleAskQuestion(idx, 'explain')}
                             disabled={!!loadingAction}
                             className="group relative flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-800 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-1 sm:flex-none justify-center h-auto min-h-[44px]"
                           >
                             <div className="absolute inset-0 bg-purple-50 dark:bg-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             {loadingAction?.section === idx &&
-                            loadingAction?.type === "explain" ? (
+                            loadingAction?.type === 'explain' ? (
                               <Loader2 className="w-4 h-4 animate-spin relative z-10 flex-shrink-0" />
                             ) : (
                               <MessageCircle className="w-4 h-4 relative z-10 flex-shrink-0" />
                             )}
                             <span
                               className="relative z-10 font-medium text-sm text-center leading-tight"
-                              style={{ fontFamily: "Lexend" }}
+                              style={{ fontFamily: 'Lexend' }}
                             >
                               Explain this better
                             </span>
                           </button>
 
                           <button
-                            onClick={() => handleAskQuestion(idx, "example")}
+                            onClick={() => handleAskQuestion(idx, 'example')}
                             disabled={!!loadingAction}
                             className="group relative flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl hover:text-amber-600 dark:hover:text-amber-400 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-amber-200 dark:hover:border-amber-800 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-1 sm:flex-none justify-center h-auto min-h-[44px]"
                           >
                             <div className="absolute inset-0 bg-amber-50 dark:bg-amber-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             {loadingAction?.section === idx &&
-                            loadingAction?.type === "example" ? (
+                            loadingAction?.type === 'example' ? (
                               <Loader2 className="w-4 h-4 animate-spin relative z-10 flex-shrink-0" />
                             ) : (
                               <Sparkles className="w-4 h-4 relative z-10 flex-shrink-0" />
                             )}
                             <span
                               className="relative z-10 font-medium text-sm text-center leading-tight"
-                              style={{ fontFamily: "Lexend" }}
+                              style={{ fontFamily: 'Lexend' }}
                             >
                               Give more examples
                             </span>
@@ -533,7 +533,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                     <div>
                                       <h4
                                         className="font-bold text-gray-900 dark:text-white text-base"
-                                        style={{ fontFamily: "Lexend" }}
+                                        style={{ fontFamily: 'Lexend' }}
                                       >
                                         Simpler Explanation
                                       </h4>
@@ -544,7 +544,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                   </div>
                                   <button
                                     onClick={() =>
-                                      toggleContentVisibility(idx, "explain")
+                                      toggleContentVisibility(idx, 'explain')
                                     }
                                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                   >
@@ -576,7 +576,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                     <div>
                                       <h4
                                         className="font-bold text-gray-900 dark:text-white text-base"
-                                        style={{ fontFamily: "Lexend" }}
+                                        style={{ fontFamily: 'Lexend' }}
                                       >
                                         Real-World Examples
                                       </h4>
@@ -587,7 +587,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                   </div>
                                   <button
                                     onClick={() =>
-                                      toggleContentVisibility(idx, "example")
+                                      toggleContentVisibility(idx, 'example')
                                     }
                                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                   >
@@ -637,13 +637,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           </div>
           <h2
             className="text-2xl font-bold text-gray-900 dark:text-white mb-2"
-            style={{ fontFamily: "Lexend" }}
+            style={{ fontFamily: 'Lexend' }}
           >
             Excellent work!
           </h2>
           <p
             className="text-gray-600 dark:text-gray-300 mb-8"
-            style={{ fontFamily: "Lexend" }}
+            style={{ fontFamily: 'Lexend' }}
           >
             You've completed this learning guide. Here are some recommended next
             steps:
@@ -659,7 +659,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                 </div>
                 <div
                   className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none"
-                  style={{ fontFamily: "Lexend" }}
+                  style={{ fontFamily: 'Lexend' }}
                 >
                   <ReactMarkdown
                     components={{

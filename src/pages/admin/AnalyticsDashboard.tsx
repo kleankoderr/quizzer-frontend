@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { Users, BookOpen, Activity, Trophy } from "lucide-react";
-import { adminService } from "../../services/adminService";
+import { useQuery } from '@tanstack/react-query';
+import { Users, BookOpen, Activity, Trophy } from 'lucide-react';
+import { adminService } from '../../services/adminService';
 import {
   LineChart,
   Line,
@@ -15,22 +15,22 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-import { StatCardSkeleton } from "../../components/skeletons/StatCardSkeleton";
-import { CardSkeleton } from "../../components/skeletons/CardSkeleton";
+} from 'recharts';
+import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
 
 const COLORS = [
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#ec4899",
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#ec4899',
 ];
 
 export const AnalyticsDashboard = () => {
   const { data: analytics, isLoading } = useQuery({
-    queryKey: ["analytics"],
+    queryKey: ['analytics'],
     queryFn: adminService.getAnalytics,
   });
 
@@ -61,7 +61,7 @@ export const AnalyticsDashboard = () => {
 
   const userRoleData =
     analytics?.users?.byRole?.map((r: any) => ({
-      name: r.role.replace("_", " "),
+      name: r.role.replace('_', ' '),
       value: r.count,
     })) || [];
 
@@ -117,7 +117,7 @@ export const AnalyticsDashboard = () => {
               <p className="mt-1 text-sm text-green-600">
                 +
                 {(analytics?.content?.quizzesLast30Days || 0) +
-                  (analytics?.content?.flashcardsLast30Days || 0)}{" "}
+                  (analytics?.content?.flashcardsLast30Days || 0)}{' '}
                 this month
               </p>
             </div>
@@ -180,9 +180,9 @@ export const AnalyticsDashboard = () => {
               <XAxis
                 dataKey="date"
                 tickFormatter={(value) =>
-                  new Date(value).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
+                  new Date(value).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
                   })
                 }
               />
@@ -213,9 +213,9 @@ export const AnalyticsDashboard = () => {
               <XAxis
                 dataKey="date"
                 tickFormatter={(value) =>
-                  new Date(value).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
+                  new Date(value).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
                   })
                 }
               />
@@ -378,7 +378,7 @@ export const AnalyticsDashboard = () => {
                     </p>
                   </div>
                 </div>
-              ),
+              )
             ) || (
               <p className="text-center text-gray-500 dark:text-gray-400">
                 No data available

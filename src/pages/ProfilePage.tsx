@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useProfile } from "../hooks";
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useProfile } from '../hooks';
 import {
   User,
   Mail,
@@ -13,13 +13,13 @@ import {
   Trophy,
   Settings,
   Zap,
-} from "lucide-react";
+} from 'lucide-react';
 
 export const ProfilePage = () => {
   const { data: profile, isLoading: loading, error } = useProfile();
 
   if (error) {
-    toast.error("Failed to load profile");
+    toast.error('Failed to load profile');
   }
 
   if (loading) {
@@ -42,10 +42,10 @@ export const ProfilePage = () => {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 

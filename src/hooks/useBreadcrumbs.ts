@@ -1,5 +1,5 @@
-import { useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useLocation } from 'react-router-dom';
+import { useMemo } from 'react';
 
 export interface BreadcrumbItem {
   label: string;
@@ -7,24 +7,24 @@ export interface BreadcrumbItem {
 }
 
 const ROUTE_LABELS: Record<string, string> = {
-  dashboard: "Dashboard",
-  study: "Study",
-  discover: "Discover",
-  quiz: "Quizzes",
-  flashcards: "Flashcards",
-  leaderboard: "Leaderboard",
-  challenges: "Challenges",
-  statistics: "Statistics",
-  attempts: "Attempts",
-  profile: "Profile",
-  settings: "Settings",
-  admin: "Admin",
-  users: "Users",
-  content: "Content",
-  moderation: "Moderation",
-  schools: "Schools",
-  "generation-analytics": "Generation Analytics",
-  analytics: "Analytics",
+  dashboard: 'Dashboard',
+  study: 'Study',
+  discover: 'Discover',
+  quiz: 'Quizzes',
+  flashcards: 'Flashcards',
+  leaderboard: 'Leaderboard',
+  challenges: 'Challenges',
+  statistics: 'Statistics',
+  attempts: 'Attempts',
+  profile: 'Profile',
+  settings: 'Settings',
+  admin: 'Admin',
+  users: 'Users',
+  content: 'Content',
+  moderation: 'Moderation',
+  schools: 'Schools',
+  'generation-analytics': 'Generation Analytics',
+  analytics: 'Analytics',
 };
 
 export const useBreadcrumbs = () => {
@@ -37,14 +37,14 @@ export const useBreadcrumbs = () => {
     }
 
     // 2. Generate default hierarchy based on URL
-    const pathnames = location.pathname.split("/").filter((x) => x);
+    const pathnames = location.pathname.split('/').filter((x) => x);
     const items: BreadcrumbItem[] = [];
 
     // Always start with Home/Dashboard if not already there
     // (The Breadcrumb component adds the Home icon link to /dashboard, so we don't need to duplicate it here unless we want text)
     // Let's stick to the path segments.
 
-    let currentPath = "";
+    let currentPath = '';
 
     pathnames.forEach((value, index) => {
       currentPath += `/${value}`;
@@ -65,7 +65,7 @@ export const useBreadcrumbs = () => {
 
       // Heuristic: if value has numbers and length > 10, it's probably an ID.
       if (value.length > 10 && /\d/.test(value)) {
-        label = "Details";
+        label = 'Details';
       }
 
       items.push({

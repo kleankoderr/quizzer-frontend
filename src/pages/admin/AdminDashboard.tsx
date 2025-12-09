@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Users,
   BookOpen,
@@ -11,16 +11,16 @@ import {
   SettingsIcon,
   Brain,
   Trophy,
-} from "lucide-react";
-import { adminService } from "../../services/adminService";
-import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
-import { StatCardSkeleton } from "../../components/skeletons/StatCardSkeleton";
-import { CardSkeleton } from "../../components/skeletons/CardSkeleton";
+} from 'lucide-react';
+import { adminService } from '../../services/adminService';
+import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
-    queryKey: ["systemStats"],
+    queryKey: ['systemStats'],
     queryFn: adminService.getSystemStats,
   });
 
@@ -41,20 +41,20 @@ export const AdminDashboard = () => {
       setIsGenerating(true);
       try {
         let result;
-        if (type === "daily")
+        if (type === 'daily')
           result = await adminService.generateDailyChallenges();
-        else if (type === "weekly")
+        else if (type === 'weekly')
           result = await adminService.generateWeeklyChallenges();
-        else if (type === "monthly")
+        else if (type === 'monthly')
           result = await adminService.generateMonthlyChallenges();
-        else if (type === "hot")
+        else if (type === 'hot')
           result = await adminService.generateHotChallenges();
 
-        toast.success(result.message || "Challenges generated successfully");
-        queryClient.invalidateQueries({ queryKey: ["systemStats"] });
+        toast.success(result.message || 'Challenges generated successfully');
+        queryClient.invalidateQueries({ queryKey: ['systemStats'] });
       } catch (error: any) {
         toast.error(
-          error.response?.data?.message || "Failed to generate challenges",
+          error.response?.data?.message || 'Failed to generate challenges'
         );
       } finally {
         setIsGenerating(false);
@@ -76,7 +76,7 @@ export const AdminDashboard = () => {
         <div className="text-center">
           <p className="font-medium text-gray-900 dark:text-white">{label}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {isGenerating ? "Generating..." : "Generate"}
+            {isGenerating ? 'Generating...' : 'Generate'}
           </p>
         </div>
       </button>
@@ -129,31 +129,31 @@ export const AdminDashboard = () => {
 
   const statCards = [
     {
-      title: "Total Users",
+      title: 'Total Users',
       value: stats?.users.total || 0,
       icon: Users,
-      color: "bg-blue-500",
+      color: 'bg-blue-500',
       trend: `+${stats?.users.newLast7Days || 0} this week`,
     },
     {
-      title: "Active Users",
+      title: 'Active Users',
       value: stats?.users.active || 0,
       icon: Activity,
-      color: "bg-green-500",
-      trend: "Currently active",
+      color: 'bg-green-500',
+      trend: 'Currently active',
     },
     {
-      title: "Total Quizzes",
+      title: 'Total Quizzes',
       value: stats?.content.quizzes || 0,
       icon: BookOpen,
-      color: "bg-purple-500",
-      trend: "Platform wide",
+      color: 'bg-purple-500',
+      trend: 'Platform wide',
     },
     {
-      title: "Total Attempts",
+      title: 'Total Attempts',
       value: stats?.engagement.totalAttempts || 0,
       icon: TrendingUp,
-      color: "bg-orange-500",
+      color: 'bg-orange-500',
       trend: `+${stats?.engagement.attemptsLast7Days || 0} this week`,
     },
   ];

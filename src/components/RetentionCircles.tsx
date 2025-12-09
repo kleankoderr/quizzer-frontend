@@ -1,5 +1,5 @@
-import React from "react";
-import { Brain, Zap, Repeat, Award } from "lucide-react";
+import React from 'react';
+import { Brain, Zap, Repeat, Award } from 'lucide-react';
 
 interface RetentionCirclesProps {
   distribution: {
@@ -15,40 +15,40 @@ export const RetentionCircles: React.FC<RetentionCirclesProps> = ({
 }) => {
   const circles = [
     {
-      level: "LEARNING",
-      label: "Learning",
+      level: 'LEARNING',
+      label: 'Learning',
       count: distribution.LEARNING,
       icon: Brain,
-      color: "text-blue-500",
-      bg: "bg-blue-100 dark:bg-blue-900/30",
-      border: "border-blue-200 dark:border-blue-800",
+      color: 'text-blue-500',
+      bg: 'bg-blue-100 dark:bg-blue-900/30',
+      border: 'border-blue-200 dark:border-blue-800',
     },
     {
-      level: "REINFORCEMENT",
-      label: "Reinforcement",
+      level: 'REINFORCEMENT',
+      label: 'Reinforcement',
       count: distribution.REINFORCEMENT,
       icon: Zap,
-      color: "text-yellow-500",
-      bg: "bg-yellow-100 dark:bg-yellow-900/30",
-      border: "border-yellow-200 dark:border-yellow-800",
+      color: 'text-yellow-500',
+      bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+      border: 'border-yellow-200 dark:border-yellow-800',
     },
     {
-      level: "RECALL",
-      label: "Recall",
+      level: 'RECALL',
+      label: 'Recall',
       count: distribution.RECALL,
       icon: Repeat,
-      color: "text-orange-500",
-      bg: "bg-orange-100 dark:bg-orange-900/30",
-      border: "border-orange-200 dark:border-orange-800",
+      color: 'text-orange-500',
+      bg: 'bg-orange-100 dark:bg-orange-900/30',
+      border: 'border-orange-200 dark:border-orange-800',
     },
     {
-      level: "MASTERY",
-      label: "Mastery",
+      level: 'MASTERY',
+      label: 'Mastery',
       count: distribution.MASTERY,
       icon: Award,
-      color: "text-green-500",
-      bg: "bg-green-100 dark:bg-green-900/30",
-      border: "border-green-200 dark:border-green-800",
+      color: 'text-green-500',
+      bg: 'bg-green-100 dark:bg-green-900/30',
+      border: 'border-green-200 dark:border-green-800',
     },
   ];
 

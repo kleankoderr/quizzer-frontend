@@ -1,16 +1,16 @@
-import { apiClient } from "./api";
-import { QUIZ_ENDPOINTS } from "../config/api";
+import { apiClient } from './api';
+import { QUIZ_ENDPOINTS } from '../config/api';
 import type {
   Quiz,
   Attempt,
   QuizGenerateRequest,
   QuizSubmission,
   QuizResult,
-} from "../types";
+} from '../types';
 import {
   gamificationService,
   type GamificationUpdateResult,
-} from "./gamification.service";
+} from './gamification.service';
 
 export interface QuizSubmitResult {
   result: QuizResult;
@@ -19,7 +19,7 @@ export interface QuizSubmitResult {
 
 export interface JobStatus {
   jobId: string;
-  status: "pending" | "active" | "completed" | "failed";
+  status: 'pending' | 'active' | 'completed' | 'failed';
   progress?: any;
   result?: { success: boolean; quiz: Quiz };
   error?: string;
@@ -29,31 +29,31 @@ export const quizService = {
   // Generate a new quiz
   generate: async (
     request: QuizGenerateRequest,
-    files?: File[],
+    files?: File[]
   ): Promise<{ jobId: string; status: string }> => {
     const formData = new FormData();
 
     // Add files if provided
     if (files && files.length > 0) {
       for (const file of files) {
-        formData.append("files", file);
+        formData.append('files', file);
       }
     }
 
     // Add other fields
-    if (request.topic) formData.append("topic", request.topic);
-    if (request.content) formData.append("content", request.content);
-    if (request.contentId) formData.append("contentId", request.contentId);
-    formData.append("numberOfQuestions", request.numberOfQuestions.toString());
-    formData.append("difficulty", request.difficulty || "medium");
+    if (request.topic) formData.append('topic', request.topic);
+    if (request.content) formData.append('content', request.content);
+    if (request.contentId) formData.append('contentId', request.contentId);
+    formData.append('numberOfQuestions', request.numberOfQuestions.toString());
+    formData.append('difficulty', request.difficulty || 'medium');
 
     // Add new fields for quiz type and question types
-    if (request.quizType) formData.append("quizType", request.quizType);
+    if (request.quizType) formData.append('quizType', request.quizType);
     if (request.timeLimit)
-      formData.append("timeLimit", request.timeLimit.toString());
+      formData.append('timeLimit', request.timeLimit.toString());
     if (request.questionTypes && request.questionTypes.length > 0) {
       for (const type of request.questionTypes) {
-        formData.append("questionTypes[]", type);
+        formData.append('questionTypes[]', type);
       }
     }
 
@@ -62,9 +62,9 @@ export const quizService = {
       formData,
       {
         headers: {
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'multipart/form-data',
         },
-      },
+      }
     );
     return response.data;
   },
@@ -97,7 +97,7 @@ export const quizService = {
   pollForCompletion: async (
     jobId: string,
     onProgress?: (progress: number) => void,
-    maxAttempts = 60,
+    maxAttempts = 60
   ): Promise<Quiz | null> => {
     let attempts = 0;
     let jobFound = false;
@@ -110,13 +110,13 @@ export const quizService = {
         // Update progress if available
         if (status.progress && onProgress) {
           const progressValue =
-            typeof status.progress === "number"
+            typeof status.progress === 'number'
               ? status.progress
               : status.progress.percent || 0;
           onProgress(progressValue);
         }
 
-        if (status.status === "completed") {
+        if (status.status === 'completed') {
           if (onProgress) onProgress(100);
 
           if (status.result?.quiz) {
@@ -125,8 +125,8 @@ export const quizService = {
           return null; // Success but no quiz object returned directly
         }
 
-        if (status.status === "failed") {
-          throw new Error(status.error || "Quiz generation failed");
+        if (status.status === 'failed') {
+          throw new Error(status.error || 'Quiz generation failed');
         }
       } catch (error: any) {
         // Handle 404: If job was previously found, it might have been completed and removed
@@ -145,7 +145,7 @@ export const quizService = {
       attempts++;
     }
 
-    throw new Error("Quiz generation timed out");
+    throw new Error('Quiz generation timed out');
   },
 
   // Get all quizzes
@@ -163,19 +163,19 @@ export const quizService = {
   // Submit quiz answers and get gamification updates
   submit: async (
     id: string,
-    submission: QuizSubmission,
+    submission: QuizSubmission
   ): Promise<QuizSubmitResult> => {
     // Submit quiz
     const response = await apiClient.post<QuizResult>(
       QUIZ_ENDPOINTS.SUBMIT(id),
-      submission,
+      submission
     );
     const result = response.data;
 
     // Get gamification updates (streak and challenges)
     const gamification = await gamificationService.afterQuizSubmission(
       result.score,
-      result.totalQuestions,
+      result.totalQuestions
     );
 
     return { result, gamification };

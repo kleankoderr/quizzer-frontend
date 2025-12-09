@@ -1,7 +1,7 @@
-import { apiClient } from "./api";
+import { apiClient } from './api';
 
 // Cache configuration
-const CACHE_KEY = "public_settings_cache";
+const CACHE_KEY = 'public_settings_cache';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour (fresh)
 const STALE_DURATION = 24 * 60 * 60 * 1000; // 24 hours (serve stale while revalidating)
 
@@ -55,7 +55,7 @@ export const settingsService = {
 
     inFlightRequest = (async () => {
       try {
-        const response = await apiClient.get("/settings/public");
+        const response = await apiClient.get('/settings/public');
         const data = response.data;
 
         // Cache the response
@@ -80,7 +80,7 @@ export const settingsService = {
   },
 
   getSettings: async () => {
-    const response = await apiClient.get("/settings");
+    const response = await apiClient.get('/settings');
     return response.data;
   },
 
@@ -89,7 +89,7 @@ export const settingsService = {
     maintenanceMode?: boolean;
     supportEmail?: string;
   }) => {
-    const response = await apiClient.patch("/settings", data);
+    const response = await apiClient.patch('/settings', data);
     // Clear cache when settings are updated
     settingsService.clearPublicSettingsCache();
     return response.data;

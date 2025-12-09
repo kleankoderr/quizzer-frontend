@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { apiClient } from './api';
 
 export interface StudyInsights {
   stats: {
@@ -14,10 +14,10 @@ export interface StudyInsights {
     MASTERY: number;
   };
   suggestions: {
-    type: "review" | "practice";
+    type: 'review' | 'practice';
     topic: string;
     reason: string;
-    priority: "high" | "medium" | "low";
+    priority: 'high' | 'medium' | 'low';
     contentId?: string;
     quizId?: string;
     flashcardSetId?: string;
@@ -26,7 +26,7 @@ export interface StudyInsights {
 
 export const studyService = {
   async getInsights(): Promise<StudyInsights> {
-    const response = await apiClient.get("/study/insights");
+    const response = await apiClient.get('/study/insights');
     return response.data;
   },
 };

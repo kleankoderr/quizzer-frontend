@@ -1,5 +1,5 @@
-import { apiClient } from "./api";
-import type { Attempt } from "../types";
+import { apiClient } from './api';
+import type { Attempt } from '../types';
 export type { Attempt };
 
 export interface StatisticsOverview {
@@ -28,12 +28,12 @@ export interface ActivityData {
 
 export const statisticsService = {
   async getOverview(): Promise<StatisticsOverview> {
-    const response = await apiClient.get("/statistics/overview");
+    const response = await apiClient.get('/statistics/overview');
     return response.data;
   },
 
   async getAttempts(filters?: {
-    type?: "quiz" | "flashcard" | "challenge";
+    type?: 'quiz' | 'flashcard' | 'challenge';
     quizId?: string;
     flashcardSetId?: string;
     challengeId?: string;
@@ -47,20 +47,20 @@ export const statisticsService = {
     totalPages: number;
     page: number;
   }> {
-    const response = await apiClient.get("/statistics/attempts", {
+    const response = await apiClient.get('/statistics/attempts', {
       params: filters,
     });
     return response.data;
   },
 
   async getPerformanceByTopic(): Promise<PerformanceByTopic[]> {
-    const response = await apiClient.get("/statistics/performance");
+    const response = await apiClient.get('/statistics/performance');
     return response.data;
   },
 
   async getActivityHeatmap(year?: number): Promise<ActivityData[]> {
     const params = year ? { year } : {};
-    const response = await apiClient.get("/statistics/activity", { params });
+    const response = await apiClient.get('/statistics/activity', { params });
     return response.data;
   },
 };

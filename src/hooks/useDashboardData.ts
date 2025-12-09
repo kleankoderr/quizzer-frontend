@@ -1,13 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 import {
   gamificationService,
   leaderboardService,
   recommendationService,
-} from "../services";
+} from '../services';
 
 export const useDashboardData = () => {
   return useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ['dashboard'],
     queryFn: async () => {
       const [gamificationData, leaderboardData, recommendationsData] =
         await Promise.all([

@@ -1,5 +1,5 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -23,7 +23,7 @@ export const AdminRoute = ({ children }: AdminRouteProps) => {
 
   // Check if user has admin role (assuming user object has role property now)
   // We need to update the AuthContext/User type to include role
-  const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+  const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
 
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;

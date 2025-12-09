@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import type { FlashcardSet } from "../types";
+import { Link } from 'react-router-dom';
+import type { FlashcardSet } from '../types';
 import {
   Calendar,
   CreditCard,
@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   Trash2,
   Plus,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface FlashcardSetListProps {
   sets: FlashcardSet[];
@@ -60,7 +60,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
           Your Flashcard Sets
         </h2>
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {sets.length} set{sets.length === 1 ? "" : "s"}
+          {sets.length} set{sets.length === 1 ? '' : 's'}
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -114,7 +114,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                     <CreditCard className="w-4 h-4" />
-                    {cardCount} card{cardCount === 1 ? "" : "s"}
+                    {cardCount} card{cardCount === 1 ? '' : 's'}
                   </span>
                   <span className="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-md text-xs font-medium">
                     Active
@@ -123,9 +123,9 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(set.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
+                    {new Date(set.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
                     })}
                   </span>
                   {hasStudied && (

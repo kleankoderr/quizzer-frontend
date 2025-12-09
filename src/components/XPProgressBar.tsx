@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Lock } from "lucide-react";
-import type { Streak } from "../types";
+import { useEffect, useState } from 'react';
+import { Lock } from 'lucide-react';
+import type { Streak } from '../types';
 
 interface XPProgressBarProps {
   streak: Streak;
@@ -84,8 +84,8 @@ export const XPProgressBar = ({
                 <div
                   className={`relative w-full aspect-square rounded-lg flex items-center justify-center mb-2 transition-all ${
                     milestone.unlocked
-                      ? "bg-gradient-to-br from-yellow-400 to-orange-500 shadow-md scale-100"
-                      : "bg-gray-100 opacity-40 scale-95"
+                      ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-md scale-100'
+                      : 'bg-gray-100 opacity-40 scale-95'
                   }`}
                 >
                   {milestone.unlocked ? (
@@ -96,7 +96,7 @@ export const XPProgressBar = ({
                 </div>
                 <p
                   className={`text-xs font-medium ${
-                    milestone.unlocked ? "text-gray-900" : "text-gray-400"
+                    milestone.unlocked ? 'text-gray-900' : 'text-gray-400'
                   }`}
                 >
                   {milestone.days}d

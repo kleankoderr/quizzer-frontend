@@ -1,8 +1,8 @@
-import { apiClient } from "./api";
+import { apiClient } from './api';
 
 export interface Task {
   id: string;
-  status: "PENDING" | "COMPLETED" | "FAILED";
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
   result?: any;
   error?: string;
 }

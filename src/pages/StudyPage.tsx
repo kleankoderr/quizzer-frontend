@@ -1,8 +1,9 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { contentService } from "../services";
-import { useContents, usePopularTopics, useTaskStatus } from "../hooks";
+import { useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { contentService } from '../services';
+import { useContents, usePopularTopics } from '../hooks';
+import type { AppEvent } from '../types/events';
 import {
   Sparkles,
   FileText,
@@ -13,31 +14,32 @@ import {
   Calendar,
   Trash2,
   X,
-} from "lucide-react";
-import { format } from "date-fns";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Modal } from "../components/Modal";
-import { CardSkeleton } from "../components/skeletons";
-import { ProgressToast } from "../components/ProgressToast";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Modal } from '../components/Modal';
+import { CardSkeleton } from '../components/skeletons';
+import { ProgressToast } from '../components/ProgressToast';
+import { useSSEEvent } from '../hooks/useSSE';
 
 export const StudyPage = () => {
   const navigate = useNavigate();
 
   // Content creation states
   const [showCreator, setShowCreator] = useState(false);
-  const [activeTab, setActiveTab] = useState<"topic" | "text" | "file">(
-    "topic",
+  const [activeTab, setActiveTab] = useState<'topic' | 'text' | 'file'>(
+    'topic'
   );
-  const [topic, setTopic] = useState("");
-  const [textContent, setTextContent] = useState("");
-  const [textTitle, setTextTitle] = useState("");
-  const [textTopic, setTextTopic] = useState("");
+  const [topic, setTopic] = useState('');
+  const [textContent, setTextContent] = useState('');
+  const [textTitle, setTextTitle] = useState('');
+  const [textTopic, setTextTopic] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
 
-  // Task processing state
-  const [taskId, setTaskId] = useState<string | null>(null);
+  // Use refs to avoid race conditions with SSE events
+  const currentJobIdRef = useRef<string | null>(null);
   const toastIdRef = useRef<string | null>(null);
 
   // Delete state
@@ -55,117 +57,153 @@ export const StudyPage = () => {
   const contents = contentsData?.data ?? [];
   const totalPages = contentsData?.meta?.totalPages ?? 1;
 
-  // Use React Query for task polling
-  const taskQuery = useTaskStatus(taskId);
+  const handleProgress = useCallback((event: AppEvent) => {
+    if (event.eventType === 'content.progress' && currentJobIdRef.current) {
+      const progressEvent = event as any;
+      console.log('Content progress event received:', {
+        jobId: progressEvent.jobId,
+        currentJobId: currentJobIdRef.current,
+        percentage: progressEvent.percentage,
+        step: progressEvent.step,
+        toastId: toastIdRef.current,
+      });
 
-  // Handle task completion
-  useEffect(() => {
-    if (!taskQuery.data) return;
-
-    const task = taskQuery.data;
-    if (task.status === "COMPLETED") {
-      if (toastIdRef.current) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Generation Complete"
-              message="Your study material is ready!"
-              progress={100}
-              status="success"
-            />
-          ),
-          { id: toastIdRef.current },
-        );
-      }
-      setTaskId(null);
-      setContentLoading(false);
-      refetch();
-      navigate(`/content/${task.result.contentId}`);
-    } else if (task.status === "FAILED") {
-      if (toastIdRef.current) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Generation Failed"
-              message={task.error || "Unknown error"}
-              progress={100}
-              status="error"
-            />
-          ),
-          { id: toastIdRef.current },
-        );
-      }
-      setTaskId(null);
-      setContentLoading(false);
-    } else {
-      // Update progress
-      if (toastIdRef.current) {
+      if (
+        progressEvent.jobId === currentJobIdRef.current &&
+        toastIdRef.current
+      ) {
         toast.custom(
           (t) => (
             <ProgressToast
               t={t}
               title="Generating Content"
-              message="Crafting your study materials..."
-              progress={50}
+              message={progressEvent.step || progressEvent.message}
+              progress={progressEvent.percentage}
               status="processing"
             />
           ),
-          { id: toastIdRef.current },
+          { id: toastIdRef.current }
         );
       }
     }
-  }, [taskQuery.data, navigate, refetch]);
+  }, []);
 
-  const handleGenerateFromTopic = useCallback(async () => {
-    if (!topic.trim()) {
-      toast.error("Please enter a topic");
-      return;
-    }
+  const handleCompleted = useCallback(
+    async (event: AppEvent) => {
+      if (
+        event.eventType === 'content.completed' &&
+        currentJobIdRef.current &&
+        toastIdRef.current
+      ) {
+        const completedEvent = event as any;
 
-    setContentLoading(true);
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Content Ready!"
+              message="Opening your study material..."
+              progress={100}
+              status="success"
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
 
-    // Start toast
-    toastIdRef.current = toast.custom(
-      (t) => (
-        <ProgressToast
-          t={t}
-          title="Generating Content"
-          message="Initiating generation..."
-          progress={0}
-          status="processing"
-        />
-      ),
-      { duration: Infinity },
-    );
+        setTimeout(() => {
+          navigate(`/content/${completedEvent.contentId}`);
+        }, 500);
 
-    try {
-      const { taskId } = await contentService.generateFromTopic(topic);
-      setTaskId(taskId);
-      // Navigation happens after polling completes
-    } catch (_error) {
-      if (toastIdRef.current) {
+        setContentLoading(false);
+        currentJobIdRef.current = null;
+        toastIdRef.current = null;
+        refetch();
+      }
+    },
+    [navigate, refetch]
+  );
+
+  const handleFailed = useCallback((event: AppEvent) => {
+    if (
+      event.eventType === 'content.failed' &&
+      currentJobIdRef.current &&
+      toastIdRef.current
+    ) {
+      const failedEvent = event as any;
+      if (failedEvent.jobId === currentJobIdRef.current) {
         toast.custom(
           (t) => (
             <ProgressToast
               t={t}
               title="Generation Failed"
-              message="Failed to start generation"
+              message={failedEvent.error}
               progress={0}
               status="error"
             />
           ),
-          { id: toastIdRef.current },
+          { id: toastIdRef.current, duration: 5000 }
         );
+
+        setContentLoading(false);
+        currentJobIdRef.current = null;
+        toastIdRef.current = null;
       }
+    }
+  }, []);
+
+  useSSEEvent('content.progress', handleProgress);
+  useSSEEvent('content.completed', handleCompleted);
+  useSSEEvent('content.failed', handleFailed);
+
+  const handleGenerateFromTopic = useCallback(async () => {
+    if (!topic.trim()) {
+      toast.error('Please enter a topic');
+      return;
+    }
+
+    setContentLoading(true);
+
+    const toastId = toast.custom(
+      (t) => (
+        <ProgressToast
+          t={t}
+          title="Generating Content"
+          message="Preparing your study material..."
+          progress={0}
+          status="processing"
+        />
+      ),
+      { duration: Infinity }
+    );
+
+    toastIdRef.current = toastId;
+
+    try {
+      const { jobId } = await contentService.generateFromTopic(topic);
+      currentJobIdRef.current = jobId;
+      console.log('Content job started:', { jobId, toastId });
+    } catch (_error) {
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Unable to Generate Content"
+            message="Something went wrong"
+            progress={0}
+            status="error"
+          />
+        ),
+        { id: toastId, duration: 5000 }
+      );
       setContentLoading(false);
+      currentJobIdRef.current = null;
+      toastIdRef.current = null;
     }
   }, [topic]);
 
   const handleCreateFromText = useCallback(async () => {
     if (!textTitle.trim() || !textContent.trim()) {
-      toast.error("Please fill in all fields");
+      toast.error('Please fill in all fields');
       return;
     }
 
@@ -180,14 +218,14 @@ export const StudyPage = () => {
           status="processing"
         />
       ),
-      { duration: Infinity },
+      { duration: Infinity }
     );
 
     try {
       const content = await contentService.createFromText({
         title: textTitle,
         content: textContent,
-        topic: textTopic || "General",
+        topic: textTopic || 'General',
       });
 
       toast.custom(
@@ -200,7 +238,7 @@ export const StudyPage = () => {
             status="success"
           />
         ),
-        { id: toastId },
+        { id: toastId }
       );
 
       navigate(`/content/${content.id}`);
@@ -215,7 +253,7 @@ export const StudyPage = () => {
             status="error"
           />
         ),
-        { id: toastId },
+        { id: toastId }
       );
     } finally {
       setContentLoading(false);
@@ -224,7 +262,7 @@ export const StudyPage = () => {
 
   const handleFileUpload = useCallback(async () => {
     if (!file) {
-      toast.error("Please select a file");
+      toast.error('Please select a file');
       return;
     }
 
@@ -239,7 +277,7 @@ export const StudyPage = () => {
           status="processing"
         />
       ),
-      { duration: Infinity },
+      { duration: Infinity }
     );
 
     try {
@@ -248,17 +286,17 @@ export const StudyPage = () => {
           (t) => (
             <ProgressToast
               t={t}
-              title={progress < 100 ? "Uploading File" : "Processing File"}
+              title={progress < 100 ? 'Uploading File' : 'Processing File'}
               message={
                 progress < 100
                   ? `Uploading... ${progress}%`
-                  : "Analyzing content..."
+                  : 'Analyzing content...'
               }
               progress={progress}
               status="processing"
             />
           ),
-          { id: toastId },
+          { id: toastId }
         );
       });
 
@@ -272,7 +310,7 @@ export const StudyPage = () => {
             status="success"
           />
         ),
-        { id: toastId },
+        { id: toastId }
       );
 
       navigate(`/content/${content.id}`);
@@ -282,12 +320,12 @@ export const StudyPage = () => {
           <ProgressToast
             t={t}
             title="Upload Failed"
-            message={error.message || "Failed to process file"}
+            message={error.message || 'Failed to process file'}
             progress={0}
             status="error"
           />
         ),
-        { id: toastId },
+        { id: toastId }
       );
     } finally {
       setContentLoading(false);
@@ -297,13 +335,13 @@ export const StudyPage = () => {
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
 
-    const loadingToast = toast.loading("Deleting content...");
+    const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(deleteContentId);
-      toast.success("Content deleted successfully!", { id: loadingToast });
+      toast.success('Content deleted successfully!', { id: loadingToast });
       // React Query will automatically refetch the contents list
     } catch (_error) {
-      toast.error("Failed to delete content", { id: loadingToast });
+      toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setDeleteContentId(null);
     }
@@ -377,11 +415,11 @@ export const StudyPage = () => {
           {/* Tabs */}
           <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
             <button
-              onClick={() => setActiveTab("topic")}
+              onClick={() => setActiveTab('topic')}
               className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-                activeTab === "topic"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+                activeTab === 'topic'
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
               }`}
             >
               <Sparkles className="w-5 h-5 md:w-5 md:h-5" />
@@ -391,11 +429,11 @@ export const StudyPage = () => {
               </span>
             </button>
             <button
-              onClick={() => setActiveTab("text")}
+              onClick={() => setActiveTab('text')}
               className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-                activeTab === "text"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+                activeTab === 'text'
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
               }`}
             >
               <FileText className="w-5 h-5 md:w-5 md:h-5" />
@@ -405,11 +443,11 @@ export const StudyPage = () => {
               </span>
             </button>
             <button
-              onClick={() => setActiveTab("file")}
+              onClick={() => setActiveTab('file')}
               className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-                activeTab === "file"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent"
+                activeTab === 'file'
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
               }`}
             >
               <Upload className="w-5 h-5 md:w-5 md:h-5" />
@@ -422,7 +460,7 @@ export const StudyPage = () => {
 
           {/* Tab Content */}
           <div className="min-h-[400px]">
-            {activeTab === "topic" && (
+            {activeTab === 'topic' && (
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-blue-50 to-primary-50 dark:from-gray-800 dark:to-gray-800 p-4 md:p-6 rounded-xl border border-primary-200 dark:border-gray-700">
                   <div className="flex items-start gap-3 mb-4">
@@ -451,7 +489,7 @@ export const StudyPage = () => {
                     placeholder="e.g., Photosynthesis, World War II, Python Programming"
                     className="w-full px-5 py-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg transition-all"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && !contentLoading) {
+                      if (e.key === 'Enter' && !contentLoading) {
                         handleGenerateFromTopic();
                       }
                     }}
@@ -495,7 +533,7 @@ export const StudyPage = () => {
               </div>
             )}
 
-            {activeTab === "text" && (
+            {activeTab === 'text' && (
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 p-4 md:p-6 rounded-xl border border-purple-200 dark:border-gray-700">
                   <div className="flex items-start gap-3 mb-4">
@@ -573,7 +611,7 @@ export const StudyPage = () => {
               </div>
             )}
 
-            {activeTab === "file" && (
+            {activeTab === 'file' && (
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 p-4 md:p-6 rounded-xl border border-green-200 dark:border-gray-700">
                   <div className="flex items-start gap-3 mb-4">
@@ -593,12 +631,12 @@ export const StudyPage = () => {
                 <div
                   className={`border-3 border-dashed rounded-xl p-6 md:p-12 text-center transition-all ${
                     file
-                      ? "border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20"
-                      : "border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Upload
-                    className={`w-16 h-16 mx-auto mb-4 ${file ? "text-primary-600" : "text-gray-400"}`}
+                    className={`w-16 h-16 mx-auto mb-4 ${file ? 'text-primary-600' : 'text-gray-400'}`}
                   />
                   <input
                     type="file"
@@ -614,7 +652,7 @@ export const StudyPage = () => {
                     Click to upload
                   </label>
                   <span className="text-gray-600 dark:text-gray-300 text-lg">
-                    {" "}
+                    {' '}
                     or drag and drop
                   </span>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
@@ -699,7 +737,7 @@ export const StudyPage = () => {
                         <span>
                           {format(
                             new Date(content.createdAt),
-                            "MMM d, yyyy · h:mm a",
+                            'MMM d, yyyy · h:mm a'
                           )}
                         </span>
                       </div>

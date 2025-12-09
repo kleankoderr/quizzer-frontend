@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { apiClient } from './api';
 
 export interface DailyQuote {
   text: string;
@@ -7,7 +7,7 @@ export interface DailyQuote {
 
 export const quoteService = {
   getDailyQuote: async (): Promise<DailyQuote> => {
-    const response = await apiClient.get<DailyQuote>("/quotes/daily");
+    const response = await apiClient.get<DailyQuote>('/quotes/daily');
     return response.data;
   },
 };

@@ -1,129 +1,129 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import { SSEProvider } from "./contexts/SSEContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import { Layout } from "./components/Layout";
-import { MaintenanceBanner } from "./components/MaintenanceOverlay";
-import { AssessmentPopup } from "./components/AssessmentPopup";
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { SSEProvider } from './contexts/SSEContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { Layout } from './components/Layout';
+import { MaintenanceBanner } from './components/MaintenanceOverlay';
+import { AssessmentPopup } from './components/AssessmentPopup';
 
 // Lazy load all page components for code splitting
 const LoginPage = lazy(() =>
-  import("./pages/LoginPage").then((m) => ({ default: m.LoginPage })),
+  import('./pages/LoginPage').then((m) => ({ default: m.LoginPage }))
 );
 const SignupPage = lazy(() =>
-  import("./pages/SignupPage").then((m) => ({ default: m.SignupPage })),
+  import('./pages/SignupPage').then((m) => ({ default: m.SignupPage }))
 );
 const OnboardingPage = lazy(() =>
-  import("./pages/OnboardingPage").then((m) => ({ default: m.OnboardingPage })),
+  import('./pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage }))
 );
 
 const DashboardPage = lazy(() =>
-  import("./pages/DashboardPage").then((m) => ({ default: m.DashboardPage })),
+  import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
 );
 const StudyPage = lazy(() =>
-  import("./pages/StudyPage").then((m) => ({ default: m.StudyPage })),
+  import('./pages/StudyPage').then((m) => ({ default: m.StudyPage }))
 );
 const ContentPage = lazy(() =>
-  import("./pages/ContentPage").then((m) => ({ default: m.ContentPage })),
+  import('./pages/ContentPage').then((m) => ({ default: m.ContentPage }))
 );
 const QuizPage = lazy(() =>
-  import("./pages/QuizPage").then((m) => ({ default: m.QuizPage })),
+  import('./pages/QuizPage').then((m) => ({ default: m.QuizPage }))
 );
 const QuizTakePage = lazy(() =>
-  import("./pages/QuizTakePage").then((m) => ({ default: m.QuizTakePage })),
+  import('./pages/QuizTakePage').then((m) => ({ default: m.QuizTakePage }))
 );
 const FlashcardsPage = lazy(() =>
-  import("./pages/FlashcardsPage").then((m) => ({ default: m.FlashcardsPage })),
+  import('./pages/FlashcardsPage').then((m) => ({ default: m.FlashcardsPage }))
 );
 const FlashcardStudyPage = lazy(() =>
-  import("./pages/FlashcardStudyPage").then((m) => ({
+  import('./pages/FlashcardStudyPage').then((m) => ({
     default: m.FlashcardStudyPage,
-  })),
+  }))
 );
 const ProfilePage = lazy(() =>
-  import("./pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
+  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
 const SettingsPage = lazy(() =>
-  import("./pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
+  import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage }))
 );
 const StatisticsPage = lazy(() =>
-  import("./pages/StatisticsPage").then((m) => ({ default: m.StatisticsPage })),
+  import('./pages/StatisticsPage').then((m) => ({ default: m.StatisticsPage }))
 );
 const LeaderboardPage = lazy(() =>
-  import("./pages/LeaderboardPage").then((m) => ({
+  import('./pages/LeaderboardPage').then((m) => ({
     default: m.LeaderboardPage,
-  })),
+  }))
 );
 const ChallengesPage = lazy(() =>
-  import("./pages/ChallengesPage").then((m) => ({ default: m.ChallengesPage })),
+  import('./pages/ChallengesPage').then((m) => ({ default: m.ChallengesPage }))
 );
 const ChallengeDetailsPage = lazy(() =>
-  import("./pages/ChallengeDetailsPage").then((m) => ({
+  import('./pages/ChallengeDetailsPage').then((m) => ({
     default: m.ChallengeDetailsPage,
-  })),
+  }))
 );
 
 const ChallengeResultsPage = lazy(() =>
-  import("./pages/ChallengeResultsPage").then((m) => ({
+  import('./pages/ChallengeResultsPage').then((m) => ({
     default: m.ChallengeResultsPage,
-  })),
+  }))
 );
 const AttemptsPage = lazy(() =>
-  import("./pages/AttemptsPage").then((m) => ({ default: m.AttemptsPage })),
+  import('./pages/AttemptsPage').then((m) => ({ default: m.AttemptsPage }))
 );
 const DiscoverPage = lazy(() =>
-  import("./pages/DiscoverPage").then((m) => ({ default: m.DiscoverPage })),
+  import('./pages/DiscoverPage').then((m) => ({ default: m.DiscoverPage }))
 );
 
 // Lazy load admin pages
 const AdminDashboard = lazy(() =>
-  import("./pages/admin/AdminDashboard").then((m) => ({
+  import('./pages/admin/AdminDashboard').then((m) => ({
     default: m.AdminDashboard,
-  })),
+  }))
 );
 const UserManagement = lazy(() =>
-  import("./pages/admin/UserManagement").then((m) => ({
+  import('./pages/admin/UserManagement').then((m) => ({
     default: m.UserManagement,
-  })),
+  }))
 );
 const ContentManagement = lazy(() =>
-  import("./pages/admin/ContentManagement").then((m) => ({
+  import('./pages/admin/ContentManagement').then((m) => ({
     default: m.ContentManagement,
-  })),
+  }))
 );
 const ContentModeration = lazy(() =>
-  import("./pages/admin/ContentModeration").then((m) => ({
+  import('./pages/admin/ContentModeration').then((m) => ({
     default: m.ContentModeration,
-  })),
+  }))
 );
 const SchoolManagement = lazy(() =>
-  import("./pages/admin/SchoolManagement").then((m) => ({
+  import('./pages/admin/SchoolManagement').then((m) => ({
     default: m.SchoolManagement,
-  })),
+  }))
 );
 const AiAnalytics = lazy(() =>
-  import("./pages/admin/AiAnalytics").then((m) => ({ default: m.AiAnalytics })),
+  import('./pages/admin/AiAnalytics').then((m) => ({ default: m.AiAnalytics }))
 );
 const PlatformSettings = lazy(() =>
-  import("./pages/admin/PlatformSettings").then((m) => ({
+  import('./pages/admin/PlatformSettings').then((m) => ({
     default: m.PlatformSettings,
-  })),
+  }))
 );
 const AnalyticsDashboard = lazy(() =>
-  import("./pages/admin/AnalyticsDashboard").then((m) => ({
+  import('./pages/admin/AnalyticsDashboard').then((m) => ({
     default: m.AnalyticsDashboard,
-  })),
+  }))
 );
-const UserDetailsPage = lazy(() => import("./pages/admin/UserDetailsPage"));
+const UserDetailsPage = lazy(() => import('./pages/admin/UserDetailsPage'));
 
 // Import AdminRoute (keep this as direct import since it's small)
-import { AdminRoute } from "./components/AdminRoute";
+import { AdminRoute } from './components/AdminRoute';
 
-import { LoadingScreen } from "./components/LoadingScreen";
+import { LoadingScreen } from './components/LoadingScreen';
 
 // Loading component for Suspense fallback
 const PageLoader = () => (

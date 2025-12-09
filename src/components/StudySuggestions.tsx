@@ -1,13 +1,13 @@
-import React from "react";
-import { ArrowRight, Clock, Target } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { contentService } from "../services/content.service";
+import React from 'react';
+import { ArrowRight, Clock, Target } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { contentService } from '../services/content.service';
 
 interface Suggestion {
-  type: "review" | "practice";
+  type: 'review' | 'practice';
   topic: string;
   reason: string;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
 }
 
 interface StudySuggestionsProps {
@@ -24,7 +24,7 @@ export const StudySuggestions: React.FC<StudySuggestionsProps> = ({
     try {
       await contentService.generateFromTopic(suggestion.topic);
       // Navigate to tasks or wait for completion (simplified for now)
-      navigate("/dashboard"); // Ideally navigate to a "generating" view or the quiz itself
+      navigate('/dashboard'); // Ideally navigate to a "generating" view or the quiz itself
     } catch (_error) {}
   };
 
@@ -49,12 +49,12 @@ export const StudySuggestions: React.FC<StudySuggestionsProps> = ({
           <div className="flex items-start gap-3">
             <div
               className={`mt-1 p-2 rounded-lg ${
-                suggestion.type === "review"
-                  ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
-                  : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                suggestion.type === 'review'
+                  ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+                  : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
               }`}
             >
-              {suggestion.type === "review" ? (
+              {suggestion.type === 'review' ? (
                 <Clock className="w-4 h-4" />
               ) : (
                 <Target className="w-4 h-4" />

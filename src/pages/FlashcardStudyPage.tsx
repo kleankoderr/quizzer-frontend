@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { useParams, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { flashcardService } from "../services/flashcard.service";
+import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { flashcardService } from '../services/flashcard.service';
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,13 +11,13 @@ import {
   Layers,
   Sparkles,
   BookOpen,
-} from "lucide-react";
-import { useFlashcardSet } from "../hooks";
+} from 'lucide-react';
+import { useFlashcardSet } from '../hooks';
 
 // Simple markdown renderer for bold text
 const renderMarkdown = (text: string) => {
   // Convert **text** to <strong>text</strong>
-  const formatted = text.replaceAll(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  const formatted = text.replaceAll(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   return { __html: formatted };
 };
 
@@ -28,13 +28,13 @@ export const FlashcardStudyPage = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardResponses, setCardResponses] = useState<
-    Array<{ cardIndex: number; response: "know" | "dont-know" | "skipped" }>
+    Array<{ cardIndex: number; response: 'know' | 'dont-know' | 'skipped' }>
   >([]);
   const [showResults, setShowResults] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (error) {
-    toast.error("Failed to load flashcard set");
+    toast.error('Failed to load flashcard set');
     return (
       <div className="text-center py-12">Failed to load flashcard set</div>
     );
@@ -51,12 +51,12 @@ export const FlashcardStudyPage = () => {
     ) {
       // Last card - finish session
       const hasResponse = cardResponses.some(
-        (r) => r.cardIndex === currentCardIndex,
+        (r) => r.cardIndex === currentCardIndex
       );
       if (hasResponse) {
         handleFinishSession(cardResponses);
       } else {
-        toast.error("Please rate how well you knew this card");
+        toast.error('Please rate how well you knew this card');
       }
     }
   };
@@ -73,10 +73,10 @@ export const FlashcardStudyPage = () => {
     setIsFlipped(!isFlipped);
   };
 
-  const handleResponse = (response: "know" | "dont-know") => {
+  const handleResponse = (response: 'know' | 'dont-know') => {
     // Update or add response for current card
     const existingIndex = cardResponses.findIndex(
-      (r) => r.cardIndex === currentCardIndex,
+      (r) => r.cardIndex === currentCardIndex
     );
     let updatedResponses;
 
@@ -95,7 +95,7 @@ export const FlashcardStudyPage = () => {
 
     setCardResponses(updatedResponses);
 
-    if (response === "know") {
+    if (response === 'know') {
       // If they know it, auto-advance to next card immediately
       setTimeout(() => {
         if (currentCardIndex < (flashcardSet?.cards.length || 0) - 1) {
@@ -120,9 +120,9 @@ export const FlashcardStudyPage = () => {
       setSubmitting(true);
       await flashcardService.recordSession(id, responses);
       setShowResults(true);
-      toast.success("Session completed! 🎉");
+      toast.success('Session completed! 🎉');
     } catch (_error) {
-      toast.error("Failed to save session");
+      toast.error('Failed to save session');
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +146,7 @@ export const FlashcardStudyPage = () => {
           No flashcards found
         </h3>
         <button
-          onClick={() => navigate("/flashcards")}
+          onClick={() => navigate('/flashcards')}
           className="mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors"
         >
           Back to Flashcards
@@ -159,12 +159,12 @@ export const FlashcardStudyPage = () => {
   const progress = ((currentCardIndex + 1) / flashcardSet.cards.length) * 100;
 
   // Calculate stats
-  const knowCount = cardResponses.filter((r) => r.response === "know").length;
+  const knowCount = cardResponses.filter((r) => r.response === 'know').length;
   const dontKnowCount = cardResponses.filter(
-    (r) => r.response === "dont-know",
+    (r) => r.response === 'dont-know'
   ).length;
   const skippedCount = cardResponses.filter(
-    (r) => r.response === "skipped",
+    (r) => r.response === 'skipped'
   ).length;
   const totalCards = flashcardSet.cards.length;
   const percentage = Math.round((knowCount / totalCards) * 100);
@@ -232,7 +232,7 @@ export const FlashcardStudyPage = () => {
 
         <div className="flex gap-4">
           <button
-            onClick={() => navigate("/flashcards")}
+            onClick={() => navigate('/flashcards')}
             className="flex-1 btn-secondary"
           >
             Back to Flashcards
@@ -264,7 +264,7 @@ export const FlashcardStudyPage = () => {
 
         <div className="relative z-10">
           <button
-            onClick={() => navigate("/flashcards")}
+            onClick={() => navigate('/flashcards')}
             className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm mb-4 transition-all touch-manipulation w-fit"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -317,38 +317,38 @@ export const FlashcardStudyPage = () => {
       {/* Flashcard */}
       <div
         className="card border border-emerald-200 dark:border-gray-700 shadow-xl dark:bg-gray-800"
-        style={{ perspective: "1000px" }}
+        style={{ perspective: '1000px' }}
       >
         <div
           className="min-h-[350px] sm:min-h-[450px] relative rounded-xl"
           style={{
-            transformStyle: "preserve-3d",
-            transition: "transform 0.6s",
-            transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+            transformStyle: 'preserve-3d',
+            transition: 'transform 0.6s',
+            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
           }}
         >
           <div
             className="absolute top-4 right-4 z-10"
             style={{
-              transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
             }}
           >
             <button
               onClick={handleFlip}
               className={`inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 ${
                 isFlipped
-                  ? "bg-emerald-600 text-white border-white/30 hover:bg-emerald-700"
-                  : "bg-emerald-600 text-white border-white/30 hover:bg-emerald-700"
+                  ? 'bg-emerald-600 text-white border-white/30 hover:bg-emerald-700'
+                  : 'bg-emerald-600 text-white border-white/30 hover:bg-emerald-700'
               }`}
             >
               <RotateCw
                 className="w-4 h-4 transition-transform duration-600"
                 style={{
-                  transform: isFlipped ? "rotate(180deg)" : "rotate(0deg)",
+                  transform: isFlipped ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
               <span className="hidden sm:inline">
-                {isFlipped ? "Show Question" : "Show Answer"}
+                {isFlipped ? 'Show Question' : 'Show Answer'}
               </span>
             </button>
           </div>
@@ -357,10 +357,10 @@ export const FlashcardStudyPage = () => {
           <div
             className="flex flex-col items-center justify-center min-h-[350px] sm:min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
             style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              position: isFlipped ? "absolute" : "relative",
-              width: "100%",
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              position: isFlipped ? 'absolute' : 'relative',
+              width: '100%',
             }}
           >
             <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-full mb-6 shadow-lg">
@@ -376,12 +376,12 @@ export const FlashcardStudyPage = () => {
           <div
             className="flex flex-col items-center justify-center min-h-[350px] sm:min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-emerald-50 dark:bg-gray-700 rounded-xl"
             style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              transform: "rotateY(180deg)",
-              position: isFlipped ? "relative" : "absolute",
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              position: isFlipped ? 'relative' : 'absolute',
               top: 0,
-              width: "100%",
+              width: '100%',
             }}
           >
             <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-full mb-6 shadow-lg">
@@ -402,7 +402,7 @@ export const FlashcardStudyPage = () => {
                 <p
                   className="text-base text-gray-700 dark:text-gray-300 leading-relaxed bg-white dark:bg-gray-800 p-4 rounded-lg"
                   dangerouslySetInnerHTML={renderMarkdown(
-                    currentCard.explanation,
+                    currentCard.explanation
                   )}
                 />
               </div>
@@ -415,7 +415,7 @@ export const FlashcardStudyPage = () => {
           {/* Response buttons - always visible */}
           <div className="flex items-center justify-center gap-4 pb-4">
             <button
-              onClick={() => handleResponse("dont-know")}
+              onClick={() => handleResponse('dont-know')}
               disabled={submitting}
               className="group relative flex items-center justify-center gap-3 px-6 py-3 md:px-8 md:py-4 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-2 border-red-300 dark:border-red-700 hover:border-red-400 dark:hover:border-red-600 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
@@ -425,7 +425,7 @@ export const FlashcardStudyPage = () => {
             </button>
 
             <button
-              onClick={() => handleResponse("know")}
+              onClick={() => handleResponse('know')}
               disabled={submitting}
               className="group relative flex items-center justify-center gap-3 px-6 py-3 md:px-8 md:py-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-2 border-green-300 dark:border-green-700 hover:border-green-400 dark:hover:border-green-600 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
@@ -464,13 +464,13 @@ export const FlashcardStudyPage = () => {
             >
               <span className="hidden sm:inline">
                 {currentCardIndex === flashcardSet.cards.length - 1
-                  ? "Finish"
-                  : "Next"}
+                  ? 'Finish'
+                  : 'Next'}
               </span>
               <span className="sm:hidden">
                 {currentCardIndex === flashcardSet.cards.length - 1
-                  ? "Done"
-                  : "Next"}
+                  ? 'Done'
+                  : 'Next'}
               </span>
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -503,16 +503,16 @@ export const FlashcardStudyPage = () => {
                 }}
                 className={`text-left p-4 rounded-xl border-2 transition-all duration-200 group ${
                   index === currentCardIndex
-                    ? "border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 shadow-md"
-                    : "border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm"
+                    ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 shadow-md'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <span
                     className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                       index === currentCardIndex
-                        ? "bg-emerald-500 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-700 dark:group-hover:text-emerald-300"
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-700 dark:group-hover:text-emerald-300'
                     }`}
                   >
                     {index + 1}

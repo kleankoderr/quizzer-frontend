@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight } from "lucide-react";
-import { apiClient } from "../services/api";
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ArrowRight } from 'lucide-react';
+import { apiClient } from '../services/api';
 
 export const AssessmentPopup = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -27,38 +27,38 @@ export const AssessmentPopup = () => {
 
         // Don't show if already on the quiz page or onboarding
         if (
-          location.pathname.includes("/quiz/") ||
-          location.pathname === "/onboarding"
+          location.pathname.includes('/quiz/') ||
+          location.pathname === '/onboarding'
         ) {
           return;
         }
 
-        const { data } = await apiClient.get("/onboarding/status");
+        const { data } = await apiClient.get('/onboarding/status');
 
-        if (data.status === "NOT_STARTED") {
+        if (data.status === 'NOT_STARTED') {
           // If onboarding hasn't started (no task), redirect to onboarding
           // But don't redirect if we're on login or signup pages
           const isAuthPage =
-            location.pathname === "/login" ||
-            location.pathname === "/signup" ||
-            location.pathname === "/admin";
-          if (location.pathname !== "/onboarding" && !isAuthPage) {
-            navigate("/onboarding");
+            location.pathname === '/login' ||
+            location.pathname === '/signup' ||
+            location.pathname === '/admin';
+          if (location.pathname !== '/onboarding' && !isAuthPage) {
+            navigate('/onboarding');
           }
-        } else if (data.status === "COMPLETED" && data.quizId) {
+        } else if (data.status === 'COMPLETED' && data.quizId) {
           setQuizId(data.quizId);
           setIsVisible(true);
 
           // Stop polling if completed
           if (pollInterval) clearInterval(pollInterval);
-        } else if (data.status === "PENDING") {
+        } else if (data.status === 'PENDING') {
           // If PENDING, we set up polling if not already set
           if (!pollInterval) {
             pollInterval = setInterval(checkStatus, 5000); // Check every 5 seconds for faster feedback
           }
         }
       } catch (error) {
-        console.error("Failed to check assessment status:", error);
+        console.error('Failed to check assessment status:', error);
       }
     };
 
@@ -74,12 +74,12 @@ export const AssessmentPopup = () => {
 
   const markAsShown = async () => {
     try {
-      await apiClient.post("/user/assessment-popup-shown");
+      await apiClient.post('/user/assessment-popup-shown');
       if (user) {
         login({ ...user, assessmentPopupShown: true });
       }
     } catch (error) {
-      console.error("Failed to mark popup as shown:", error);
+      console.error('Failed to mark popup as shown:', error);
     }
   };
 
@@ -156,6 +156,6 @@ export const AssessmentPopup = () => {
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body,
+    document.body
   );
 };
