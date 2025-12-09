@@ -10,6 +10,7 @@ interface SSEContextType {
 
 const SSEContext = createContext<SSEContextType | undefined>(undefined);
 
+/* eslint-disable react-refresh/only-export-components */
 export const SSEProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
