@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -35,8 +35,7 @@ export const QuizTakePage = () => {
   const [challengeResult, setChallengeResult] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Use questions directly from the API without shuffling
-  const questions = quiz?.questions || [];
+  const questions = useMemo(() => quiz?.questions ?? [], [quiz?.questions]);
 
   // Get localStorage key for this quiz (memoized to prevent dependency issues)
   const getStorageKey = useCallback((key: string) => `quiz_${id}_${key}`, [id]);
@@ -47,7 +46,7 @@ export const QuizTakePage = () => {
       if (!quiz || !id) return;
 
       // If not forced, require all questions to be answered
-      if (!force && selectedAnswers.some((answer) => answer === null)) {
+      if (!force && selectedAnswers.includes(null)) {
         toast.error('Please answer all questions before submitting.');
         return;
       }
@@ -271,10 +270,7 @@ export const QuizTakePage = () => {
   };
 
   const handleNext = () => {
-    if (
-      questions &&
-      currentQuestionIndex < questions.length - 1
-    ) {
+    if (questions && currentQuestionIndex < questions.length - 1) {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
       localStorage.setItem(getStorageKey('questionIndex'), newIndex.toString());
@@ -456,9 +452,7 @@ export const QuizTakePage = () => {
   const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = selectedAnswers.filter((a) => a !== null).length;
   const progressPercentage =
-    questions.length > 0
-      ? (answeredCount / questions.length) * 100
-      : 0;
+    questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">

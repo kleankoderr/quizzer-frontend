@@ -463,7 +463,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     const isCorrect =
       showResults &&
       hasCorrectAnswer &&
-      userAnswer.trim().toLowerCase() === (correctAnswer as string).trim().toLowerCase();
+      userAnswer.trim().toLowerCase() ===
+        (correctAnswer as string).trim().toLowerCase();
 
     return (
       <div className="space-y-4">
