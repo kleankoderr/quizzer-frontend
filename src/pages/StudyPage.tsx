@@ -274,7 +274,7 @@ export const StudyPage = () => {
     }
 
     setContentLoading(true);
-    
+
     const toastId = toast.custom(
       (t) => (
         <ProgressToast
@@ -291,26 +291,33 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.createFromFile(files, (progress) => {
-        // Show upload progress
-        if (progress < 100) {
-          toast.custom(
-            (t) => (
-              <ProgressToast
-                t={t}
-                title="Uploading Files"
-                message={`Uploading... ${progress}%`}
-                progress={progress}
-                status="processing"
-              />
-            ),
-            { id: toastId }
-          );
+      const { jobId } = await contentService.createFromFile(
+        files,
+        (progress) => {
+          // Show upload progress
+          if (progress < 100) {
+            toast.custom(
+              (t) => (
+                <ProgressToast
+                  t={t}
+                  title="Uploading Files"
+                  message={`Uploading... ${progress}%`}
+                  progress={progress}
+                  status="processing"
+                />
+              ),
+              { id: toastId }
+            );
+          }
         }
-      });
-      
+      );
+
       currentJobIdRef.current = jobId;
-      console.log('Content job started from files:', { jobId, toastId, fileCount: files.length });
+      console.log('Content job started from files:', {
+        jobId,
+        toastId,
+        fileCount: files.length,
+      });
     } catch (error: any) {
       toast.custom(
         (t) => (
@@ -620,8 +627,8 @@ export const StudyPage = () => {
                         Upload Documents
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Upload up to 5 PDF files. The system will extract and organize
-                        the content into study materials.
+                        Upload up to 5 PDF files. The system will extract and
+                        organize the content into study materials.
                       </p>
                     </div>
                   </div>
@@ -708,7 +715,10 @@ export const StudyPage = () => {
                   ) : (
                     <>
                       <Upload className="w-6 h-6" />
-                      Upload & Process {files.length > 0 ? `${files.length} File${files.length > 1 ? 's' : ''}` : 'Files'}
+                      Upload & Process{' '}
+                      {files.length > 0
+                        ? `${files.length} File${files.length > 1 ? 's' : ''}`
+                        : 'Files'}
                     </>
                   )}
                 </button>
