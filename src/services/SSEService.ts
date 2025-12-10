@@ -1,3 +1,5 @@
+import axios from 'axios';
+import type { CancelTokenSource } from 'axios';
 import type { AppEvent } from '../types/events';
 
 type EventHandler = (event: AppEvent) => void;
@@ -11,7 +13,7 @@ interface SSESnapshot {
 
 export class SSEService {
   private static instance: SSEService;
-  private abortController: AbortController | null = null;
+  private cancelTokenSource: CancelTokenSource | null = null;
   private readonly listeners = new Map<string, Set<EventHandler>>();
   private url: string | null = null;
   private token: string | null = null;
@@ -20,7 +22,7 @@ export class SSEService {
   private readonly storeListeners = new Set<() => void>();
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
-  private readonly maxReconnectAttempts = 3; // Reduced from 5 to 3
+  private readonly maxReconnectAttempts = 3;
   private readonly baseReconnectDelay = 1000;
   private connectionFailed = false;
 
@@ -36,7 +38,6 @@ export class SSEService {
   public connect(url: string, token?: string): void {
     // Prevent duplicate connections
     if (this.url === url && this.isConnected) {
-      console.log('[SSEService] Already connected to', url);
       return;
     }
 
@@ -52,7 +53,6 @@ export class SSEService {
 
   private async establishConnection(): Promise<void> {
     if (!this.url) {
-      console.error('[SSEService] No URL provided');
       return;
     }
 
@@ -61,43 +61,38 @@ export class SSEService {
       this.connectionFailed = true;
       this.isConnected = false;
       this.notifyStoreListeners();
-      console.error(
-        `[SSEService] Max reconnection attempts (${this.maxReconnectAttempts}) reached. Giving up.`
-      );
       return;
     }
 
     // Don't retry if connection previously failed permanently
     if (this.connectionFailed && this.reconnectAttempts > 0) {
-      console.warn('[SSEService] Connection previously failed, not retrying');
       return;
     }
 
     try {
-      this.abortController = new AbortController();
+      this.cancelTokenSource = axios.CancelToken.source();
 
-      const headers: HeadersInit = {
+      const headers: Record<string, string> = {
         Accept: 'text/event-stream',
         'Cache-Control': 'no-cache',
       };
 
-      // Add Authorization header if token is provided
       if (this.token) {
         headers.Authorization = `Bearer ${this.token}`;
       }
 
-      console.log('[SSEService] Connecting to', this.url);
-
-      const response = await fetch(this.url, {
+      const response = await axios.get(this.url, {
         headers,
-        signal: this.abortController.signal,
+        responseType: 'stream',
+        cancelToken: this.cancelTokenSource.token,
+        adapter: 'fetch', // Use fetch adapter for streaming
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      if (!response.body) {
+      if (!response.data) {
         throw new Error('Response body is null');
       }
 
@@ -106,21 +101,17 @@ export class SSEService {
       this.reconnectAttempts = 0;
       this.connectionFailed = false;
       this.notifyStoreListeners();
-      console.log('[SSEService] Connected successfully');
 
       // Process the stream
-      await this.processStream(response.body);
+      await this.processStream(response.data);
     } catch (error: any) {
       this.isConnected = false;
       this.notifyStoreListeners();
 
-      // Don't log abort errors (user-initiated disconnects)
-      if (error.name === 'AbortError') {
-        console.log('[SSEService] Connection aborted');
+      // Don't handle cancel errors (user-initiated disconnects)
+      if (axios.isCancel(error)) {
         return;
       }
-
-      console.error('[SSEService] Connection error:', error.message);
 
       // Handle reconnection with max retry limit
       if (this.reconnectAttempts < this.maxReconnectAttempts && this.url) {
@@ -128,9 +119,6 @@ export class SSEService {
       } else {
         this.connectionFailed = true;
         this.notifyStoreListeners();
-        console.error(
-          `[SSEService] Failed to connect after ${this.reconnectAttempts} attempts`
-        );
       }
     }
   }
@@ -145,7 +133,6 @@ export class SSEService {
         const { done, value } = await reader.read();
 
         if (done) {
-          console.log('[SSEService] Stream ended');
           this.isConnected = false;
           this.notifyStoreListeners();
 
@@ -170,8 +157,8 @@ export class SSEService {
         }
       }
     } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('[SSEService] Stream processing error:', error);
+      if (!axios.isCancel(error)) {
+        // Stream processing error - silent fail
       }
     } finally {
       reader.releaseLock();
@@ -180,13 +167,10 @@ export class SSEService {
 
   private processMessage(message: string): void {
     const lines = message.split('\n');
-    let eventType = 'message';
     let data = '';
 
     for (const line of lines) {
-      if (line.startsWith('event:')) {
-        eventType = line.substring(6).trim();
-      } else if (line.startsWith('data:')) {
+      if (line.startsWith('data:')) {
         data += line.substring(5).trim();
       }
     }
@@ -195,8 +179,8 @@ export class SSEService {
       try {
         const parsedData: AppEvent = JSON.parse(data);
         this.handleMessage(parsedData);
-      } catch (error) {
-        console.error('[SSEService] Failed to parse message:', error);
+      } catch {
+        // Failed to parse message - silent fail
       }
     }
   }
@@ -214,26 +198,20 @@ export class SSEService {
 
     this.reconnectAttempts++;
 
-    console.log(
-      `[SSEService] Scheduling reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`
-    );
-
     this.reconnectTimeout = setTimeout(() => {
       this.establishConnection();
     }, delay);
   }
 
   public disconnect(): void {
-    console.log('[SSEService] Disconnecting');
-
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
     }
 
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
+    if (this.cancelTokenSource) {
+      this.cancelTokenSource.cancel();
+      this.cancelTokenSource = null;
     }
 
     this.isConnected = false;
@@ -254,11 +232,8 @@ export class SSEService {
         for (const handler of handlers) {
           try {
             handler(data);
-          } catch (error) {
-            console.error(
-              `[SSEService] Error in handler for ${data.eventType}:`,
-              error
-            );
+          } catch {
+            // Handler error - silent fail
           }
         }
       }
@@ -305,8 +280,8 @@ export class SSEService {
     for (const listener of this.storeListeners) {
       try {
         listener();
-      } catch (error) {
-        console.error('[SSEService] Error notifying listener:', error);
+      } catch {
+        // Listener error - silent fail
       }
     }
   }
