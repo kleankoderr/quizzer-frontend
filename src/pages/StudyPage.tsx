@@ -35,7 +35,7 @@ export const StudyPage = () => {
   const [textContent, setTextContent] = useState('');
   const [textTitle, setTextTitle] = useState('');
   const [textTopic, setTextTopic] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [contentLoading, setContentLoading] = useState(false);
 
   // Use refs to avoid race conditions with SSE events
@@ -96,6 +96,13 @@ export const StudyPage = () => {
         toastIdRef.current
       ) {
         const completedEvent = event as any;
+        console.log('Content completed event received:', {
+          event: completedEvent,
+          contentId: completedEvent.contentId,
+          resourceId: completedEvent.resourceId,
+          currentJobId: currentJobIdRef.current,
+          toastId: toastIdRef.current,
+        });
 
         toast.custom(
           (t) => (
@@ -261,76 +268,67 @@ export const StudyPage = () => {
   }, [textTitle, textContent, textTopic, navigate]);
 
   const handleFileUpload = useCallback(async () => {
-    if (!file) {
-      toast.error('Please select a file');
+    if (files.length === 0) {
+      toast.error('Please select at least one file');
       return;
     }
 
     setContentLoading(true);
+    
     const toastId = toast.custom(
       (t) => (
         <ProgressToast
           t={t}
-          title="Processing File"
+          title="Processing Files"
           message="Uploading and extracting text..."
-          progress={10}
+          progress={0}
           status="processing"
         />
       ),
       { duration: Infinity }
     );
 
+    toastIdRef.current = toastId;
+
     try {
-      const content = await contentService.createFromFile(file, (progress) => {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title={progress < 100 ? 'Uploading File' : 'Processing File'}
-              message={
-                progress < 100
-                  ? `Uploading... ${progress}%`
-                  : 'Analyzing content...'
-              }
-              progress={progress}
-              status="processing"
-            />
-          ),
-          { id: toastId }
-        );
+      const { jobId } = await contentService.createFromFile(files, (progress) => {
+        // Show upload progress
+        if (progress < 100) {
+          toast.custom(
+            (t) => (
+              <ProgressToast
+                t={t}
+                title="Uploading Files"
+                message={`Uploading... ${progress}%`}
+                progress={progress}
+                status="processing"
+              />
+            ),
+            { id: toastId }
+          );
+        }
       });
-
-      toast.custom(
-        (t) => (
-          <ProgressToast
-            t={t}
-            title="File Processed"
-            message="Content generated successfully!"
-            progress={100}
-            status="success"
-          />
-        ),
-        { id: toastId }
-      );
-
-      navigate(`/content/${content.id}`);
+      
+      currentJobIdRef.current = jobId;
+      console.log('Content job started from files:', { jobId, toastId, fileCount: files.length });
     } catch (error: any) {
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Upload Failed"
-            message={error.message || 'Failed to process file'}
+            message={error.message || 'Failed to process files'}
             progress={0}
             status="error"
           />
         ),
-        { id: toastId }
+        { id: toastId, duration: 5000 }
       );
-    } finally {
       setContentLoading(false);
+      currentJobIdRef.current = null;
+      toastIdRef.current = null;
     }
-  }, [file, navigate]);
+  }, [files]);
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
@@ -339,13 +337,14 @@ export const StudyPage = () => {
     try {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
-      // React Query will automatically refetch the contents list
+      // Refetch the contents list to update the UI
+      refetch();
     } catch (_error) {
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setDeleteContentId(null);
     }
-  }, [deleteContentId]);
+  }, [deleteContentId, refetch]);
 
   return (
     <div className="space-y-6 pb-8 px-4 sm:px-0">
@@ -621,69 +620,95 @@ export const StudyPage = () => {
                         Upload Documents
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Upload PDF files. The system will extract and organize
+                        Upload up to 5 PDF files. The system will extract and organize
                         the content into study materials.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div
-                  className={`border-3 border-dashed rounded-xl p-6 md:p-12 text-center transition-all ${
-                    file
+                <label
+                  htmlFor="file-upload"
+                  className={`block border-3 border-dashed rounded-xl p-6 md:p-12 text-center transition-all cursor-pointer ${
+                    files.length > 0
                       ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20'
                       : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Upload
-                    className={`w-16 h-16 mx-auto mb-4 ${file ? 'text-primary-600' : 'text-gray-400'}`}
+                    className={`w-16 h-16 mx-auto mb-4 ${files.length > 0 ? 'text-primary-600' : 'text-gray-400'}`}
                   />
                   <input
                     type="file"
                     id="file-upload"
-                    accept=".pdf,.docx,.txt"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    accept=".pdf"
+                    multiple
+                    onChange={(e) => {
+                      const selectedFiles = Array.from(e.target.files || []);
+                      if (selectedFiles.length > 5) {
+                        toast.error('Maximum 5 files allowed');
+                        setFiles(selectedFiles.slice(0, 5));
+                      } else {
+                        setFiles(selectedFiles);
+                      }
+                    }}
                     className="hidden"
                   />
-                  <label
-                    htmlFor="file-upload"
-                    className="cursor-pointer text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-bold text-lg"
-                  >
+                  <span className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-bold text-lg">
                     Click to upload
-                  </label>
+                  </span>
                   <span className="text-gray-600 dark:text-gray-300 text-lg">
                     {' '}
                     or drag and drop
                   </span>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                    PDF (max 5MB)
+                    PDF files (max 5 files, 5MB each)
                   </p>
-                  {file && (
-                    <div className="mt-6 p-4 bg-white dark:bg-gray-700 rounded-xl border-2 border-primary-300 dark:border-primary-600 shadow-sm">
-                      <p className="text-base font-semibold text-gray-900 dark:text-white truncate max-w-[200px] mx-auto">
-                        {file.name}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {(file.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                  )}
-                </div>
+                </label>
+
+                {files.length > 0 && (
+                  <div className="space-y-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border-2 border-primary-300 dark:border-primary-600 shadow-sm"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setFiles(files.filter((_, i) => i !== index));
+                          }}
+                          className="ml-2 p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                          type="button"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <button
                   onClick={handleFileUpload}
-                  disabled={contentLoading || !file}
+                  disabled={contentLoading || files.length === 0}
                   className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:shadow-none text-lg"
                 >
                   {contentLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                      Processing File...
+                      Processing Files...
                     </>
                   ) : (
                     <>
                       <Upload className="w-6 h-6" />
-                      Upload & Process File
+                      Upload & Process {files.length > 0 ? `${files.length} File${files.length > 1 ? 's' : ''}` : 'Files'}
                     </>
                   )}
                 </button>

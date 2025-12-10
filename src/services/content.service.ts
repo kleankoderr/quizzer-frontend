@@ -62,12 +62,15 @@ export const contentService = {
   },
 
   async createFromFile(
-    file: File,
+    files: File[],
     onProgress?: (progress: number) => void
-  ): Promise<Content> {
+  ): Promise<{ jobId: string }> {
     clearCache();
     const formData = new FormData();
-    formData.append('file', file);
+
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
 
     const response = await apiClient.post('/content/upload', formData, {
       headers: {
