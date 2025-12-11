@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowRight, Clock, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { contentService } from '../services/content.service';
+import { contentService } from '../services';
 
 interface Suggestion {
   type: 'review' | 'practice';
