@@ -4,6 +4,7 @@ export interface Content {
   id: string;
   title: string;
   content: string;
+  description?: string;
   topic: string;
   userId: string;
   createdAt: string;
@@ -26,14 +27,11 @@ export interface Content {
   lastReadPosition?: number;
 }
 
-export interface CreateContentDto {
-  title: string;
-  content: string;
-  topic: string;
-}
-
-export interface GenerateFromTopicDto {
-  topic: string;
+export interface GenerateContentDto {
+  topic?: string;
+  content?: string;
+  title?: string;
+  selectedFileIds?: string[];
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -43,36 +41,58 @@ const clearCache = () => {
   cache.clear();
 };
 
-export interface UpdateContentDto extends Partial<CreateContentDto> {
+export interface UpdateContentDto {
+  title?: string;
+  content?: string;
+  topic?: string;
   learningGuide?: Content['learningGuide'];
   lastReadPosition?: number;
 }
 
 export const contentService = {
-  async generateFromTopic(topic: string): Promise<{ jobId: string }> {
-    clearCache();
-    const response = await apiClient.post('/content/generate', { topic });
-    return response.data;
-  },
-
-  async createFromText(data: CreateContentDto): Promise<Content> {
-    clearCache();
-    const response = await apiClient.post('/content', data);
-    return response.data;
-  },
-
-  async createFromFile(
-    files: File[],
+  /**
+   * Unified content generation method
+   * Supports generation from:
+   * - Topic alone
+   * - Content text (with optional topic/title)
+   * - Uploaded files
+   * - Selected files from file management
+   * - Any combination of the above
+   */
+  async generate(
+    data: GenerateContentDto,
+    files?: File[],
     onProgress?: (progress: number) => void
   ): Promise<{ jobId: string }> {
     clearCache();
     const formData = new FormData();
 
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
+    // Add text fields if provided
+    if (data.topic) {
+      formData.append('topic', data.topic);
+    }
+    if (data.content) {
+      formData.append('content', data.content);
+    }
+    if (data.title) {
+      formData.append('title', data.title);
+    }
 
-    const response = await apiClient.post('/content/upload', formData, {
+    // Add selected file IDs if provided
+    if (data.selectedFileIds && data.selectedFileIds.length > 0) {
+      data.selectedFileIds.forEach((id) => {
+        formData.append('selectedFileIds[]', id);
+      });
+    }
+
+    // Add uploaded files if provided
+    if (files && files.length > 0) {
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+    }
+
+    const response = await apiClient.post('/content/generate', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

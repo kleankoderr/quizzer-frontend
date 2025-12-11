@@ -16,11 +16,10 @@ import {
   X,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Modal } from '../components/Modal';
 import { CardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
+import { FileSelector } from '../components/FileSelector';
 import { useSSEEvent } from '../hooks/useSSE';
 
 export const StudyPage = () => {
@@ -36,6 +35,7 @@ export const StudyPage = () => {
   const [textTitle, setTextTitle] = useState('');
   const [textTopic, setTextTopic] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [contentLoading, setContentLoading] = useState(false);
 
   // Use refs to avoid race conditions with SSE events
@@ -186,7 +186,7 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.generateFromTopic(topic);
+      const { jobId } = await contentService.generate({ topic });
       currentJobIdRef.current = jobId;
       console.log('Content job started:', { jobId, toastId });
     } catch (_error) {
@@ -209,8 +209,8 @@ export const StudyPage = () => {
   }, [topic]);
 
   const handleCreateFromText = useCallback(async () => {
-    if (!textTitle.trim() || !textContent.trim()) {
-      toast.error('Please fill in all fields');
+    if (!textContent.trim()) {
+      toast.error('Please enter some content');
       return;
     }
 
@@ -219,57 +219,47 @@ export const StudyPage = () => {
       (t) => (
         <ProgressToast
           t={t}
-          title="Creating Content"
+          title="Generating Content"
           message="Processing your text..."
-          progress={20}
+          progress={0}
           status="processing"
         />
       ),
       { duration: Infinity }
     );
 
+    toastIdRef.current = toastId;
+
     try {
-      const content = await contentService.createFromText({
-        title: textTitle,
+      const { jobId } = await contentService.generate({
         content: textContent,
-        topic: textTopic || 'General',
+        title: textTitle || undefined,
+        topic: textTopic || undefined,
       });
-
-      toast.custom(
-        (t) => (
-          <ProgressToast
-            t={t}
-            title="Content Created"
-            message="Redirecting..."
-            progress={100}
-            status="success"
-          />
-        ),
-        { id: toastId }
-      );
-
-      navigate(`/content/${content.id}`);
+      currentJobIdRef.current = jobId;
+      console.log('Content job started from text:', { jobId, toastId });
     } catch (_error) {
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
-            title="Creation Failed"
-            message="Failed to create content"
+            title="Generation Failed"
+            message="Failed to process content"
             progress={0}
             status="error"
           />
         ),
-        { id: toastId }
+        { id: toastId, duration: 5000 }
       );
-    } finally {
       setContentLoading(false);
+      currentJobIdRef.current = null;
+      toastIdRef.current = null;
     }
-  }, [textTitle, textContent, textTopic, navigate]);
+  }, [textTitle, textContent, textTopic]);
 
   const handleFileUpload = useCallback(async () => {
-    if (files.length === 0) {
-      toast.error('Please select at least one file');
+    if (files.length === 0 && selectedFileIds.length === 0) {
+      toast.error('Please select or upload at least one file');
       return;
     }
 
@@ -291,7 +281,8 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.createFromFile(
+      const { jobId } = await contentService.generate(
+        { selectedFileIds },
         files,
         (progress) => {
           // Show upload progress
@@ -316,7 +307,8 @@ export const StudyPage = () => {
       console.log('Content job started from files:', {
         jobId,
         toastId,
-        fileCount: files.length,
+        newFileCount: files.length,
+        existingFileCount: selectedFileIds.length,
       });
     } catch (error: any) {
       toast.custom(
@@ -335,7 +327,7 @@ export const StudyPage = () => {
       currentJobIdRef.current = null;
       toastIdRef.current = null;
     }
-  }, [files]);
+  }, [files, selectedFileIds]);
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
@@ -559,13 +551,13 @@ export const StudyPage = () => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Title
+                    Title (Optional)
                   </label>
                   <input
                     type="text"
                     value={textTitle}
                     onChange={(e) => setTextTitle(e.target.value)}
-                    placeholder="Enter content title"
+                    placeholder="Enter content title (auto-generated if empty)"
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                   />
                 </div>
@@ -597,20 +589,18 @@ export const StudyPage = () => {
 
                 <button
                   onClick={handleCreateFromText}
-                  disabled={
-                    contentLoading || !textTitle.trim() || !textContent.trim()
-                  }
+                  disabled={contentLoading || !textContent.trim()}
                   className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:shadow-none text-lg"
                 >
                   {contentLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                      Creating Content...
+                      Generating Content...
                     </>
                   ) : (
                     <>
-                      <Plus className="w-6 h-6" />
-                      Create Study Content
+                      <Sparkles className="w-6 h-6" />
+                      Generate Study Content
                     </>
                   )}
                 </button>
@@ -624,13 +614,34 @@ export const StudyPage = () => {
                     <Upload className="w-6 h-6 text-green-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                        Upload Documents
+                        Upload or Select Documents
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Upload up to 5 PDF files. The system will extract and
-                        organize the content into study materials.
+                        Upload new PDF files or select from your previously
+                        uploaded files. The system will extract and organize the
+                        content into study materials.
                       </p>
                     </div>
+                  </div>
+                </div>
+
+                {/* File Selector for existing files */}
+                <FileSelector
+                  selectedFileIds={selectedFileIds}
+                  onSelectionChange={setSelectedFileIds}
+                  maxFiles={5}
+                  className="mb-6"
+                />
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">
+                      Or upload new files
+                    </span>
                   </div>
                 </div>
 
@@ -704,7 +715,10 @@ export const StudyPage = () => {
 
                 <button
                   onClick={handleFileUpload}
-                  disabled={contentLoading || files.length === 0}
+                  disabled={
+                    contentLoading ||
+                    (files.length === 0 && selectedFileIds.length === 0)
+                  }
                   className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:shadow-none text-lg"
                 >
                   {contentLoading ? (
@@ -715,9 +729,9 @@ export const StudyPage = () => {
                   ) : (
                     <>
                       <Upload className="w-6 h-6" />
-                      Upload & Process{' '}
-                      {files.length > 0
-                        ? `${files.length} File${files.length > 1 ? 's' : ''}`
+                      Process{' '}
+                      {files.length + selectedFileIds.length > 0
+                        ? `${files.length + selectedFileIds.length} File${files.length + selectedFileIds.length > 1 ? 's' : ''}`
                         : 'Files'}
                     </>
                   )}
@@ -762,11 +776,9 @@ export const StudyPage = () => {
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                         {content.title}
                       </h3>
-                      <div className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4 prose prose-sm dark:prose-invert max-h-[4.5em] overflow-hidden">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {content.content}
-                        </ReactMarkdown>
-                      </div>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">
+                        {content.description || 'No description available'}
+                      </p>
                       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 gap-1">
                         <Calendar className="w-3 h-3" />
                         <span>

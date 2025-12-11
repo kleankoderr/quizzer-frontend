@@ -13,6 +13,7 @@ import {
   Settings,
   Brain,
   Calendar,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -40,6 +41,7 @@ export const Sidebar = ({
     { path: '/challenges', icon: Trophy, label: 'Challenges' },
     { path: '/leaderboard', icon: Medal, label: 'Leaderboard' },
     { path: '/attempts', icon: Calendar, label: 'Attempts' },
+    { path: '/files', icon: FileText, label: 'Files' },
     { path: '/statistics', icon: BarChart3, label: 'Analytics' },
     { path: '/profile', icon: User, label: 'Profile' },
     { path: '/settings', icon: Settings, label: 'Settings' },

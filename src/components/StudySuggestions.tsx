@@ -22,9 +22,9 @@ export const StudySuggestions: React.FC<StudySuggestionsProps> = ({
   const handleAction = async (suggestion: Suggestion) => {
     // Generate a quick quiz for the topic
     try {
-      await contentService.generateFromTopic(suggestion.topic);
+      await contentService.generate({ topic: suggestion.topic });
       // Navigate to tasks or wait for completion (simplified for now)
-      navigate('/dashboard'); // Ideally navigate to a "generating" view or the quiz itself
+      navigate('/dashboard');
     } catch (_error) {}
   };
 
