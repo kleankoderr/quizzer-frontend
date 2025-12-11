@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronRight,
   X,
+  LayoutList,
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import toast from 'react-hot-toast';
@@ -307,13 +308,19 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         )}
 
-        <div>
-          <label
-            htmlFor="cards"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Number of Cards: {numberOfCards}
-          </label>
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <label
+              htmlFor="cards"
+              className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2"
+            >
+              <LayoutList className="w-4 h-4 text-primary-600" />
+              Number of Cards
+            </label>
+            <span className="text-2xl font-bold text-primary-600">
+              {numberOfCards}
+            </span>
+          </div>
           <input
             id="cards"
             type="range"
@@ -321,11 +328,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             max="30"
             value={numberOfCards}
             onChange={(e) => setNumberOfCards(Number.parseInt(e.target.value))}
-            className="w-full"
+            className="w-full accent-primary-600 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>5</span>
-            <span>30</span>
+          <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
+            <span>5 cards</span>
+            <span>30 cards</span>
           </div>
         </div>
 

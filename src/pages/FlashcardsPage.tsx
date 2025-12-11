@@ -253,15 +253,15 @@ export const FlashcardsPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-900 dark:from-emerald-800 dark:to-emerald-950 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">
+            <Sparkles className="w-6 h-6 text-primary-200" />
+            <span className="text-primary-100 font-semibold text-sm">
               Smart Learning Cards
             </span>
           </div>
@@ -271,7 +271,7 @@ export const FlashcardsPage = () => {
                 <CreditCard className="w-10 h-10" />
                 Flashcard Generator
               </h1>
-              <p className="text-emerald-100 dark:text-emerald-200 text-lg">
+              <p className="text-primary-100 text-lg">
                 Transform any content into effective study flashcards
               </p>
             </div>
@@ -295,10 +295,10 @@ export const FlashcardsPage = () => {
             <StatCardSkeleton count={3} />
           ) : (
             <>
-              <div className="card p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-shadow">
+              <div className="card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all">
                 <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md">
-                    <Layers className="w-6 h-6 text-white" />
+                  <div className="flex-shrink-0 p-3 rounded-lg bg-primary-100 dark:bg-primary-900/30">
+                    <Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -310,10 +310,10 @@ export const FlashcardsPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="card p-4 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/10 dark:to-blue-900/10 border-cyan-200 dark:border-cyan-800 hover:shadow-md transition-shadow">
+              <div className="card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all">
                 <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 shadow-md">
-                    <CreditCard className="w-6 h-6 text-white" />
+                  <div className="flex-shrink-0 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -325,10 +325,10 @@ export const FlashcardsPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="card p-4 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/10 dark:to-emerald-900/10 border-teal-200 dark:border-teal-800 hover:shadow-md transition-shadow">
+              <div className="card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all">
                 <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-500 shadow-md">
-                    <BookOpen className="w-6 h-6 text-white" />
+                  <div className="flex-shrink-0 p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                    <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">

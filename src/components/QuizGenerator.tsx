@@ -9,6 +9,14 @@ import {
   ChevronDown,
   ChevronRight,
   X,
+  Clock,
+  Target,
+  ListChecks,
+  CheckSquare,
+  CheckCircle,
+  Link as LinkIcon,
+  AlignLeft,
+  LayoutList,
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import toast from 'react-hot-toast';
@@ -44,7 +52,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
     'medium'
   );
   const [quizType, setQuizType] = useState<QuizType>('standard');
-  const [timeLimit, setTimeLimit] = useState(300); // 5 minutes default
+  const [timeLimit, setTimeLimit] = useState(300);
   const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<
     QuestionType[]
   >(['single-select', 'true-false']);
@@ -109,20 +117,13 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const toggleQuestionType = (type: QuestionType) => {
     setSelectedQuestionTypes((prev) => {
       if (prev.includes(type)) {
-        // Must have at least one type selected
         return prev.length > 1 ? prev.filter((t) => t !== type) : prev;
       }
       return [...prev, type];
     });
   };
 
-  const questionTypeLabels: Record<QuestionType, string> = {
-    'true-false': 'True/False',
-    'single-select': 'Single Select',
-    'multi-select': 'Multi Select',
-    matching: 'Matching',
-    'fill-blank': 'Fill in the Blank',
-  };
+
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -350,130 +351,236 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
           </div>
         )}
 
-        <div>
-          <label
-            htmlFor="questions"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Number of Questions: {numberOfQuestions}
-          </label>
-          <input
-            id="questions"
-            type="range"
-            min="3"
-            max="20"
-            value={numberOfQuestions}
-            onChange={(e) =>
-              setNumberOfQuestions(Number.parseInt(e.target.value))
-            }
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>3</span>
-            <span>20</span>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Difficulty
-          </label>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {(['easy', 'medium', 'hard'] as const).map((level) => (
-              <button
-                key={level}
-                type="button"
-                onClick={() => setDifficulty(level)}
-                className={`w-full flex items-center justify-center py-2 px-2 sm:px-4 rounded-lg border-2 text-sm sm:text-base transition-colors ${
-                  difficulty === level
-                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
-                }`}
+        <div className="space-y-6">
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4">
+              <label
+                htmlFor="questions"
+                className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2"
               >
-                {level.charAt(0).toUpperCase() + level.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Quiz Type
-          </label>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {(['standard', 'timed', 'scenario'] as const).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setQuizType(type)}
-                className={`w-full flex items-center justify-center py-2 px-2 sm:px-4 rounded-lg border-2 text-sm sm:text-base transition-colors ${
-                  quizType === type
-                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div className="text-xs text-gray-500 mt-2">
-            {quizType === 'standard' &&
-              'Standard quiz with no time constraints'}
-            {quizType === 'timed' && 'Quiz with a time limit to complete'}
-            {quizType === 'scenario' && 'Real-world scenario-based questions'}
-          </div>
-        </div>
-
-        {quizType === 'timed' && (
-          <div>
-            <label
-              htmlFor="timeLimit"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Time Limit: {Math.floor(timeLimit / 60)}:
-              {(timeLimit % 60).toString().padStart(2, '0')}
-            </label>
+                <LayoutList className="w-4 h-4 text-primary-600" />
+                Number of Questions
+              </label>
+              <span className="text-2xl font-bold text-primary-600">
+                {numberOfQuestions}
+              </span>
+            </div>
             <input
-              id="timeLimit"
+              id="questions"
               type="range"
-              min="60"
-              max="3600"
-              step="60"
-              value={timeLimit}
-              onChange={(e) => setTimeLimit(Number.parseInt(e.target.value))}
-              className="w-full"
+              min="3"
+              max="20"
+              value={numberOfQuestions}
+              onChange={(e) =>
+                setNumberOfQuestions(Number.parseInt(e.target.value))
+              }
+              className="w-full accent-primary-600 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>1 min</span>
-              <span>60 min</span>
+            <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
+              <span>3 questions</span>
+              <span>20 questions</span>
             </div>
           </div>
-        )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Question Types
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-            {(Object.keys(questionTypeLabels) as QuestionType[]).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => toggleQuestionType(type)}
-                className={`py-2 px-4 rounded-lg border-2 text-sm transition-colors ${
-                  selectedQuestionTypes.includes(type)
-                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {questionTypeLabels[type]}
-              </button>
-            ))}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+              Difficulty Level
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setDifficulty(level)}
+                  className={`relative p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md ${
+                    difficulty === level
+                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700/50 bg-white dark:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-1 h-1.5 w-12 mb-1">
+                      <div
+                        className={`flex-1 rounded-full ${
+                          level === 'easy' ||
+                          level === 'medium' ||
+                          level === 'hard'
+                            ? 'bg-primary-500'
+                            : 'bg-gray-200 dark:bg-gray-700'
+                        }`}
+                      />
+                      <div
+                        className={`flex-1 rounded-full ${
+                          level === 'medium' || level === 'hard'
+                            ? 'bg-primary-500'
+                            : 'bg-gray-200 dark:bg-gray-700'
+                        }`}
+                      />
+                      <div
+                        className={`flex-1 rounded-full ${
+                          level === 'hard'
+                            ? 'bg-primary-500'
+                            : 'bg-gray-200 dark:bg-gray-700'
+                        }`}
+                      />
+                    </div>
+                    <span
+                      className={`font-bold ${
+                        difficulty === level
+                          ? 'text-primary-700 dark:text-primary-300'
+                          : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Select at least one question type. Questions will be distributed
-            evenly.
-          </p>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+              Quiz Format
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                {
+                  id: 'standard',
+                  label: 'Standard',
+                  icon: ListChecks,
+                  desc: 'Untimed practice',
+                },
+                {
+                  id: 'timed',
+                  label: 'Timed',
+                  icon: Clock,
+                  desc: 'Speed challenge',
+                },
+                {
+                  id: 'scenario',
+                  label: 'Scenario',
+                  icon: Target,
+                  desc: 'Real-world application',
+                },
+              ].map((type) => (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => setQuizType(type.id as QuizType)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md ${
+                    quizType === type.id
+                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700/50 bg-white dark:bg-gray-800'
+                  }`}
+                >
+                  <type.icon
+                    className={`w-6 h-6 mb-3 ${
+                      quizType === type.id
+                        ? 'text-primary-600'
+                        : 'text-gray-400 dark:text-gray-500'
+                    }`}
+                  />
+                  <div className="font-bold text-gray-900 dark:text-white mb-0.5">
+                    {type.label}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {type.desc}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {quizType === 'timed' && (
+            <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-5 border border-blue-100 dark:border-blue-900/30">
+              <div className="flex items-center justify-between mb-4">
+                <label
+                  htmlFor="timeLimit"
+                  className="text-sm font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2"
+                >
+                  <Clock className="w-4 h-4" />
+                  Time Limit
+                </label>
+                <div className="font-mono text-lg font-bold text-blue-700 dark:text-blue-300 bg-white dark:bg-blue-900/50 px-3 py-1 rounded-lg border border-blue-200 dark:border-blue-800">
+                  {Math.floor(timeLimit / 60)}:
+                  {(timeLimit % 60).toString().padStart(2, '0')}
+                </div>
+              </div>
+              <input
+                id="timeLimit"
+                type="range"
+                min="60"
+                max="3600"
+                step="60"
+                value={timeLimit}
+                onChange={(e) => setTimeLimit(Number.parseInt(e.target.value))}
+                className="w-full accent-blue-600 h-2 bg-blue-200 dark:bg-blue-900/50 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs font-medium text-blue-400/80 mt-2">
+                <span>1 min</span>
+                <span>60 min</span>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+              Included Question Types
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                {
+                  id: 'single-select',
+                  label: 'Single Choice',
+                  icon: CheckCircle,
+                },
+                {
+                  id: 'multi-select',
+                  label: 'Multi Choice',
+                  icon: CheckSquare,
+                },
+                { id: 'true-false', label: 'True/False', icon: CheckSquare },
+                { id: 'matching', label: 'Matching', icon: LinkIcon },
+                { id: 'fill-blank', label: 'Fill Blanks', icon: AlignLeft },
+              ].map((type) => (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => toggleQuestionType(type.id as QuestionType)}
+                  className={`p-3 rounded-xl border-2 text-center transition-all duration-200 ${
+                    selectedQuestionTypes.includes(type.id as QuestionType)
+                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700/50 bg-white dark:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex justify-center mb-2">
+                    <type.icon
+                      className={`w-5 h-5 ${
+                        selectedQuestionTypes.includes(type.id as QuestionType)
+                          ? 'text-primary-600'
+                          : 'text-gray-400 dark:text-gray-500'
+                      }`}
+                    />
+                  </div>
+                  <span
+                    className={`text-xs font-bold block ${
+                      selectedQuestionTypes.includes(type.id as QuestionType)
+                        ? 'text-primary-700 dark:text-primary-300'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    {type.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {selectedQuestionTypes.length === 0 && (
+              <p className="text-xs text-red-500 mt-2 font-medium">
+                * Please select at least one question type
+              </p>
+            )}
+          </div>
         </div>
 
         <button

@@ -261,15 +261,15 @@ export const QuizPage = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-900 p-6 md:p-8 shadow-lg">
+      <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-6 h-6 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-sm">
+            <Sparkles className="w-6 h-6 text-primary-200" />
+            <span className="text-primary-100 font-semibold text-sm">
               Smart Learning
             </span>
           </div>
@@ -279,14 +279,14 @@ export const QuizPage = () => {
                 <Brain className="w-10 h-10" />
                 Quiz Generator
               </h1>
-              <p className="text-blue-100 dark:text-blue-200 text-lg">
+              <p className="text-primary-100 text-lg">
                 Create intelligent quizzes from any topic, content, or file
               </p>
             </div>
             {!showGenerator && (
               <button
                 onClick={() => setShowGenerator(true)}
-                className="group flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-xl transition-all hover:scale-105 font-semibold shadow-lg"
+                className="group flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-xl transition-all hover:scale-105 font-semibold shadow-lg"
               >
                 <Plus className="w-5 h-5" />
                 New Quiz
@@ -304,46 +304,46 @@ export const QuizPage = () => {
               <StatCardSkeleton count={3} />
             ) : (
               <>
-                <div className="card p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
+                <div className="card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between">
-                    <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500">
-                      <Brain className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 p-3 rounded-lg bg-primary-100 dark:bg-primary-900/30">
+                      <Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {totalQuizzes}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">
                         Total Quizzes
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="card p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-800">
+                <div className="card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between">
-                    <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
-                      <Target className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                      <Target className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {totalQuestions}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">
                         Questions Created
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="card p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+                <div className="card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between">
-                    <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500">
-                      <CheckCircle className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 p-3 rounded-lg bg-green-100 dark:bg-green-900/30">
+                      <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {completedQuizzes}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium uppercase tracking-wide">
                         Completed
                       </p>
                     </div>

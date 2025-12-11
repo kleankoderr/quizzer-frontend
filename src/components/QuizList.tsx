@@ -32,8 +32,8 @@ export const QuizList: React.FC<QuizListProps> = ({
   if (quizzes.length === 0) {
     return (
       <div className="card text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mb-4">
-          <Brain className="w-10 h-10 text-blue-600" />
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+          <Brain className="w-10 h-10 text-primary-600 dark:text-primary-400" />
         </div>
         <h3 className="text-xl font-semibold text-gray-700 mb-2">
           No quizzes yet
@@ -43,7 +43,7 @@ export const QuizList: React.FC<QuizListProps> = ({
         </p>
         <button
           onClick={onCreateNew}
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Create New Quiz
@@ -71,10 +71,10 @@ export const QuizList: React.FC<QuizListProps> = ({
             <Link
               key={quiz.id}
               to={`/quiz/${quiz.id}`}
-              className="group relative overflow-hidden border-2 border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800"
+              className="group relative overflow-hidden border-2 border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800"
             >
               {/* Gradient accent */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1 bg-primary-500"></div>
 
               {/* Top right actions */}
               <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -96,12 +96,12 @@ export const QuizList: React.FC<QuizListProps> = ({
               </div>
 
               {/* Icon */}
-              <div className="inline-flex p-2.5 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg mb-3 group-hover:from-blue-200 group-hover:to-indigo-200 dark:group-hover:from-blue-900/50 dark:group-hover:to-indigo-900/50 transition-colors">
-                <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors">
+                <Brain className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
 
               {/* Content */}
-              <h3 className="font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+              <h3 className="font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
                 {quiz.title}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
@@ -129,7 +129,7 @@ export const QuizList: React.FC<QuizListProps> = ({
                     <FileText className="w-4 h-4" />
                     {quiz.questions.length} questions
                   </span>
-                  <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md text-xs font-medium">
+                  <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
                     {quiz.difficulty || 'Medium'}
                   </span>
                 </div>
@@ -151,10 +151,10 @@ export const QuizList: React.FC<QuizListProps> = ({
 
               {/* Action hint */}
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                   Click to {hasAttempts ? 'retake' : 'start'}
                 </span>
-                <Play className="w-4 h-4 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Play className="w-4 h-4 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </Link>
           );

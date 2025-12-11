@@ -317,7 +317,7 @@ export const QuizTakePage = () => {
     return (
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">
         {/* Results Hero */}
-        <div className="relative overflow-hidden rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-900 p-6 sm:p-8 shadow-lg">
+        <div className="relative overflow-hidden rounded-lg sm:rounded-xl bg-primary-600 dark:bg-primary-700 p-6 sm:p-8 shadow-lg">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
@@ -457,7 +457,7 @@ export const QuizTakePage = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-lg sm:rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-900 dark:to-primary-950 p-4 sm:p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-lg sm:rounded-xl bg-primary-600 dark:bg-primary-700 p-4 sm:p-6 shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
