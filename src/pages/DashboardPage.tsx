@@ -19,8 +19,8 @@ import { StatCardSkeleton, ChartSkeleton } from '../components/skeletons';
 import { StatCard } from '../components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { studyService } from '../services/study.service';
-import { contentService, coachingService} from '../services';
-import {statisticsService} from '../services/statistics.service';
+import { contentService, coachingService } from '../services';
+import { statisticsService } from '../services/statistics.service';
 import {
   AreaChart,
   Area,
@@ -246,9 +246,9 @@ export const DashboardPage = () => {
                     navigate(`/flashcards/${topRecommendation.flashcardSetId}`)
                   }
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                      topRecommendation.quizId
-                          ? 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
-                          : 'bg-white text-blue-600 hover:bg-blue-50'
+                    topRecommendation.quizId
+                      ? 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
+                      : 'bg-white text-blue-600 hover:bg-blue-50'
                   }`}
                 >
                   <Brain className="w-5 h-5" />
@@ -303,7 +303,11 @@ export const DashboardPage = () => {
 
         <StatCard
           title="Avg. Accuracy"
-          value={statistics?.averageAccuracy ? `${statistics.averageAccuracy.toFixed(1)}%` : '0%'}
+          value={
+            statistics?.averageAccuracy
+              ? `${statistics.averageAccuracy.toFixed(1)}%`
+              : '0%'
+          }
           icon={TrendingUp}
           trend="Keep it up!"
           color="green"

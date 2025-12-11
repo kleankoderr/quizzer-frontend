@@ -3,64 +3,22 @@ import { CheckCircle, XCircle, Target, Eye, EyeOff } from 'lucide-react';
 import { QuestionRenderer } from '../QuestionRenderer';
 import type { Quiz, QuizResult, AnswerValue } from '../../types';
 
-interface QuizReviewProps {
+// Separated Review Content Component (can be reused)
+interface QuizReviewContentProps {
   quiz: Quiz;
   result: QuizResult;
   selectedAnswers: (AnswerValue | null)[];
-  challengeId?: string;
+  showExplanations: boolean;
+  onToggleExplanations: () => void;
 }
 
-export const QuizReview = ({
+export const QuizReviewContent = ({
   quiz,
   result,
   selectedAnswers,
-}: QuizReviewProps) => {
-  const [showExplanations, setShowExplanations] = useState(false);
-  const checkAnswerCorrect = (
-    questionType: string,
-    userAnswer: AnswerValue | null,
-    correctAnswer: AnswerValue
-  ): boolean => {
-    if (userAnswer === null) return false;
-
-    switch (questionType) {
-      case 'multi-select': {
-        if (!Array.isArray(userAnswer) || !Array.isArray(correctAnswer))
-          return false;
-        if (userAnswer.length !== correctAnswer.length) return false;
-        const sortedUser = [...userAnswer].sort(
-          (a, b) => Number(a) - Number(b)
-        );
-        const sortedCorrect = [...correctAnswer].sort(
-          (a, b) => Number(a) - Number(b)
-        );
-        return sortedUser.every((val, idx) => val === sortedCorrect[idx]);
-      }
-
-      case 'matching': {
-        if (typeof userAnswer !== 'object' || typeof correctAnswer !== 'object')
-          return false;
-        if (Array.isArray(userAnswer) || Array.isArray(correctAnswer))
-          return false;
-        const userObj = userAnswer as { [key: string]: string };
-        const correctObj = correctAnswer as { [key: string]: string };
-        const userKeys = Object.keys(userObj).sort((a, b) =>
-          a.localeCompare(b)
-        );
-        const correctKeys = Object.keys(correctObj).sort((a, b) =>
-          a.localeCompare(b)
-        );
-        if (userKeys.length !== correctKeys.length) return false;
-        if (!userKeys.every((key, idx) => key === correctKeys[idx]))
-          return false;
-        return userKeys.every((key) => userObj[key] === correctObj[key]);
-      }
-
-      default:
-        return JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
-    }
-  };
-
+  showExplanations,
+  onToggleExplanations,
+}: QuizReviewContentProps) => {
   return (
     <div className="card dark:bg-gray-800 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -73,33 +31,30 @@ export const QuizReview = ({
           </h2>
         </div>
         <button
-          onClick={() => setShowExplanations(!showExplanations)}
-          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg transition-colors text-sm font-medium"
+          onClick={onToggleExplanations}
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg transition-colors text-sm font-medium touch-manipulation"
         >
           {showExplanations ? (
             <>
               <EyeOff className="w-4 h-4" />
               <span className="hidden sm:inline">Hide Explanations</span>
+              <span className="sm:hidden">Hide</span>
             </>
           ) : (
             <>
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Show Explanations</span>
+              <span className="sm:hidden">Show</span>
             </>
           )}
         </button>
       </div>
-      <div className="space-y-4 sm:space-y-6">
-        {quiz.questions.map((question, index) => {
-          const userAnswer = selectedAnswers[index];
-          const correctAnswer = result.correctAnswers[index];
 
-          // Determine if answer is correct based on question type
-          const isCorrect = checkAnswerCorrect(
-            question.questionType,
-            userAnswer,
-            correctAnswer
-          );
+      <div className="space-y-4 sm:space-y-6">
+        {(quiz.questions || []).map((question, index) => {
+          const userAnswer = selectedAnswers?.[index];
+          const correctAnswer = result.correctAnswers?.[index];
+          const isCorrect = result.questions?.[index]?.isCorrect ?? false;
 
           return (
             <div
@@ -133,5 +88,31 @@ export const QuizReview = ({
         })}
       </div>
     </div>
+  );
+};
+
+// Original QuizReview component (for use in QuizTakePage after submission)
+interface QuizReviewProps {
+  quiz: Quiz;
+  result: QuizResult;
+  selectedAnswers: (AnswerValue | null)[];
+  challengeId?: string;
+}
+
+export const QuizReview = ({
+  quiz,
+  result,
+  selectedAnswers,
+}: QuizReviewProps) => {
+  const [showExplanations, setShowExplanations] = useState(false);
+
+  return (
+    <QuizReviewContent
+      quiz={quiz}
+      result={result}
+      selectedAnswers={selectedAnswers}
+      showExplanations={showExplanations}
+      onToggleExplanations={() => setShowExplanations(!showExplanations)}
+    />
   );
 };

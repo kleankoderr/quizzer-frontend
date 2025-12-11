@@ -113,6 +113,11 @@ export interface QuizResult {
   totalQuestions: number;
   percentage: number;
   correctAnswers: AnswerValue[];
+  questions?: {
+    isCorrect: boolean;
+    userAnswer: any;
+    correctAnswer: any;
+  }[];
   feedback?: {
     message: string;
     percentile?: number;

@@ -156,7 +156,11 @@ export const StatisticsPage = () => {
 
         <StatCard
           title="Average Accuracy"
-          value={overview?.averageAccuracy ? `${overview.averageAccuracy.toFixed(1)}%` : '0%'}
+          value={
+            overview?.averageAccuracy
+              ? `${overview.averageAccuracy.toFixed(1)}%`
+              : '0%'
+          }
           icon={TrendingUp}
           trend={
             <span className="flex items-center gap-1">
@@ -169,9 +173,17 @@ export const StatisticsPage = () => {
 
         <StatCard
           title="Time Spent"
-          value={overview?.totalTimeSpent ? `${Math.floor(overview.totalTimeSpent / 60)}h` : '0h'}
+          value={
+            overview?.totalTimeSpent
+              ? `${Math.floor(overview.totalTimeSpent / 60)}h`
+              : '0h'
+          }
           icon={Clock}
-          description={overview?.totalTimeSpent ? `${overview.totalTimeSpent % 60}m this month` : 'Start studying!'}
+          description={
+            overview?.totalTimeSpent
+              ? `${overview.totalTimeSpent % 60}m this month`
+              : 'Start studying!'
+          }
           color="blue"
           variant="gradient"
         />

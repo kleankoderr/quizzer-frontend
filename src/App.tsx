@@ -36,6 +36,9 @@ const QuizPage = lazy(() =>
 const QuizTakePage = lazy(() =>
   import('./pages/QuizTakePage').then((m) => ({ default: m.QuizTakePage }))
 );
+const QuizReviewPage = lazy(() =>
+  import('./pages/QuizReviewPage').then((m) => ({ default: m.QuizReviewPage }))
+);
 const FlashcardsPage = lazy(() =>
   import('./pages/FlashcardsPage').then((m) => ({ default: m.FlashcardsPage }))
 );
@@ -199,8 +202,13 @@ function AppRoutes() {
           <Route path="quiz/:id" element={<QuizTakePage />} />
           <Route
             path="quiz/:id/results/:attemptId"
-            element={<QuizTakePage />}
+            element={<QuizReviewPage />}
           />
+          <Route
+            path="quiz/attempt/:attemptId/review"
+            element={<QuizReviewPage />}
+          />
+
           <Route path="flashcards" element={<FlashcardsPage />} />
           <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />

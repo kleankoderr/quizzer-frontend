@@ -286,7 +286,19 @@ export function AttemptsPage() {
       (attempt.type === 'quiz' || attempt.type === 'challenge') &&
       attempt.quizId
     ) {
-      navigate(`/quiz/${attempt.quizId}/results/${attempt.id}`);
+      navigate(`/quiz/attempt/${attempt.id}/review`, {
+        state: {
+          breadcrumb: [
+            { label: 'Attempts', path: '/attempts' },
+            {
+              label:
+                attempt.quiz?.title || attempt.challenge?.title || 'Unknown',
+              path: null,
+            },
+            { label: 'Attempt', path: null },
+          ],
+        },
+      });
     }
   };
 

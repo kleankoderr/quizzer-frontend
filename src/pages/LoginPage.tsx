@@ -176,7 +176,7 @@ export const LoginPage = () => {
                   className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Mail className="w-5 h-5" />
-                  Continue with Email
+                  Login with Email
                 </button>
               </motion.div>
             ) : (

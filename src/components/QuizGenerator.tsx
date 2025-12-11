@@ -94,12 +94,6 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
     }
   };
 
-
-
-
-
-
-
   return (
     <div className="card border border-primary-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 p-4 md:p-6">
       <div className="flex items-center gap-3 mb-6">

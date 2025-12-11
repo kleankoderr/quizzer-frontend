@@ -68,7 +68,7 @@ export const QuizPage = () => {
           sourceId,
           sourceTitle,
           contentId,
-          breadcrumb: (location.state).breadcrumb,
+          breadcrumb: location.state.breadcrumb,
         });
         setShowGenerator(true);
       }

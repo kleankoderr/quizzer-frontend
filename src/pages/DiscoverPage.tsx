@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Sparkles,
@@ -12,15 +13,23 @@ import {
 } from 'lucide-react';
 
 export const DiscoverPage = () => {
+  const [searchParams] = useSearchParams();
+  const initialTopic = searchParams.get('q') || '';
+
   const [activeTab, setActiveTab] = useState<'topic' | 'text' | 'file'>(
     'topic'
   );
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState(initialTopic);
   const [textContent, setTextContent] = useState('');
   const [textTitle, setTextTitle] = useState('');
   const [textTopic, setTextTopic] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) setTopic(q);
+  }, [searchParams]);
 
   const popularTopics = [
     'Biology',

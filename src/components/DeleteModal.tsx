@@ -27,8 +27,9 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 
   const defaultMessage = (
     <p className="text-gray-600 dark:text-gray-400">
-      Are you sure you want to delete {itemName ? <strong>{itemName}</strong> : 'this item'}? 
-      This action cannot be undone.
+      Are you sure you want to delete{' '}
+      {itemName ? <strong>{itemName}</strong> : 'this item'}? This action cannot
+      be undone.
     </p>
   );
 
@@ -66,9 +67,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
         </>
       }
     >
-      <div className="py-2">
-        {message || defaultMessage}
-      </div>
+      <div className="py-2">{message || defaultMessage}</div>
     </Modal>
   );
 };

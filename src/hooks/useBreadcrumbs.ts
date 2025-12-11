@@ -68,9 +68,15 @@ export const useBreadcrumbs = () => {
         label = 'Details';
       }
 
+      // Handle specific non-linkable segments to prevent broken breadcrumbs
+      // 'results', 'attempt', 'review' are typically part of a longer path and don't have their own index pages
+      const isNonLinkable = ['results', 'attempt', 'review'].includes(
+        value.toLowerCase()
+      );
+
       items.push({
         label,
-        path: isLast ? undefined : currentPath,
+        path: isLast || isNonLinkable ? undefined : currentPath,
       });
     });
 

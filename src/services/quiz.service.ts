@@ -85,7 +85,12 @@ export const quizService = {
     return response.data;
   },
 
-  // Get all quizzes
+  async getAttemptReview(attemptId: string): Promise<any> {
+    const response = await apiClient.get<any>(
+      `/quiz/attempt/${attemptId}/review`
+    );
+    return response.data;
+  },
   getAll: async (): Promise<Quiz[]> => {
     const response = await apiClient.get<Quiz[]>(QUIZ_ENDPOINTS.GET_ALL);
     return response.data;
