@@ -14,7 +14,7 @@ import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { DeleteModal } from '../../components/DeleteModal';
-import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
+import { TableSkeleton } from '../../components/skeletons';
 
 type ContentType = 'quizzes' | 'flashcards' | 'contents' | 'challenges';
 

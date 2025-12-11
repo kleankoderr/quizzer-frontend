@@ -30,33 +30,30 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   const validateFiles = (newFiles: File[]): File[] => {
     const validFiles: File[] = [];
-    let hasError = false;
 
-    // Check quantity limit including existing files
-    if (files.length + newFiles.length > maxFiles) {
-      toast.error(`Maximum ${maxFiles} files allowed`);
-      return [];
-    }
-
-    newFiles.forEach((file) => {
-      // Check size limit
-      if (file.size > maxSizeMB * 1024 * 1024) {
-        toast.error(`${file.name} exceeds ${maxSizeMB}MB limit`);
-        hasError = true;
-        return;
+      // Check quantity limit including existing files
+      if (files.length + newFiles.length > maxFiles) {
+          toast.error(`Maximum ${maxFiles} files allowed`);
+          return [];
       }
 
-      // Check duplicate
-      if (files.some((f) => f.name === file.name && f.size === file.size)) {
-        toast.error(`${file.name} is already selected`);
-        hasError = true;
-        return;
+      for (const file of newFiles) {
+          // Check size limit
+          if (file.size > maxSizeMB * 1024 * 1024) {
+              toast.error(`${file.name} exceeds ${maxSizeMB}MB limit`);
+              continue;
+          }
+
+          // Check duplicate
+          if (files.some((f) => f.name === file.name && f.size === file.size)) {
+              toast.error(`${file.name} is already selected`);
+              continue;
       }
 
       validFiles.push(file);
-    });
+    }
 
-    return validFiles;
+      return validFiles;
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
