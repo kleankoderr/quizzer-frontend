@@ -29,6 +29,7 @@ interface LearningGuideProps {
   contentRef?: React.RefObject<HTMLDivElement | null>;
   contentId: string;
   topic?: string;
+  description?: string;
   onGenerateQuiz?: () => void;
   onGenerateFlashcards?: () => void;
 }
@@ -41,6 +42,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   onContentClick,
   contentRef,
   contentId,
+  description,
   onGenerateQuiz,
   onGenerateFlashcards,
 }) => {
@@ -235,12 +237,14 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none"
               style={{ fontFamily: 'Lexend' }}
             >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeRaw, rehypeKatex]}
-              >
-                {guide.overview}
-              </ReactMarkdown>
+              {(guide.overview || description) && (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                >
+                  {guide.overview || description || ''}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
           <div className="hidden md:block">
@@ -275,17 +279,19 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         </div>
 
         {/* Key Concepts */}
-        <div className="flex flex-wrap gap-2">
-          {guide.keyConcepts.map((concept, idx) => (
-            <span
-              key={idx}
-              className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-100 dark:border-primary-800"
-              style={{ fontFamily: 'Lexend' }}
-            >
-              {concept}
-            </span>
-          ))}
-        </div>
+        {guide.keyConcepts && guide.keyConcepts.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {guide.keyConcepts.map((concept, idx) => (
+              <span
+                key={idx}
+                className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-100 dark:border-primary-800"
+                style={{ fontFamily: 'Lexend' }}
+              >
+                {concept}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Sections */}
@@ -475,6 +481,40 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       </div>
                     )}
 
+                    {section.assessment && (
+                      <div className="mt-4 relative overflow-hidden sm:rounded-xl sm:border border-green-100 dark:border-green-900/50 bg-green-50/30 sm:bg-gradient-to-br sm:from-green-50/50 sm:to-white dark:from-green-900/10 dark:to-gray-800 sm:shadow-sm border-l-4 sm:border-l border-l-green-500 sm:border-l-green-100">
+                        <div className="hidden sm:block absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400 to-green-600"></div>
+                        <div className="p-4">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-green-100 dark:border-green-800 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
+                              <Brain className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <h4
+                                className="font-bold text-gray-900 dark:text-white text-sm"
+                                style={{ fontFamily: 'Lexend' }}
+                              >
+                                Knowledge Check
+                              </h4>
+                            </div>
+                          </div>
+                          <div className="prose prose-green prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-green-50 dark:border-green-900/20">
+                            <div
+                              className="m-0 leading-relaxed text-sm"
+                              style={{ fontFamily: 'Lexend' }}
+                            >
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkMath]}
+                                rehypePlugins={[rehypeRaw, rehypeKatex]}
+                              >
+                                {section.assessment}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {activeSection === idx && (
                       <div className="mt-8 space-y-6">
                         <div className="flex flex-wrap gap-3">
@@ -648,32 +688,40 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             You've completed this learning guide. Here are some recommended next
             steps:
           </p>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
-            {guide.nextSteps.map((step, idx) => (
-              <div
-                key={idx}
-                className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3 text-left"
-              >
-                <div className="w-8 h-8 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
-                  {idx + 1}
-                </div>
+          {guide.nextSteps && guide.nextSteps.length > 0 ? (
+            <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
+              {guide.nextSteps.map((step, idx) => (
                 <div
-                  className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none"
-                  style={{ fontFamily: 'Lexend' }}
+                  key={idx}
+                  className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3 text-left"
                 >
-                  <ReactMarkdown
-                    components={{
-                      p: ({ children }) => (
-                        <span className="m-0">{children}</span>
-                      ),
-                    }}
+                  <div className="w-8 h-8 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+                    {idx + 1}
+                  </div>
+                  <div
+                    className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none"
+                    style={{ fontFamily: 'Lexend' }}
                   >
-                    {step}
-                  </ReactMarkdown>
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => (
+                          <span className="m-0">{children}</span>
+                        ),
+                      }}
+                    >
+                      {step}
+                    </ReactMarkdown>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mb-8 p-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                You have completed all sections!
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700 max-w-2xl mx-auto">
             <button

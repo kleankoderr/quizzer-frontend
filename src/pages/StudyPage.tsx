@@ -494,22 +494,24 @@ export const StudyPage = () => {
                   />
                 </div>
 
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Popular topics:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {popularTopics.slice(0, 5).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setTopic(t)}
-                        className="px-4 py-2 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-700 dark:text-gray-200 hover:text-primary-700 dark:hover:text-primary-300 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow"
-                      >
-                        {t}
-                      </button>
-                    ))}
+                {popularTopics.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Popular topics:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {popularTopics.map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => setTopic(t)}
+                          className="px-4 py-2 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-700 dark:text-gray-200 hover:text-primary-700 dark:hover:text-primary-300 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow"
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <button
                   onClick={handleGenerateFromTopic}

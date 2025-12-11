@@ -745,6 +745,7 @@ export const ContentPage = () => {
                 contentRef={contentRef}
                 contentId={content.id}
                 topic={content.topic}
+                description={content.description}
                 onGenerateQuiz={handleGenerateQuiz}
                 onGenerateFlashcards={handleGenerateFlashcards}
                 onToggleSectionComplete={async (index, isComplete) => {

@@ -1,19 +1,20 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
-    Home,
-    BookOpen,
-    Layers,
-    Trophy,
-    BarChart3,
-    LogOut,
-    ChevronLeft,
-    ChevronRight,
-    Medal,
-    User,
-    Settings,
-    Brain,
-    Calendar,
-    FileText, type LucideProps,
+  Home,
+  BookOpen,
+  Layers,
+  Trophy,
+  BarChart3,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Medal,
+  User,
+  Settings,
+  Brain,
+  Calendar,
+  FileText,
+  type LucideProps,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -50,51 +51,13 @@ export const Sidebar = ({
   const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
-  let filteredNavItems: ({
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  } | {
-      path: string;
-      icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-      label: string
-  })[];
+  let filteredNavItems: {
+    path: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
+    >;
+    label: string;
+  }[];
 
   if (isAdmin) {
     // For admins, show Admin Dashboard, Users, Content, Analytics, and Settings

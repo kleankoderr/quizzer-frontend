@@ -12,17 +12,18 @@ export interface Content {
   quizId?: string;
   flashcardSetId?: string;
   learningGuide?: {
-    overview: string;
-    keyConcepts: string[];
+    overview?: string;
+    keyConcepts?: string[];
     sections: {
       title: string;
       content: string;
       example?: string;
+      assessment?: string;
       completed?: boolean;
       generatedExplanation?: string;
       generatedExample?: string;
     }[];
-    nextSteps: string[];
+    nextSteps?: string[];
   };
   lastReadPosition?: number;
 }
