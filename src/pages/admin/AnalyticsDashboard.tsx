@@ -16,8 +16,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
-import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
+import { StatCardSkeleton } from '../../components/skeletons';
+import { CardSkeleton } from '../../components/skeletons';
+import { StatCard } from '../../components/StatCard';
 
 const COLORS = [
   '#3b82f6',
@@ -84,87 +85,65 @@ export const AnalyticsDashboard = () => {
 
       {/* Overview Stats */}
       <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Total Users
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                {analytics?.users?.total || 0}
-              </p>
-              <p className="mt-1 text-sm text-green-600">
-                +{analytics?.users?.newLast30Days || 0} this month
-              </p>
-            </div>
-            <div className="rounded-lg bg-blue-500 p-3">
-              <Users className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Total Users"
+          value={analytics?.users?.total || 0}
+          icon={Users}
+          color="blue"
+          trend={
+            <span className="text-green-600">
+              +{analytics?.users?.newLast30Days || 0} this month
+            </span>
+          }
+          variant="default"
+        />
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Total Content
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                {(analytics?.content?.quizzes || 0) +
-                  (analytics?.content?.flashcards || 0) +
-                  (analytics?.content?.studyMaterials || 0)}
-              </p>
-              <p className="mt-1 text-sm text-green-600">
-                +
-                {(analytics?.content?.quizzesLast30Days || 0) +
-                  (analytics?.content?.flashcardsLast30Days || 0)}{' '}
-                this month
-              </p>
-            </div>
-            <div className="rounded-lg bg-purple-500 p-3">
-              <BookOpen className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Total Content"
+          value={
+            (analytics?.content?.quizzes || 0) +
+            (analytics?.content?.flashcards || 0) +
+            (analytics?.content?.studyMaterials || 0)
+          }
+          icon={BookOpen}
+          color="purple"
+          trend={
+            <span className="text-green-600">
+              +
+              {(analytics?.content?.quizzesLast30Days || 0) +
+                (analytics?.content?.flashcardsLast30Days || 0)}{' '}
+              this month
+            </span>
+          }
+          variant="default"
+        />
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Total Attempts
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                {analytics?.engagement?.totalAttempts || 0}
-              </p>
-              <p className="mt-1 text-sm text-green-600">
-                +{analytics?.engagement?.attemptsLast30Days || 0} this month
-              </p>
-            </div>
-            <div className="rounded-lg bg-orange-500 p-3">
-              <Activity className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Total Attempts"
+          value={analytics?.engagement?.totalAttempts || 0}
+          icon={Activity}
+          color="orange"
+          trend={
+            <span className="text-green-600">
+              +{analytics?.engagement?.attemptsLast30Days || 0} this month
+            </span>
+          }
+          variant="default"
+        />
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Active Challenges
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                {analytics?.challenges?.active || 0}
-              </p>
-              <p className="mt-1 text-sm text-blue-600">
-                {analytics?.challenges?.completionRate?.toFixed(1) || 0}%
-                completion rate
-              </p>
-            </div>
-            <div className="rounded-lg bg-green-500 p-3">
-              <Trophy className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Active Challenges"
+          value={analytics?.challenges?.active || 0}
+          icon={Trophy}
+          color="green"
+          trend={
+            <span className="text-blue-600">
+              {analytics?.challenges?.completionRate?.toFixed(1) || 0}%
+              completion rate
+            </span>
+          }
+          variant="default"
+        />
       </div>
 
       {/* Charts Row 1 */}

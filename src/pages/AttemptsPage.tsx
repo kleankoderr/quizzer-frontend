@@ -31,6 +31,7 @@ import {
   ChartSkeleton,
   StatCardSkeleton,
 } from '../components/skeletons';
+import { StatCard } from '../components/StatCard';
 
 const COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
 
@@ -322,85 +323,46 @@ export function AttemptsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Total
-              </p>
-              <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {attemptStats.total}
-            </p>
-          </div>
-        </div>
+        <StatCard
+          title="Total"
+          value={attemptStats.total}
+          icon={Calendar}
+          color="blue"
+          variant="minimal"
+        />
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Quizzes
-              </p>
-              <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {attemptStats.quizzes}
-            </p>
-          </div>
-        </div>
+        <StatCard
+          title="Quizzes"
+          value={attemptStats.quizzes}
+          icon={BookOpen}
+          color="indigo"
+          variant="minimal"
+        />
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Flashcards
-              </p>
-              <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {attemptStats.flashcards}
-            </p>
-          </div>
-        </div>
+        <StatCard
+          title="Flashcards"
+          value={attemptStats.flashcards}
+          icon={Layers}
+          color="emerald"
+          variant="minimal"
+        />
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Challenges
-              </p>
-              <div className="p-1.5 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
-                <TrendingUp className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {attemptStats.challenges}
-            </p>
-          </div>
-        </div>
+        <StatCard
+          title="Challenges"
+          value={attemptStats.challenges}
+          icon={TrendingUp}
+          color="pink"
+          variant="minimal"
+        />
 
-        <div className="col-span-2 md:col-span-1 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex flex-col h-full justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Avg Score
-              </p>
-              <div className="p-1.5 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                <Award className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {attemptStats.averageScore}%
-            </p>
-          </div>
-        </div>
+        <StatCard
+          title="Avg Score"
+          value={`${attemptStats.averageScore}%`}
+          icon={Award}
+          color="yellow"
+          variant="minimal"
+          className="col-span-2 md:col-span-1"
+        />
       </div>
 
       {/* Filters */}

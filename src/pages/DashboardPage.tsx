@@ -16,11 +16,11 @@ import {
   Calendar,
 } from 'lucide-react';
 import { StatCardSkeleton, ChartSkeleton } from '../components/skeletons';
+import { StatCard } from '../components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { studyService } from '../services/study.service';
-import { contentService } from '../services/content.service';
-import { statisticsService } from '../services/statistics.service';
-import { coachingService } from '../services/coaching.service';
+import { contentService, coachingService} from '../services';
+import {statisticsService} from '../services/statistics.service';
 import {
   AreaChart,
   Area,
@@ -246,9 +246,9 @@ export const DashboardPage = () => {
                     navigate(`/flashcards/${topRecommendation.flashcardSetId}`)
                   }
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                    !topRecommendation.quizId
-                      ? 'bg-white text-blue-600 hover:bg-blue-50'
-                      : 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
+                      topRecommendation.quizId
+                          ? 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
+                          : 'bg-white text-blue-600 hover:bg-blue-50'
                   }`}
                 >
                   <Brain className="w-5 h-5" />
@@ -292,65 +292,32 @@ export const DashboardPage = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card p-4 md:p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border-blue-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Total Attempts
-              </p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {statistics?.totalAttempts || 0}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {statistics?.quizAttempts || 0} quizzes,{' '}
-                {statistics?.flashcardAttempts || 0} flashcards
-              </p>
-            </div>
-            <div className="p-3 bg-blue-500 rounded-xl">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Total Attempts"
+          value={statistics?.totalAttempts || 0}
+          icon={BookOpen}
+          description={`${statistics?.quizAttempts || 0} quizzes, ${statistics?.flashcardAttempts || 0} flashcards`}
+          color="blue"
+          variant="gradient"
+        />
 
-        <div className="card p-4 md:p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 border-green-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Avg. Accuracy
-              </p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {statistics?.averageAccuracy
-                  ? `${statistics.averageAccuracy.toFixed(1)}%`
-                  : '0%'}
-              </p>
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                Keep it up!
-              </p>
-            </div>
-            <div className="p-3 bg-green-500 rounded-xl">
-              <TrendingUp className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Avg. Accuracy"
+          value={statistics?.averageAccuracy ? `${statistics.averageAccuracy.toFixed(1)}%` : '0%'}
+          icon={TrendingUp}
+          trend="Keep it up!"
+          color="green"
+          variant="gradient"
+        />
 
-        <div className="card p-4 md:p-6 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border-orange-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Current Streak
-              </p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {statistics?.currentStreak || 0}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                days
-              </p>
-            </div>
-            <div className="p-3 bg-orange-500 rounded-xl">
-              <Award className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Current Streak"
+          value={statistics?.currentStreak || 0}
+          icon={Award}
+          description="days"
+          color="orange"
+          variant="gradient"
+        />
       </div>
 
       {/* Main Content Grid: Recent Attempts & Learning Progress */}

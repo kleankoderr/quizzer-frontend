@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 import type { FlashcardSet } from '../types';
+import { Card } from './Card';
 import {
   Calendar,
   CreditCard,
@@ -69,85 +69,70 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
           const hasStudied = !!set.lastStudiedAt;
 
           return (
-            <Link
+            <Card
               key={set.id}
               to={`/flashcards/${set.id}`}
-              className="group relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1"
-            >
-              {/* Gradient accent */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-primary-500"></div>
-
-              {/* Top right actions */}
-              <div className="absolute top-4 right-4 flex items-center gap-2">
-                {hasStudied && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-semibold">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Studied
-                  </div>
-                )}
-                {onDelete && (
-                  <button
-                    onClick={(e) => handleDelete(e, set.id)}
-                    className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                    title="Delete flashcard set"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Icon */}
-              <div className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors">
+              title={set.title}
+              subtitle={set.topic}
+              icon={
                 <Layers className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-              </div>
-
-              {/* Content */}
-              <h3 className="font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
-                {set.title}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                {set.topic}
-              </p>
-
-              {/* Stats */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                    <CreditCard className="w-4 h-4" />
-                    {cardCount} card{cardCount === 1 ? '' : 's'}
-                  </span>
-                  <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
-                    Active
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {new Date(set.createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
+              }
+              actions={
+                <>
                   {hasStudied && (
-                    <span className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
-                      <BookOpen className="w-3 h-3" />
-                      Reviewed
-                    </span>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-semibold">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Studied
+                    </div>
                   )}
-                </div>
-              </div>
-
-              {/* Action hint */}
-              <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  Click to study
+                  {onDelete && (
+                    <button
+                      onClick={(e) => handleDelete(e, set.id)}
+                      className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete flashcard set"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </>
+              }
+              footer={
+                <>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    Click to study
+                  </span>
+                  <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                    <span className="text-sm font-bold">Study Now</span>
+                    <Play className="w-4 h-4 fill-current" />
+                  </div>
+                </>
+              }
+            >
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4" />
+                  {cardCount} card{cardCount === 1 ? '' : 's'}
                 </span>
-                <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                  <span className="text-sm font-bold">Study Now</span>
-                  <Play className="w-4 h-4 fill-current" />
-                </div>
+                <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
+                  Active
+                </span>
               </div>
-            </Link>
+              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(set.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+                {hasStudied && (
+                  <span className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
+                    <BookOpen className="w-3 h-3" />
+                    Reviewed
+                  </span>
+                )}
+              </div>
+            </Card>
           );
         })}
       </div>

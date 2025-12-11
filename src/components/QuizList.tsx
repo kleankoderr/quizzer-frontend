@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Card } from './Card';
 import type { Quiz } from '../types';
 import {
   Calendar,
@@ -68,46 +68,42 @@ export const QuizList: React.FC<QuizListProps> = ({
           const latestAttempt = quiz.attempts?.[0] ?? null;
 
           return (
-            <Link
+            <Card
               key={quiz.id}
               to={`/quiz/${quiz.id}`}
-              className="group relative overflow-hidden border-2 border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800"
-            >
-              {/* Gradient accent */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-primary-500"></div>
-
-              {/* Top right actions */}
-              <div className="absolute top-4 right-4 flex items-center gap-2">
-                {hasAttempts && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Attempted
-                  </div>
-                )}
-                {onDelete && (
-                  <button
-                    onClick={(e) => handleDelete(e, quiz.id)}
-                    className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                    title="Delete quiz"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Icon */}
-              <div className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors">
+              title={quiz.title}
+              subtitle={quiz.topic}
+              icon={
                 <Brain className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-              </div>
-
-              {/* Content */}
-              <h3 className="font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
-                {quiz.title}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                {quiz.topic}
-              </p>
-
+              }
+              actions={
+                <>
+                  {hasAttempts && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Attempted
+                    </div>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={(e) => handleDelete(e, quiz.id)}
+                      className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                      title="Delete quiz"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </>
+              }
+              footer={
+                <>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    Click to {hasAttempts ? 'retake' : 'start'}
+                  </span>
+                  <Play className="w-4 h-4 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </>
+              }
+            >
               {/* Tags */}
               {quiz.tags && quiz.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mb-2">
@@ -148,15 +144,7 @@ export const QuizList: React.FC<QuizListProps> = ({
                   )}
                 </div>
               </div>
-
-              {/* Action hint */}
-              <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  Click to {hasAttempts ? 'retake' : 'start'}
-                </span>
-                <Play className="w-4 h-4 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </Link>
+            </Card>
           );
         })}
       </div>

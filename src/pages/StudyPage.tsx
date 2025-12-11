@@ -17,12 +17,13 @@ import {
   Plus,
   ChevronRight,
 } from 'lucide-react';
-import { format } from 'date-fns';
+
 import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { FileSelector } from '../components/FileSelector';
 import { FileUpload } from '../components/FileUpload';
+import { Card } from '../components/Card';
 import { useSSEEvent } from '../hooks/useSSE';
 
 export const StudyPage = () => {
@@ -352,6 +353,16 @@ export const StudyPage = () => {
       setIsDeleting(false);
     }
   }, [deleteContentId, refetch]);
+
+  const getSummary = (content: any) => {
+    if (content.description) {
+      return content.description;
+    }
+    if (content.generatedContent?.summary) {
+      return content.generatedContent.summary;
+    }
+    return 'No description available';
+  };
 
   return (
     <div className="space-y-6 pb-8 px-4 sm:px-0">
@@ -718,51 +729,50 @@ export const StudyPage = () => {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contents.map((content) => (
-                  <div
+                  <Card
                     key={content.id}
-                    className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 group relative"
+                    title={content.title}
+                    subtitle={content.topic}
+                    onClick={() => navigate(`/content/${content.id}`)}
+                    icon={
+                      <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                    }
+                    actions={
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteContentId(content.id);
+                        }}
+                        className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        title="Delete content"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    }
                   >
-                    <div
-                      className="cursor-pointer"
-                      onClick={() => navigate(`/content/${content.id}`)}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="p-3 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg group-hover:bg-primary-600 group-hover:text-white transition-colors">
-                          <BookOpen className="w-6 h-6" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
+                      {getSummary(content)}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {new Date(content.createdAt).toLocaleDateString(
+                          'en-US',
+                          {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          }
+                        )}
+                      </div>
+                      {content.generatedContent && (
+                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <Zap className="w-3.5 h-3.5" />
+                          Generated
                         </div>
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                          {content.topic}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        {content.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">
-                        {content.description || 'No description available'}
-                      </p>
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 gap-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>
-                          {format(
-                            new Date(content.createdAt),
-                            'MMM d, yyyy · h:mm a'
-                          )}
-                        </span>
-                      </div>
+                      )}
                     </div>
-
-                    {/* Delete Button - Moved to bottom right to avoid overlap */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteContentId(content.id);
-                      }}
-                      className="absolute bottom-4 right-4 p-2 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg"
-                      title="Delete content"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
+                  </Card>
                 ))}
               </div>
 

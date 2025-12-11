@@ -33,6 +33,7 @@ import {
   ChartSkeleton,
   TableSkeleton,
 } from '../components/skeletons';
+import { StatCard } from '../components/StatCard';
 
 const COLORS = [
   '#3b82f6',
@@ -144,80 +145,49 @@ export const StatisticsPage = () => {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/10 dark:to-indigo-900/10 border-violet-200 dark:border-violet-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-              Total Attempts
-            </p>
-            <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
-              <BookOpen className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {overview?.totalAttempts || 0}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
-            {overview?.quizAttempts || 0} quizzes •{' '}
-            {overview?.flashcardAttempts || 0} flashcards
-          </p>
-        </div>
+        <StatCard
+          title="Total Attempts"
+          value={overview?.totalAttempts || 0}
+          icon={BookOpen}
+          description={`${overview?.quizAttempts || 0} quizzes • ${overview?.flashcardAttempts || 0} flashcards`}
+          color="violet"
+          variant="gradient"
+        />
 
-        <div className="card bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-              Average Accuracy
-            </p>
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {overview?.averageAccuracy
-              ? `${overview.averageAccuracy.toFixed(1)}%`
-              : '0%'}
-          </p>
-          <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> Keep it up!
-          </p>
-        </div>
+        <StatCard
+          title="Average Accuracy"
+          value={overview?.averageAccuracy ? `${overview.averageAccuracy.toFixed(1)}%` : '0%'}
+          icon={TrendingUp}
+          trend={
+            <span className="flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" /> Keep it up!
+            </span>
+          }
+          color="emerald"
+          variant="gradient"
+        />
 
-        <div className="card bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border-blue-200 dark:border-blue-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-              Time Spent
-            </p>
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {overview?.totalTimeSpent
-              ? `${Math.floor(overview.totalTimeSpent / 60)}h`
-              : '0h'}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
-            {overview?.totalTimeSpent
-              ? `${overview.totalTimeSpent % 60}m this month`
-              : 'Start studying!'}
-          </p>
-        </div>
+        <StatCard
+          title="Time Spent"
+          value={overview?.totalTimeSpent ? `${Math.floor(overview.totalTimeSpent / 60)}h` : '0h'}
+          icon={Clock}
+          description={overview?.totalTimeSpent ? `${overview.totalTimeSpent % 60}m this month` : 'Start studying!'}
+          color="blue"
+          variant="gradient"
+        />
 
-        <div className="card bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 border-orange-200 dark:border-orange-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-              Current Streak
-            </p>
-            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-              <Flame className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {overview?.currentStreak || 0}
-          </p>
-          <p className="text-xs text-orange-600 dark:text-orange-400 mt-2 font-medium flex items-center gap-1">
-            <Flame className="w-3 h-3" /> days streak
-          </p>
-        </div>
+        <StatCard
+          title="Current Streak"
+          value={overview?.currentStreak || 0}
+          icon={Flame}
+          trend={
+            <span className="flex items-center gap-1">
+              <Flame className="w-3 h-3" /> days streak
+            </span>
+          }
+          color="orange"
+          variant="gradient"
+        />
       </div>
 
       {/* Charts Row */}

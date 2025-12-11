@@ -15,8 +15,9 @@ import {
 import { adminService } from '../../services/adminService';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
-import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
+import { StatCard } from '../../components/StatCard';
+import { StatCardSkeleton } from '../../components/skeletons';
+import { CardSkeleton } from '../../components/skeletons';
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
@@ -132,29 +133,37 @@ export const AdminDashboard = () => {
       title: 'Total Users',
       value: stats?.users.total || 0,
       icon: Users,
-      color: 'bg-blue-500',
-      trend: `+${stats?.users.newLast7Days || 0} this week`,
+      color: 'blue' as const,
+      trend: (
+        <span className="text-green-600">
+          +{stats?.users.newLast7Days || 0} this week
+        </span>
+      ),
     },
     {
       title: 'Active Users',
       value: stats?.users.active || 0,
       icon: Activity,
-      color: 'bg-green-500',
-      trend: 'Currently active',
+      color: 'green' as const,
+      trend: <span className="text-green-600">Currently active</span>,
     },
     {
       title: 'Total Quizzes',
       value: stats?.content.quizzes || 0,
       icon: BookOpen,
-      color: 'bg-purple-500',
-      trend: 'Platform wide',
+      color: 'purple' as const,
+      trend: <span className="text-gray-500">Platform wide</span>,
     },
     {
       title: 'Total Attempts',
       value: stats?.engagement.totalAttempts || 0,
       icon: TrendingUp,
-      color: 'bg-orange-500',
-      trend: `+${stats?.engagement.attemptsLast7Days || 0} this week`,
+      color: 'orange' as const,
+      trend: (
+        <span className="text-green-600">
+          +{stats?.engagement.attemptsLast7Days || 0} this week
+        </span>
+      ),
     },
   ];
 
@@ -171,27 +180,15 @@ export const AdminDashboard = () => {
 
       <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
-          <div
+          <StatCard
             key={index}
-            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {stat.title}
-                </p>
-                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                  {stat.value}
-                </p>
-              </div>
-              <div className={`rounded-lg p-3 ${stat.color}`}>
-                <stat.icon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="font-medium text-green-600">{stat.trend}</span>
-            </div>
-          </div>
+            title={stat.title}
+            value={stat.value}
+            icon={stat.icon}
+            color={stat.color}
+            trend={stat.trend}
+            variant="default"
+          />
         ))}
       </div>
 
