@@ -20,6 +20,7 @@ interface FileSelectorProps {
   onSelectionChange: (fileIds: string[]) => void;
   maxFiles?: number;
   className?: string;
+  hideIfEmpty?: boolean;
 }
 
 export const FileSelector = ({
@@ -27,6 +28,7 @@ export const FileSelector = ({
   onSelectionChange,
   maxFiles = 5,
   className = '',
+  hideIfEmpty = false,
 }: FileSelectorProps) => {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<UserDocument[]>([]);
@@ -73,7 +75,6 @@ export const FileSelector = ({
       setDocuments(docs);
       setFilteredDocuments(docs);
     } catch (error) {
-      toast.error('Failed to load files');
       console.error(error);
     } finally {
       setLoading(false);
@@ -113,6 +114,12 @@ export const FileSelector = ({
   }
 
   if (documents.length === 0) {
+    if (loading) return null;
+  }
+
+  if (documents.length === 0) {
+    if (hideIfEmpty) return null;
+
     return (
       <div
         className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 ${className}`}

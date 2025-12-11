@@ -1,6 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import type { FlashcardGenerateRequest } from '../types';
-import { Layers, Sparkles, FileText, Upload } from 'lucide-react';
+import {
+  Layers,
+  Sparkles,
+  FileText,
+  Upload,
+  ChevronDown,
+  ChevronRight,
+  X,
+} from 'lucide-react';
+import { FileSelector } from './FileSelector';
+import toast from 'react-hot-toast';
 
 interface FlashcardGeneratorProps {
   onGenerate: (request: FlashcardGenerateRequest, files?: File[]) => void;
@@ -21,7 +31,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [mode, setMode] = useState<'topic' | 'content' | 'files'>('topic');
   const [topic, setTopic] = useState('');
   const [content, setContent] = useState('');
+
   const [files, setFiles] = useState<File[]>([]);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
   const [numberOfCards, setNumberOfCards] = useState(10);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,8 +84,12 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       onGenerate({ topic, numberOfCards, contentId });
     } else if (mode === 'content' && content.trim()) {
       onGenerate({ content, numberOfCards, contentId });
-    } else if (mode === 'files' && files.length > 0) {
-      onGenerate({ numberOfCards, contentId }, files);
+    } else if (mode === 'files') {
+      if (files.length === 0 && selectedFileIds.length === 0) {
+        toast.error('Please select or upload at least one file');
+        return;
+      }
+      onGenerate({ numberOfCards, contentId, selectedFileIds }, files);
     }
   };
 
@@ -182,119 +199,111 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             </p>
           </div>
         ) : (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Upload Files
-            </label>
-
-            {/* Drag and Drop Zone */}
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isDragging
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-              }`}
-            >
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                  Drop PDF files here or click to browse
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  PDF files only (max 5MB each, up to 5 files)
-                </p>
-              </div>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleFileChange}
-              accept="application/pdf,.pdf"
-              multiple
-              className="hidden"
+          <div className="space-y-4">
+            {/* File Selector */}
+            <FileSelector
+              selectedFileIds={selectedFileIds}
+              onSelectionChange={setSelectedFileIds}
+              maxFiles={5}
+              className="mb-4"
+              hideIfEmpty={true}
             />
 
-            {/* File List */}
-            {files.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Selected files ({files.length})
-                </p>
-                {files.map((file, index) => (
+            {/* Collapsible Upload Section */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowUpload(!showUpload)}
+                className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-primary-600" />
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    Upload New Files
+                  </span>
+                </div>
+                {showUpload ? (
+                  <ChevronDown className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
+
+              {showUpload && (
+                <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                  {/* Drag and Drop Zone */}
                   <div
-                    key={`${file.name}-${index}`}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-3 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                      isDragging
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    }`}
                   >
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="flex-shrink-0">
-                        {file.type === 'application/pdf' ? (
-                          <svg
-                            className="h-8 w-8 text-red-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z" />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="h-8 w-8 text-blue-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h10l4 4v16H2v-1z" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
-                          {file.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {formatFileSize(file.size)}
-                        </p>
-                      </div>
+                    <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <div>
+                      <p className="text-lg font-bold text-primary-600 dark:text-primary-400 mb-1">
+                        Click to upload
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-100 mb-2">
+                        or drag and drop PDF files
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Maximum 5 files, 5MB each
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      className="ml-4 text-red-600 hover:text-red-800 transition-colors"
-                    >
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileChange}
+                    accept="application/pdf,.pdf"
+                    multiple
+                    className="hidden"
+                  />
+
+                  {/* File List */}
+                  {files.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Selected files ({files.length})
+                      </p>
+                      {files.map((file, index) => (
+                        <div
+                          key={`${file.name}-${index}`}
+                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                        >
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            <div className="flex-shrink-0">
+                              <FileText className="h-8 w-8 text-primary-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
+                                {file.name}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatFileSize(file.size)}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="ml-4 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

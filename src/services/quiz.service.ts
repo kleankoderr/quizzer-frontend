@@ -44,6 +44,11 @@ export const quizService = {
     if (request.topic) formData.append('topic', request.topic);
     if (request.content) formData.append('content', request.content);
     if (request.contentId) formData.append('contentId', request.contentId);
+    if (request.selectedFileIds && request.selectedFileIds.length > 0) {
+      for (const id of request.selectedFileIds) {
+        formData.append('selectedFileIds[]', id);
+      }
+    }
     formData.append('numberOfQuestions', request.numberOfQuestions.toString());
     formData.append('difficulty', request.difficulty || 'medium');
 
@@ -78,74 +83,6 @@ export const quizService = {
   async getAttemptById(attemptId: string): Promise<Attempt> {
     const response = await apiClient.get<Attempt>(`/quiz/attempt/${attemptId}`);
     return response.data;
-  },
-
-  async getAllAttempts(params?: {
-    quizId?: string;
-    flashcardSetId?: string;
-    challengeId?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<Attempt[]> {
-    const response = await apiClient.get<Attempt[]>(`/quiz/attempts`, {
-      params,
-    });
-    return response.data;
-  },
-
-  // Poll for quiz completion
-  pollForCompletion: async (
-    jobId: string,
-    onProgress?: (progress: number) => void,
-    maxAttempts = 60
-  ): Promise<Quiz | null> => {
-    let attempts = 0;
-    let jobFound = false;
-
-    while (attempts < maxAttempts) {
-      try {
-        const status = await quizService.getJobStatus(jobId);
-        jobFound = true;
-
-        // Update progress if available
-        if (status.progress && onProgress) {
-          const progressValue =
-            typeof status.progress === 'number'
-              ? status.progress
-              : status.progress.percent || 0;
-          onProgress(progressValue);
-        }
-
-        if (status.status === 'completed') {
-          if (onProgress) onProgress(100);
-
-          if (status.result?.quiz) {
-            return status.result.quiz;
-          }
-          return null; // Success but no quiz object returned directly
-        }
-
-        if (status.status === 'failed') {
-          throw new Error(status.error || 'Quiz generation failed');
-        }
-      } catch (error: any) {
-        // Handle 404: If job was previously found, it might have been completed and removed
-        if (error?.response?.status === 404 && jobFound) {
-          if (onProgress) onProgress(100);
-          return null; // Assume success
-        }
-        // If never found or other error, rethrow
-        if (error?.response?.status !== 404) {
-          throw error;
-        }
-      }
-
-      // Wait 5 seconds before next poll
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      attempts++;
-    }
-
-    throw new Error('Quiz generation timed out');
   },
 
   // Get all quizzes

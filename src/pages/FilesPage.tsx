@@ -242,21 +242,6 @@ export const FilesPage = () => {
       switch (type) {
         case 'pdf':
           return mimeType.includes('pdf');
-        case 'image':
-          return mimeType.startsWith('image/');
-        case 'document':
-          return (
-            mimeType.includes('word') ||
-            mimeType.includes('document') ||
-            mimeType.includes('text')
-          );
-        case 'other':
-          return (
-            !mimeType.includes('pdf') &&
-            !mimeType.startsWith('image/') &&
-            !mimeType.includes('word') &&
-            !mimeType.includes('document')
-          );
         default:
           return false;
       }
@@ -280,25 +265,28 @@ export const FilesPage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <FileText className="w-8 h-8 text-primary-600" />
-              My Files
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage and organize your uploaded documents
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <FileText className="w-8 h-8 text-primary-600" />
+                My Files
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+                Manage and organize your uploaded documents
+              </p>
+            </div>
           </div>
+
           <button
             onClick={() => setUploadModalOpen(true)}
-            className="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium flex items-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
           >
             <Upload className="w-5 h-5" />
             Upload Files
@@ -384,13 +372,6 @@ export const FilesPage = () => {
             >
               <option value="all">All Files ({getFileTypeCount('all')})</option>
               <option value="pdf">PDFs ({getFileTypeCount('pdf')})</option>
-              <option value="image">
-                Images ({getFileTypeCount('image')})
-              </option>
-              <option value="document">
-                Documents ({getFileTypeCount('document')})
-              </option>
-              <option value="other">Other ({getFileTypeCount('other')})</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
           </div>
@@ -582,9 +563,6 @@ export const FilesPage = () => {
                           <p className="font-medium text-gray-900 dark:text-white truncate">
                             {doc.displayName}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                            {doc.document.fileName}
-                          </p>
                         </div>
                       </div>
                     </td>
@@ -673,12 +651,9 @@ export const FilesPage = () => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">
                   {selectedDocument.displayName}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {selectedDocument.document.fileName}
-                </p>
               </div>
             </div>
 
@@ -759,7 +734,7 @@ export const FilesPage = () => {
               onChange={handleFileSelect}
               className="hidden"
               id="file-upload"
-              accept="*/*"
+              accept=".pdf,application/pdf"
             />
             <label
               htmlFor="file-upload"
@@ -768,7 +743,7 @@ export const FilesPage = () => {
               Select Files
             </label>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Maximum 5 files
+              PDF files only (max 5 files)
             </p>
           </div>
 

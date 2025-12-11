@@ -99,6 +99,7 @@ export interface QuizGenerateRequest {
   timeLimit?: number;
   questionTypes?: QuestionType[];
   contentId?: string;
+  selectedFileIds?: string[];
 }
 
 export interface QuizSubmission {
@@ -142,6 +143,7 @@ export interface FlashcardGenerateRequest {
   content?: string;
   numberOfCards: number;
   contentId?: string;
+  selectedFileIds?: string[];
 }
 
 // Streak types

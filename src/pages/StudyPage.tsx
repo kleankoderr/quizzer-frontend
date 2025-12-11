@@ -14,6 +14,8 @@ import {
   Calendar,
   Trash2,
   X,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Modal } from '../components/Modal';
@@ -36,7 +38,9 @@ export const StudyPage = () => {
   const [textTopic, setTextTopic] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+
   const [contentLoading, setContentLoading] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
 
   // Use refs to avoid race conditions with SSE events
   const currentJobIdRef = useRef<string | null>(null);
@@ -635,56 +639,73 @@ export const StudyPage = () => {
                   className="mb-6"
                 />
 
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">
-                      Or upload new files
-                    </span>
-                  </div>
-                </div>
+                {/* Collapsible Upload Section */}
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowUpload(!showUpload)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-primary-600" />
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        Upload New Files
+                      </span>
+                    </div>
+                    {showUpload ? (
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-500" />
+                    )}
+                  </button>
 
-                <label
-                  htmlFor="file-upload"
-                  className={`block border-3 border-dashed rounded-xl p-6 md:p-12 text-center transition-all cursor-pointer ${
-                    files.length > 0
-                      ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <Upload
-                    className={`w-16 h-16 mx-auto mb-4 ${files.length > 0 ? 'text-primary-600' : 'text-gray-400'}`}
-                  />
-                  <input
-                    type="file"
-                    id="file-upload"
-                    accept=".pdf"
-                    multiple
-                    onChange={(e) => {
-                      const selectedFiles = Array.from(e.target.files || []);
-                      if (selectedFiles.length > 5) {
-                        toast.error('Maximum 5 files allowed');
-                        setFiles(selectedFiles.slice(0, 5));
-                      } else {
-                        setFiles(selectedFiles);
-                      }
-                    }}
-                    className="hidden"
-                  />
-                  <span className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-bold text-lg">
-                    Click to upload
-                  </span>
-                  <span className="text-gray-600 dark:text-gray-300 text-lg">
-                    {' '}
-                    or drag and drop
-                  </span>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                    PDF files (max 5 files, 5MB each)
-                  </p>
-                </label>
+                  {showUpload && (
+                    <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                      <label
+                        htmlFor="file-upload"
+                        className={`block border-3 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                          files.length > 0
+                            ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <Upload
+                          className={`w-12 h-12 mx-auto mb-4 ${files.length > 0 ? 'text-primary-600' : 'text-gray-400'}`}
+                        />
+                        <div className="mb-2">
+                          <span className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-bold text-lg">
+                            Click to upload
+                          </span>
+                          <span className="text-gray-600 dark:text-gray-100 text-lg">
+                            {' '}
+                            or drag and drop
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          PDF files (max 5 files, 5MB each)
+                        </p>
+                        <input
+                          type="file"
+                          id="file-upload"
+                          accept=".pdf"
+                          multiple
+                          onChange={(e) => {
+                            const selectedFiles = Array.from(
+                              e.target.files || []
+                            );
+                            if (selectedFiles.length > 5) {
+                              toast.error('Maximum 5 files allowed');
+                              setFiles(selectedFiles.slice(0, 5));
+                            } else {
+                              setFiles(selectedFiles);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
 
                 {files.length > 0 && (
                   <div className="space-y-2">
