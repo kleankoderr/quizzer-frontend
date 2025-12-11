@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { QuizGenerator } from '../components/QuizGenerator';
 import { QuizList } from '../components/QuizList';
-import { Modal } from '../components/Modal';
+import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQuizzes } from '../hooks';
@@ -42,6 +42,7 @@ export const QuizPage = () => {
     | undefined
   >(undefined);
   const [deleteQuizId, setDeleteQuizId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Use refs to avoid race conditions with SSE events
   const currentJobIdRef = useRef<string | null>(null);
@@ -231,6 +232,7 @@ export const QuizPage = () => {
   const confirmDeleteQuiz = async () => {
     if (!deleteQuizId) return;
 
+    setIsDeleting(true);
     const loadingToast = toast.loading('Deleting quiz...');
     try {
       await quizService.delete(deleteQuizId);
@@ -239,12 +241,13 @@ export const QuizPage = () => {
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
 
       toast.success('Quiz deleted successfully!', { id: loadingToast });
+      setDeleteQuizId(null);
     } catch (_error) {
       toast.error('Failed to delete quiz. Please try again.', {
         id: loadingToast,
       });
     } finally {
-      setDeleteQuizId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -393,32 +396,14 @@ export const QuizPage = () => {
           />
         ))}
 
-      <Modal
+      <DeleteModal
         isOpen={!!deleteQuizId}
         onClose={() => setDeleteQuizId(null)}
+        onConfirm={confirmDeleteQuiz}
         title="Delete Quiz"
-        footer={
-          <>
-            <button
-              onClick={() => setDeleteQuizId(null)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDeleteQuiz}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Delete Quiz
-            </button>
-          </>
-        }
-      >
-        <p>
-          Are you sure you want to delete this quiz? This action cannot be
-          undone.
-        </p>
-      </Modal>
+        message="Are you sure you want to delete this quiz? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

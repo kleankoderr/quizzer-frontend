@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { FlashcardGenerateRequest } from '../types';
 import {
   Layers,
@@ -7,10 +7,10 @@ import {
   Upload,
   ChevronDown,
   ChevronRight,
-  X,
   LayoutList,
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
+import { FileUpload } from './FileUpload';
 import toast from 'react-hot-toast';
 
 interface FlashcardGeneratorProps {
@@ -37,8 +37,6 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [numberOfCards, setNumberOfCards] = useState(10);
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialValues) {
@@ -48,34 +46,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     }
   }, [initialValues]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...newFiles]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    setFiles((prev) => [...prev, ...droppedFiles]);
-  };
-
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+  // File handling functions removed as they are now handled by FileUpload component
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,11 +65,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
+
 
   return (
     <div className="card border border-primary-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 p-4 md:p-6">
@@ -232,76 +199,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
               {showUpload && (
                 <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                  {/* Drag and Drop Zone */}
-                  <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`border-3 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                      isDragging
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                    }`}
-                  >
-                    <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <div>
-                      <p className="text-lg font-bold text-primary-600 dark:text-primary-400 mb-1">
-                        Click to upload
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-100 mb-2">
-                        or drag and drop PDF files
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Maximum 5 files, 5MB each
-                      </p>
-                    </div>
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    onChange={handleFileChange}
-                    accept="application/pdf,.pdf"
-                    multiple
-                    className="hidden"
+                  <FileUpload
+                    files={files}
+                    onFilesChange={setFiles}
+                    maxFiles={5}
                   />
-
-                  {/* File List */}
-                  {files.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Selected files ({files.length})
-                      </p>
-                      {files.map((file, index) => (
-                        <div
-                          key={`${file.name}-${index}`}
-                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
-                        >
-                          <div className="flex items-center space-x-3 flex-1 min-w-0">
-                            <div className="flex-shrink-0">
-                              <FileText className="h-8 w-8 text-primary-500" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
-                                {file.name}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {formatFileSize(file.size)}
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeFile(index)}
-                            className="ml-4 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            <X className="w-5 h-5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
             </div>

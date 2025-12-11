@@ -5,23 +5,24 @@ import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
 import type { AppEvent } from '../types/events';
 import {
+  BookOpen,
   Sparkles,
   FileText,
   Upload,
-  Plus,
-  BookOpen,
   Zap,
   Calendar,
   Trash2,
   X,
   ChevronDown,
+  Plus,
   ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Modal } from '../components/Modal';
+import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { FileSelector } from '../components/FileSelector';
+import { FileUpload } from '../components/FileUpload';
 import { useSSEEvent } from '../hooks/useSSE';
 
 export const StudyPage = () => {
@@ -48,6 +49,7 @@ export const StudyPage = () => {
 
   // Delete state
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Use React Query hooks for data fetching
   const [page, setPage] = useState(1);
@@ -336,16 +338,18 @@ export const StudyPage = () => {
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
 
+    setIsDeleting(true);
     const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
       // Refetch the contents list to update the UI
       refetch();
+      setDeleteContentId(null);
     } catch (_error) {
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
-      setDeleteContentId(null);
+      setIsDeleting(false);
     }
   }, [deleteContentId, refetch]);
 
@@ -661,80 +665,14 @@ export const StudyPage = () => {
 
                   {showUpload && (
                     <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                      <label
-                        htmlFor="file-upload"
-                        className={`block border-3 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                          files.length > 0
-                            ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
-                      >
-                        <Upload
-                          className={`w-12 h-12 mx-auto mb-4 ${files.length > 0 ? 'text-primary-600' : 'text-gray-400'}`}
-                        />
-                        <div className="mb-2">
-                          <span className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-bold text-lg">
-                            Click to upload
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-100 text-lg">
-                            {' '}
-                            or drag and drop
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          PDF files (max 5 files, 5MB each)
-                        </p>
-                        <input
-                          type="file"
-                          id="file-upload"
-                          accept=".pdf"
-                          multiple
-                          onChange={(e) => {
-                            const selectedFiles = Array.from(
-                              e.target.files || []
-                            );
-                            if (selectedFiles.length > 5) {
-                              toast.error('Maximum 5 files allowed');
-                              setFiles(selectedFiles.slice(0, 5));
-                            } else {
-                              setFiles(selectedFiles);
-                            }
-                          }}
-                          className="hidden"
-                        />
-                      </label>
+                      <FileUpload
+                        files={files}
+                        onFilesChange={setFiles}
+                        maxFiles={5}
+                      />
                     </div>
                   )}
                 </div>
-
-                {files.length > 0 && (
-                  <div className="space-y-2">
-                    {files.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border-2 border-primary-300 dark:border-primary-600 shadow-sm"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {(file.size / (1024 * 1024)).toFixed(2)} MB
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setFiles(files.filter((_, i) => i !== index));
-                          }}
-                          className="ml-2 p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                          type="button"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 <button
                   onClick={handleFileUpload}
@@ -874,32 +812,14 @@ export const StudyPage = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      <Modal
+      <DeleteModal
         isOpen={!!deleteContentId}
         onClose={() => setDeleteContentId(null)}
+        onConfirm={confirmDeleteContent}
         title="Delete Study Material"
-        footer={
-          <>
-            <button
-              onClick={() => setDeleteContentId(null)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDeleteContent}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Delete
-            </button>
-          </>
-        }
-      >
-        <p>
-          Are you sure you want to delete this study material? This action
-          cannot be undone.
-        </p>
-      </Modal>
+        message="Are you sure you want to delete this study material? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

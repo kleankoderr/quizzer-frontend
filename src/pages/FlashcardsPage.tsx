@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { FlashcardGenerator } from '../components/FlashcardGenerator';
 import { FlashcardSetList } from '../components/FlashcardSetList';
-import { Modal } from '../components/Modal';
+import { DeleteModal } from '../components/DeleteModal';
 import { useFlashcardSets } from '../hooks';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
@@ -30,6 +30,7 @@ export const FlashcardsPage = () => {
   const { data: flashcardSets = [], isLoading } = useFlashcardSets();
   const [loading, setLoading] = useState(false);
   const [deleteSetId, setDeleteSetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [initialValues, setInitialValues] = useState<
     | {
         topic?: string;
@@ -223,6 +224,7 @@ export const FlashcardsPage = () => {
   const confirmDeleteSet = async () => {
     if (!deleteSetId) return;
 
+    setIsDeleting(true);
     const loadingToast = toast.loading('Deleting flashcard set...');
     try {
       await flashcardService.delete(deleteSetId);
@@ -233,12 +235,13 @@ export const FlashcardsPage = () => {
       toast.success('Flashcard set deleted successfully!', {
         id: loadingToast,
       });
+      setDeleteSetId(null);
     } catch (_error) {
       toast.error('Failed to delete flashcard set. Please try again.', {
         id: loadingToast,
       });
     } finally {
-      setDeleteSetId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -385,32 +388,14 @@ export const FlashcardsPage = () => {
           />
         ))}
 
-      <Modal
+      <DeleteModal
         isOpen={!!deleteSetId}
         onClose={() => setDeleteSetId(null)}
+        onConfirm={confirmDeleteSet}
         title="Delete Flashcard Set"
-        footer={
-          <>
-            <button
-              onClick={() => setDeleteSetId(null)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDeleteSet}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Delete Set
-            </button>
-          </>
-        }
-      >
-        <p>
-          Are you sure you want to delete this flashcard set? This action cannot
-          be undone.
-        </p>
-      </Modal>
+        message="Are you sure you want to delete this flashcard set? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

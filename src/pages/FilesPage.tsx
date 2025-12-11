@@ -26,6 +26,8 @@ import {
   type UserDocument,
 } from '../services/user-document.service';
 import { Modal } from '../components/Modal';
+import { DeleteModal } from '../components/DeleteModal';
+import { FileUpload } from '../components/FileUpload';
 
 type SortField = 'name' | 'date' | 'size';
 type SortOrder = 'asc' | 'desc';
@@ -47,6 +49,7 @@ export const FilesPage = () => {
     null
   );
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
@@ -156,17 +159,19 @@ export const FilesPage = () => {
   const confirmDelete = async () => {
     if (!selectedDocument) return;
 
+    setIsDeleting(true);
     const loadingToast = toast.loading('Deleting file...');
     try {
       await userDocumentService.deleteUserDocument(selectedDocument.id);
       toast.success('File deleted successfully', { id: loadingToast });
       setDocuments(documents.filter((d) => d.id !== selectedDocument.id));
+      setDeleteModalOpen(false);
+      setSelectedDocument(null);
     } catch (error) {
       toast.error('Failed to delete file', { id: loadingToast });
       console.error(error);
     } finally {
-      setDeleteModalOpen(false);
-      setSelectedDocument(null);
+      setIsDeleting(false);
     }
   };
 
@@ -208,32 +213,8 @@ export const FilesPage = () => {
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      if (selectedFiles.length + uploadFiles.length > 5) {
-        toast.error('You can upload up to 5 files at a time');
-        return;
-      }
-      setUploadFiles([...uploadFiles, ...selectedFiles]);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (e.dataTransfer.files) {
-      const droppedFiles = Array.from(e.dataTransfer.files);
-      if (droppedFiles.length + uploadFiles.length > 5) {
-        toast.error('You can upload up to 5 files at a time');
-        return;
-      }
-      setUploadFiles([...uploadFiles, ...droppedFiles]);
-    }
-  };
-
-  const removeUploadFile = (index: number) => {
-    setUploadFiles(uploadFiles.filter((_, i) => i !== index));
-  };
+  // File handling functions removed as they are now handled by FileUpload component
+  // handleFileSelect, handleDrop, removeUploadFile are no longer needed here
 
   const getFileTypeCount = (type: string) => {
     if (type === 'all') return documents.length;
@@ -608,33 +589,14 @@ export const FilesPage = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      <Modal
+      <DeleteModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
         title="Delete File"
-      >
-        <div className="p-6">
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Are you sure you want to delete{' '}
-            <strong>{selectedDocument?.displayName}</strong>? This action cannot
-            be undone.
-          </p>
-          <div className="flex gap-3 justify-end">
-            <button
-              onClick={() => setDeleteModalOpen(false)}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </Modal>
+        itemName={selectedDocument?.displayName}
+        isDeleting={isDeleting}
+      />
 
       {/* Preview Modal */}
       <Modal
@@ -719,65 +681,12 @@ export const FilesPage = () => {
         title="Upload Files"
       >
         <div className="p-6">
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()}
-            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center mb-4 hover:border-primary-500 dark:hover:border-primary-400 transition-colors"
-          >
-            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
-              Drag and drop files here, or click to select
-            </p>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-              id="file-upload"
-              accept=".pdf,application/pdf"
-            />
-            <label
-              htmlFor="file-upload"
-              className="inline-block px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors cursor-pointer font-medium"
-            >
-              Select Files
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              PDF files only (max 5 files)
-            </p>
-          </div>
-
-          {uploadFiles.length > 0 && (
-            <div className="space-y-2 mb-4">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Selected Files ({uploadFiles.length}/5)
-              </p>
-              {uploadFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {file.name}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {userDocumentService.formatFileSize(file.size)}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeUploadFile(index)}
-                    className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <FileUpload
+            files={uploadFiles}
+            onFilesChange={setUploadFiles}
+            maxFiles={5}
+            className="mb-6"
+          />
 
           <div className="flex gap-3 justify-end">
             <button

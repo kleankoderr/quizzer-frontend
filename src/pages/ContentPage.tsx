@@ -23,7 +23,7 @@ import { format } from 'date-fns';
 
 import { contentService, type Content } from '../services/content.service';
 import toast from 'react-hot-toast';
-import { Modal } from '../components/Modal';
+import { DeleteModal } from '../components/DeleteModal';
 import { InlineNoteInput } from '../components/InlineNoteInput';
 import { LearningGuide } from '../components/LearningGuide';
 
@@ -199,8 +199,10 @@ export const ContentPage = () => {
   const [deleteHighlightId, setDeleteHighlightId] = useState<string | null>(
     null
   );
+  const [isDeletingHighlight, setIsDeletingHighlight] = useState(false);
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] =
     useState(false);
+  const [isDeletingContent, setIsDeletingContent] = useState(false);
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<
     number | undefined
   >(undefined);
@@ -357,14 +359,16 @@ export const ContentPage = () => {
 
   const confirmDeleteHighlight = async () => {
     if (!deleteHighlightId) return;
+    setIsDeletingHighlight(true);
     try {
       await contentService.deleteHighlight(deleteHighlightId);
       toast.success('Highlight removed');
       refetch();
+      setDeleteHighlightId(null);
     } catch (_error) {
       toast.error('Failed to delete highlight');
     } finally {
-      setDeleteHighlightId(null);
+      setIsDeletingHighlight(false);
     }
   };
 
@@ -435,17 +439,19 @@ export const ContentPage = () => {
   const confirmDeleteContent = async () => {
     if (!id) return;
 
+    setIsDeletingContent(true);
     const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(id);
       toast.success('Content deleted successfully!', { id: loadingToast });
       // Invalidate contents list to remove deleted item
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
+      setIsDeleteContentModalOpen(false);
       navigate('/study');
     } catch (_error) {
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
-      setIsDeleteContentModalOpen(false);
+      setIsDeletingContent(false);
     }
   };
 
@@ -908,56 +914,23 @@ export const ContentPage = () => {
       )}
 
       {/* Modals */}
-      <Modal
+      <DeleteModal
         isOpen={!!deleteHighlightId}
         onClose={() => setDeleteHighlightId(null)}
+        onConfirm={confirmDeleteHighlight}
         title="Delete Highlight"
-        footer={
-          <>
-            <button
-              onClick={() => setDeleteHighlightId(null)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDeleteHighlight}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Delete
-            </button>
-          </>
-        }
-      >
-        <p>Are you sure you want to delete this highlight?</p>
-      </Modal>
+        message="Are you sure you want to delete this highlight?"
+        isDeleting={isDeletingHighlight}
+      />
 
-      <Modal
+      <DeleteModal
         isOpen={isDeleteContentModalOpen}
         onClose={() => setIsDeleteContentModalOpen(false)}
+        onConfirm={confirmDeleteContent}
         title="Delete Content"
-        footer={
-          <>
-            <button
-              onClick={() => setIsDeleteContentModalOpen(false)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDeleteContent}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Delete Content
-            </button>
-          </>
-        }
-      >
-        <p>
-          Are you sure you want to delete this content? This action cannot be
-          undone.
-        </p>
-      </Modal>
+        message="Are you sure you want to delete this content? This action cannot be undone."
+        isDeleting={isDeletingContent}
+      />
     </div>
   );
 };

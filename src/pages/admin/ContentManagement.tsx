@@ -13,7 +13,7 @@ import {
 import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import { Modal } from '../../components/Modal';
+import { DeleteModal } from '../../components/DeleteModal';
 import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 type ContentType = 'quizzes' | 'flashcards' | 'contents' | 'challenges';
@@ -114,6 +114,12 @@ export const ContentManagement = () => {
       closeModal();
     },
   });
+
+  const isDeleting =
+    deleteQuizMutation.isPending ||
+    deleteFlashcardMutation.isPending ||
+    deleteContentMutation.isPending ||
+    deleteChallengeMutation.isPending;
 
   const closeModal = () => {
     setModalConfig((prev) => ({ ...prev, isOpen: false }));
@@ -306,29 +312,14 @@ export const ContentManagement = () => {
         )}
       </div>
 
-      <Modal
+      <DeleteModal
         isOpen={modalConfig.isOpen}
         onClose={closeModal}
+        onConfirm={modalConfig.onConfirm}
         title={modalConfig.title}
-        footer={
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={closeModal}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={modalConfig.onConfirm}
-              className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${modalConfig.confirmColor || 'bg-primary-600 hover:bg-primary-700'}`}
-            >
-              {modalConfig.confirmText || 'Confirm'}
-            </button>
-          </div>
-        }
-      >
-        <p>{modalConfig.message}</p>
-      </Modal>
+        message={modalConfig.message}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };
