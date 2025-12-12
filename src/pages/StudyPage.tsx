@@ -5,18 +5,17 @@ import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
 import type { AppEvent } from '../types/events';
 import {
-  BookOpen,
-  Sparkles,
-  FileText,
-  Upload,
-  Zap,
-  Calendar,
-  Trash2,
-  X,
-  ChevronDown,
   Plus,
   ChevronRight,
+  BookOpen,
+  Sparkles,
+  Zap,
+  FileText,
+  Upload,
+  X,
+  ChevronDown,
   Folder,
+  Trash2,
 } from 'lucide-react';
 
 import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
@@ -105,17 +104,14 @@ export const StudyPage = () => {
       title={content.title}
       subtitle={content.topic}
       onClick={() => navigate(`/content/${content.id}`)}
-      icon={
-        <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-      }
       actions={
-        <>
+        <div className="flex items-center gap-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setDeleteContentId(content.id);
             }}
-            className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1.5 text-red-800 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
             title="Delete content"
           >
             <Trash2 className="w-4 h-4" />
@@ -125,12 +121,12 @@ export const StudyPage = () => {
               e.stopPropagation();
               setMoveContentId(content.id);
             }}
-            className="p-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
             title="Move to Study Pack"
           >
             <Folder className="w-4 h-4" />
           </button>
-        </>
+        </div>
       }
     >
       <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
@@ -138,7 +134,6 @@ export const StudyPage = () => {
       </p>
       <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
         <div className="flex items-center gap-1">
-          <Calendar className="w-3.5 h-3.5" />
           {new Date(content.createdAt).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -147,7 +142,6 @@ export const StudyPage = () => {
         </div>
         {content.generatedContent && (
           <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-            <Zap className="w-3.5 h-3.5" />
             Generated
           </div>
         )}

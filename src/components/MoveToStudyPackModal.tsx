@@ -44,7 +44,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       setNewPackTitle('');
       setMoving(null);
     }
-  }, [isOpen, fetchStudyPacks]);
+  }, [isOpen]);
 
   const handleCreatePack = useCallback(async () => {
     const trimmedTitle = newPackTitle.trim();

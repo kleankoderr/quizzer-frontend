@@ -2,14 +2,10 @@ import React from 'react';
 import { Card } from './Card';
 import type { Quiz } from '../types';
 import {
-  Calendar,
-  FileText,
   Brain,
-  Play,
-  CheckCircle2,
-  Trash2,
   Plus,
   Folder,
+  Trash2,
 } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -47,7 +43,6 @@ export const QuizList: React.FC<QuizListProps> = ({
   }, [quizzes]);
 
   const renderQuizCard = (quiz: Quiz) => {
-    const hasAttempts = quiz.attempts && quiz.attempts.length > 0;
     const latestAttempt = quiz.attempts?.[0] ?? null;
 
     return (
@@ -56,21 +51,12 @@ export const QuizList: React.FC<QuizListProps> = ({
         to={`/quiz/${quiz.id}`}
         title={quiz.title}
         subtitle={quiz.topic}
-        icon={
-          <Brain className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-        }
         actions={
-          <>
-            {hasAttempts && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
-                <CheckCircle2 className="w-3 h-3" />
-                Attempted
-              </div>
-            )}
+          <div className="flex items-center gap-1">
             {onDelete && (
               <button
                 onClick={(e) => handleDelete(e, quiz.id)}
-                className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                className="p-1.5 text-red-800 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
                 title="Delete quiz"
               >
                 <Trash2 className="w-4 h-4" />
@@ -82,20 +68,12 @@ export const QuizList: React.FC<QuizListProps> = ({
                 e.stopPropagation();
                 setMoveQuizId(quiz.id);
               }}
-              className="p-1.5 bg-primary-5 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
               title="Move to Study Pack"
             >
               <Folder className="w-4 h-4" />
             </button>
-          </>
-        }
-        footer={
-          <>
-            <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-              Click to {hasAttempts ? 'retake' : 'start'}
-            </span>
-            <Play className="w-4 h-4 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </>
+          </div>
         }
       >
         {/* Tags */}
@@ -116,7 +94,6 @@ export const QuizList: React.FC<QuizListProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-              <FileText className="w-4 h-4" />
               {quiz.questions.length} questions
             </span>
             <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
@@ -125,7 +102,6 @@ export const QuizList: React.FC<QuizListProps> = ({
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
               {new Date(quiz.createdAt).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
