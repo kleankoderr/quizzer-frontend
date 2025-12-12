@@ -1,5 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { X } from 'lucide-react';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,21 +21,17 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+  useBodyScrollLock(isOpen);
+  useFocusTrap(modalRef as React.RefObject<HTMLElement>, isOpen);
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
+  useKeyboardNavigation(isOpen, {
+    onMoveUp: () => {},
+    onMoveDown: () => {},
+    onSelect: () => {},
+    onClose: onClose,
+  });
 
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+  // Removed manual useEffect for escape and scroll lock
 
   if (!isOpen) return null;
 

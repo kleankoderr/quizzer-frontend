@@ -24,7 +24,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
       }
     };
 
-      globalThis.addEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
     return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, []);
 

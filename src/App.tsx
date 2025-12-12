@@ -84,6 +84,14 @@ const DiscoverPage = lazy(() =>
 const FilesPage = lazy(() =>
   import('./pages/FilesPage').then((m) => ({ default: m.FilesPage }))
 );
+const StudyPacksPage = lazy(() =>
+  import('./pages/StudyPacksPage').then((m) => ({ default: m.StudyPacksPage }))
+);
+const StudyPackDetailsPage = lazy(() =>
+  import('./pages/StudyPackDetailsPage').then((m) => ({
+    default: m.StudyPackDetailsPage,
+  }))
+);
 
 // Lazy load admin pages
 const AdminDashboard = lazy(() =>
@@ -222,6 +230,8 @@ function AppRoutes() {
           <Route path="statistics" element={<StatisticsPage />} />
           <Route path="attempts" element={<AttemptsPage />} />
           <Route path="files" element={<FilesPage />} />
+          <Route path="study-packs" element={<StudyPacksPage />} />
+          <Route path="study-packs/:id" element={<StudyPackDetailsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
 

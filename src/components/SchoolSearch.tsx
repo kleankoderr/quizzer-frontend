@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { School as SchoolIcon, Search, Plus } from 'lucide-react';
 import { schoolService, type School } from '../services/school.service';
+import { useDebounce } from '../hooks/useDebounce';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface SchoolSearchProps {
   value: string;
@@ -21,33 +23,26 @@ export const SchoolSearch = ({
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const debouncedQuery = useDebounce(query, 300);
+
   useEffect(() => {
     setQuery(value);
   }, [value]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(wrapperRef as React.RefObject<HTMLElement>, () =>
+    setIsOpen(false)
+  );
 
   useEffect(() => {
     const searchSchools = async () => {
-      if (query.length < 3) {
+      if (debouncedQuery.length < 3) {
         setResults([]);
         return;
       }
 
       setLoading(true);
       try {
-        const data = await schoolService.searchSchools(query);
+        const data = await schoolService.searchSchools(debouncedQuery);
         setResults(data);
       } catch (error) {
         console.error('Failed to search schools:', error);
@@ -56,9 +51,8 @@ export const SchoolSearch = ({
       }
     };
 
-    const debounce = setTimeout(searchSchools, 300); // Faster response (300ms)
-    return () => clearTimeout(debounce);
-  }, [query]);
+    searchSchools();
+  }, [debouncedQuery]);
 
   const handleSelect = (schoolName: string) => {
     onChange(schoolName);

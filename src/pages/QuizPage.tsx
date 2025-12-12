@@ -393,6 +393,9 @@ export const QuizPage = () => {
             quizzes={quizzes}
             onDelete={handleDelete}
             onCreateNew={() => setShowGenerator(true)}
+            onItemMoved={() =>
+              queryClient.invalidateQueries({ queryKey: ['quizzes'] })
+            }
           />
         ))}
 

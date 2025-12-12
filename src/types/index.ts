@@ -88,6 +88,11 @@ export interface Quiz {
     score: number;
     completedAt: string;
   }[];
+  studyPackId?: string;
+  studyPack?: {
+    id: string;
+    title: string;
+  };
 }
 
 export interface QuizGenerateRequest {
@@ -141,6 +146,11 @@ export interface FlashcardSet {
   userId: string;
   createdAt: string;
   lastStudiedAt?: string;
+  studyPackId?: string;
+  studyPack?: {
+    id: string;
+    title: string;
+  };
 }
 
 export interface FlashcardGenerateRequest {
@@ -340,4 +350,54 @@ export interface Attempt {
     title: string;
     type: string;
   };
+}
+
+// Study Pack types
+export interface StudyPack {
+  id: string;
+  title: string;
+  description?: string;
+  coverImage?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt?: string;
+  _count?: {
+    quizzes: number;
+    flashcardSets: number;
+    contents: number;
+    userDocuments: number;
+  };
+  quizzes?: any[];
+  flashcardSets?: any[];
+  contents?: any[];
+  userDocuments?: any[];
+}
+
+export interface CreateStudyPackRequest {
+  title: string;
+  description?: string;
+  coverImage?: string;
+}
+
+export interface UpdateStudyPackRequest {
+  title?: string;
+  description?: string;
+  coverImage?: string;
+}
+
+export interface MoveItemRequest {
+  type: 'quiz' | 'flashcard' | 'content' | 'file';
+  itemId: string;
+}
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
 }

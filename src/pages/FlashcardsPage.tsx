@@ -385,6 +385,9 @@ export const FlashcardsPage = () => {
             sets={flashcardSets}
             onDelete={handleDelete}
             onCreateNew={() => setShowGenerator(true)}
+            onItemMoved={() =>
+              queryClient.invalidateQueries({ queryKey: ['flashcardSets'] })
+            }
           />
         ))}
 

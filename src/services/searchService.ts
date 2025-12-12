@@ -3,7 +3,7 @@ import { apiClient } from './api';
 export interface SearchResult {
   id: string;
   title: string;
-  type: 'quiz' | 'flashcard' | 'content';
+  type: 'quiz' | 'flashcard' | 'content' | 'study-pack';
   metadata?: string;
   url: string;
 }

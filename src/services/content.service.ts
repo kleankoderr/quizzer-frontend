@@ -26,6 +26,10 @@ export interface Content {
     nextSteps?: string[];
   };
   lastReadPosition?: number;
+  studyPack?: {
+    id: string;
+    title: string;
+  };
 }
 
 export interface GenerateContentDto {

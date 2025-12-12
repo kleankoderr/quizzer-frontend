@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useRef, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
@@ -16,8 +16,11 @@ import {
   ChevronDown,
   Plus,
   ChevronRight,
+  Folder,
 } from 'lucide-react';
 
+import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
+import { CollapsibleSection } from '../components/CollapsibleSection';
 import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
@@ -28,9 +31,24 @@ import { useSSEEvent } from '../hooks/useSSE';
 
 export const StudyPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Use React Query hooks for data fetching (moved up for useMemo dependency)
+  const [page, setPage] = useState(1);
+  const {
+    data: contentsData,
+    isLoading: isLoadingContents,
+    refetch,
+  } = useContents(undefined, page, 6);
+  const { data: popularTopics = [] } = usePopularTopics();
+
+  const contents = useMemo(() => contentsData?.data ?? [], [contentsData]);
+  const totalPages = contentsData?.meta?.totalPages ?? 1;
 
   // Content creation states
-  const [showCreator, setShowCreator] = useState(false);
+  const [showCreator, setShowCreator] = useState(
+    location.state?.openCreator || false
+  );
   const [activeTab, setActiveTab] = useState<'topic' | 'text' | 'file'>(
     'topic'
   );
@@ -51,18 +69,91 @@ export const StudyPage = () => {
   // Delete state
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [moveContentId, setMoveContentId] = useState<string | null>(null);
 
-  // Use React Query hooks for data fetching
-  const [page, setPage] = useState(1);
-  const {
-    data: contentsData,
-    isLoading: isLoadingContents,
-    refetch,
-  } = useContents(undefined, page, 6);
-  const { data: popularTopics = [] } = usePopularTopics();
+  const getSummary = (content: any) => {
+    if (content.description) {
+      return content.description;
+    }
+    if (content.generatedContent?.summary) {
+      return content.generatedContent.summary;
+    }
+    return 'No description available';
+  };
 
-  const contents = contentsData?.data ?? [];
-  const totalPages = contentsData?.meta?.totalPages ?? 1;
+  // Group contents by study pack
+  const groupedContents = useMemo(() => {
+    const groups: Record<string, (typeof contents)[0][]> = {};
+    const noPack: (typeof contents)[0][] = [];
+
+    for (const content of contents) {
+      if (content.studyPack) {
+        const title = content.studyPack.title;
+        if (!groups[title]) groups[title] = [];
+        groups[title].push(content);
+      } else {
+        noPack.push(content);
+      }
+    }
+
+      return { groups, noPack };
+  }, [contents]);
+
+  const renderContentCard = (content: any) => (
+    <Card
+      key={content.id}
+      title={content.title}
+      subtitle={content.topic}
+      onClick={() => navigate(`/content/${content.id}`)}
+      icon={
+        <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
+      actions={
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteContentId(content.id);
+            }}
+            className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Delete content"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setMoveContentId(content.id);
+            }}
+            className="p-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Move to Study Pack"
+          >
+            <Folder className="w-4 h-4" />
+          </button>
+        </>
+      }
+    >
+      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
+        {getSummary(content)}
+      </p>
+      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-1">
+          <Calendar className="w-3.5 h-3.5" />
+          {new Date(content.createdAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </div>
+        {content.generatedContent && (
+          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+            <Zap className="w-3.5 h-3.5" />
+            Generated
+          </div>
+        )}
+      </div>
+    </Card>
+  );
 
   const handleProgress = useCallback((event: AppEvent) => {
     if (event.eventType === 'content.progress' && currentJobIdRef.current) {
@@ -354,16 +445,6 @@ export const StudyPage = () => {
     }
   }, [deleteContentId, refetch]);
 
-  const getSummary = (content: any) => {
-    if (content.description) {
-      return content.description;
-    }
-    if (content.generatedContent?.summary) {
-      return content.generatedContent.summary;
-    }
-    return 'No description available';
-  };
-
   return (
     <div className="space-y-6 pb-8 px-4 sm:px-0">
       {/* Hero Header */}
@@ -496,7 +577,7 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  <label htmlFor={topic} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     What topic do you want to learn about?
                   </label>
                   <input
@@ -571,7 +652,7 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor={textTitle} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Title (Optional)
                   </label>
                   <input
@@ -584,7 +665,7 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor={textTopic} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Topic (Optional)
                   </label>
                   <input
@@ -597,7 +678,7 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor={textContent} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Content
                   </label>
                   <textarea
@@ -727,54 +808,55 @@ export const StudyPage = () => {
             </div>
           ) : contents.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {contents.map((content) => (
-                  <Card
-                    key={content.id}
-                    title={content.title}
-                    subtitle={content.topic}
-                    onClick={() => navigate(`/content/${content.id}`)}
-                    icon={
-                      <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                    }
-                    actions={
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteContentId(content.id);
-                        }}
-                        className="p-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                        title="Delete content"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    }
-                  >
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
-                      {getSummary(content)}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {new Date(content.createdAt).toLocaleDateString(
-                          'en-US',
-                          {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          }
+              <>
+                {Object.entries(groupedContents.groups).map(
+                  ([packTitle, packContents]) => (
+                    <CollapsibleSection
+                      key={packTitle}
+                      title={packTitle}
+                      count={packContents.length}
+                      defaultOpen={true}
+                      className="mb-8 last:mb-0"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {packContents.map((content) =>
+                          renderContentCard(content)
                         )}
                       </div>
-                      {content.generatedContent && (
-                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                          <Zap className="w-3.5 h-3.5" />
-                          Generated
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                    </CollapsibleSection>
+                  )
+                )}
+
+                {/* Uncategorized Contents */}
+                {groupedContents.noPack.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                    {groupedContents.noPack.map((content) =>
+                      renderContentCard(content)
+                    )}
+                  </div>
+                )}
+              </>
+
+              {/* Move Modal */}
+              <MoveToStudyPackModal
+                isOpen={!!moveContentId}
+                onClose={() => setMoveContentId(null)}
+                itemId={moveContentId || ''}
+                itemType="content"
+                onMoveSuccess={() => {
+                  refetch();
+                }}
+              />
+
+              <DeleteModal
+                isOpen={!!deleteContentId}
+                onClose={() => setDeleteContentId(null)}
+                onConfirm={confirmDeleteContent}
+                title="Delete Content?"
+                message="Are you sure you want to delete this study material? This action cannot be undone."
+                itemName="study material"
+                isDeleting={isDeleting}
+              />
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -800,36 +882,28 @@ export const StudyPage = () => {
               )}
             </>
           ) : (
-            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <div className="flex flex-col items-center">
-                <BookOpen className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-3" />
-                <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">
-                  No study materials yet
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                  Create your first content to get started
-                </p>
-                <button
-                  onClick={() => setShowCreator(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
-                >
-                  Create Study Material
-                </button>
+            <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+                <BookOpen className="w-8 h-8 text-primary-600 dark:text-primary-400" />
               </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                No study materials yet
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
+                Get started by generating content from a topic, your own text,
+                or by uploading files.
+              </p>
+              <button
+                onClick={() => setShowCreator(true)}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+              >
+                <Plus className="w-5 h-5" />
+                Create Content
+              </button>
             </div>
           )}
         </div>
       )}
-
-      {/* Delete Confirmation Modal */}
-      <DeleteModal
-        isOpen={!!deleteContentId}
-        onClose={() => setDeleteContentId(null)}
-        onConfirm={confirmDeleteContent}
-        title="Delete Study Material"
-        message="Are you sure you want to delete this study material? This action cannot be undone."
-        isDeleting={isDeleting}
-      />
     </div>
   );
 };

@@ -62,7 +62,7 @@ export const FilesPage = () => {
 
   useEffect(() => {
     filterAndSortDocuments();
-  }, [documents, searchQuery, selectedType, sortField, sortOrder]);
+  }, []);
 
   const loadDocuments = async () => {
     try {
@@ -220,10 +220,9 @@ export const FilesPage = () => {
     if (type === 'all') return documents.length;
     return documents.filter((doc) => {
       const mimeType = doc.document.mimeType;
-      switch (type) {
-        case 'pdf':
+      if (type === 'pdf') {
           return mimeType.includes('pdf');
-        default:
+      } else {
           return false;
       }
     }).length;

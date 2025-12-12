@@ -221,12 +221,22 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   };
 
   const renderMatching = () => {
-    const leftItems = question.leftColumn || [];
-    const rightItems = question.rightColumn || [];
     const correctMatches =
       typeof correctAnswer === 'object' && !Array.isArray(correctAnswer)
         ? correctAnswer
         : {};
+
+    // Fallback: Use keys/values from correctMatches if columns are missing
+    // This handles cases where the API might strip these fields in reviews
+    const leftItems =
+      question.leftColumn && question.leftColumn.length > 0
+        ? question.leftColumn
+        : Object.keys(correctMatches);
+
+    const rightItems =
+      question.rightColumn && question.rightColumn.length > 0
+        ? question.rightColumn
+        : Array.from(new Set(Object.values(correctMatches) as string[]));
     const hasCorrectAnswer = correctAnswer !== undefined;
 
     const handleMatchClick = (leftItem: string, rightItem: string) => {
