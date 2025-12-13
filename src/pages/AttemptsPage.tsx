@@ -23,7 +23,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import type { Attempt } from '../types';
 import { useAttempts } from '../hooks';
 import {

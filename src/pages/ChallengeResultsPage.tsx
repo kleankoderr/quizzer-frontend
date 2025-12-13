@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { toPng } from 'html-to-image';
 import { QuizReview } from '../components/quiz/QuizReview';
 import { quizService } from '../services/quiz.service';
@@ -293,13 +293,8 @@ export const ChallengeResultsPage = () => {
       const dataUrl = await toPng(resultsRef.current, {
         cacheBust: true,
         filter: (node) => {
-          if (
-            node instanceof HTMLElement &&
-            node.getAttribute('data-html2canvas-ignore')
-          ) {
-            return false;
-          }
-          return true;
+          return !(node instanceof HTMLElement &&
+              node.dataset.html2canvasIgnore);
         },
       });
 
@@ -568,7 +563,7 @@ export const ChallengeResultsPage = () => {
 
               {/* Current User Entry (if not in top list) */}
               {currentUserEntry &&
-                !topLeaderboard.find((e) => e.userId === user?.id) && (
+                !topLeaderboard.some((e) => e.userId === user?.id) && (
                   <>
                     <div className="flex items-center justify-center my-2">
                       <div className="h-px bg-gray-200 dark:bg-gray-700 w-1/2"></div>

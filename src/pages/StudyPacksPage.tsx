@@ -4,7 +4,7 @@ import { studyPackService } from '../services/studyPackService';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { DeleteModal } from '../components/DeleteModal';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import {
   useQuery,
   useQueryClient,

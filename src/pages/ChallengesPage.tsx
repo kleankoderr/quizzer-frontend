@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { challengeService } from '../services';
 import { useChallenges, useLeaderboard } from '../hooks';
 import {

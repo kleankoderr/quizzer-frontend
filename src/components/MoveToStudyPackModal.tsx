@@ -3,7 +3,7 @@ import { Modal } from './Modal';
 import { studyPackService } from '../services/studyPackService';
 import type { StudyPack } from '../types';
 import { Folder, Plus } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { useAsync } from '../hooks/useAsync';
 
 interface MoveToStudyPackModalProps {

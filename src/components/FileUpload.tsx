@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, FileText, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 
 interface FileUploadProps {
   files: File[];

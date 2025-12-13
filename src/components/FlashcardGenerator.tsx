@@ -12,7 +12,7 @@ import {
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
 import { StudyPackSelector } from './StudyPackSelector';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 
 interface FlashcardGeneratorProps {
   onGenerate: (request: FlashcardGenerateRequest, files?: File[]) => void;

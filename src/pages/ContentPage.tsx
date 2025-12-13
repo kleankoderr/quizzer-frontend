@@ -22,7 +22,7 @@ import rehypeKatex from 'rehype-katex';
 import { format } from 'date-fns';
 
 import { contentService, type Content } from '../services/content.service';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { DeleteModal } from '../components/DeleteModal';
 import { InlineNoteInput } from '../components/InlineNoteInput';
 import { LearningGuide } from '../components/LearningGuide';

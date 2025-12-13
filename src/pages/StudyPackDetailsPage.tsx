@@ -17,7 +17,7 @@ import {
 import { DeleteModal } from '../components/DeleteModal';
 import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
 import { EditStudyPackModal } from '../components/EditStudyPackModal';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { quizService } from '../services/quiz.service';
 import { flashcardService } from '../services/flashcard.service';

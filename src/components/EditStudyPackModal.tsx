@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from './Modal';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { studyPackService } from '../services/studyPackService';
 import type { StudyPack } from '../types';
 

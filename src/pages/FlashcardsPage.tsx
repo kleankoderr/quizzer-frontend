@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import type { FlashcardGenerateRequest } from '../types';
 import type { AppEvent } from '../types/events';

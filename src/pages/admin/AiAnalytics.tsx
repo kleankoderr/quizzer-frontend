@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Brain, Sparkles, Code, Save } from 'lucide-react';
 import { adminService } from '../../services/adminService';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../../utils/toast';
 import { useState, useEffect } from 'react';
 
 const DEFAULT_PROMPTS = {

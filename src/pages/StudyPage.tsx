@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';

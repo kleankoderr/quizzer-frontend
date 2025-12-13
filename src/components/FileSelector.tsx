@@ -8,7 +8,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import {
   userDocumentService,
   type UserDocument,

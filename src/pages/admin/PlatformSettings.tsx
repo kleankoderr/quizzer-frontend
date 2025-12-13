@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Save } from 'lucide-react';
 import { adminService } from '../../services/adminService';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../../utils/toast';
 import { useState, useEffect } from 'react';
-import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
+import { CardSkeleton } from '../../components/skeletons';
 
 export const PlatformSettings = () => {
   const queryClient = useQueryClient();

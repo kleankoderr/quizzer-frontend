@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../../utils/toast';
 import { DeleteModal } from '../../components/DeleteModal';
 import { TableSkeleton } from '../../components/skeletons';
 

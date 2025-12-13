@@ -5,7 +5,7 @@ import {
   useSearchParams,
   useLocation,
 } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { quizService } from '../services/quiz.service';
 import type { Quiz, QuizResult, AnswerValue } from '../types';
 import { QuizScoreCard } from '../components/quiz/QuizScoreCard';

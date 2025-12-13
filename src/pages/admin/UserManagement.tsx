@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { adminService, type User } from '../../services/adminService';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../../utils/toast';
 import { Modal } from '../../components/Modal';
-import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
+import { TableSkeleton } from '../../components/skeletons';
 
 export const UserManagement = () => {
   const [search, setSearch] = useState('');

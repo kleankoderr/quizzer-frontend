@@ -13,7 +13,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../../utils/toast';
 import { Link } from 'react-router-dom';
 import { StatCard } from '../../components/StatCard';
 import { StatCardSkeleton } from '../../components/skeletons';

@@ -12,7 +12,7 @@ import {
   TrendingUp,
   CheckCircle,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 
 export const ChallengeDetailsPage = () => {
   const { id } = useParams<{ id: string }>();

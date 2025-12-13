@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Eye, EyeOff } from 'lucide-react';
 import { adminService } from '../../services/adminService';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../../utils/toast';
 import { useState } from 'react';
 import { Modal } from '../../components/Modal';
 

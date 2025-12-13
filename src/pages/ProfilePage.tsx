@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import { useProfile } from '../hooks';
 import {
   User,
