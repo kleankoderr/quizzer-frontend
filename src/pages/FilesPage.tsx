@@ -221,9 +221,9 @@ export const FilesPage = () => {
     return documents.filter((doc) => {
       const mimeType = doc.document.mimeType;
       if (type === 'pdf') {
-          return mimeType.includes('pdf');
+        return mimeType.includes('pdf');
       } else {
-          return false;
+        return false;
       }
     }).length;
   };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from './Card';
 
-import { Trash2, Folder, XCircle } from 'lucide-react';
+import { Trash2, Folder, XCircle, MoreVertical } from 'lucide-react';
 
 interface StudyPackItemCardProps {
   item: any;
@@ -50,9 +50,39 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
   onClick,
   className = '',
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
   const stats = getItemStats(type, item);
   const dateStr = item.createdAt || item.uploadedAt;
   const formattedDate = dateStr ? formatDate(dateStr) : '';
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleAction = async (
+    e: React.MouseEvent,
+    action: () => void | Promise<void>
+  ) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    setIsLoading(true);
+    try {
+      await action();
+    } catch (error) {
+      console.error('Action failed', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className={className}>
@@ -61,42 +91,56 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
         subtitle={getItemSubtitle(type, item)}
         onClick={onClick}
         actions={
-          <div className="flex items-center gap-1">
-            {onMove && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMove();
-                }}
-                className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                title="Move to..."
-              >
-                <Folder className="w-4 h-4" />
-              </button>
-            )}
-            {onRemove && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove();
-                }}
-                className="p-1.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/10 rounded-full transition-colors"
-                title="Remove from pack"
-              >
-                <XCircle className="w-4 h-4" />
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                className="p-1.5 text-red-800 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                title="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              disabled={isLoading}
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+              title="Actions"
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <MoreVertical className="w-4 h-4" />
+              )}
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {onMove && (
+                  <button
+                    onClick={(e) => handleAction(e, onMove)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 group transition-colors"
+                  >
+                    <Folder className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400" />
+                    Move to...
+                  </button>
+                )}
+                {onRemove && (
+                  <button
+                    onClick={(e) => handleAction(e, onRemove)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 flex items-center gap-2 transition-colors"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Remove from pack
+                  </button>
+                )}
+                {onDelete && (
+                  <>
+                    <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
+                    <button
+                      onClick={(e) => handleAction(e, onDelete)}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete permanently
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         }

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
+import { StudyPackSelector } from './StudyPackSelector';
 import toast from 'react-hot-toast';
 
 interface QuizGeneratorProps {
@@ -56,6 +57,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<
     QuestionType[]
   >(['single-select', 'true-false']);
+  const [selectedStudyPackId, setSelectedStudyPackId] = useState('');
 
   const toggleQuestionType = (type: QuestionType) => {
     setSelectedQuestionTypes((prev) => {
@@ -79,6 +81,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
       questionTypes:
         selectedQuestionTypes.length > 0 ? selectedQuestionTypes : undefined,
       contentId: initialValues?.contentId,
+      studyPackId: selectedStudyPackId || undefined,
     };
 
     if (mode === 'topic' && topic.trim()) {
@@ -479,6 +482,11 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               </p>
             )}
           </div>
+
+          <StudyPackSelector
+            value={selectedStudyPackId}
+            onChange={setSelectedStudyPackId}
+          />
         </div>
 
         <button

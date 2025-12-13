@@ -47,13 +47,15 @@ export const FlashcardsPage = () => {
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, contentId } = location.state as {
-        topic?: string;
-        contentText?: string;
-        contentId?: string;
-      };
+      const { topic, contentText, contentId, openGenerator } =
+        location.state as {
+          topic?: string;
+          contentText?: string;
+          contentId?: string;
+          openGenerator?: boolean; // Added flag
+        };
 
-      if (topic || contentText) {
+      if (topic || contentText || openGenerator) {
         setInitialValues({
           topic,
           content: contentText,
@@ -385,9 +387,27 @@ export const FlashcardsPage = () => {
             sets={flashcardSets}
             onDelete={handleDelete}
             onCreateNew={() => setShowGenerator(true)}
-            onItemMoved={() =>
-              queryClient.invalidateQueries({ queryKey: ['flashcardSets'] })
-            }
+            onItemMoved={(itemId, pack) => {
+              queryClient.setQueryData(
+                ['flashcardSets'],
+                (old: any[] | undefined) => {
+                  if (!old) return old;
+                  return old.map((s) => {
+                    if (s.id === itemId) {
+                      return {
+                        ...s,
+                        studyPackId: pack?.id,
+                        studyPack: pack
+                          ? { id: pack.id, title: pack.title }
+                          : undefined,
+                      };
+                    }
+                    return s;
+                  });
+                }
+              );
+              queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+            }}
           />
         ))}
 

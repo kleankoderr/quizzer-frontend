@@ -124,18 +124,41 @@ export const StudyPackDetailsPage: React.FC = () => {
     async (itemId: string, type: ItemType) => {
       if (!studyPack) return;
 
+      // Optimistic update
+      queryClient.setQueryData(['studyPack', studyPack.id], (old: any) => {
+        if (!old) return old;
+        const listKey =
+          type === 'quiz'
+            ? 'quizzes'
+            : type === 'flashcard'
+              ? 'flashcardSets'
+              : type === 'userDocument'
+                ? 'userDocuments'
+                : 'contents';
+
+        return {
+          ...old,
+          [listKey]: old[listKey]?.filter((i: any) => i.id !== itemId),
+        };
+      });
+
       try {
         await studyPackService.removeItem(studyPack.id, {
           type: type as any,
           itemId,
         });
         toast.success('Item removed from pack');
+        // No need to invalidate immediately if optimistic update worked, unless to sync
         queryClient.invalidateQueries({
           queryKey: ['studyPack', studyPack.id],
         });
       } catch (error) {
         console.error('Failed to remove item', error);
         toast.error('Failed to remove item');
+        // Revert invalidation on error
+        queryClient.invalidateQueries({
+          queryKey: ['studyPack', studyPack.id],
+        });
       }
     },
     [studyPack, queryClient]
@@ -200,27 +223,27 @@ export const StudyPackDetailsPage: React.FC = () => {
         label: 'Quizzes',
         icon: HelpCircle,
         count: studyPack?.quizzes?.length || 0,
-        createRoute: '/quiz/new',
+        createRoute: '/quiz',
         emptyMessage: 'Create a quiz to test your knowledge on this topic.',
-        emptyAction: 'Create Quiz',
+        emptyAction: 'Add Quiz',
       },
       {
         id: 'flashcards',
         label: 'Flashcards',
         icon: Layers,
         count: studyPack?.flashcardSets?.length || 0,
-        createRoute: '/flashcards/new',
+        createRoute: '/flashcards',
         emptyMessage: 'Create flashcards to memorize key concepts efficiently.',
-        emptyAction: 'Create Flashcards',
+        emptyAction: 'Add Flashcards',
       },
       {
         id: 'materials',
         label: 'Study Materials',
         icon: BookOpen,
         count: studyPack?.contents?.length || 0,
-        createRoute: '/content/new',
+        createRoute: '/content',
         emptyMessage: 'Add content to read and learn from.',
-        emptyAction: 'Create Content',
+        emptyAction: 'Add Content',
       },
       {
         id: 'files',
@@ -257,7 +280,11 @@ export const StudyPackDetailsPage: React.FC = () => {
             onClick={() => {
               if (tab.id === 'materials') {
                 navigate('/study', { state: { openCreator: true } });
-              } else {
+              } else if (tab.id === 'quizzes') {
+                navigate('/quiz', { state: { openGenerator: true } });
+              } else if (tab.id === 'flashcards') {
+                navigate('/flashcards', { state: { openGenerator: true } });
+              } else if (tab.createRoute) {
                 navigate(tab.createRoute);
               }
             }}
@@ -300,6 +327,10 @@ export const StudyPackDetailsPage: React.FC = () => {
               onClick={() => {
                 if (activeTab === 'materials') {
                   navigate('/study', { state: { openCreator: true } });
+                } else if (activeTab === 'quizzes') {
+                  navigate('/quiz', { state: { openGenerator: true } });
+                } else if (activeTab === 'flashcards') {
+                  navigate('/flashcards', { state: { openGenerator: true } });
                 } else if (currentTab?.createRoute) {
                   navigate(currentTab.createRoute);
                 }
@@ -507,9 +538,29 @@ export const StudyPackDetailsPage: React.FC = () => {
         onClose={closeMoveModal}
         itemId={moveState.itemId || ''}
         itemType={moveState.itemType}
-        onMoveSuccess={() =>
-          queryClient.invalidateQueries({ queryKey: ['studyPack', id] })
-        }
+        onMoveSuccess={(pack) => {
+          if (pack?.id !== id) {
+            queryClient.setQueryData(['studyPack', id], (old: any) => {
+              if (!old) return old;
+              const listKey =
+                moveState.itemType === 'quiz'
+                  ? 'quizzes'
+                  : moveState.itemType === 'flashcard'
+                    ? 'flashcardSets'
+                    : moveState.itemType === 'content' // Type guard
+                      ? 'contents'
+                      : 'userDocuments'; // Fallback or explicit check if type was wider
+
+              return {
+                ...old,
+                [listKey]: old[listKey]?.filter(
+                  (i: any) => i.id !== moveState.itemId
+                ),
+              };
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ['studyPack', id] });
+        }}
       />
     </Container>
   );

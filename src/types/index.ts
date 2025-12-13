@@ -105,6 +105,7 @@ export interface QuizGenerateRequest {
   questionTypes?: QuestionType[];
   contentId?: string;
   selectedFileIds?: string[];
+  studyPackId?: string;
 }
 
 export interface QuizSubmission {
@@ -159,6 +160,7 @@ export interface FlashcardGenerateRequest {
   numberOfCards: number;
   contentId?: string;
   selectedFileIds?: string[];
+  studyPackId?: string;
 }
 
 // Streak types

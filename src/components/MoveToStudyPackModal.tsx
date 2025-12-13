@@ -11,7 +11,7 @@ interface MoveToStudyPackModalProps {
   onClose: () => void;
   itemId: string;
   itemType: 'quiz' | 'flashcard' | 'content' | 'file';
-  onMoveSuccess?: () => void;
+  onMoveSuccess?: (pack?: StudyPack) => void;
 }
 
 export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
@@ -24,6 +24,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
   const [studyPacks, setStudyPacks] = useState<StudyPack[]>([]);
   const [moving, setMoving] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [creatingLoading, setCreatingLoading] = useState(false);
   const [newPackTitle, setNewPackTitle] = useState('');
 
   const { execute: fetchStudyPacks, loading } = useAsync(
@@ -50,6 +51,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
     const trimmedTitle = newPackTitle.trim();
     if (!trimmedTitle) return;
 
+    setCreatingLoading(true);
     try {
       const newPack = await studyPackService.create({
         title: trimmedTitle,
@@ -60,9 +62,13 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       toast.success('Study pack created');
       setIsCreating(false);
       setNewPackTitle('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create study pack', error);
-      toast.error('Failed to create study pack');
+      toast.error(
+        error.response?.data?.message || 'Failed to create study pack'
+      );
+    } finally {
+      setCreatingLoading(false);
     }
   }, [newPackTitle]);
 
@@ -72,7 +78,8 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
         setMoving(packId);
         await studyPackService.moveItem(packId, { type: itemType, itemId });
         toast.success('Item moved successfully');
-        onMoveSuccess?.();
+        const pack = studyPacks.find((p) => p.id === packId);
+        onMoveSuccess?.(pack);
         onClose();
       } catch (error) {
         console.error('Failed to move item', error);
@@ -81,7 +88,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
         setMoving(null);
       }
     },
-    [itemId, itemType, onMoveSuccess, onClose]
+    [itemId, itemType, onMoveSuccess, onClose, studyPacks]
   );
 
   const handleKeyDown = useCallback(
@@ -111,17 +118,25 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
                   placeholder="Enter title..."
                   className="flex-1 px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-primary-500"
                   autoFocus
+                  disabled={creatingLoading}
                 />
                 <button
                   onClick={handleCreatePack}
-                  disabled={!newPackTitle.trim()}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!newPackTitle.trim() || creatingLoading}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Create
+                  {creatingLoading ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    </>
+                  ) : (
+                    'Create'
+                  )}
                 </button>
                 <button
                   onClick={() => setIsCreating(false)}
-                  className="px-3 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                  disabled={creatingLoading}
+                  className="px-3 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 disabled:opacity-50"
                 >
                   Cancel
                 </button>

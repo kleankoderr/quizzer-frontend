@@ -1,12 +1,7 @@
 import React from 'react';
-import type { FlashcardSet } from '../types';
+import type { FlashcardSet, StudyPack } from '../types';
 import { Card } from './Card';
-import {
-  Layers,
-  Plus,
-  Folder,
-  Trash2,
-} from 'lucide-react';
+import { Layers, Plus, Folder, Trash2 } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
 
@@ -14,7 +9,7 @@ interface FlashcardSetListProps {
   sets: FlashcardSet[];
   onDelete?: (id: string) => void;
   onCreateNew?: () => void;
-  onItemMoved?: () => void;
+  onItemMoved?: (itemId: string, pack?: StudyPack) => void;
 }
 
 export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
@@ -170,8 +165,8 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
         onClose={() => setMoveSetId(null)}
         itemId={moveSetId || ''}
         itemType="flashcard"
-        onMoveSuccess={() => {
-          if (onItemMoved) onItemMoved();
+        onMoveSuccess={(pack) => {
+          if (onItemMoved) onItemMoved(moveSetId || '', pack);
         }}
       />
     </div>

@@ -26,6 +26,9 @@ export const flashcardService = {
         formData.append('selectedFileIds[]', id);
       }
     }
+    if (request.studyPackId) {
+      formData.append('studyPackId', request.studyPackId);
+    }
     formData.append('numberOfCards', request.numberOfCards.toString());
 
     const response = await apiClient.post<{ jobId: string; status: string }>(

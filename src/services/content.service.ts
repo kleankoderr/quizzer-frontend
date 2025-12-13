@@ -37,6 +37,7 @@ export interface GenerateContentDto {
   content?: string;
   title?: string;
   selectedFileIds?: string[];
+  studyPackId?: string;
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -81,6 +82,9 @@ export const contentService = {
     }
     if (data.title) {
       formData.append('title', data.title);
+    }
+    if (data.studyPackId) {
+      formData.append('studyPackId', data.studyPackId);
     }
 
     // Add selected file IDs if provided

@@ -49,6 +49,9 @@ export const quizService = {
         formData.append('selectedFileIds[]', id);
       }
     }
+    if (request.studyPackId) {
+      formData.append('studyPackId', request.studyPackId);
+    }
     formData.append('numberOfQuestions', request.numberOfQuestions.toString());
     formData.append('difficulty', request.difficulty || 'medium');
 

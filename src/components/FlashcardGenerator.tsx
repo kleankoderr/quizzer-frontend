@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
+import { StudyPackSelector } from './StudyPackSelector';
 import toast from 'react-hot-toast';
 
 interface FlashcardGeneratorProps {
@@ -37,6 +38,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [numberOfCards, setNumberOfCards] = useState(10);
+  const [selectedStudyPackId, setSelectedStudyPackId] = useState('');
 
   useEffect(() => {
     if (initialValues) {
@@ -51,17 +53,22 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const contentId = initialValues?.contentId;
+    const commonParams = {
+      numberOfCards,
+      contentId,
+      studyPackId: selectedStudyPackId || undefined,
+    };
 
     if (mode === 'topic' && topic.trim()) {
-      onGenerate({ topic, numberOfCards, contentId });
+      onGenerate({ ...commonParams, topic });
     } else if (mode === 'content' && content.trim()) {
-      onGenerate({ content, numberOfCards, contentId });
+      onGenerate({ ...commonParams, content });
     } else if (mode === 'files') {
       if (files.length === 0 && selectedFileIds.length === 0) {
         toast.error('Please select or upload at least one file');
         return;
       }
-      onGenerate({ numberOfCards, contentId, selectedFileIds }, files);
+      onGenerate({ ...commonParams, selectedFileIds }, files);
     }
   };
 
@@ -235,6 +242,12 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             <span>30 cards</span>
           </div>
         </div>
+
+        <StudyPackSelector
+          value={selectedStudyPackId}
+          onChange={setSelectedStudyPackId}
+          className="mb-6"
+        />
 
         <button
           type="submit"

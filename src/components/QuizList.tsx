@@ -1,12 +1,7 @@
 import React from 'react';
 import { Card } from './Card';
-import type { Quiz } from '../types';
-import {
-  Brain,
-  Plus,
-  Folder,
-  Trash2,
-} from 'lucide-react';
+import type { Quiz, StudyPack } from '../types';
+import { Brain, Plus, Folder, Trash2 } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
 
@@ -14,7 +9,7 @@ interface QuizListProps {
   quizzes: Quiz[];
   onDelete?: (id: string) => void;
   onCreateNew?: () => void;
-  onItemMoved?: () => void;
+  onItemMoved?: (itemId: string, pack?: StudyPack) => void;
 }
 
 export const QuizList: React.FC<QuizListProps> = ({
@@ -188,8 +183,8 @@ export const QuizList: React.FC<QuizListProps> = ({
         onClose={() => setMoveQuizId(null)}
         itemId={moveQuizId || ''}
         itemType="quiz"
-        onMoveSuccess={() => {
-          if (onItemMoved) onItemMoved();
+        onMoveSuccess={(pack) => {
+          if (onItemMoved) onItemMoved(moveQuizId || '', pack);
         }}
       />
     </div>

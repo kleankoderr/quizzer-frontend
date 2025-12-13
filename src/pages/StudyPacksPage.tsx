@@ -29,6 +29,10 @@ export const StudyPacksPage: React.FC = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
 
+  // Loading states
+  const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit] = useState(9); // 3x3 grid
@@ -64,6 +68,7 @@ export const StudyPacksPage: React.FC = () => {
       const trimmedTitle = newTitle.trim();
       if (!trimmedTitle) return;
 
+      setIsCreating(true);
       try {
         await studyPackService.create({
           title: trimmedTitle,
@@ -74,9 +79,13 @@ export const StudyPacksPage: React.FC = () => {
         toast.success('Study pack created');
         queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
         setPage(1);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to create study pack', error);
-        toast.error('Failed to create study pack');
+        toast.error(
+          error.response?.data?.message || 'Failed to create study pack'
+        );
+      } finally {
+        setIsCreating(false);
       }
     },
     [newTitle, newDescription, resetCreateForm, queryClient]
@@ -85,6 +94,7 @@ export const StudyPacksPage: React.FC = () => {
   const handleDelete = useCallback(async () => {
     if (!deleteId) return;
 
+    setIsDeleting(true);
     try {
       await studyPackService.delete(deleteId);
       setDeleteId(null);
@@ -93,6 +103,8 @@ export const StudyPacksPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to delete study pack', error);
       toast.error('Failed to delete study pack');
+    } finally {
+      setIsDeleting(false);
     }
   }, [deleteId, queryClient]);
 
@@ -237,16 +249,24 @@ export const StudyPacksPage: React.FC = () => {
             <button
               type="button"
               onClick={handleCloseCreateModal}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium"
+              disabled={isCreating}
+              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={!newTitle.trim()}
-              className="bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors font-medium shadow-sm"
+              disabled={!newTitle.trim() || isCreating}
+              className="bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2"
             >
-              Create Pack
+              {isCreating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Pack'
+              )}
             </button>
           </div>
         </form>
@@ -259,6 +279,7 @@ export const StudyPacksPage: React.FC = () => {
         title="Delete Study Pack?"
         message="Are you sure you want to delete this study pack? The items inside will not be deleted, they will just be removed from this pack."
         itemName="Study Pack"
+        isDeleting={isDeleting}
       />
     </Container>
   );

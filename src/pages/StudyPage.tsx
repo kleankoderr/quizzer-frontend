@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
+import { useQueryClient } from '@tanstack/react-query';
 import type { AppEvent } from '../types/events';
 import {
   Plus,
@@ -26,10 +27,12 @@ import { ProgressToast } from '../components/ProgressToast';
 import { FileSelector } from '../components/FileSelector';
 import { FileUpload } from '../components/FileUpload';
 import { Card } from '../components/Card';
+import { StudyPackSelector } from '../components/StudyPackSelector';
 import { useSSEEvent } from '../hooks/useSSE';
 
 export const StudyPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
 
   // Use React Query hooks for data fetching (moved up for useMemo dependency)
@@ -57,6 +60,7 @@ export const StudyPage = () => {
   const [textTopic, setTextTopic] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [selectedStudyPackId, setSelectedStudyPackId] = useState<string>('');
 
   const [contentLoading, setContentLoading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
@@ -95,7 +99,7 @@ export const StudyPage = () => {
       }
     }
 
-      return { groups, noPack };
+    return { groups, noPack };
   }, [contents]);
 
   const renderContentCard = (content: any) => (
@@ -278,7 +282,10 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.generate({ topic });
+      const { jobId } = await contentService.generate({
+        topic,
+        studyPackId: selectedStudyPackId || undefined,
+      });
       currentJobIdRef.current = jobId;
       console.log('Content job started:', { jobId, toastId });
     } catch (_error) {
@@ -298,7 +305,7 @@ export const StudyPage = () => {
       currentJobIdRef.current = null;
       toastIdRef.current = null;
     }
-  }, [topic]);
+  }, [topic, selectedStudyPackId]);
 
   const handleCreateFromText = useCallback(async () => {
     if (!textContent.trim()) {
@@ -327,6 +334,7 @@ export const StudyPage = () => {
         content: textContent,
         title: textTitle || undefined,
         topic: textTopic || undefined,
+        studyPackId: selectedStudyPackId || undefined,
       });
       currentJobIdRef.current = jobId;
       console.log('Content job started from text:', { jobId, toastId });
@@ -347,7 +355,7 @@ export const StudyPage = () => {
       currentJobIdRef.current = null;
       toastIdRef.current = null;
     }
-  }, [textTitle, textContent, textTopic]);
+  }, [textTitle, textContent, textTopic, selectedStudyPackId]);
 
   const handleFileUpload = useCallback(async () => {
     if (files.length === 0 && selectedFileIds.length === 0) {
@@ -374,7 +382,10 @@ export const StudyPage = () => {
 
     try {
       const { jobId } = await contentService.generate(
-        { selectedFileIds },
+        {
+          selectedFileIds,
+          studyPackId: selectedStudyPackId || undefined,
+        },
         files,
         (progress) => {
           // Show upload progress
@@ -419,7 +430,7 @@ export const StudyPage = () => {
       currentJobIdRef.current = null;
       toastIdRef.current = null;
     }
-  }, [files, selectedFileIds]);
+  }, [files, selectedFileIds, selectedStudyPackId]);
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
@@ -571,7 +582,10 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor={topic} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  <label
+                    htmlFor={topic}
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
+                  >
                     What topic do you want to learn about?
                   </label>
                   <input
@@ -606,6 +620,12 @@ export const StudyPage = () => {
                     </div>
                   </div>
                 )}
+
+                <StudyPackSelector
+                  value={selectedStudyPackId}
+                  onChange={setSelectedStudyPackId}
+                  className="mb-6"
+                />
 
                 <button
                   onClick={handleGenerateFromTopic}
@@ -646,7 +666,10 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor={textTitle} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor={textTitle}
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Title (Optional)
                   </label>
                   <input
@@ -659,7 +682,10 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor={textTopic} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor={textTopic}
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Topic (Optional)
                   </label>
                   <input
@@ -672,7 +698,10 @@ export const StudyPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor={textContent} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor={textContent}
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Content
                   </label>
                   <textarea
@@ -682,6 +711,12 @@ export const StudyPage = () => {
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all h-40 md:h-64"
                   />
                 </div>
+
+                <StudyPackSelector
+                  value={selectedStudyPackId}
+                  onChange={setSelectedStudyPackId}
+                  className="mb-6"
+                />
 
                 <button
                   onClick={handleCreateFromText}
@@ -760,6 +795,12 @@ export const StudyPage = () => {
                   )}
                 </div>
 
+                <StudyPackSelector
+                  value={selectedStudyPackId}
+                  onChange={setSelectedStudyPackId}
+                  className="mb-6"
+                />
+
                 <button
                   onClick={handleFileUpload}
                   disabled={
@@ -837,7 +878,28 @@ export const StudyPage = () => {
                 onClose={() => setMoveContentId(null)}
                 itemId={moveContentId || ''}
                 itemType="content"
-                onMoveSuccess={() => {
+                onMoveSuccess={(pack) => {
+                  queryClient.setQueryData(
+                    ['contents', undefined, page, 6],
+                    (old: any) => {
+                      if (!old || !old.data) return old;
+                      return {
+                        ...old,
+                        data: old.data.map((c: any) => {
+                          if (c.id === moveContentId) {
+                            return {
+                              ...c,
+                              studyPackId: pack?.id,
+                              studyPack: pack
+                                ? { id: pack.id, title: pack.title }
+                                : undefined,
+                            };
+                          }
+                          return c;
+                        }),
+                      };
+                    }
+                  );
                   refetch();
                 }}
               />

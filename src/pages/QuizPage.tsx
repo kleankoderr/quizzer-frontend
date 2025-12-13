@@ -50,17 +50,25 @@ export const QuizPage = () => {
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, sourceId, sourceTitle, contentId } =
-        location.state as {
-          topic?: string;
-          contentText?: string;
-          sourceId?: string;
-          sourceTitle?: string;
-          contentId?: string;
-          breadcrumb?: any[];
-        };
+      const {
+        topic,
+        contentText,
+        sourceId,
+        sourceTitle,
+        contentId,
+        openGenerator,
+      } = location.state as {
+        topic?: string;
+        contentText?: string;
+        sourceId?: string;
+        sourceTitle?: string;
+        contentId?: string;
+        breadcrumb?: any[];
+        openGenerator?: boolean; // Added flag
+      };
 
-      if (topic || contentText) {
+      if (topic || contentText || openGenerator) {
+        // Check flag
         setInitialValues({
           topic,
           content: contentText,
@@ -393,9 +401,27 @@ export const QuizPage = () => {
             quizzes={quizzes}
             onDelete={handleDelete}
             onCreateNew={() => setShowGenerator(true)}
-            onItemMoved={() =>
-              queryClient.invalidateQueries({ queryKey: ['quizzes'] })
-            }
+            onItemMoved={(itemId, pack) => {
+              queryClient.setQueryData(
+                ['quizzes'],
+                (old: any[] | undefined) => {
+                  if (!old) return old;
+                  return old.map((q) => {
+                    if (q.id === itemId) {
+                      return {
+                        ...q,
+                        studyPackId: pack?.id,
+                        studyPack: pack
+                          ? { id: pack.id, title: pack.title }
+                          : undefined,
+                      };
+                    }
+                    return q;
+                  });
+                }
+              );
+              queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+            }}
           />
         ))}
 
