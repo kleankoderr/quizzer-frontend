@@ -22,6 +22,14 @@ export interface Content {
       completed?: boolean;
       generatedExplanation?: string;
       generatedExample?: string;
+      knowledgeCheck?: {
+        question: string;
+        options: string[];
+        answer: string;
+        explanation: string;
+        userScore?: number;
+        userAnswer?: string;
+      };
     }[];
     nextSteps?: string[];
   };
@@ -199,11 +207,14 @@ export const contentService = {
     sectionTitle: string,
     sectionContent: string
   ): Promise<string> {
-    const response = await apiClient.post(`/content/${contentId}/explain`, {
-      sectionTitle,
-      sectionContent,
-    });
-    return response.data;
+    const response = await apiClient.post<{ explanation: string }>(
+      `/content/${contentId}/explain`,
+      {
+        sectionTitle,
+        sectionContent,
+      }
+    );
+    return response.data.explanation;
   },
 
   async generateExample(
@@ -211,10 +222,13 @@ export const contentService = {
     sectionTitle: string,
     sectionContent: string
   ): Promise<string> {
-    const response = await apiClient.post(`/content/${contentId}/example`, {
-      sectionTitle,
-      sectionContent,
-    });
-    return response.data;
+    const response = await apiClient.post<{ examples: string }>(
+      `/content/${contentId}/example`,
+      {
+        sectionTitle,
+        sectionContent,
+      }
+    );
+    return response.data.examples;
   },
 };

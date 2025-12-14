@@ -19,9 +19,12 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 import { format } from 'date-fns';
 
 import { contentService, type Content } from '../services/content.service';
+
 import { Toast as toast } from '../utils/toast';
 import { DeleteModal } from '../components/DeleteModal';
 import { InlineNoteInput } from '../components/InlineNoteInput';
@@ -150,9 +153,12 @@ const MarkdownContent = ({
                 span: [['className'], ['title'], ['style']],
                 div: [['className']],
                 math: [['xmlns'], ['display']],
+                code: [['className']],
+                pre: [['className']],
               },
             },
           ],
+          rehypeHighlight,
         ]}
         components={{
           h1: (props) => <HeadingRenderer level={1} {...props} />,
@@ -754,29 +760,31 @@ export const ContentPage = () => {
                 description={content.description}
                 onGenerateQuiz={handleGenerateQuiz}
                 onGenerateFlashcards={handleGenerateFlashcards}
-                onToggleSectionComplete={async (index, isComplete) => {
+                onSectionUpdate={async (index, updates) => {
                   if (!content?.learningGuide) return;
 
-                  const previousContent = queryClient.getQueryData([
-                    'content',
-                    id,
-                  ]);
-
-                  // Calculate new progress
                   const updatedGuide = JSON.parse(
                     JSON.stringify(content.learningGuide)
                   );
+                  
                   if (updatedGuide.sections[index]) {
-                    updatedGuide.sections[index].completed = isComplete;
+                    updatedGuide.sections[index] = {
+                      ...updatedGuide.sections[index],
+                      ...updates
+                    };
                   }
 
-                  const totalSections = updatedGuide.sections.length;
-                  const completedCount = updatedGuide.sections.filter(
-                    (s: any) => s.completed
-                  ).length;
-                  const newProgress = Math.round(
-                    (completedCount / totalSections) * 100
-                  );
+                  // Recalculate progress if completed status changed
+                  let newProgress = content.lastReadPosition;
+                  if ('completed' in updates) {
+                    const totalSections = updatedGuide.sections.length;
+                    const completedCount = updatedGuide.sections.filter(
+                      (s: any) => s.completed
+                    ).length;
+                    newProgress = Math.round(
+                      (completedCount / totalSections) * 100
+                    );
+                  }
 
                   // Optimistic update
                   queryClient.setQueryData(
@@ -797,11 +805,11 @@ export const ContentPage = () => {
                       lastReadPosition: newProgress,
                     });
                   } catch (_error) {
-                    // Revert
-                    queryClient.setQueryData(['content', id], previousContent);
                     toast.error('Failed to save progress');
+                    refetch();
                   }
                 }}
+
               />
             ) : (
               <MarkdownContent

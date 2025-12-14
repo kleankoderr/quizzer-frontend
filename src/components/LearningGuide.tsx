@@ -3,7 +3,6 @@ import {
   CheckCircle,
   ChevronRight,
   Lightbulb,
-  ArrowRight,
   MessageCircle,
   Sparkles,
   Loader2,
@@ -16,9 +15,12 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 
 import { contentService, type Content } from '../services/content.service';
 import { applyHighlights, type Highlight } from '../utils/contentUtils';
+import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 
 interface LearningGuideProps {
   guide: NonNullable<Content['learningGuide']>;
@@ -32,6 +34,7 @@ interface LearningGuideProps {
   description?: string;
   onGenerateQuiz?: () => void;
   onGenerateFlashcards?: () => void;
+  onSectionUpdate?: (index: number, updates: any) => void;
 }
 
 export const LearningGuide: React.FC<LearningGuideProps> = ({
@@ -45,6 +48,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   description,
   onGenerateQuiz,
   onGenerateFlashcards,
+  onSectionUpdate,
 }) => {
   const [completedSections, setCompletedSections] = useState<Set<number>>(
     () => {
@@ -66,7 +70,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
     setCompletedSections(newCompleted);
   }, [guide]);
-  const [activeSection, setActiveSection] = useState<number>(0);
+  const [activeSection, setActiveSection] = useState<number>(-1);
   const [generatedContent, setGeneratedContent] = useState<
     Record<string, string>
   >(() => {
@@ -74,10 +78,18 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     for (const section of guide.sections) {
       const index = guide.sections.indexOf(section);
       if (section.generatedExplanation) {
-        initial[`${index}-explain`] = section.generatedExplanation;
+        const val = section.generatedExplanation as any;
+        initial[`${index}-explain`] =
+          typeof val === 'object'
+            ? val.explanation || ''
+            : String(val);
       }
       if (section.generatedExample) {
-        initial[`${index}-example`] = section.generatedExample;
+        const val = section.generatedExample as any;
+        initial[`${index}-example`] =
+          typeof val === 'object'
+            ? val.examples || ''
+            : String(val);
       }
     }
     return initial;
@@ -101,6 +113,34 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     section: number;
     type: 'explain' | 'example';
   } | null>(null);
+  const [activeKnowledgeCheckSectionIndex, setActiveKnowledgeCheckSectionIndex] = useState<number | null>(null);
+
+  const markdownRehypePlugins = React.useMemo(() => [
+    rehypeRaw,
+    rehypeKatex,
+    [
+      rehypeSanitize,
+      {
+        ...defaultSchema,
+        tagNames: [
+          ...(defaultSchema.tagNames || []),
+          'mark', 'span', 'div', 'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd', 'code', 'pre'
+        ],
+        attributes: {
+          ...defaultSchema.attributes,
+          mark: [['className'], ['data-highlight-id']],
+          span: [['className'], ['title'], ['style']],
+          div: [['className']],
+          math: [['xmlns'], ['display']],
+          code: [['className']],
+          pre: [['className']],
+        },
+      },
+    ],
+    rehypeHighlight,
+  ] as any, []);
+
+  const markdownRemarkPlugins = React.useMemo(() => [remarkGfm, remarkMath], []);
 
   const toggleSection = (index: number) => {
     setActiveSection(activeSection === index ? -1 : index);
@@ -108,24 +148,51 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
   const markAsComplete = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
+    const section = guide.sections[index];
+    
+    // Check for Knowledge Check if trying to complete (not un-complete)
+    if (!completedSections.has(index) && section.knowledgeCheck && section.knowledgeCheck.userScore !== 1) {
+       setActiveKnowledgeCheckSectionIndex(index);
+       return;
+    }
+
     const newCompleted = new Set(completedSections);
     const isComplete = !newCompleted.has(index);
 
     if (isComplete) {
       newCompleted.add(index);
 
-      // Auto-advance to next section
-      if (index === activeSection && index < guide.sections.length - 1) {
-        setTimeout(() => {
-          setActiveSection(index + 1);
-        }, 300);
+      // Auto-advance to next section or close if last
+      if (index === activeSection) {
+        if (index < guide.sections.length - 1) {
+          setTimeout(() => {
+            setActiveSection(index + 1);
+          }, 300);
+        } else {
+          setTimeout(() => {
+            setActiveSection(-1);
+          }, 300);
+        }
       }
     } else {
       newCompleted.delete(index);
     }
 
     setCompletedSections(newCompleted);
-    onToggleSectionComplete?.(index, isComplete);
+    if (onSectionUpdate) {
+      const updates: any = { completed: isComplete };
+      // Reset knowledge check score if marking as incomplete
+      if (!isComplete && section.knowledgeCheck) {
+        updates.knowledgeCheck = {
+          ...section.knowledgeCheck,
+          userScore: undefined,
+          userAnswer: undefined,
+        };
+      }
+      onSectionUpdate(index, updates);
+    } else {
+      onToggleSectionComplete?.(index, isComplete);
+    }
   };
 
   const handleAskQuestion = async (
@@ -239,8 +306,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             >
               {(guide.overview || description) && (
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  remarkPlugins={markdownRemarkPlugins}
+                  rehypePlugins={markdownRehypePlugins}
                 >
                   {guide.overview || description || ''}
                 </ReactMarkdown>
@@ -393,44 +460,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                   <div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700/50 mt-2">
                     <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown">
                       <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkMath]}
-                        rehypePlugins={[
-                          rehypeRaw,
-                          rehypeKatex,
-                          [
-                            rehypeSanitize,
-                            {
-                              ...defaultSchema,
-                              tagNames: [
-                                ...(defaultSchema.tagNames || []),
-                                'mark',
-                                'span',
-                                'div',
-                                'math',
-                                'semantics',
-                                'mrow',
-                                'mi',
-                                'mo',
-                                'mn',
-                                'msup',
-                                'msub',
-                                'mfrac',
-                                'msqrt',
-                                'mroot',
-                                'mtable',
-                                'mtr',
-                                'mtd',
-                              ],
-                              attributes: {
-                                ...defaultSchema.attributes,
-                                mark: [['className'], ['data-highlight-id']],
-                                span: [['className'], ['title'], ['style']],
-                                div: [['className']],
-                                math: [['xmlns'], ['display']],
-                              },
-                            },
-                          ],
-                        ]}
+                        remarkPlugins={markdownRemarkPlugins}
+                        rehypePlugins={markdownRehypePlugins}
                         components={{
                           h1: (props) => (
                             <HeadingRenderer level={1} {...props} />
@@ -470,8 +501,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                               style={{ fontFamily: 'Lexend' }}
                             >
                               <ReactMarkdown
-                                remarkPlugins={[remarkGfm, remarkMath]}
-                                rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                remarkPlugins={markdownRemarkPlugins}
+                                rehypePlugins={markdownRehypePlugins}
                               >
                                 {section.example}
                               </ReactMarkdown>
@@ -504,8 +535,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                               style={{ fontFamily: 'Lexend' }}
                             >
                               <ReactMarkdown
-                                remarkPlugins={[remarkGfm, remarkMath]}
-                                rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                remarkPlugins={markdownRemarkPlugins}
+                                rehypePlugins={markdownRehypePlugins}
                               >
                                 {section.assessment}
                               </ReactMarkdown>
@@ -593,8 +624,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                 </div>
                                 <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
                                   <ReactMarkdown
-                                    remarkPlugins={[remarkGfm, remarkMath]}
-                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                    remarkPlugins={markdownRemarkPlugins}
+                                    rehypePlugins={markdownRehypePlugins}
                                   >
                                     {generatedContent[`${idx}-explain`]}
                                   </ReactMarkdown>
@@ -636,8 +667,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                                 </div>
                                 <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
                                   <ReactMarkdown
-                                    remarkPlugins={[remarkGfm, remarkMath]}
-                                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                                    remarkPlugins={markdownRemarkPlugins}
+                                    rehypePlugins={markdownRehypePlugins}
                                   >
                                     {generatedContent[`${idx}-example`]}
                                   </ReactMarkdown>
@@ -645,6 +676,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                               </div>
                             </div>
                           )}
+
                       </div>
                     )}
 
@@ -652,10 +684,10 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       <div className="mt-8 flex justify-end">
                         <button
                           onClick={(e) => markAsComplete(idx, e)}
-                          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                          className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md flex items-center gap-2"
                         >
-                          Complete Section
-                          <ArrowRight className="w-4 h-4" />
+                          <CheckCircle className="w-5 h-5" />
+                          <span>Complete Section</span>
                         </button>
                       </div>
                     )}
@@ -666,10 +698,6 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           );
         })}
       </div>
-
-      {/* Next Steps */}
-      {/* Completion Modal */}
-      {/* Next Steps */}
       {progress === 100 && (
         <div className="bg-gradient-to-br from-primary-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl p-4 md:p-6 border border-primary-100 dark:border-gray-700 text-center animate-in zoom-in duration-500">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -740,6 +768,49 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             </button>
           </div>
         </div>
+      )}
+      
+      {/* Knowledge Check Modal */}
+      {activeKnowledgeCheckSectionIndex !== null && guide.sections[activeKnowledgeCheckSectionIndex] && (
+        <KnowledgeCheckModal 
+          isOpen={true}
+          onClose={() => setActiveKnowledgeCheckSectionIndex(null)}
+          sectionTitle={guide.sections[activeKnowledgeCheckSectionIndex].title}
+          knowledgeCheck={guide.sections[activeKnowledgeCheckSectionIndex].knowledgeCheck!}
+          onUpdate={(updates) => {
+             if (onSectionUpdate) {
+                onSectionUpdate(activeKnowledgeCheckSectionIndex, updates);
+             }
+          }}
+          onComplete={() => {
+             // Mark as complete
+             const index = activeKnowledgeCheckSectionIndex;
+             const newCompleted = new Set(completedSections);
+             newCompleted.add(index);
+             setCompletedSections(newCompleted);
+
+             if (onSectionUpdate) {
+                onSectionUpdate(index, { completed: true });
+             } else {
+                onToggleSectionComplete?.(index, true);
+             }
+
+             // Auto-advance or close if last
+             if (index === activeSection) {
+               if (index < guide.sections.length - 1) {
+                  setTimeout(() => {
+                    setActiveSection(index + 1);
+                  }, 300);
+               } else {
+                  setTimeout(() => {
+                    setActiveSection(-1);
+                  }, 300);
+               }
+             }
+             
+             setActiveKnowledgeCheckSectionIndex(null);
+          }}
+        />
       )}
     </div>
   );

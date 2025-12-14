@@ -10,6 +10,7 @@ interface QuestionRendererProps {
   showResults?: boolean;
   correctAnswer?: AnswerValue;
   showExplanation?: boolean;
+  hideQuestionNumber?: boolean;
 }
 
 export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
@@ -20,6 +21,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   showResults = false,
   correctAnswer,
   showExplanation = true,
+  hideQuestionNumber = false,
 }) => {
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
 
@@ -532,9 +534,11 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   return (
     <div>
       <div className="flex items-start gap-2 sm:gap-3 mb-4 sm:mb-6">
-        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md text-sm sm:text-base mt-0.5">
-          {questionIndex + 1}
-        </div>
+        {!hideQuestionNumber && (
+          <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md text-sm sm:text-base mt-0.5">
+            {questionIndex + 1}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white break-words">
             {question.question}

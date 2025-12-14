@@ -153,6 +153,11 @@
   font-weight: 500;
 }
 
+.content-markdown code::before,
+.content-markdown code::after {
+  content: none !important;
+}
+
 .dark .content-markdown code {
   background-color: #1e3a8a;
   color: #93c5fd;
