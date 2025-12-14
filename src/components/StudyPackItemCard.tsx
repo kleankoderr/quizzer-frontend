@@ -77,16 +77,16 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
     setIsLoading(true);
     try {
       await action();
-    } catch (error) {
-      console.error('Action failed', error);
+    } catch (_error) {
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={className}>
+    <div className={`h-full ${className}`}>
       <Card
+        className="h-full"
         title={item.title || item.displayName || 'Untitled'}
         subtitle={getItemSubtitle(type, item)}
         onClick={onClick}

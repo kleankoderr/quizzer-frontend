@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -10,13 +10,39 @@ interface ProgressToastProps {
   status: 'processing' | 'success' | 'error';
 }
 
-export const ProgressToast: React.FC<ProgressToastProps> = ({
-  t,
-  title,
-  message,
-  progress,
-  status,
-}) => {
+export const ProgressToast: React.FC<
+  ProgressToastProps & { autoProgress?: boolean }
+> = ({ t, title, message, progress, status, autoProgress = false }) => {
+  const [currentProgress, setCurrentProgress] = useState(progress);
+
+  useEffect(() => {
+    if (status === 'success') {
+      setCurrentProgress(100);
+      return;
+    }
+    if (status === 'error') {
+      return;
+    }
+
+    if (status === 'processing' && autoProgress) {
+      setCurrentProgress((prev: number) => Math.max(prev, 10)); // Start at least at 10%
+
+      const interval = setInterval(() => {
+        setCurrentProgress((prev: number) => {
+          if (prev >= 95) return prev;
+          // Calculate increment - slower as it gets higher
+          const remaining = 95 - prev;
+          const increment = Math.max(0.1, remaining * 0.05);
+          return Math.min(95, prev + Math.random() * increment);
+        });
+      }, 500);
+
+      return () => clearInterval(interval);
+    } else {
+      setCurrentProgress(progress);
+    }
+  }, [status, autoProgress, progress]);
+
   useEffect(() => {
     if (status === 'success' || status === 'error') {
       const timer = setTimeout(() => {
@@ -64,7 +90,7 @@ export const ProgressToast: React.FC<ProgressToastProps> = ({
               <div className="relative flex items-center justify-center w-10 h-10">
                 <Loader2 className="absolute w-10 h-10 text-blue-600 dark:text-blue-400 animate-spin" />
                 <span className="relative text-[10px] font-bold text-blue-700 dark:text-blue-300">
-                  {Math.round(progress)}%
+                  {Math.round(currentProgress)}%
                 </span>
               </div>
             )}
@@ -90,7 +116,7 @@ export const ProgressToast: React.FC<ProgressToastProps> = ({
               <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${currentProgress}%` }}
                 />
               </div>
             )}

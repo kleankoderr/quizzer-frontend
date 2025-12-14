@@ -467,14 +467,27 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   const renderFillBlank = () => {
     const userAnswer = typeof selectedAnswer === 'string' ? selectedAnswer : '';
     const hasCorrectAnswer =
-      correctAnswer !== undefined && typeof correctAnswer === 'string';
+      correctAnswer !== undefined &&
+      (typeof correctAnswer === 'string' ||
+        (Array.isArray(correctAnswer) && typeof correctAnswer[0] === 'string'));
 
-    // Simple case-insensitive comparison for fill-blank questions
-    const isCorrect =
-      showResults &&
-      hasCorrectAnswer &&
-      userAnswer.trim().toLowerCase() ===
-        (correctAnswer as string).trim().toLowerCase();
+    // Check if correct (case insensitive)
+    let isCorrect = false;
+    if (showResults && hasCorrectAnswer) {
+      const userNorm = userAnswer.trim().toLowerCase();
+      if (Array.isArray(correctAnswer)) {
+        const normalizedAnswers = correctAnswer.map((ans) =>
+          String(ans).trim().toLowerCase()
+        );
+        isCorrect = normalizedAnswers.includes(userNorm);
+      } else {
+        isCorrect = userNorm === String(correctAnswer).trim().toLowerCase();
+      }
+    }
+
+    const displayCorrectAnswer = Array.isArray(correctAnswer)
+      ? correctAnswer.join(' / ')
+      : String(correctAnswer);
 
     return (
       <div className="space-y-4">
@@ -506,7 +519,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                   ✗ Your answer: <strong>{userAnswer}</strong>
                 </div>
                 <div className="text-green-700">
-                  ✓ Correct answer: <strong>{correctAnswer as string}</strong>
+                  ✓ Correct answer: <strong>{displayCorrectAnswer}</strong>
                 </div>
               </>
             )}

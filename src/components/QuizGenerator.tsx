@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { QuizGenerateRequest, QuizType, QuestionType } from '../types';
 import {
   Brain,
@@ -16,6 +16,7 @@ import {
   Link as LinkIcon,
   AlignLeft,
   LayoutList,
+  Folder,
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
@@ -32,6 +33,7 @@ interface QuizGeneratorProps {
     sourceId?: string;
     sourceTitle?: string;
     contentId?: string;
+    studyPackId?: string;
   };
 }
 
@@ -48,6 +50,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [showUpload, setShowUpload] = useState(false);
+  const [showExistingFiles, setShowExistingFiles] = useState(false);
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>(
     'medium'
@@ -57,7 +60,9 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<
     QuestionType[]
   >(['single-select', 'true-false']);
-  const [selectedStudyPackId, setSelectedStudyPackId] = useState('');
+  const [selectedStudyPackId, setSelectedStudyPackId] = useState(
+    initialValues?.studyPackId || ''
+  );
 
   const toggleQuestionType = (type: QuestionType) => {
     setSelectedQuestionTypes((prev) => {
@@ -210,14 +215,42 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
 
         {mode === 'files' && (
           <div className="space-y-4">
-            {/* File Selector */}
-            <FileSelector
-              selectedFileIds={selectedFileIds}
-              onSelectionChange={setSelectedFileIds}
-              maxFiles={5}
-              className="mb-4"
-              hideIfEmpty={true}
-            />
+            {/* Collapsible Existing Files Section */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowExistingFiles(!showExistingFiles)}
+                className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Folder className="w-5 h-5 text-primary-600" />
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    Select Existing Files
+                  </span>
+                  {selectedFileIds.length > 0 && (
+                    <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs px-2 py-0.5 rounded-full font-bold">
+                      {selectedFileIds.length}
+                    </span>
+                  )}
+                </div>
+                {showExistingFiles ? (
+                  <ChevronDown className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
+
+              {showExistingFiles && (
+                <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                  <FileSelector
+                    selectedFileIds={selectedFileIds}
+                    onSelectionChange={setSelectedFileIds}
+                    maxFiles={5}
+                    hideIfEmpty={false}
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Collapsible Upload Section */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
@@ -231,6 +264,11 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                   <span className="font-semibold text-gray-900 dark:text-white">
                     Upload New Files
                   </span>
+                  {files.length > 0 && (
+                    <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs px-2 py-0.5 rounded-full font-bold">
+                      {files.length}
+                    </span>
+                  )}
                 </div>
                 {showUpload ? (
                   <ChevronDown className="w-5 h-5 text-gray-500" />

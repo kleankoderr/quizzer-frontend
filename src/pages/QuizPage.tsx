@@ -38,6 +38,7 @@ export const QuizPage = () => {
         sourceTitle?: string;
         contentId?: string;
         breadcrumb?: any[];
+        studyPackId?: string;
       }
     | undefined
   >(undefined);
@@ -64,7 +65,8 @@ export const QuizPage = () => {
         sourceTitle?: string;
         contentId?: string;
         breadcrumb?: any[];
-        openGenerator?: boolean; // Added flag
+        openGenerator?: boolean;
+        studyPackId?: string; // Add type definition
       };
 
       if (topic || contentText || openGenerator) {
@@ -77,6 +79,7 @@ export const QuizPage = () => {
           sourceTitle,
           contentId,
           breadcrumb: location.state.breadcrumb,
+          studyPackId: location.state.studyPackId, // Pass studyPackId
         });
         setShowGenerator(true);
       }
@@ -84,25 +87,9 @@ export const QuizPage = () => {
   }, [location.state]);
 
   const handleProgress = useCallback((event: AppEvent) => {
+    // Progress is now handled automatically by the toast component
     if (event.eventType === 'quiz.progress' && currentJobIdRef.current) {
-      const progressEvent = event as any;
-      if (
-        progressEvent.jobId === currentJobIdRef.current &&
-        toastIdRef.current
-      ) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Generating Quiz"
-              message={progressEvent.step || progressEvent.message}
-              progress={progressEvent.percentage}
-              status="processing"
-            />
-          ),
-          { id: toastIdRef.current }
-        );
-      }
+      // Toast updates disabled to allow auto-progress
     }
   }, []);
 
@@ -204,6 +191,7 @@ export const QuizPage = () => {
           message="Preparing your quiz..."
           progress={0}
           status="processing"
+          autoProgress={true}
         />
       ),
       { duration: Infinity }

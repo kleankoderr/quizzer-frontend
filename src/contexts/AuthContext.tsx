@@ -69,8 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           const freshUser = await authService.getCurrentUser();
           authStore.setState({ user: freshUser });
           authService.saveAuthData(freshUser);
-        } catch (error) {
-          console.error('Failed to sync user:', error);
+        } catch (_error) {
           // If 401, maybe logout? But api interceptor handles that.
         }
       }
@@ -87,8 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(async () => {
     try {
       await authService.logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch (_error) {
     } finally {
       authStore.setState({ user: null });
     }

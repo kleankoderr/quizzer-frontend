@@ -52,7 +52,7 @@ export const StudyPage = () => {
     location.state?.openCreator || false
   );
   const [activeTab, setActiveTab] = useState<'topic' | 'text' | 'file'>(
-    'topic'
+    location.state?.activeTab || 'topic'
   );
   const [topic, setTopic] = useState('');
   const [textContent, setTextContent] = useState('');
@@ -60,10 +60,13 @@ export const StudyPage = () => {
   const [textTopic, setTextTopic] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
-  const [selectedStudyPackId, setSelectedStudyPackId] = useState<string>('');
+  const [selectedStudyPackId, setSelectedStudyPackId] = useState<string>(
+    location.state?.studyPackId || ''
+  );
 
   const [contentLoading, setContentLoading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [showExistingFiles, setShowExistingFiles] = useState(false);
 
   // Use refs to avoid race conditions with SSE events
   const currentJobIdRef = useRef<string | null>(null);
@@ -154,33 +157,9 @@ export const StudyPage = () => {
   );
 
   const handleProgress = useCallback((event: AppEvent) => {
+    // Progress is now handled automatically by the toast component
     if (event.eventType === 'content.progress' && currentJobIdRef.current) {
-      const progressEvent = event as any;
-      console.log('Content progress event received:', {
-        jobId: progressEvent.jobId,
-        currentJobId: currentJobIdRef.current,
-        percentage: progressEvent.percentage,
-        step: progressEvent.step,
-        toastId: toastIdRef.current,
-      });
-
-      if (
-        progressEvent.jobId === currentJobIdRef.current &&
-        toastIdRef.current
-      ) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Generating Content"
-              message={progressEvent.step || progressEvent.message}
-              progress={progressEvent.percentage}
-              status="processing"
-            />
-          ),
-          { id: toastIdRef.current }
-        );
-      }
+      // Toast updates disabled to allow auto-progress
     }
   }, []);
 
@@ -192,13 +171,6 @@ export const StudyPage = () => {
         toastIdRef.current
       ) {
         const completedEvent = event as any;
-        console.log('Content completed event received:', {
-          event: completedEvent,
-          contentId: completedEvent.contentId,
-          resourceId: completedEvent.resourceId,
-          currentJobId: currentJobIdRef.current,
-          toastId: toastIdRef.current,
-        });
 
         toast.custom(
           (t) => (
@@ -274,6 +246,7 @@ export const StudyPage = () => {
           message="Preparing your study material..."
           progress={0}
           status="processing"
+          autoProgress={true}
         />
       ),
       { duration: Infinity }
@@ -287,7 +260,6 @@ export const StudyPage = () => {
         studyPackId: selectedStudyPackId || undefined,
       });
       currentJobIdRef.current = jobId;
-      console.log('Content job started:', { jobId, toastId });
     } catch (_error) {
       toast.custom(
         (t) => (
@@ -322,6 +294,7 @@ export const StudyPage = () => {
           message="Processing your text..."
           progress={0}
           status="processing"
+          autoProgress={true}
         />
       ),
       { duration: Infinity }
@@ -337,7 +310,6 @@ export const StudyPage = () => {
         studyPackId: selectedStudyPackId || undefined,
       });
       currentJobIdRef.current = jobId;
-      console.log('Content job started from text:', { jobId, toastId });
     } catch (_error) {
       toast.custom(
         (t) => (
@@ -406,13 +378,23 @@ export const StudyPage = () => {
         }
       );
 
+      // Switch to auto-progress for content generation phase
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            key="generation-phase"
+            t={t}
+            title="Generating Content"
+            message="Processing uploaded files..."
+            progress={0}
+            status="processing"
+            autoProgress={true}
+          />
+        ),
+        { id: toastId }
+      );
+
       currentJobIdRef.current = jobId;
-      console.log('Content job started from files:', {
-        jobId,
-        toastId,
-        newFileCount: files.length,
-        existingFileCount: selectedFileIds.length,
-      });
     } catch (error: any) {
       toast.custom(
         (t) => (
@@ -756,13 +738,42 @@ export const StudyPage = () => {
                   </div>
                 </div>
 
-                {/* File Selector for existing files */}
-                <FileSelector
-                  selectedFileIds={selectedFileIds}
-                  onSelectionChange={setSelectedFileIds}
-                  maxFiles={5}
-                  className="mb-6"
-                />
+                {/* Collapsible Existing Files Section */}
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowExistingFiles(!showExistingFiles)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Folder className="w-5 h-5 text-primary-600" />
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        Select Existing Files
+                      </span>
+                      {selectedFileIds.length > 0 && (
+                        <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs px-2 py-0.5 rounded-full font-bold">
+                          {selectedFileIds.length}
+                        </span>
+                      )}
+                    </div>
+                    {showExistingFiles ? (
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-500" />
+                    )}
+                  </button>
+
+                  {showExistingFiles && (
+                    <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                      <FileSelector
+                        selectedFileIds={selectedFileIds}
+                        onSelectionChange={setSelectedFileIds}
+                        maxFiles={5}
+                        hideIfEmpty={false}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Collapsible Upload Section */}
                 <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mt-6">
@@ -776,6 +787,11 @@ export const StudyPage = () => {
                       <span className="font-semibold text-gray-900 dark:text-white">
                         Upload New Files
                       </span>
+                      {files.length > 0 && (
+                        <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs px-2 py-0.5 rounded-full font-bold">
+                          {files.length}
+                        </span>
+                      )}
                     </div>
                     {showUpload ? (
                       <ChevronDown className="w-5 h-5 text-gray-500" />

@@ -11,6 +11,8 @@ import {
   SettingsIcon,
   Brain,
   Trophy,
+  Folder,
+  File,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Toast as toast } from '../../utils/toast';
@@ -322,7 +324,7 @@ export const AdminDashboard = () => {
                 {stats?.content.flashcards || 0}
               </span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg bg-yellow-100 p-2 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400">
                   <FileText className="h-5 w-5" />
@@ -338,6 +340,44 @@ export const AdminDashboard = () => {
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 {stats?.content.studyMaterials || 0}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <Folder className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Study Packs
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Total collections
+                  </p>
+                </div>
+              </div>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats?.content.studyPacks || 0}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-teal-100 p-2 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
+                  <File className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Documents
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Uploaded files
+                  </p>
+                </div>
+              </div>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats?.content.documents || 0}
               </span>
             </div>
           </div>

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { StudyPackCard } from '../components/StudyPackCard';
 import { studyPackService } from '../services/studyPackService';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Modal } from '../components/Modal';
+import { StudyPackModal } from '../components/StudyPackModal';
 import { DeleteModal } from '../components/DeleteModal';
 import { Toast as toast } from '../utils/toast';
 import {
@@ -10,6 +10,7 @@ import {
   useQueryClient,
   keepPreviousData,
 } from '@tanstack/react-query';
+import type { StudyPack } from '../types';
 
 const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="max-w-7xl mx-auto">{children}</div>
@@ -23,14 +24,15 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export const StudyPacksPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPack, setEditingPack] = useState<StudyPack | undefined>(
+    undefined
+  );
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'alphabetical' | 'date'>('alphabetical');
-  const [newTitle, setNewTitle] = useState('');
-  const [newDescription, setNewDescription] = useState('');
 
   // Loading states
-  const [isCreating, setIsCreating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination state
@@ -57,39 +59,43 @@ export const StudyPacksPage: React.FC = () => {
     });
   }, [studyPacks, sortBy]);
 
-  const resetCreateForm = useCallback(() => {
-    setNewTitle('');
-    setNewDescription('');
-  }, []);
+  const handleOpenCreate = () => {
+    setEditingPack(undefined);
+    setIsModalOpen(true);
+  };
 
-  const handleCreate = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      const trimmedTitle = newTitle.trim();
-      if (!trimmedTitle) return;
+  const handleOpenEdit = (pack: StudyPack) => {
+    setEditingPack(pack);
+    setIsModalOpen(true);
+  };
 
-      setIsCreating(true);
-      try {
-        await studyPackService.create({
-          title: trimmedTitle,
-          description: newDescription,
-        });
-        setIsCreateModalOpen(false);
-        resetCreateForm();
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPack(undefined);
+  };
+
+  const handleSubmit = async (data: { title: string; description: string }) => {
+    setIsSubmitting(true);
+    try {
+      if (editingPack) {
+        await studyPackService.update(editingPack.id, data);
+        toast.success('Study pack updated');
+      } else {
+        await studyPackService.create(data);
         toast.success('Study pack created');
-        queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
         setPage(1);
-      } catch (error: any) {
-        console.error('Failed to create study pack', error);
-        toast.error(
-          error.response?.data?.message || 'Failed to create study pack'
-        );
-      } finally {
-        setIsCreating(false);
       }
-    },
-    [newTitle, newDescription, resetCreateForm, queryClient]
-  );
+      await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      handleCloseModal();
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message ||
+          `Failed to ${editingPack ? 'update' : 'create'} study pack`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleDelete = useCallback(async () => {
     if (!deleteId) return;
@@ -99,19 +105,13 @@ export const StudyPacksPage: React.FC = () => {
       await studyPackService.delete(deleteId);
       setDeleteId(null);
       toast.success('Study pack deleted');
-      queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
-    } catch (error) {
-      console.error('Failed to delete study pack', error);
+      await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+    } catch (_error) {
       toast.error('Failed to delete study pack');
     } finally {
       setIsDeleting(false);
     }
   }, [deleteId, queryClient]);
-
-  const handleCloseCreateModal = useCallback(() => {
-    setIsCreateModalOpen(false);
-    resetCreateForm();
-  }, [resetCreateForm]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -128,21 +128,21 @@ export const StudyPacksPage: React.FC = () => {
             Organize your learning resources into collections.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <select
             value={sortBy}
             onChange={(e) =>
               setSortBy(e.target.value as 'alphabetical' | 'date')
             }
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-primary-500 font-medium"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-primary-500 font-medium w-full sm:w-auto"
           >
             <option value="alphabetical">Alphabetical (A-Z)</option>
             <option value="date">Date Added</option>
           </select>
 
           <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
+            onClick={handleOpenCreate}
+            className="flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm w-full sm:w-auto whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
             Create Study Pack
@@ -167,6 +167,7 @@ export const StudyPacksPage: React.FC = () => {
                 key={pack.id}
                 studyPack={pack}
                 onDelete={() => setDeleteId(pack.id)}
+                onEdit={() => handleOpenEdit(pack)}
               />
             ))}
           </div>
@@ -206,7 +207,7 @@ export const StudyPacksPage: React.FC = () => {
             course.
           </p>
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={handleOpenCreate}
             className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
           >
             Create Study Pack
@@ -214,63 +215,13 @@ export const StudyPacksPage: React.FC = () => {
         </div>
       )}
 
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={handleCloseCreateModal}
-        title="Create New Study Pack"
-      >
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="e.g. Biology 101"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-              required
-              autoFocus
-            />
-            <textarea
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="What is this collection about?"
-              rows={3}
-              className="mt-4 w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all resize-none"
-            />
-          </div>
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={handleCloseCreateModal}
-              disabled={isCreating}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!newTitle.trim() || isCreating}
-              className="bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2"
-            >
-              {isCreating ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Pack'
-              )}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <StudyPackModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
+        initialData={editingPack}
+        isLoading={isSubmitting}
+      />
 
       <DeleteModal
         isOpen={!!deleteId}

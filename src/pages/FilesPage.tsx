@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FileText,
   Download,
@@ -19,6 +19,8 @@ import {
   SortAsc,
   SortDesc,
 } from 'lucide-react';
+import { CardSkeleton } from '../components/skeletons';
+import { TableSkeleton } from '../components/skeletons';
 import { format } from 'date-fns';
 import { Toast as toast } from '../utils/toast';
 import {
@@ -28,6 +30,8 @@ import {
 import { Modal } from '../components/Modal';
 import { DeleteModal } from '../components/DeleteModal';
 import { FileUpload } from '../components/FileUpload';
+import { useUserDocuments } from '../hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SortField = 'name' | 'date' | 'size';
 type SortOrder = 'asc' | 'desc';
@@ -35,49 +39,30 @@ type ViewMode = 'grid' | 'list';
 
 export const FilesPage = () => {
   const navigate = useNavigate();
-  const [documents, setDocuments] = useState<UserDocument[]>([]);
-  const [filteredDocuments, setFilteredDocuments] = useState<UserDocument[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
+  const { data: documents = [], isLoading: loading } = useUserDocuments();
+  const queryClient = useQueryClient();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedDocument, setSelectedDocument] = useState<UserDocument | null>(
     null
   );
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const location = useLocation();
+  const [uploadModalOpen, setUploadModalOpen] = useState(
+    location.state?.openUpload === true
+  );
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortDocuments();
-  }, []);
-
-  const loadDocuments = async () => {
-    try {
-      setLoading(true);
-      const docs = await userDocumentService.getUserDocuments();
-      setDocuments(docs);
-    } catch (error) {
-      toast.error('Failed to load documents');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterAndSortDocuments = useCallback(() => {
+  const filteredDocuments = useMemo(() => {
+    // Determine which list to filter - use data from hook
     let filtered = [...documents];
 
     // Apply search filter
@@ -98,21 +83,6 @@ export const FilesPage = () => {
         switch (selectedType) {
           case 'pdf':
             return mimeType.includes('pdf');
-          case 'image':
-            return mimeType.startsWith('image/');
-          case 'document':
-            return (
-              mimeType.includes('word') ||
-              mimeType.includes('document') ||
-              mimeType.includes('text')
-            );
-          case 'other':
-            return (
-              !mimeType.includes('pdf') &&
-              !mimeType.startsWith('image/') &&
-              !mimeType.includes('word') &&
-              !mimeType.includes('document')
-            );
           default:
             return true;
         }
@@ -137,7 +107,7 @@ export const FilesPage = () => {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-    setFilteredDocuments(filtered);
+    return filtered;
   }, [documents, searchQuery, selectedType, sortField, sortOrder]);
 
   const handleDownload = async (doc: UserDocument) => {
@@ -145,9 +115,8 @@ export const FilesPage = () => {
       const { url } = await userDocumentService.getDownloadUrl(doc.id);
       window.open(url, '_blank');
       toast.success('Download started');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to download file');
-      console.error(error);
     }
   };
 
@@ -164,12 +133,14 @@ export const FilesPage = () => {
     try {
       await userDocumentService.deleteUserDocument(selectedDocument.id);
       toast.success('File deleted successfully', { id: loadingToast });
-      setDocuments(documents.filter((d) => d.id !== selectedDocument.id));
+
+      // Invalidate queries instead of local state update
+      await queryClient.invalidateQueries({ queryKey: ['userDocuments'] });
+
       setDeleteModalOpen(false);
       setSelectedDocument(null);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete file', { id: loadingToast });
-      console.error(error);
     } finally {
       setIsDeleting(false);
     }
@@ -198,16 +169,17 @@ export const FilesPage = () => {
     setUploading(true);
 
     try {
-      const uploaded = await userDocumentService.uploadFiles(uploadFiles);
-      toast.success(`Successfully uploaded ${uploaded.length} file(s)`, {
+      await userDocumentService.uploadFiles(uploadFiles);
+      toast.success(`Successfully uploaded ${uploadFiles.length} file(s)`, {
         id: loadingToast,
       });
-      setDocuments([...uploaded, ...documents]);
+      // Invalidate queries to refresh list
+      await queryClient.invalidateQueries({ queryKey: ['userDocuments'] });
+
       setUploadModalOpen(false);
       setUploadFiles([]);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to upload files', { id: loadingToast });
-      console.error(error);
     } finally {
       setUploading(false);
     }
@@ -232,14 +204,6 @@ export const FilesPage = () => {
     (acc, doc) => acc + doc.document.sizeBytes,
     0
   );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-primary-600"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -409,7 +373,17 @@ export const FilesPage = () => {
       </div>
 
       {/* Files Display */}
-      {filteredDocuments.length === 0 ? (
+      {loading ? (
+        viewMode === 'grid' ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <CardSkeleton count={10} />
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <TableSkeleton rows={10} columns={4} />
+          </div>
+        )
+      ) : filteredDocuments.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
           <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -424,30 +398,29 @@ export const FilesPage = () => {
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredDocuments.map((doc) => (
             <div
               key={doc.id}
-              className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200"
+              className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-lg hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200 flex flex-col"
             >
               {/* File Icon */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-xl flex items-center justify-center text-3xl">
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-xl flex items-center justify-center text-2xl sm:text-3xl">
                   {userDocumentService.getFileIcon(doc.document.mimeType)}
                 </div>
-                <div className="relative">
+                <div className="relative -mr-2 -mt-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setOpenMenuId(openMenuId === doc.id ? null : doc.id);
                     }}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <MoreVertical className="w-5 h-5" />
+                    <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                   {openMenuId === doc.id && (
                     <>
-                      {/* Backdrop to close menu when clicking outside */}
                       <div
                         className="fixed inset-0 z-10"
                         onClick={() => setOpenMenuId(null)}
@@ -490,18 +463,20 @@ export const FilesPage = () => {
               </div>
 
               {/* File Info */}
-              <h3
-                className="font-semibold text-gray-900 dark:text-white mb-2 truncate"
-                title={doc.displayName}
-              >
-                {doc.displayName}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {userDocumentService.formatFileSize(doc.document.sizeBytes)}
-              </p>
-              <div className="flex items-center gap-1 text-xs text-gray-400">
-                <Calendar className="w-3 h-3" />
-                {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+              <div className="mt-auto">
+                <h3
+                  className="font-semibold text-gray-900 dark:text-white mb-1 truncate text-sm sm:text-base"
+                  title={doc.displayName}
+                >
+                  {doc.displayName}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {userDocumentService.formatFileSize(doc.document.sizeBytes)}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                  <Calendar className="w-3 h-3" />
+                  {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+                </div>
               </div>
             </div>
           ))}
@@ -515,10 +490,10 @@ export const FilesPage = () => {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                     Size
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                     Uploaded
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
@@ -539,19 +514,25 @@ export const FilesPage = () => {
                             doc.document.mimeType
                           )}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 max-w-[200px] sm:max-w-xs lg:max-w-md">
                           <p className="font-medium text-gray-900 dark:text-white truncate">
                             {doc.displayName}
+                          </p>
+                          {/* Show size on mobile in subtitle */}
+                          <p className="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {userDocumentService.formatFileSize(
+                              doc.document.sizeBytes
+                            )}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {userDocumentService.formatFileSize(
                         doc.document.sizeBytes
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -565,7 +546,7 @@ export const FilesPage = () => {
                         </button>
                         <button
                           onClick={() => handleDownload(doc)}
-                          className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          className="hidden sm:block p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                           title="Download"
                         >
                           <Download className="w-4 h-4" />

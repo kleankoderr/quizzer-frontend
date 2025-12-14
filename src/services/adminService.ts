@@ -10,6 +10,8 @@ export interface SystemStats {
     quizzes: number;
     flashcards: number;
     studyMaterials: number;
+    studyPacks: number;
+    documents: number;
   };
   engagement: {
     totalAttempts: number;

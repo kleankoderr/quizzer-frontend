@@ -57,9 +57,7 @@ export const AssessmentPopup = () => {
             pollInterval = setInterval(checkStatus, 5000); // Check every 5 seconds for faster feedback
           }
         }
-      } catch (error) {
-        console.error('Failed to check assessment status:', error);
-      }
+      } catch (_error) {}
     };
 
     // Initial check
@@ -78,9 +76,7 @@ export const AssessmentPopup = () => {
       if (user) {
         login({ ...user, assessmentPopupShown: true });
       }
-    } catch (error) {
-      console.error('Failed to mark popup as shown:', error);
-    }
+    } catch (_error) {}
   };
 
   const handleTakeQuiz = () => {

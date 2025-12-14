@@ -74,8 +74,7 @@ export const FileSelector = ({
       const docs = await userDocumentService.getUserDocuments();
       setDocuments(docs);
       setFilteredDocuments(docs);
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
     } finally {
       setLoading(false);
       loadingRef.current = false;
@@ -158,6 +157,7 @@ export const FileSelector = ({
           <div className="flex items-center gap-2">
             {selectedFileIds.length > 0 && (
               <button
+                type="button"
                 onClick={clearSelection}
                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
@@ -165,6 +165,7 @@ export const FileSelector = ({
               </button>
             )}
             <button
+              type="button"
               onClick={() => navigate('/files')}
               className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors flex items-center gap-1"
             >
@@ -186,6 +187,7 @@ export const FileSelector = ({
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
@@ -208,6 +210,7 @@ export const FileSelector = ({
               return (
                 <button
                   key={doc.id}
+                  type="button"
                   onClick={() => toggleSelection(doc.id)}
                   className={`w-full p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left ${
                     isSelected ? 'bg-primary-50 dark:bg-primary-900/20' : ''

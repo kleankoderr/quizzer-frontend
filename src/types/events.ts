@@ -34,6 +34,7 @@ export interface FlashcardProgressEvent extends ProgressEvent {
 export interface FlashcardCompletedEvent extends CompletionEvent {
   eventType: 'flashcard.completed';
   resourceType: 'flashcard-set';
+  jobId: string;
   flashcardSetId: string;
   cardCount: number;
 }

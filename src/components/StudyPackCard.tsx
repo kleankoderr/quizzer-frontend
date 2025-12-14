@@ -7,12 +7,14 @@ import {
   Brain,
   HelpCircle,
   Layers,
+  Pencil,
   Trash2,
 } from 'lucide-react';
 
 interface StudyPackCardProps {
   studyPack: StudyPack;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 const StatItem: React.FC<{
@@ -29,6 +31,7 @@ const StatItem: React.FC<{
 export const StudyPackCard: React.FC<StudyPackCardProps> = ({
   studyPack,
   onDelete,
+  onEdit,
 }) => {
   const counts = studyPack._count || {
     quizzes: 0,
@@ -55,6 +58,12 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
     e.preventDefault();
     e.stopPropagation();
     onDelete?.();
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onEdit?.();
   };
 
   const stats = [
@@ -90,19 +99,31 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
       to={`/study-packs/${studyPack.id}`}
       gradientColor="bg-blue-500"
       actions={
-        onDelete && (
-          <button
-            onClick={handleDelete}
-            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors text-gray-400 hover:text-red-500 group/delete"
-            title="Delete Study Pack"
-            aria-label="Delete study pack"
-          >
-            <Trash2 className="w-5 h-5 transition-transform group-hover/delete:scale-110" />
-          </button>
-        )
+        <div className="flex items-center gap-1">
+          {onEdit && (
+            <button
+              onClick={handleEdit}
+              className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-gray-400 hover:text-blue-500 group/edit"
+              title="Edit Study Pack"
+              aria-label="Edit study pack"
+            >
+              <Pencil className="w-5 h-5 transition-transform group-hover/edit:scale-110" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={handleDelete}
+              className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors text-gray-400 hover:text-red-500 group/delete"
+              title="Delete Study Pack"
+              aria-label="Delete study pack"
+            >
+              <Trash2 className="w-5 h-5 transition-transform group-hover/delete:scale-110" />
+            </button>
+          )}
+        </div>
       }
     >
-      <div className="flex gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
         {stats.map((stat) => (
           <StatItem key={stat.title} {...stat} />
         ))}

@@ -44,8 +44,7 @@ export const SchoolSearch = ({
       try {
         const data = await schoolService.searchSchools(debouncedQuery);
         setResults(data);
-      } catch (error) {
-        console.error('Failed to search schools:', error);
+      } catch (_error) {
       } finally {
         setLoading(false);
       }

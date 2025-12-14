@@ -26,7 +26,6 @@ export interface JobStatus {
 }
 
 export const quizService = {
-  // Generate a new quiz
   generate: async (
     request: QuizGenerateRequest,
     files?: File[]

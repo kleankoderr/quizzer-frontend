@@ -4,7 +4,7 @@ import { studyPackService } from '../services/studyPackService';
 import type { StudyPack } from '../types';
 import { Folder, Plus } from 'lucide-react';
 import { Toast as toast } from '../utils/toast';
-import { useAsync } from '../hooks/useAsync';
+import { useAsync } from '../hooks';
 
 interface MoveToStudyPackModalProps {
   isOpen: boolean;
@@ -63,7 +63,6 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       setIsCreating(false);
       setNewPackTitle('');
     } catch (error: any) {
-      console.error('Failed to create study pack', error);
       toast.error(
         error.response?.data?.message || 'Failed to create study pack'
       );
@@ -81,8 +80,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
         const pack = studyPacks.find((p) => p.id === packId);
         onMoveSuccess?.(pack);
         onClose();
-      } catch (error) {
-        console.error('Failed to move item', error);
+      } catch (_error) {
         toast.error('Failed to move item');
       } finally {
         setMoving(null);

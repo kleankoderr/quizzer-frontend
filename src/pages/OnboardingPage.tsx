@@ -86,8 +86,7 @@ export const OnboardingPage = () => {
 
       // Move to completion step (Step 4) which will auto-redirect
       setStep(4);
-    } catch (error) {
-      console.error('Onboarding failed:', error);
+    } catch (_error) {
       // Even if it fails, try to redirect to dashboard to avoid getting stuck
       navigate('/dashboard');
     } finally {

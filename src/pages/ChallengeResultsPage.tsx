@@ -249,14 +249,12 @@ export const ChallengeResultsPage = () => {
           );
           setAttemptDetails(attempt);
           setQuizDetails(attempt.quiz);
-        } catch (err) {
-          console.error('Failed to load attempt details', err);
+        } catch (_err) {
         } finally {
           setLoadingAttempt(false);
         }
       }
-    } catch (error) {
-      console.error('Failed to load results:', error);
+    } catch (_error) {
       toast.error('Failed to load results');
       navigate('/challenges');
     } finally {
@@ -293,8 +291,9 @@ export const ChallengeResultsPage = () => {
       const dataUrl = await toPng(resultsRef.current, {
         cacheBust: true,
         filter: (node) => {
-          return !(node instanceof HTMLElement &&
-              node.dataset.html2canvasIgnore);
+          return !(
+            node instanceof HTMLElement && node.dataset.html2canvasIgnore
+          );
         },
       });
 
@@ -320,7 +319,6 @@ export const ChallengeResultsPage = () => {
       // Ignore abort errors which happen when user cancels share
       if (error instanceof Error && error.name === 'AbortError') return;
 
-      console.error('Error sharing:', error);
       toast.error('Failed to share results');
     } finally {
       setIsSharing(false);

@@ -71,8 +71,7 @@ export const QuizReviewPage = () => {
         });
 
         setSelectedAnswers(userAnswers);
-      } catch (error) {
-        console.error('Failed to load attempt:', error);
+      } catch (_error) {
         toast.error('Failed to load attempt details');
         navigate('/quiz');
       } finally {

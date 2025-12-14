@@ -63,8 +63,7 @@ export const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
         const data = await searchService.search(debouncedQuery);
         setResults(data);
         setSelectedIndex(0);
-      } catch (error) {
-        console.error('Search failed', error);
+      } catch (_error) {
         setResults([]);
       } finally {
         setLoading(false);

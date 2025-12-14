@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import type { FlashcardGenerateRequest } from '../types';
-import type { AppEvent } from '../types/events';
+import type { AppEvent, FlashcardCompletedEvent } from '../types/events';
 import {
   CreditCard,
   Plus,
@@ -37,6 +37,7 @@ export const FlashcardsPage = () => {
         content?: string;
         mode?: 'topic' | 'content' | 'files';
         contentId?: string;
+        studyPackId?: string;
       }
     | undefined
   >(undefined);
@@ -53,6 +54,7 @@ export const FlashcardsPage = () => {
           contentText?: string;
           contentId?: string;
           openGenerator?: boolean; // Added flag
+          studyPackId?: string;
         };
 
       if (topic || contentText || openGenerator) {
@@ -61,6 +63,7 @@ export const FlashcardsPage = () => {
           content: contentText,
           mode: contentText ? 'content' : 'topic',
           contentId,
+          studyPackId: (location.state as any).studyPackId,
         });
         setShowGenerator(true);
       }
@@ -68,33 +71,9 @@ export const FlashcardsPage = () => {
   }, [location.state]);
 
   const handleProgress = useCallback((event: AppEvent) => {
+    // Progress is now handled automatically by the toast component
     if (event.eventType === 'flashcard.progress' && currentJobIdRef.current) {
-      const progressEvent = event as any;
-      console.log('Progress event received:', {
-        jobId: progressEvent.jobId,
-        currentJobId: currentJobIdRef.current,
-        percentage: progressEvent.percentage,
-        step: progressEvent.step,
-        toastId: toastIdRef.current,
-      });
-
-      if (
-        progressEvent.jobId === currentJobIdRef.current &&
-        toastIdRef.current
-      ) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Creating Flashcards"
-              message={progressEvent.step || progressEvent.message}
-              progress={progressEvent.percentage}
-              status="processing"
-            />
-          ),
-          { id: toastIdRef.current }
-        );
-      }
+      // Toast updates disabled to allow auto-progress
     }
   }, []);
 
@@ -105,7 +84,13 @@ export const FlashcardsPage = () => {
         currentJobIdRef.current &&
         toastIdRef.current
       ) {
-        const completedEvent = event as any;
+        // TypeScript automatically narrows event to FlashcardCompletedEvent here
+        const completedEvent = event as FlashcardCompletedEvent;
+
+        // Verify that this completion event matches our current job
+        if (completedEvent.jobId !== currentJobIdRef.current) {
+          return;
+        }
 
         await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
 
@@ -187,20 +172,18 @@ export const FlashcardsPage = () => {
           message="Preparing your study materials..."
           progress={0}
           status="processing"
+          autoProgress={true}
         />
       ),
       { duration: Infinity }
     );
 
     toastIdRef.current = toastId;
-    console.log('Initial toast created:', toastId);
 
     try {
       const { jobId } = await flashcardService.generate(request, files);
       currentJobIdRef.current = jobId;
-      console.log('Job started:', { jobId, toastId });
     } catch (_error) {
-      console.error('Failed to start job:', _error);
       toast.custom(
         (t) => (
           <ProgressToast
