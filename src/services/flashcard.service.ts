@@ -48,7 +48,7 @@ export const flashcardService = {
    */
   getAll: async (
     page: number = 1,
-    limit: number = 100
+    limit: number = 20
   ): Promise<FlashcardSet[]> => {
     const response = await apiClient.get<{ data: FlashcardSet[]; meta: any }>(
       `/flashcards?page=${page}&limit=${limit}`

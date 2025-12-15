@@ -96,7 +96,7 @@ export const quizService = {
   /**
    * Get all quizzes for the current user
    */
-  getAll: async (page: number = 1, limit: number = 100): Promise<Quiz[]> => {
+  getAll: async (page: number = 1, limit: number = 20): Promise<Quiz[]> => {
     const response = await apiClient.get<{ data: Quiz[]; meta: any }>(
       `/quiz?page=${page}&limit=${limit}`
     );
