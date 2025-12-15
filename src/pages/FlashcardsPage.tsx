@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import type { FlashcardGenerateRequest } from '../types';
-import type { AppEvent, FlashcardCompletedEvent } from '../types/events';
+import type { AppEvent } from '../types/events';
 import {
   CreditCard,
   Plus,
@@ -69,63 +69,60 @@ export const FlashcardsPage = () => {
       }
     }
   }, [location.state]);
-
-  const handleProgress = useCallback((event: AppEvent) => {
-    // Progress is now handled automatically by the toast component
-    if (event.eventType === 'flashcard.progress' && currentJobIdRef.current) {
-      // Toast updates disabled to allow auto-progress
-    }
-  }, []);
-
-  const handleCompleted = useCallback(
-    async (event: AppEvent) => {
-      if (
-        event.eventType === 'flashcard.completed' &&
-        currentJobIdRef.current &&
-        toastIdRef.current
-      ) {
-        // TypeScript automatically narrows event to FlashcardCompletedEvent here
-        const completedEvent = event as FlashcardCompletedEvent;
-
-        // Verify that this completion event matches our current job
-        if (completedEvent.jobId !== currentJobIdRef.current) {
-          return;
+    useCallback((event: AppEvent) => {
+        // Progress is now handled automatically by the toast component
+        if (event.eventType === 'flashcard.progress' && currentJobIdRef.current) {
+            // Toast updates disabled to allow auto-progress
         }
+    }, []);
 
-        await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+    const handleCompleted = useCallback(
+        async (event: AppEvent) => {
+            if (
+                event.eventType === 'flashcard.completed' &&
+                currentJobIdRef.current &&
+                toastIdRef.current
+            ) {
+                const completedEvent = event;
 
-        if (initialValues?.contentId) {
-          await queryClient.invalidateQueries({
-            queryKey: ['content', initialValues.contentId],
-          });
-        }
+                // Verify that this completion event matches our current job
+                if (completedEvent.jobId !== currentJobIdRef.current) {
+                    return;
+                }
 
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Flashcards Ready!"
-              message="Opening your flashcards..."
-              progress={100}
-              status="success"
-            />
-          ),
-          { id: toastIdRef.current, duration: 2000 }
-        );
+                await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
 
-        setTimeout(() => {
-          navigate(`/flashcards/${completedEvent.flashcardSetId}`);
-        }, 500);
+                if (initialValues?.contentId) {
+                    await queryClient.invalidateQueries({
+                        queryKey: ['content', initialValues.contentId],
+                    });
+                }
 
-        setLoading(false);
-        currentJobIdRef.current = null;
-        toastIdRef.current = null;
-      }
-    },
-    [queryClient, initialValues, navigate]
-  );
+                toast.custom(
+                    (t) => (
+                        <ProgressToast
+                            t={t}
+                            title="Flashcards Ready!"
+                            message="Opening your flashcards..."
+                            progress={100}
+                            status="success"
+                        />
+                    ),
+                    { id: toastIdRef.current, duration: 2000 }
+                );
 
-  const handleFailed = useCallback((event: AppEvent) => {
+                setTimeout(() => {
+                    navigate(`/flashcards/${completedEvent.flashcardSetId}`);
+                }, 500);
+
+                setLoading(false);
+                currentJobIdRef.current = null;
+                toastIdRef.current = null;
+            }
+        },
+        [queryClient, initialValues, navigate]
+    );
+    const handleFailed = useCallback((event: AppEvent) => {
     if (
       event.eventType === 'flashcard.failed' &&
       currentJobIdRef.current &&
@@ -153,7 +150,6 @@ export const FlashcardsPage = () => {
     }
   }, []);
 
-  useSSEEvent('flashcard.progress', handleProgress);
   useSSEEvent('flashcard.completed', handleCompleted);
   useSSEEvent('flashcard.failed', handleFailed);
 

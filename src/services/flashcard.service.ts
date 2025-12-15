@@ -59,6 +59,26 @@ export const flashcardService = {
     return response.data;
   },
 
+  // Check job status
+  getJobStatus: async (
+    jobId: string
+  ): Promise<{
+    jobId: string;
+    status: string;
+    progress: number;
+    result?: any;
+    error?: string;
+  }> => {
+    const response = await apiClient.get<{
+      jobId: string;
+      status: string;
+      progress: number;
+      result?: any;
+      error?: string;
+    }>(`/flashcards/status/${jobId}`);
+    return response.data;
+  },
+
   // Record flashcard study session
   recordSession: async (
     id: string,

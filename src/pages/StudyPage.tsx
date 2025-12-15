@@ -155,50 +155,48 @@ export const StudyPage = () => {
       </div>
     </Card>
   );
+    useCallback((event: AppEvent) => {
+        // Progress is now handled automatically by the toast component
+        if (event.eventType === 'content.progress' && currentJobIdRef.current) {
+            // Toast updates disabled to allow auto-progress
+        }
+    }, []);
 
-  const handleProgress = useCallback((event: AppEvent) => {
-    // Progress is now handled automatically by the toast component
-    if (event.eventType === 'content.progress' && currentJobIdRef.current) {
-      // Toast updates disabled to allow auto-progress
-    }
-  }, []);
+    const handleCompleted = useCallback(
+        async (event: AppEvent) => {
+            if (
+                event.eventType === 'content.completed' &&
+                currentJobIdRef.current &&
+                toastIdRef.current
+            ) {
+                const completedEvent = event as any;
 
-  const handleCompleted = useCallback(
-    async (event: AppEvent) => {
-      if (
-        event.eventType === 'content.completed' &&
-        currentJobIdRef.current &&
-        toastIdRef.current
-      ) {
-        const completedEvent = event as any;
+                toast.custom(
+                    (t) => (
+                        <ProgressToast
+                            t={t}
+                            title="Content Ready!"
+                            message="Opening your study material..."
+                            progress={100}
+                            status="success"
+                        />
+                    ),
+                    { id: toastIdRef.current, duration: 2000 }
+                );
 
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Content Ready!"
-              message="Opening your study material..."
-              progress={100}
-              status="success"
-            />
-          ),
-          { id: toastIdRef.current, duration: 2000 }
-        );
+                setTimeout(() => {
+                    navigate(`/content/${completedEvent.contentId}`);
+                }, 500);
 
-        setTimeout(() => {
-          navigate(`/content/${completedEvent.contentId}`);
-        }, 500);
-
-        setContentLoading(false);
-        currentJobIdRef.current = null;
-        toastIdRef.current = null;
-        refetch();
-      }
-    },
-    [navigate, refetch]
-  );
-
-  const handleFailed = useCallback((event: AppEvent) => {
+                setContentLoading(false);
+                currentJobIdRef.current = null;
+                toastIdRef.current = null;
+                refetch();
+            }
+        },
+        [navigate, refetch]
+    );
+    const handleFailed = useCallback((event: AppEvent) => {
     if (
       event.eventType === 'content.failed' &&
       currentJobIdRef.current &&
@@ -226,7 +224,6 @@ export const StudyPage = () => {
     }
   }, []);
 
-  useSSEEvent('content.progress', handleProgress);
   useSSEEvent('content.completed', handleCompleted);
   useSSEEvent('content.failed', handleFailed);
 

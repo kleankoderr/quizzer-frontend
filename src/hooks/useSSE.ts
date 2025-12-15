@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { useSSEContext } from '../contexts/SSEContext';
 import type { AppEvent } from '../types/events';
 
@@ -23,8 +23,20 @@ export const useSSE = (): SSEState => {
  */
 export const useSSEEvent = (eventType: string, handler: EventHandler): void => {
   const { service } = useSSEContext();
+  
+  // Use ref to store the latest handler without triggering re-subscriptions
+  const handlerRef = useRef(handler);
+  
+  useEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
 
   useEffect(() => {
-    return service.addEventListener(eventType, handler);
-  }, [service, eventType, handler]);
+    // Stable wrapper that always calls the latest handler
+    const stableHandler = (event: AppEvent) => {
+      handlerRef.current(event);
+    };
+    
+    return service.addEventListener(eventType, stableHandler);
+  }, [service, eventType]);
 };

@@ -14,6 +14,7 @@ export const ProgressToast: React.FC<
   ProgressToastProps & { autoProgress?: boolean }
 > = ({ t, title, message, progress, status, autoProgress = false }) => {
   const [currentProgress, setCurrentProgress] = useState(progress);
+  const [currentMessage, setCurrentMessage] = useState(message);
 
   useEffect(() => {
     if (status === 'success') {
@@ -25,23 +26,62 @@ export const ProgressToast: React.FC<
     }
 
     if (status === 'processing' && autoProgress) {
-      setCurrentProgress((prev: number) => Math.max(prev, 10)); // Start at least at 10%
+      setCurrentProgress((prev: number) => Math.max(prev, 5)); // Start at 5%
 
       const interval = setInterval(() => {
         setCurrentProgress((prev: number) => {
-          if (prev >= 95) return prev;
-          // Calculate increment - slower as it gets higher
-          const remaining = 95 - prev;
-          const increment = Math.max(0.1, remaining * 0.05);
-          return Math.min(95, prev + Math.random() * increment);
+          if (prev >= 98) return prev; // Cap at 98%
+
+          // Determine speed based on progress
+          let increment: number;
+
+          if (prev < 20) {
+            // Initializing - Fast
+            increment = Math.random() * 2 + 1; // 1-3%
+          } else if (prev < 40) {
+            // Processing - Medium
+            increment = Math.random() * 1.5 + 0.5; // 0.5-2%
+          } else if (prev < 70) {
+            // Generating - Medium Slow
+            increment = Math.random() + 0.2; // 0.2-1.2%
+          } else if (prev < 90) {
+            // Formatting - Slow
+            increment = Math.random() * 0.5 + 0.1; // 0.1-0.6%
+          } else {
+            // Finalizing - Crawling (90-99%)
+            increment = Math.random() * 0.2; // 0-0.2%
+          }
+
+          return Math.min(98, prev + increment);
         });
-      }, 500);
+      }, 300); // Update every 300ms
 
       return () => clearInterval(interval);
     } else {
       setCurrentProgress(progress);
+      setCurrentMessage(message);
     }
-  }, [status, autoProgress, progress]);
+  }, [status, autoProgress, progress, message]);
+
+  // Update message based on progress
+  useEffect(() => {
+    if (status === 'processing' && autoProgress) {
+        let newMessage: string;
+        if (currentProgress < 20) {
+          newMessage = 'Initializing...';
+        } else if (currentProgress < 40) {
+          newMessage = 'Processing content...';
+        } else if (currentProgress < 70) {
+          newMessage = 'Generating results...';
+        } else if (currentProgress < 90) {
+          newMessage = 'Formatting output...';
+        } else {
+          newMessage = 'Finalizing...';
+        }
+        
+        setCurrentMessage(newMessage);
+    }
+  }, [currentProgress, status, autoProgress, message]);
 
   useEffect(() => {
     if (status === 'success' || status === 'error') {
@@ -72,8 +112,8 @@ export const ProgressToast: React.FC<
   const displayMessage =
     status === 'error'
       ? '.....'
-      : message
-        ? truncateMessage(message)
+      : currentMessage
+        ? truncateMessage(currentMessage)
         : undefined;
 
   return (

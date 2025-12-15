@@ -85,66 +85,64 @@ export const QuizPage = () => {
       }
     }
   }, [location.state]);
-
-  const handleProgress = useCallback((event: AppEvent) => {
-    // Progress is now handled automatically by the toast component
-    if (event.eventType === 'quiz.progress' && currentJobIdRef.current) {
-      // Toast updates disabled to allow auto-progress
-    }
-  }, []);
-
-  const handleCompleted = useCallback(
-    async (event: AppEvent) => {
-      if (
-        event.eventType === 'quiz.completed' &&
-        currentJobIdRef.current &&
-        toastIdRef.current
-      ) {
-        const completedEvent = event as any;
-
-        await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-
-        if (initialValues?.contentId) {
-          await queryClient.invalidateQueries({
-            queryKey: ['content', initialValues.contentId],
-          });
+    useCallback((event: AppEvent) => {
+        // Progress is now handled automatically by the toast component
+        if (event.eventType === 'quiz.progress' && currentJobIdRef.current) {
+            // Toast updates disabled to allow auto-progress
         }
+    }, []);
 
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Quiz Ready!"
-              message="Opening your quiz..."
-              progress={100}
-              status="success"
-            />
-          ),
-          { id: toastIdRef.current, duration: 2000 }
-        );
+    const handleCompleted = useCallback(
+        async (event: AppEvent) => {
+            if (
+                event.eventType === 'quiz.completed' &&
+                currentJobIdRef.current &&
+                toastIdRef.current
+            ) {
+                const completedEvent = event as any;
 
-        setTimeout(() => {
-          navigate(`/quiz/${completedEvent.quizId}`, {
-            state: {
-              breadcrumb: initialValues?.breadcrumb
-                ? [
-                    ...initialValues.breadcrumb,
-                    { label: 'Quiz', path: `/quiz/${completedEvent.quizId}` },
-                  ]
-                : undefined,
-            },
-          });
-        }, 500);
+                await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
 
-        setGenerating(false);
-        currentJobIdRef.current = null;
-        toastIdRef.current = null;
-      }
-    },
-    [queryClient, initialValues, navigate]
-  );
+                if (initialValues?.contentId) {
+                    await queryClient.invalidateQueries({
+                        queryKey: ['content', initialValues.contentId],
+                    });
+                }
 
-  const handleFailed = useCallback((event: AppEvent) => {
+                toast.custom(
+                    (t) => (
+                        <ProgressToast
+                            t={t}
+                            title="Quiz Ready!"
+                            message="Opening your quiz..."
+                            progress={100}
+                            status="success"
+                        />
+                    ),
+                    { id: toastIdRef.current, duration: 2000 }
+                );
+
+                setTimeout(() => {
+                    navigate(`/quiz/${completedEvent.quizId}`, {
+                        state: {
+                            breadcrumb: initialValues?.breadcrumb
+                                ? [
+                                    ...initialValues.breadcrumb,
+                                    { label: 'Quiz', path: `/quiz/${completedEvent.quizId}` },
+                                ]
+                                : undefined,
+                        },
+                    });
+                }, 500);
+
+                setGenerating(false);
+                currentJobIdRef.current = null;
+                toastIdRef.current = null;
+            }
+        },
+        [queryClient, initialValues, navigate]
+    );
+    const handleFailed = useCallback((event: AppEvent) => {
     if (
       event.eventType === 'quiz.failed' &&
       currentJobIdRef.current &&
@@ -172,7 +170,6 @@ export const QuizPage = () => {
     }
   }, []);
 
-  useSSEEvent('quiz.progress', handleProgress);
   useSSEEvent('quiz.completed', handleCompleted);
   useSSEEvent('quiz.failed', handleFailed);
 
