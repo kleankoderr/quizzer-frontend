@@ -93,9 +93,14 @@ export const quizService = {
     );
     return response.data;
   },
-  getAll: async (): Promise<Quiz[]> => {
-    const response = await apiClient.get<Quiz[]>(QUIZ_ENDPOINTS.GET_ALL);
-    return response.data;
+  /**
+   * Get all quizzes for the current user
+   */
+  getAll: async (page: number = 1, limit: number = 100): Promise<Quiz[]> => {
+    const response = await apiClient.get<{ data: Quiz[]; meta: any }>(
+      `/quiz?page=${page}&limit=${limit}`
+    );
+    return response.data.data; // Extract data array from paginated response
   },
 
   // Get quiz by ID

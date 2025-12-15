@@ -38,7 +38,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   }, [sets]);
 
   const renderSetCard = (set: FlashcardSet) => {
-    const cardCount = Array.isArray(set.cards) ? set.cards.length : 0;
+    const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
     const hasStudied = !!set.lastStudiedAt;
 
     return (

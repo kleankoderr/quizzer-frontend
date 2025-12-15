@@ -81,6 +81,7 @@ export interface Quiz {
   quizType?: QuizType;
   timeLimit?: number;
   questions: QuizQuestion[];
+  questionCount?: number; // Count for list view (when questions array not loaded)
   userId: string;
   tags?: string[];
   createdAt: string;
@@ -88,6 +89,7 @@ export interface Quiz {
     score: number;
     completedAt: string;
   }[];
+  attemptCount?: number; // Count for list view (when attempts array not loaded)
   studyPackId?: string;
   studyPack?: {
     id: string;
@@ -144,6 +146,7 @@ export interface FlashcardSet {
   title: string;
   topic: string;
   cards: Flashcard[];
+  cardCount?: number; // Count for list view (when cards array not loaded)
   userId: string;
   createdAt: string;
   lastStudiedAt?: string;

@@ -229,7 +229,7 @@ export const FlashcardsPage = () => {
   // Calculate stats
   const totalSets = flashcardSets.length;
   const totalCards = flashcardSets.reduce(
-    (sum, set) => sum + (Array.isArray(set.cards) ? set.cards.length : 0),
+    (sum, set) => sum + (set.cardCount || 0),
     0
   );
   const studiedSets = flashcardSets.filter((set) => set.lastStudiedAt).length;

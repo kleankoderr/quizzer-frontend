@@ -247,11 +247,11 @@ export const QuizPage = () => {
   // Calculate stats
   const totalQuizzes = quizzes.length;
   const totalQuestions = quizzes.reduce(
-    (sum, quiz) => sum + quiz.questions.length,
+    (sum, quiz) => sum + (quiz.questionCount || 0),
     0
   );
   const completedQuizzes = quizzes.filter(
-    (quiz) => quiz.attempts && quiz.attempts.length > 0
+    (quiz) => quiz.attemptCount && quiz.attemptCount > 0
   ).length;
 
   return (

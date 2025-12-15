@@ -43,12 +43,17 @@ export const flashcardService = {
     return response.data;
   },
 
-  // Get all flashcard sets
-  getAll: async (): Promise<FlashcardSet[]> => {
-    const response = await apiClient.get<FlashcardSet[]>(
-      FLASHCARD_ENDPOINTS.GET_ALL
+  /**
+   * Get all flashcard sets for the current user
+   */
+  getAll: async (
+    page: number = 1,
+    limit: number = 100
+  ): Promise<FlashcardSet[]> => {
+    const response = await apiClient.get<{ data: FlashcardSet[]; meta: any }>(
+      `/flashcards?page=${page}&limit=${limit}`
     );
-    return response.data;
+    return response.data.data; // Extract data array from paginated response
   },
 
   // Get flashcard set by ID

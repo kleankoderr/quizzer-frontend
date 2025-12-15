@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from './Card';
 import type { Quiz, StudyPack } from '../types';
-import { Brain, Plus, Folder, Trash2 } from 'lucide-react';
+import { Brain, Plus, Folder, Trash2, Target, Clock } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
 
@@ -87,10 +87,19 @@ export const QuizList: React.FC<QuizListProps> = ({
 
         {/* Stats */}
         <div className="space-y-2">
+            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                <Target className="w-4 h-4" />
+                {quiz.questionCount || quiz.questions?.length || 0} questions
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                {quiz.createdAt
+                  ? new Date(quiz.createdAt).toLocaleDateString()
+                  : 'N/A'}
+              </span>
+            </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-              {quiz.questions.length} questions
-            </span>
             <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
               {quiz.difficulty || 'Medium'}
             </span>
