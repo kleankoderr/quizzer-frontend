@@ -541,7 +541,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white break-words [&_code]:bg-gray-100 dark:[&_code]:bg-gray-700 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]">
+          <div className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white w-full max-w-full overflow-hidden break-words [&_p]:m-0 [&_pre]:whitespace-pre-wrap [&_code]:break-all [&_code]:bg-gray-100 dark:[&_code]:bg-gray-700 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em] [&_img]:max-w-full">
             <ReactMarkdown>{question.question}</ReactMarkdown>
           </div>
         </div>
