@@ -29,6 +29,7 @@ import { Toast as toast } from '../utils/toast';
 import { DeleteModal } from '../components/DeleteModal';
 import { InlineNoteInput } from '../components/InlineNoteInput';
 import { LearningGuide } from '../components/LearningGuide';
+import { ContentPageSkeleton } from '../components/skeletons';
 
 import './ContentPage.css';
 import { useContent } from '../hooks';
@@ -602,11 +603,7 @@ export const ContentPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-primary-600"></div>
-      </div>
-    );
+    return <ContentPageSkeleton />;
   }
 
   if (!content) {

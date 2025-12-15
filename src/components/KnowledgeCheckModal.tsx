@@ -173,7 +173,7 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
         <div className="p-6 overflow-y-auto custom-scrollbar">
             <QuestionRenderer 
                 question={questionData}
-                questionIndex={0} // Always 0 as it's a single question
+                questionIndex={0} 
                 selectedAnswer={selectedAnswerIndex}
                 onAnswerSelect={handleDisplayAnswerSelect}
                 showResults={showResult}

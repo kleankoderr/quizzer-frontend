@@ -1,3 +1,4 @@
+import ReactMarkdown from 'react-markdown';
 import { useState } from 'react';
 import type { QuizQuestion, AnswerValue } from '../types';
 import { Check, X, AlertTriangle } from 'lucide-react';
@@ -557,9 +558,9 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
             💡 Explanation:
           </p>
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            {question.explanation}
-          </p>
+          <div className="text-sm text-blue-800 dark:text-blue-200 [&_strong]:font-bold">
+            <ReactMarkdown>{question.explanation}</ReactMarkdown>
+          </div>
         </div>
       )}
     </div>
