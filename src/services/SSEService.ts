@@ -14,7 +14,7 @@ class SSEService {
   private token: string | null = null;
   private listeners: Map<string, Set<EventHandler>> = new Map();
   private stateChangeListeners: Set<StateChangeCallback> = new Set();
-  
+
   private state: SSEState = {
     isConnected: false,
     lastEvent: null,
@@ -22,7 +22,7 @@ class SSEService {
 
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectTimer: NodeJS.Timeout | null = null;
+  private reconnectTimer: number | null = null;
   private isManualDisconnect = false;
 
   connect(url: string, token?: string): void {
@@ -66,7 +66,7 @@ class SSEService {
     this.eventSource.onerror = () => {
       console.error('[SSE] Connection error');
       this.updateState({ isConnected: false, lastEvent: this.state.lastEvent });
-      
+
       if (!this.isManualDisconnect) {
         this.scheduleReconnect();
       }
@@ -81,7 +81,7 @@ class SSEService {
   private handleMessage = (event: MessageEvent): void => {
     try {
       const data = JSON.parse(event.data) as AppEvent;
-      
+
       this.updateState({
         isConnected: true,
         lastEvent: data,
@@ -123,14 +123,22 @@ class SSEService {
   }
 
   private scheduleReconnect(): void {
-    if (this.reconnectTimer || this.reconnectAttempts >= this.maxReconnectAttempts) {
+    if (
+      this.reconnectTimer ||
+      this.reconnectAttempts >= this.maxReconnectAttempts
+    ) {
       return;
     }
 
     this.reconnectAttempts++;
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
+    const delay = Math.min(
+      1000 * Math.pow(2, this.reconnectAttempts - 1),
+      30000
+    );
 
-    console.log(`[SSE] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    console.log(
+      `[SSE] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+    );
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
@@ -140,7 +148,7 @@ class SSEService {
 
   disconnect(): void {
     this.isManualDisconnect = true;
-    
+
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
