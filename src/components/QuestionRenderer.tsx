@@ -541,9 +541,9 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white break-words">
-            {question.question}
-          </h2>
+          <div className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white break-words [&_code]:bg-gray-100 dark:[&_code]:bg-gray-700 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]">
+            <ReactMarkdown>{question.question}</ReactMarkdown>
+          </div>
         </div>
       </div>
 
@@ -553,7 +553,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       {question.questionType === 'matching' && renderMatching()}
       {question.questionType === 'fill-blank' && renderFillBlank()}
 
-      {showResults && showExplanation && question.explanation && (
+      {showExplanation && question.explanation && (
         <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
           <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
             💡 Explanation:
