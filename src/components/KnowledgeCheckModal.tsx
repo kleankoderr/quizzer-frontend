@@ -67,7 +67,7 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
       questionType: type,
       question: knowledgeCheck.question,
       options: knowledgeCheck.options,
-      correctAnswer: correctIndex !== -1 ? correctIndex : knowledgeCheck.answer, 
+      correctAnswer: correctIndex === -1 ? knowledgeCheck.answer : correctIndex,
       explanation: knowledgeCheck.explanation,
     };
   }, [knowledgeCheck]);
@@ -76,7 +76,7 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
   const selectedAnswerIndex = useMemo(() => {
     if (selectedAnswer === undefined) return null;
     const idx = knowledgeCheck.options.indexOf(selectedAnswer);
-    return idx !== -1 ? idx : null;
+    return idx === -1 ? null : idx;
   }, [selectedAnswer, knowledgeCheck.options]);
 
   const handleClose = () => {
@@ -178,7 +178,7 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
                 onAnswerSelect={handleDisplayAnswerSelect}
                 showResults={showResult}
                 correctAnswer={questionData.correctAnswer}
-                showExplanation={true}
+                showExplanation={showResult}
                 hideQuestionNumber={true}
             />
         </div>
