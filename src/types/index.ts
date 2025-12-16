@@ -108,6 +108,7 @@ export interface QuizGenerateRequest {
   contentId?: string;
   selectedFileIds?: string[];
   studyPackId?: string;
+  title?: string;
 }
 
 export interface QuizSubmission {

@@ -30,41 +30,19 @@ import { DeleteModal } from '../components/DeleteModal';
 import { InlineNoteInput } from '../components/InlineNoteInput';
 import { LearningGuide } from '../components/LearningGuide';
 import { ContentPageSkeleton } from '../components/skeletons';
+import { 
+  applyHighlights,
+  HIGHLIGHT_BORDER_COLORS,
+  type Highlight 
+} from '../utils/contentUtils';
 
 import './ContentPage.css';
 import { useContent } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 
-interface Highlight {
-  id: string;
-  text: string;
-  note?: string;
-  color: 'yellow' | 'green' | 'pink';
-  createdAt: string;
-  sectionIndex?: number;
-}
-
 interface ExtendedContent extends Content {
   highlights?: Highlight[];
 }
-
-const HIGHLIGHT_COLORS = {
-  yellow: 'bg-yellow-200 dark:bg-yellow-900/50',
-  green: 'bg-green-200 dark:bg-green-900/50',
-  pink: 'bg-pink-200 dark:bg-pink-900/50',
-};
-
-const NOTE_HIGHLIGHT_COLORS = {
-  yellow: 'bg-blue-100/60 dark:bg-blue-900/30',
-  green: 'bg-blue-100/60 dark:bg-blue-900/30',
-  pink: 'bg-blue-100/60 dark:bg-blue-900/30',
-};
-
-const HIGHLIGHT_BORDER_COLORS = {
-  yellow: 'border-yellow-400 dark:border-yellow-700',
-  green: 'border-green-400 dark:border-green-700',
-  pink: 'border-pink-400 dark:border-pink-700',
-};
 
 // Markdown Content Component with Scroll Tracking
 const MarkdownContent = ({
@@ -157,8 +135,19 @@ const MarkdownContent = ({
               ],
               attributes: {
                 ...defaultSchema.attributes,
-                mark: [['className'], ['data-highlight-id']],
-                span: [['className'], ['title'], ['style']],
+                mark: [
+                  ['className'],
+                  ['data-highlight-id'],
+                  ['data-has-note'],
+                  ['title'],
+                ],
+                span: [
+                  ['className'],
+                  ['title'],
+                  ['style'],
+                  ['data-note-id'],
+                  ['data-note-text'],
+                ],
                 div: [['className']],
                 math: [['xmlns'], ['display']],
                 code: [['className']],
@@ -209,10 +198,6 @@ export const ContentPage = () => {
   } | null>(null);
 
   // Modal states
-  const [deleteHighlightId, setDeleteHighlightId] = useState<string | null>(
-    null
-  );
-  const [isDeletingHighlight, setIsDeletingHighlight] = useState(false);
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] =
     useState(false);
   const [isDeletingContent, setIsDeletingContent] = useState(false);
@@ -424,17 +409,12 @@ export const ContentPage = () => {
     }
   };
 
-  const handleDeleteHighlight = (highlightId: string) => {
-    setDeleteHighlightId(highlightId);
-  };
-
-  const confirmDeleteHighlight = async () => {
-    if (!deleteHighlightId) return;
-    setIsDeletingHighlight(true);
+  const handleDeleteHighlight = async (highlightId: string) => {
+    if (!id) return;
 
     // Store the highlight being deleted for potential rollback
     const highlightToDelete = content?.highlights?.find(
-      (h) => h.id === deleteHighlightId
+      (h) => h.id === highlightId
     );
 
     // Optimistic update - remove highlight immediately from UI
@@ -442,16 +422,12 @@ export const ContentPage = () => {
       if (!old) return old;
       return {
         ...old,
-        highlights: old.highlights?.filter((h) => h.id !== deleteHighlightId) || [],
+        highlights: old.highlights?.filter((h) => h.id !== highlightId) || [],
       };
     });
 
-    // Close modal immediately for better UX
-    setDeleteHighlightId(null);
-    setIsDeletingHighlight(false);
-
     try {
-      await contentService.deleteHighlight(deleteHighlightId);
+      await contentService.deleteHighlight(highlightId);
       // Invalidate to ensure consistency with server
       await queryClient.invalidateQueries({ queryKey: ['content', id] });
     } catch (_error) {
@@ -466,7 +442,6 @@ export const ContentPage = () => {
         });
       }
       toast.error('Failed to delete highlight');
-      setIsDeletingHighlight(false);
     }
   };
 
@@ -478,18 +453,10 @@ export const ContentPage = () => {
       return;
     }
 
-    const maxContentLength = 5000;
-    const contentText =
-      content.content.length > maxContentLength
-        ? content.content.substring(0, maxContentLength) + '...'
-        : content.content;
-
     navigate('/quiz', {
       state: {
-        topic: content.topic,
-        contentText: contentText,
+        topic: content.title,
         sourceId: content.id,
-        sourceTitle: content.title,
         contentId: content.id,
         breadcrumb: [
           { label: 'Study', path: '/study' },
@@ -508,16 +475,9 @@ export const ContentPage = () => {
       return;
     }
 
-    const maxContentLength = 5000;
-    const contentText =
-      content.content.length > maxContentLength
-        ? content.content.substring(0, maxContentLength) + '...'
-        : content.content;
-
     navigate('/flashcards', {
       state: {
         topic: content.topic,
-        contentText: contentText,
         sourceId: content.id,
         sourceTitle: content.title,
         contentId: content.id,
@@ -628,50 +588,17 @@ export const ContentPage = () => {
     </>
   );
 
-  // Helper function to apply highlights to markdown content
-  const applyHighlights = (markdown: string, highlights: Highlight[]) => {
-    if (!highlights || highlights.length === 0) return markdown;
-
-    let processed = markdown;
-    const sortedHighlights = [...highlights].sort(
-      (a, b) => b.text.length - a.text.length
-    );
-    const replacements: Map<string, string> = new Map();
-
-    sortedHighlights.forEach((highlight) => {
-      const escapedText = highlight.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(escapedText, 'g');
-
-      const colorKey = highlight.color as keyof typeof HIGHLIGHT_COLORS;
-      // Use different color for notes (with opacity)
-      const colorClass = highlight.note
-        ? NOTE_HIGHLIGHT_COLORS[colorKey] || 'bg-blue-100/60 dark:bg-blue-900/30'
-        : HIGHLIGHT_COLORS[colorKey] || 'bg-yellow-200 dark:bg-yellow-900/50';
-
-      processed = processed.replace(regex, (match) => {
-        const placeholder = `__HL_${replacements.size}__`;
-        const noteIndicator = highlight.note
-          ? `<span class="note-indicator inline-flex items-center justify-center w-4 h-4 ml-1 text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-full align-top cursor-pointer transition-colors" data-note-id="${highlight.id}" data-note-text="${highlight.note.replace(/"/g, '&quot;')}" title="Click to view note">!</span>`
-          : '';
-
-        replacements.set(
-          placeholder,
-          `<mark class="highlight-mark ${colorClass} rounded px-0.5 cursor-pointer hover:opacity-80 transition-opacity" data-highlight-id="${highlight.id}" data-has-note="${!!highlight.note}" title="${highlight.note ? 'Click to view note' : 'Click to remove highlight'}">${match}${noteIndicator}</mark>`
-        );
-        return placeholder;
-      });
-    });
-
-    replacements.forEach((replacement, placeholder) => {
-      processed = processed.split(placeholder).join(replacement);
-    });
-
-    return processed;
-  };
-
   const processedContent = useMemo(() => {
     if (!content?.content) return '';
-    return applyHighlights(content.content, content.highlights || []);
+    const result = applyHighlights(content.content, content.highlights || []);
+    console.log('Processing highlights:', {
+      hasContent: !!content?.content,
+      highlightsCount: content?.highlights?.length || 0,
+      highlights: content?.highlights,
+      processedLength: result.length,
+      originalLength: content?.content?.length || 0
+    });
+    return result;
   }, [content?.content, content?.highlights]);
 
   // Handle clicks on highlights and note indicators
@@ -1042,15 +969,6 @@ export const ContentPage = () => {
       )}
 
       {/* Modals */}
-      <DeleteModal
-        isOpen={!!deleteHighlightId}
-        onClose={() => setDeleteHighlightId(null)}
-        onConfirm={confirmDeleteHighlight}
-        title="Delete Highlight"
-        message="Are you sure you want to delete this highlight?"
-        isDeleting={isDeletingHighlight}
-      />
-
       <DeleteModal
         isOpen={isDeleteContentModalOpen}
         onClose={() => setIsDeleteContentModalOpen(false)}
