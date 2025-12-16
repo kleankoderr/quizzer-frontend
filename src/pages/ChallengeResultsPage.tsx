@@ -1,83 +1,28 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { challengeService } from '../services';
 import type { Challenge, ChallengeProgress } from '../types';
 import {
-  Trophy,
   TrendingUp,
   ArrowLeft,
-  Share2,
-  Target,
   CheckCircle,
   Sparkles,
   Award,
+  Target,
+  Trophy,
 } from 'lucide-react';
-import Confetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
 import { Toast as toast } from '../utils/toast';
-import { toPng } from 'html-to-image';
 import { QuizReview } from '../components/quiz/QuizReview';
 import { quizService } from '../services/quiz.service';
 import { useAuth } from '../contexts/AuthContext';
+import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
 
 // Constants
 const CONFETTI_DURATION = 5000;
-const SCORE_THRESHOLDS = {
-  EXCELLENT: 90,
-  GOOD: 70,
-  PASS: 50,
-} as const;
-
 const TOP_LEADERBOARD_COUNT = 10;
-
-// Helper functions
-const getGradeInfo = (score: number) => {
-  if (score >= SCORE_THRESHOLDS.EXCELLENT) {
-    return {
-      color: 'text-emerald-400',
-      grade: 'A+',
-      message: 'Outstanding Performance!',
-      description: "You've mastered this challenge with exceptional skill.",
-    };
-  }
-  if (score >= SCORE_THRESHOLDS.GOOD) {
-    return {
-      color: 'text-blue-400',
-      grade: 'A',
-      message: 'Great Job!',
-      description: "Solid performance! You're on the right track.",
-    };
-  }
-  if (score >= SCORE_THRESHOLDS.PASS) {
-    return {
-      color: 'text-amber-400',
-      grade: 'B',
-      message: 'Well Done!',
-      description: 'Good effort. Keep practicing to reach the top.',
-    };
-  }
-  return {
-    color: 'text-rose-400',
-    grade: 'C',
-    message: 'Challenge Completed',
-    description: 'Review your answers and try again to improve.',
-  };
-};
-
-const getGradeColorHex = (grade: string) => {
-  switch (grade) {
-    case 'A+':
-      return '#34d399'; // emerald-400
-    case 'A':
-      return '#60a5fa'; // blue-400
-    case 'B':
-      return '#fbbf24'; // amber-400
-    case 'C':
-      return '#fb7185'; // rose-400
-    default:
-      return '#ffffff';
-  }
-};
+const SCORE_THRESHOLDS = {
+  GOOD: 70,
+} as const;
 
 const parseAnswers = (answers: any) => {
   return typeof answers === 'string' ? JSON.parse(answers) : answers;
@@ -88,10 +33,8 @@ export const ChallengeResultsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { width, height } = useWindowSize();
 
   // State
-  const [isSharing, setIsSharing] = useState(false);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [progress, setProgress] = useState<ChallengeProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,11 +45,8 @@ export const ChallengeResultsPage = () => {
   const [quizDetails, setQuizDetails] = useState<any>(null);
   const [loadingAttempt, setLoadingAttempt] = useState(false);
 
-  const resultsRef = useRef<HTMLDivElement>(null);
-
   // Memoized values
   const finalScore = progress?.finalScore || 0;
-  const gradeInfo = useMemo(() => getGradeInfo(finalScore), [finalScore]);
 
   const userRank = useMemo(() => {
     if (!user?.id) return null;
@@ -129,7 +69,7 @@ export const ChallengeResultsPage = () => {
     );
   }, [progress]);
 
-  const statsData = useMemo(
+  const statsData: ResultsStat[] = useMemo(
     () => [
       {
         icon: TrendingUp,
@@ -160,12 +100,12 @@ export const ChallengeResultsPage = () => {
       {
         icon: Award,
         label: 'Grade',
-        value: gradeInfo.grade,
-        color: gradeInfo.color,
-        valueColor: gradeInfo.color,
+        value: '', // Will be calculated by ResultsHeroCard
+        color: 'text-white',
+        valueColor: 'text-white',
       },
     ],
-    [progress, challenge, userRank, gradeInfo, totalScore, totalQuestions]
+    [progress, challenge, userRank, totalScore, totalQuestions]
   );
 
   const breadcrumbItems = useMemo(() => {
@@ -282,49 +222,6 @@ export const ChallengeResultsPage = () => {
     loadResults();
   }, [loadResults]);
 
-  // Share handler
-  const handleShare = useCallback(async () => {
-    if (!resultsRef.current || !challenge || isSharing) return;
-
-    try {
-      setIsSharing(true);
-      const dataUrl = await toPng(resultsRef.current, {
-        cacheBust: true,
-        filter: (node) => {
-          return !(
-            node instanceof HTMLElement && node.dataset.html2canvasIgnore
-          );
-        },
-      });
-
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `challenge-result-${id}.png`, {
-        type: 'image/png',
-      });
-
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Challenge Results',
-          text: `I just completed the "${challenge.title}" challenge on Quizzer! Score: ${finalScore}%`,
-        });
-      } else {
-        const link = document.createElement('a');
-        link.download = `challenge-result-${id}.png`;
-        link.href = dataUrl;
-        link.click();
-        toast.success('Image saved to device!');
-      }
-    } catch (error) {
-      // Ignore abort errors which happen when user cancels share
-      if (error instanceof Error && error.name === 'AbortError') return;
-
-      toast.error('Failed to share results');
-    } finally {
-      setIsSharing(false);
-    }
-  }, [challenge, finalScore, id, isSharing]);
-
   // Loading state
   if (loading || !challenge || !progress) {
     return (
@@ -339,137 +236,17 @@ export const ChallengeResultsPage = () => {
 
   return (
     <div className="space-y-6 pb-8 md:pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Confetti */}
-      {showConfetti && (
-        <Confetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-        />
-      )}
-
-      {/* Results Hero */}
-      <div
-        ref={resultsRef}
-        className="relative overflow-hidden rounded-3xl bg-primary-600 dark:bg-primary-900 shadow-xl border border-primary-500/30"
-      >
-        {/* Background Lighting */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-white opacity-[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-white opacity-[0.03] rounded-full blur-2xl translate-y-1/3 -translate-x-1/3" />
-        </div>
-
-        <div className="relative z-10 px-6 py-8 md:p-12">
-          {/* Share Button */}
-          <div className="absolute top-4 right-4 md:top-6 md:right-6">
-            <button
-              onClick={handleShare}
-              disabled={isSharing}
-              data-html2canvas-ignore="true"
-              className={`p-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 rounded-full md:rounded-xl text-white transition-all flex items-center gap-2 border border-white/10 ${isSharing ? 'opacity-50 cursor-not-allowed' : ''}`}
-              aria-label="Share Results"
-            >
-              <Share2 className="w-5 h-5" />
-              <span className="hidden md:inline font-medium text-sm">
-                {isSharing ? 'Sharing...' : 'Share'}
-              </span>
-            </button>
-          </div>
-
-          {/* Hero Content */}
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            {/* Trophy Icon */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
-              <div className="relative inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 border border-white/20 shadow-2xl animate-float">
-                <Trophy className="w-10 h-10 md:w-12 md:h-12 text-white drop-shadow-lg" />
-              </div>
-            </div>
-
-            <h1 className="text-2xl md:text-4xl font-semibold text-white mb-2 md:mb-3 tracking-tight">
-              Congratulations{' '}
-              <span className="text-blue-200 font-bold">
-                {user?.name || 'Challenger'}
-              </span>
-              , you've completed the challenge!
-            </h1>
-
-            <p className="text-primary-100 text-base md:text-xl mb-8 md:mb-12 max-w-xl mx-auto leading-relaxed">
-              {gradeInfo.description}
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 w-full items-center">
-              {/* Circular Progress */}
-              <div className="flex flex-col items-center justify-center order-1 md:order-none">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full transform scale-110" />
-
-                  <svg className="transform -rotate-90 w-48 h-48 md:w-56 md:h-56 drop-shadow-xl relative z-10">
-                    <circle
-                      cx="50%"
-                      cy="50%"
-                      r="42%"
-                      stroke="currentColor"
-                      strokeWidth="10"
-                      fill="transparent"
-                      className="text-white/10"
-                    />
-                    <circle
-                      cx="50%"
-                      cy="50%"
-                      r="42%"
-                      stroke={getGradeColorHex(gradeInfo.grade)}
-                      strokeWidth="10"
-                      fill="transparent"
-                      strokeDasharray={`${2 * Math.PI * (window.innerWidth < 768 ? 80 : 96)}`}
-                      style={{
-                        strokeDasharray: '280',
-                        strokeDashoffset: `${280 * (1 - finalScore / 100)}`,
-                      }}
-                      pathLength={280}
-                      className={`${gradeInfo.color} transition-all duration-1000 ease-out shadow-[0_0_10px_currentColor]`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                    <span className="text-5xl md:text-6xl font-bold tracking-tighter text-white">
-                      {finalScore}%
-                    </span>
-                    <span className="text-sm font-medium text-white/70 uppercase tracking-widest mt-1">
-                      Final Score
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-3 md:gap-4 w-full order-2 md:order-none">
-                {statsData.map((stat, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white/10 rounded-2xl p-4 md:p-5 flex flex-col justify-between border border-white/5 hover:bg-white/15 transition-colors group"
-                  >
-                    <div className="flex items-center gap-2 mb-2 text-primary-100">
-                      <stat.icon
-                        className={`w-4 h-4 ${stat.color} opacity-80`}
-                      />
-                      <span className="text-xs font-medium uppercase tracking-wider opacity-70">
-                        {stat.label}
-                      </span>
-                    </div>
-                    <div
-                      className={`text-xl md:text-2xl font-bold tracking-tight ${stat.valueColor}`}
-                    >
-                      {stat.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ResultsHeroCard
+        score={finalScore}
+        totalScore={totalScore}
+        totalQuestions={totalQuestions}
+        userName={user?.name}
+        stats={statsData}
+        showConfetti={showConfetti}
+        shareId={id}
+        shareTitle={challenge.title}
+        completionType="challenge"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Main Content: Quiz Review */}

@@ -11,7 +11,7 @@ interface KnowledgeCheckModalProps {
   knowledgeCheck: {
     question: string;
     options: string[];
-    answer: string;
+    correctAnswer: number; // This is an index
     explanation: string;
     userAnswer?: string;
     userScore?: number;
@@ -60,14 +60,11 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
       type = 'true-false';
     }
 
-    // Find correct answer index
-    const correctIndex = knowledgeCheck.options.indexOf(knowledgeCheck.answer);
-
     return {
       questionType: type,
       question: knowledgeCheck.question,
       options: knowledgeCheck.options,
-      correctAnswer: correctIndex === -1 ? knowledgeCheck.answer : correctIndex,
+      correctAnswer: knowledgeCheck.correctAnswer, // Use the index directly
       explanation: knowledgeCheck.explanation,
     };
   }, [knowledgeCheck]);
@@ -98,7 +95,10 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
   const handleCheckAnswer = () => {
     if (!selectedAnswer) return;
 
-    const isCorrect = selectedAnswer === knowledgeCheck.answer;
+    // Get the index of the selected answer
+    const selectedIndex = knowledgeCheck.options.indexOf(selectedAnswer);
+    // Compare with the correctAnswer index
+    const isCorrect = selectedIndex === knowledgeCheck.correctAnswer;
     
     // Update parent state
     onUpdate({
@@ -132,7 +132,9 @@ export const KnowledgeCheckModal: React.FC<KnowledgeCheckModalProps> = ({
 
   if (!isOpen && !isClosing) return null;
 
-  const isCorrect = selectedAnswer === knowledgeCheck.answer;
+  // Get the index of the selected answer and compare with correctAnswer index
+  const selectedIndex = selectedAnswer ? knowledgeCheck.options.indexOf(selectedAnswer) : -1;
+  const isCorrect = selectedIndex === knowledgeCheck.correctAnswer;
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 font-sans">

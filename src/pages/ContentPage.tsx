@@ -41,6 +41,7 @@ interface Highlight {
   note?: string;
   color: 'yellow' | 'green' | 'pink';
   createdAt: string;
+  sectionIndex?: number;
 }
 
 interface ExtendedContent extends Content {
@@ -51,6 +52,12 @@ const HIGHLIGHT_COLORS = {
   yellow: 'bg-yellow-200 dark:bg-yellow-900/50',
   green: 'bg-green-200 dark:bg-green-900/50',
   pink: 'bg-pink-200 dark:bg-pink-900/50',
+};
+
+const NOTE_HIGHLIGHT_COLORS = {
+  yellow: 'bg-blue-100/60 dark:bg-blue-900/30',
+  green: 'bg-blue-100/60 dark:bg-blue-900/30',
+  pink: 'bg-blue-100/60 dark:bg-blue-900/30',
 };
 
 const HIGHLIGHT_BORDER_COLORS = {
@@ -181,7 +188,6 @@ export const ContentPage = () => {
     data: contentData,
     isLoading: loading,
     error,
-    refetch,
   } = useContent(id);
   const content = contentData as ExtendedContent | undefined;
   const [selectedText, setSelectedText] = useState('');
@@ -302,6 +308,28 @@ export const ContentPage = () => {
   ) => {
     if (!selectedText || !id) return;
 
+    // Create temporary highlight for optimistic update
+    const tempHighlight: Highlight = {
+      id: `temp-${Date.now()}`,
+      text: selectedText,
+      color: color,
+      createdAt: new Date().toISOString(),
+      sectionIndex: selectedSectionIndex,
+    };
+
+    // Optimistic update - add highlight immediately to UI
+    queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        highlights: [...(old.highlights || []), tempHighlight],
+      };
+    });
+
+    // Clear selection immediately for better UX
+    setToolbarPosition(null);
+    window.getSelection()?.removeAllRanges();
+
     try {
       await contentService.addHighlight(id, {
         text: selectedText,
@@ -310,13 +338,20 @@ export const ContentPage = () => {
         color: color,
         sectionIndex: selectedSectionIndex,
       });
-      toast.success('Text highlighted');
-      refetch(); // Refresh to show new highlight
+      
+      // Invalidate to get the real highlight from server (with real ID)
+      // Backend will return existing highlight if duplicate, so no error
+      await queryClient.invalidateQueries({ queryKey: ['content', id] });
     } catch (_error) {
+      // Rollback optimistic update on error
+      queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          highlights: old.highlights?.filter((h) => h.id !== tempHighlight.id) || [],
+        };
+      });
       toast.error('Failed to save highlight');
-    } finally {
-      setToolbarPosition(null);
-      window.getSelection()?.removeAllRanges();
     }
   };
 
@@ -332,16 +367,39 @@ export const ContentPage = () => {
   const saveInlineNote = async () => {
     if (!inlineNote?.text || !id) return;
 
-    try {
-      let textToSave = selectedText;
-      if (
-        !textToSave &&
-        selectedSectionIndex !== undefined &&
-        content?.learningGuide
-      ) {
-        textToSave = content.learningGuide.sections[selectedSectionIndex].title;
-      }
+    let textToSave = selectedText;
+    if (
+      !textToSave &&
+      selectedSectionIndex !== undefined &&
+      content?.learningGuide
+    ) {
+      textToSave = content.learningGuide.sections[selectedSectionIndex].title;
+    }
 
+    // Create temporary note for optimistic update
+    const tempNote: Highlight = {
+      id: `temp-note-${Date.now()}`,
+      text: textToSave || 'Note',
+      note: inlineNote.text,
+      color: 'yellow',
+      createdAt: new Date().toISOString(),
+      sectionIndex: selectedSectionIndex,
+    };
+
+    // Optimistic update - add note immediately to UI
+    queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        highlights: [...(old.highlights || []), tempNote],
+      };
+    });
+
+    // Clear note input immediately for better UX
+    setInlineNote(null);
+    window.getSelection()?.removeAllRanges();
+
+    try {
       await contentService.addHighlight(id, {
         text: textToSave || 'Note',
         startOffset: 0,
@@ -350,13 +408,19 @@ export const ContentPage = () => {
         color: 'yellow',
         sectionIndex: selectedSectionIndex,
       });
-      toast.success('Note added');
-      refetch();
+      
+      // Invalidate to get the real note from server (with real ID)
+      await queryClient.invalidateQueries({ queryKey: ['content', id] });
     } catch (_error) {
+      // Rollback optimistic update on error
+      queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          highlights: old.highlights?.filter((h) => h.id !== tempNote.id) || [],
+        };
+      });
       toast.error('Failed to add note');
-    } finally {
-      setInlineNote(null);
-      window.getSelection()?.removeAllRanges();
     }
   };
 
@@ -367,14 +431,41 @@ export const ContentPage = () => {
   const confirmDeleteHighlight = async () => {
     if (!deleteHighlightId) return;
     setIsDeletingHighlight(true);
+
+    // Store the highlight being deleted for potential rollback
+    const highlightToDelete = content?.highlights?.find(
+      (h) => h.id === deleteHighlightId
+    );
+
+    // Optimistic update - remove highlight immediately from UI
+    queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        highlights: old.highlights?.filter((h) => h.id !== deleteHighlightId) || [],
+      };
+    });
+
+    // Close modal immediately for better UX
+    setDeleteHighlightId(null);
+    setIsDeletingHighlight(false);
+
     try {
       await contentService.deleteHighlight(deleteHighlightId);
-      toast.success('Highlight removed');
-      refetch();
-      setDeleteHighlightId(null);
+      // Invalidate to ensure consistency with server
+      await queryClient.invalidateQueries({ queryKey: ['content', id] });
     } catch (_error) {
+      // Rollback optimistic update on error
+      if (highlightToDelete) {
+        queryClient.setQueryData(['content', id], (old: ExtendedContent | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            highlights: [...(old.highlights || []), highlightToDelete],
+          };
+        });
+      }
       toast.error('Failed to delete highlight');
-    } finally {
       setIsDeletingHighlight(false);
     }
   };
@@ -464,7 +555,7 @@ export const ContentPage = () => {
 
   const renderNotesContent = () => (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-lg">
           <StickyNote className="w-5 h-5 text-primary-600" />
           Notes & Highlights
@@ -474,7 +565,7 @@ export const ContentPage = () => {
         </span>
       </div>
 
-      <div className="space-y-4 flex-1">
+      <div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 -mr-2 pb-6">
         {content?.highlights && content.highlights.length > 0 ? (
           content.highlights.map((highlight) => (
             <div
@@ -552,8 +643,10 @@ export const ContentPage = () => {
       const regex = new RegExp(escapedText, 'g');
 
       const colorKey = highlight.color as keyof typeof HIGHLIGHT_COLORS;
-      const colorClass =
-        HIGHLIGHT_COLORS[colorKey] || 'bg-yellow-200 dark:bg-yellow-900/50';
+      // Use different color for notes (with opacity)
+      const colorClass = highlight.note
+        ? NOTE_HIGHLIGHT_COLORS[colorKey] || 'bg-blue-100/60 dark:bg-blue-900/30'
+        : HIGHLIGHT_COLORS[colorKey] || 'bg-yellow-200 dark:bg-yellow-900/50';
 
       processed = processed.replace(regex, (match) => {
         const placeholder = `__HL_${replacements.size}__`;
@@ -563,7 +656,7 @@ export const ContentPage = () => {
 
         replacements.set(
           placeholder,
-          `<mark class="${colorClass} rounded px-0.5" data-highlight-id="${highlight.id}">${match}${noteIndicator}</mark>`
+          `<mark class="highlight-mark ${colorClass} rounded px-0.5 cursor-pointer hover:opacity-80 transition-opacity" data-highlight-id="${highlight.id}" data-has-note="${!!highlight.note}" title="${highlight.note ? 'Click to view note' : 'Click to remove highlight'}">${match}${noteIndicator}</mark>`
         );
         return placeholder;
       });
@@ -579,16 +672,18 @@ export const ContentPage = () => {
   const processedContent = useMemo(() => {
     if (!content?.content) return '';
     return applyHighlights(content.content, content.highlights || []);
-  }, [content]);
+  }, [content?.content, content?.highlights]);
 
-  // Handle note indicator clicks
+  // Handle clicks on highlights and note indicators
   const handleContentClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
+    
+    // Handle note indicator clicks - show note
     if (target.classList.contains('note-indicator')) {
+      e.stopPropagation();
       const noteText = target.getAttribute('data-note-text');
       const noteId = target.getAttribute('data-note-id');
       if (noteText) {
-        // Show note in a tooltip or modal
         const rect = target.getBoundingClientRect();
         setInlineNote({
           id: noteId || undefined,
@@ -598,6 +693,34 @@ export const ContentPage = () => {
             y: rect.top - 10 + window.scrollY,
           },
         });
+      }
+      return;
+    }
+    
+    // Handle highlight clicks - remove highlight or show note
+    if (target.classList.contains('highlight-mark') || target.tagName === 'MARK') {
+      const highlightId = target.getAttribute('data-highlight-id');
+      const hasNote = target.getAttribute('data-has-note') === 'true';
+      
+      if (highlightId) {
+        if (hasNote) {
+          // If it has a note, show the note
+          const noteText = target.querySelector('.note-indicator')?.getAttribute('data-note-text');
+          if (noteText) {
+            const rect = target.getBoundingClientRect();
+            setInlineNote({
+              id: highlightId,
+              text: noteText,
+              position: {
+                x: rect.left + rect.width / 2,
+                y: rect.top - 10 + window.scrollY,
+              },
+            });
+          }
+        } else {
+          // If it's just a highlight, remove it (unhighlight)
+          handleDeleteHighlight(highlightId);
+        }
       }
     }
   };
@@ -803,7 +926,7 @@ export const ContentPage = () => {
                     });
                   } catch (_error) {
                     toast.error('Failed to save progress');
-                    refetch();
+                    await queryClient.invalidateQueries({ queryKey: ['content', id] });
                   }
                 }}
 

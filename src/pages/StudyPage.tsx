@@ -29,6 +29,9 @@ import { FileUpload } from '../components/FileUpload';
 import { Card } from '../components/Card';
 import { StudyPackSelector } from '../components/StudyPackSelector';
 import { useSSEEvent } from '../hooks/useSSE';
+import { CardMenu, Pencil } from '../components/CardMenu';
+import { EditTitleModal } from '../components/EditTitleModal';
+import { formatDate } from '../utils/dateFormat';
 
 export const StudyPage = () => {
   const navigate = useNavigate();
@@ -76,6 +79,9 @@ export const StudyPage = () => {
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [moveContentId, setMoveContentId] = useState<string | null>(null);
+  const [editContentId, setEditContentId] = useState<string | null>(null);
+
+  const editingContent = contents.find((c) => c.id === editContentId);
 
   const getSummary = (content: any) => {
     if (content.description) {
@@ -105,56 +111,75 @@ export const StudyPage = () => {
     return { groups, noPack };
   }, [contents]);
 
-  const renderContentCard = (content: any) => (
-    <Card
-      key={content.id}
-      title={content.title}
-      subtitle={content.topic}
-      onClick={() => navigate(`/content/${content.id}`)}
-      actions={
-        <div className="flex items-center gap-1">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeleteContentId(content.id);
-            }}
-            className="p-1.5 text-red-800 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
-            title="Delete content"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setMoveContentId(content.id);
-            }}
-            className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-            title="Move to Study Pack"
-          >
-            <Folder className="w-4 h-4" />
-          </button>
-        </div>
-      }
-    >
-      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
-        {getSummary(content)}
-      </p>
-      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-        <div className="flex items-center gap-1">
-          {new Date(content.createdAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </div>
-        {content.generatedContent && (
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-            Generated
+  const handleTitleUpdate = async (contentId: string, newTitle: string) => {
+    try {
+      await contentService.updateTitle(contentId, newTitle);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['contents'], (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((c: any) =>
+            c.id === contentId ? { ...c, title: newTitle } : c
+          ),
+        };
+      });
+
+      // Invalidate to refetch from server
+      await queryClient.invalidateQueries({ queryKey: ['contents'] });
+      
+      toast.success('Content title updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update content title');
+      throw error;
+    }
+  };
+
+  const renderContentCard = (content: any) => {
+    const menuItems = [
+      {
+        label: 'Edit Title',
+        icon: <Pencil className="w-4 h-4" />,
+        onClick: () => setEditContentId(content.id),
+      },
+      {
+        label: 'Move to Study Pack',
+        icon: <Folder className="w-4 h-4" />,
+        onClick: () => setMoveContentId(content.id),
+      },
+      {
+        label: 'Delete',
+        icon: <Trash2 className="w-4 h-4" />,
+        onClick: () => setDeleteContentId(content.id),
+        variant: 'danger' as const,
+      },
+    ];
+
+    return (
+      <Card
+        key={content.id}
+        title={content.title}
+        subtitle={content.topic}
+        onClick={() => navigate(`/content/${content.id}`)}
+        actions={<CardMenu items={menuItems} />}
+      >
+        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
+          {getSummary(content)}
+        </p>
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-1">
+            {formatDate(content.createdAt)}
           </div>
-        )}
-      </div>
-    </Card>
-  );
+          {content.generatedContent && (
+            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              Generated
+            </div>
+          )}
+        </div>
+      </Card>
+    );
+  };
     useCallback((event: AppEvent) => {
         // Progress is now handled automatically by the toast component
         if (event.eventType === 'content.progress' && currentJobIdRef.current) {
@@ -917,13 +942,19 @@ export const StudyPage = () => {
                 }}
               />
 
+              <EditTitleModal
+                isOpen={!!editContentId}
+                currentTitle={editingContent?.title || ''}
+                onClose={() => setEditContentId(null)}
+                onSave={(newTitle) => handleTitleUpdate(editContentId || '', newTitle)}
+              />
+
               <DeleteModal
                 isOpen={!!deleteContentId}
                 onClose={() => setDeleteContentId(null)}
                 onConfirm={confirmDeleteContent}
-                title="Delete Content?"
+                title="Delete Study Material"
                 message="Are you sure you want to delete this study material? This action cannot be undone."
-                itemName="study material"
                 isDeleting={isDeleting}
               />
 

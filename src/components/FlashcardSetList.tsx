@@ -1,10 +1,15 @@
 import React from 'react';
 import type { FlashcardSet, StudyPack } from '../types';
 import { Card } from './Card';
-import { Layers, Plus, Folder, Trash2 } from 'lucide-react';
+import { Layers, Plus } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
-
+import { CardMenu, Pencil, Folder, Trash2 } from './CardMenu';
+import { EditTitleModal } from './EditTitleModal';
+import { flashcardService } from '../services/flashcard.service';
+import { Toast as toast } from '../utils/toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { formatDate } from '../utils/dateFormat';
 interface FlashcardSetListProps {
   sets: FlashcardSet[];
   onDelete?: (id: string) => void;
@@ -19,6 +24,35 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   onItemMoved,
 }) => {
   const [moveSetId, setMoveSetId] = React.useState<string | null>(null);
+  const [editSetId, setEditSetId] = React.useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const editingSet = sets.find((s) => s.id === editSetId);
+
+  const handleTitleUpdate = async (setId: string, newTitle: string) => {
+    try {
+      await flashcardService.updateTitle(setId, newTitle);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['flashcardSets'], (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((s: FlashcardSet) =>
+            s.id === setId ? { ...s, title: newTitle } : s
+          ),
+        };
+      });
+
+      // Invalidate to refetch from server
+      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      
+      toast.success('Flashcard set title updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update flashcard set title');
+      throw error;
+    }
+  };
 
   const groupedSets = React.useMemo(() => {
     const groups: { [key: string]: FlashcardSet[] } = {};
@@ -41,39 +75,40 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
     const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
     const hasStudied = !!set.lastStudiedAt;
 
+    const menuItems = [
+      {
+        label: 'Edit Title',
+        icon: <Pencil className="w-4 h-4" />,
+        onClick: () => setEditSetId(set.id),
+      },
+      {
+        label: 'Move to Study Pack',
+        icon: <Folder className="w-4 h-4" />,
+        onClick: () => setMoveSetId(set.id),
+      },
+      ...(onDelete
+        ? [
+            {
+              label: 'Delete',
+              icon: <Trash2 className="w-4 h-4" />,
+              onClick: () => handleDelete(new Event('click') as any, set.id),
+              variant: 'danger' as const,
+            },
+          ]
+        : []),
+    ];
+
     return (
       <Card
         key={set.id}
         to={`/flashcards/${set.id}`}
         title={set.title}
         subtitle={set.topic}
-        actions={
-          <div className="flex items-center gap-1">
-            {onDelete && (
-              <button
-                onClick={(e) => handleDelete(e, set.id)}
-                className="p-1.5 text-red-800 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                title="Delete flashcard set"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setMoveSetId(set.id);
-              }}
-              className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              title="Move to Study Pack"
-            >
-              <Folder className="w-4 h-4" />
-            </button>
-          </div>
-        }
+        actions={<CardMenu items={menuItems} />}
       >
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+            <Layers className="w-4 h-4" />
             {cardCount} card{cardCount === 1 ? '' : 's'}
           </span>
           <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
@@ -82,15 +117,11 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
         </div>
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1">
-            {new Date(set.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
+            {formatDate(set.createdAt)}
           </span>
           {hasStudied && (
             <span className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
-              Reviewed
+              Last studied
             </span>
           )}
         </div>
@@ -168,6 +199,13 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
         onMoveSuccess={(pack) => {
           if (onItemMoved) onItemMoved(moveSetId || '', pack);
         }}
+      />
+
+      <EditTitleModal
+        isOpen={!!editSetId}
+        currentTitle={editingSet?.title || ''}
+        onClose={() => setEditSetId(null)}
+        onSave={(newTitle) => handleTitleUpdate(editSetId || '', newTitle)}
       />
     </div>
   );

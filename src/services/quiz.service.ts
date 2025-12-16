@@ -130,6 +130,14 @@ export const quizService = {
     return { result, gamification };
   },
 
+  // Update quiz title
+  updateTitle: async (id: string, title: string): Promise<Quiz> => {
+    const response = await apiClient.patch<Quiz>(`/quiz/${id}/title`, {
+      title,
+    });
+    return response.data;
+  },
+
   // Delete quiz
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/quiz/${id}`);

@@ -1,9 +1,15 @@
 import React from 'react';
 import { Card } from './Card';
 import type { Quiz, StudyPack } from '../types';
-import { Brain, Plus, Folder, Trash2, Target, Clock } from 'lucide-react';
+import { Brain, Plus } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
+import { CardMenu, Pencil, Folder, Trash2 } from './CardMenu';
+import { EditTitleModal } from './EditTitleModal';
+import { quizService } from '../services/quiz.service';
+import { Toast as toast } from '../utils/toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { formatDate } from '../utils/dateFormat';
 
 interface QuizListProps {
   quizzes: Quiz[];
@@ -19,6 +25,35 @@ export const QuizList: React.FC<QuizListProps> = ({
   onItemMoved,
 }) => {
   const [moveQuizId, setMoveQuizId] = React.useState<string | null>(null);
+  const [editQuizId, setEditQuizId] = React.useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const editingQuiz = quizzes.find((q) => q.id === editQuizId);
+
+  const handleTitleUpdate = async (quizId: string, newTitle: string) => {
+    try {
+      await quizService.updateTitle(quizId, newTitle);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['quizzes'], (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((q: Quiz) =>
+            q.id === quizId ? { ...q, title: newTitle } : q
+          ),
+        };
+      });
+
+      // Invalidate to refetch from server
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      
+      toast.success('Quiz title updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update quiz title');
+      throw error;
+    }
+  };
 
   const groupedQuizzes = React.useMemo(() => {
     const groups: { [key: string]: Quiz[] } = {};
@@ -40,36 +75,36 @@ export const QuizList: React.FC<QuizListProps> = ({
   const renderQuizCard = (quiz: Quiz) => {
     const latestAttempt = quiz.attempts?.[0] ?? null;
 
+    const menuItems = [
+      {
+        label: 'Edit Title',
+        icon: <Pencil className="w-4 h-4" />,
+        onClick: () => setEditQuizId(quiz.id),
+      },
+      {
+        label: 'Move to Study Pack',
+        icon: <Folder className="w-4 h-4" />,
+        onClick: () => setMoveQuizId(quiz.id),
+      },
+      ...(onDelete
+        ? [
+            {
+              label: 'Delete',
+              icon: <Trash2 className="w-4 h-4" />,
+              onClick: () => handleDelete(new Event('click') as any, quiz.id),
+              variant: 'danger' as const,
+            },
+          ]
+        : []),
+    ];
+
     return (
       <Card
         key={quiz.id}
         to={`/quiz/${quiz.id}`}
         title={quiz.title}
         subtitle={quiz.topic}
-        actions={
-          <div className="flex items-center gap-1">
-            {onDelete && (
-              <button
-                onClick={(e) => handleDelete(e, quiz.id)}
-                className="p-1.5 text-red-800 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                title="Delete quiz"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setMoveQuizId(quiz.id);
-              }}
-              className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              title="Move to Study Pack"
-            >
-              <Folder className="w-4 h-4" />
-            </button>
-          </div>
-        }
+        actions={<CardMenu items={menuItems} />}
       >
         {/* Tags */}
         {quiz.tags && quiz.tags.length > 0 && (
@@ -87,36 +122,28 @@ export const QuizList: React.FC<QuizListProps> = ({
 
         {/* Stats */}
         <div className="space-y-2">
-            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <Target className="w-4 h-4" />
+          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-1.5">
+              <Brain className="w-4 h-4" />
+              <span>
                 {quiz.questionCount || quiz.questions?.length || 0} questions
               </span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                {quiz.createdAt
-                  ? new Date(quiz.createdAt).toLocaleDateString()
-                  : 'N/A'}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs">
+                {quiz.createdAt ? formatDate(quiz.createdAt) : 'Unknown date'}
               </span>
             </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
-              {quiz.difficulty || 'Medium'}
-            </span>
           </div>
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span className="flex items-center gap-1">
-              {new Date(quiz.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })}
-            </span>
-            {latestAttempt && (
-              <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
-                Score: {latestAttempt.score}%
-              </span>
-            )}
-          </div>
+
+          {/* Footer */}
+          {latestAttempt && (
+            <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
+              Last attempt: {formatDate(latestAttempt.completedAt)} •{' '}
+              {latestAttempt.score}/
+              {quiz.questionCount || quiz.questions?.length} correct
+            </div>
+          )}
         </div>
       </Card>
     );
@@ -195,6 +222,13 @@ export const QuizList: React.FC<QuizListProps> = ({
         onMoveSuccess={(pack) => {
           if (onItemMoved) onItemMoved(moveQuizId || '', pack);
         }}
+      />
+
+      <EditTitleModal
+        isOpen={!!editQuizId}
+        currentTitle={editingQuiz?.title || ''}
+        onClose={() => setEditQuizId(null)}
+        onSave={(newTitle) => handleTitleUpdate(editQuizId || '', newTitle)}
       />
     </div>
   );

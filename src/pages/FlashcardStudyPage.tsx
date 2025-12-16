@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
@@ -11,8 +11,13 @@ import {
   Layers,
   Sparkles,
   BookOpen,
+  ThumbsUp,
+  ThumbsDown,
+  Target,
 } from 'lucide-react';
 import { useFlashcardSet } from '../hooks';
+import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
+import { useAuth } from '../contexts/AuthContext';
 
 // Simple markdown renderer for bold text
 const renderMarkdown = (text: string) => {
@@ -25,6 +30,7 @@ export const FlashcardStudyPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: flashcardSet, isLoading: loading, error } = useFlashcardSet(id);
+  const { user } = useAuth();
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardResponses, setCardResponses] = useState<
@@ -32,6 +38,42 @@ export const FlashcardStudyPage = () => {
   >([]);
   const [showResults, setShowResults] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Calculate stats (must be before any conditional returns)
+  const knowCount = cardResponses.filter((r) => r.response === 'know').length;
+  const dontKnowCount = cardResponses.filter(
+    (r) => r.response === 'dont-know'
+  ).length;
+  const totalCards = flashcardSet?.cards?.length || 0;
+  const percentage = totalCards > 0 ? Math.round((knowCount / totalCards) * 100) : 0;
+
+  // Flashcard-specific stats for ResultsHeroCard (must be before any conditional returns)
+  const flashcardStats: ResultsStat[] = useMemo(
+    () => [
+      {
+        icon: ThumbsUp,
+        label: 'Knew It',
+        value: knowCount,
+        color: 'text-green-200',
+        valueColor: 'text-white',
+      },
+      {
+        icon: ThumbsDown,
+        label: "Didn't Know",
+        value: dontKnowCount,
+        color: 'text-red-200',
+        valueColor: 'text-white',
+      },
+      {
+        icon: Target,
+        label: 'Total Cards',
+        value: totalCards,
+        color: 'text-blue-200',
+        valueColor: 'text-white',
+      },
+    ],
+    [knowCount, dontKnowCount, totalCards]
+  );
 
   if (error) {
     toast.error('Failed to load flashcard set');
@@ -158,77 +200,25 @@ export const FlashcardStudyPage = () => {
   const currentCard = flashcardSet.cards[currentCardIndex];
   const progress = ((currentCardIndex + 1) / flashcardSet.cards.length) * 100;
 
-  // Calculate stats
-  const knowCount = cardResponses.filter((r) => r.response === 'know').length;
-  const dontKnowCount = cardResponses.filter(
-    (r) => r.response === 'dont-know'
-  ).length;
-  const skippedCount = cardResponses.filter(
-    (r) => r.response === 'skipped'
-  ).length;
-  const totalCards = flashcardSet.cards.length;
-  const percentage = Math.round((knowCount / totalCards) * 100);
-
   // Show results screen
   if (showResults) {
     return (
-      <div className="max-w-3xl mx-auto space-y-6 pb-8">
-        <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-8 shadow-lg text-center">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
-          </div>
-
-          <div className="relative z-10">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-yellow-400 rounded-full mb-6">
-              <span className="text-4xl">🏆</span>
-            </div>
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Session Complete!
-            </h1>
-
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 border-2 border-white/30">
-                <div className="flex flex-col items-center gap-1">
-                  <div className="text-5xl font-bold text-white">
-                    {percentage}%
-                  </div>
-                  <div className="text-sm text-primary-100 dark:text-primary-200 font-medium">
-                    Score
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mt-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="text-3xl mb-2">👍🏼</div>
-                <div className="text-2xl font-bold text-white">{knowCount}</div>
-                <div className="text-sm text-primary-100 dark:text-primary-200">
-                  Knew It
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="text-3xl mb-2">👎🏼</div>
-                <div className="text-2xl font-bold text-white">
-                  {dontKnowCount}
-                </div>
-                <div className="text-sm text-primary-100 dark:text-primary-200">
-                  Didn't Know
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="text-3xl mb-2">⏭️</div>
-                <div className="text-2xl font-bold text-white">
-                  {skippedCount}
-                </div>
-                <div className="text-sm text-primary-100 dark:text-primary-200">
-                  Skipped
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="max-w-4xl mx-auto space-y-6 pb-8">
+        <ResultsHeroCard
+          score={percentage}
+          totalScore={knowCount}
+          totalQuestions={totalCards}
+          userName={user?.name}
+          stats={flashcardStats}
+          showConfetti={percentage >= 70}
+          onBack={() => navigate('/flashcards')}
+          backLabel="Back to Flashcards"
+          shareId={id}
+          shareTitle={flashcardSet.title}
+          completionType="quiz"
+          customTitle="Study Session Complete!"
+          contentContext="flashcard"
+        />
 
         <div className="flex gap-4">
           <button

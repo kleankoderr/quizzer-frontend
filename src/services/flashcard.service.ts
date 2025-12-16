@@ -99,6 +99,15 @@ export const flashcardService = {
     return response.data;
   },
 
+  // Update flashcard set title
+  updateTitle: async (id: string, title: string): Promise<FlashcardSet> => {
+    const response = await apiClient.patch<FlashcardSet>(
+      `/flashcards/${id}/title`,
+      { title }
+    );
+    return response.data;
+  },
+
   // Delete flashcard set
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/flashcards/${id}`);

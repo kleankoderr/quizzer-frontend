@@ -164,14 +164,34 @@ export const contentService = {
     return response.data;
   },
 
-  async getJobStatus(jobId: string): Promise<{ jobId: string; status: string; progress: number; result?: any; error?: string }> {
-    const response = await apiClient.get<{ jobId: string; status: string; progress: number; result?: any; error?: string }>(`/content/status/${jobId}`);
+  async getJobStatus(
+    jobId: string
+  ): Promise<{
+    jobId: string;
+    status: string;
+    progress: number;
+    result?: any;
+    error?: string;
+  }> {
+    const response = await apiClient.get<{
+      jobId: string;
+      status: string;
+      progress: number;
+      result?: any;
+      error?: string;
+    }>(`/content/status/${jobId}`);
     return response.data;
   },
 
   async update(id: string, data: UpdateContentDto): Promise<Content> {
     clearCache();
     const response = await apiClient.put(`/content/${id}`, data);
+    return response.data;
+  },
+
+  async updateTitle(id: string, title: string): Promise<Content> {
+    clearCache();
+    const response = await apiClient.patch(`/content/${id}/title`, { title });
     return response.data;
   },
 

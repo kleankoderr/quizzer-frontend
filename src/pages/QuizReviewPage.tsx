@@ -8,8 +8,9 @@ import {
 import { Toast as toast } from '../utils/toast';
 import { quizService } from '../services/quiz.service';
 import type { Quiz, QuizResult, AnswerValue } from '../types';
-import { QuizScoreCard } from '../components/quiz/QuizScoreCard';
+import { ResultsHeroCard } from '../components/quiz/ResultsHeroCard';
 import { QuizReviewContent } from '../components/quiz/QuizReview';
+import { useAuth } from '../contexts/AuthContext';
 
 export const QuizReviewPage = () => {
   const { attemptId } = useParams<{ attemptId: string }>();
@@ -17,6 +18,7 @@ export const QuizReviewPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const challengeId = searchParams.get('challengeId');
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -25,6 +27,7 @@ export const QuizReviewPage = () => {
     (AnswerValue | null)[]
   >([]);
   const [showExplanations, setShowExplanations] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Use a ref to track if we've already fetched for this attemptId to prevent double calls in Strict Mode
   const fetchedAttemptIdRef = useRef<string | null>(null);
@@ -71,6 +74,13 @@ export const QuizReviewPage = () => {
         });
 
         setSelectedAnswers(userAnswers);
+
+        // Show confetti if score >= 70%
+        if (attemptReview.percentage && attemptReview.percentage >= 70) {
+          setShowConfetti(true);
+          const timer = setTimeout(() => setShowConfetti(false), 5000);
+          return () => clearTimeout(timer);
+        }
       } catch (_error) {
         toast.error('Failed to load attempt details');
         navigate('/quiz');
@@ -132,11 +142,16 @@ export const QuizReviewPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">
-      <QuizScoreCard
-        result={result}
-        title={quiz.title}
+      <ResultsHeroCard
+        score={result.percentage}
+        totalScore={result.score}
+        totalQuestions={result.totalQuestions}
+        userName={user?.name}
+        showConfetti={showConfetti}
         onBack={handleBack}
         backLabel={challengeId ? 'Back to Challenge' : 'Back to Quizzes'}
+        shareId={attemptId}
+        shareTitle={quiz.title}
       />
 
       <QuizReviewContent
