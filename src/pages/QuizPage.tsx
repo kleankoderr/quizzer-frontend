@@ -372,7 +372,6 @@ export const QuizPage = () => {
             onGenerate={handleGenerate}
             loading={generating}
             initialValues={initialValues}
-            title={initialValues?.sourceTitle}
           />
         </div>
       )}
