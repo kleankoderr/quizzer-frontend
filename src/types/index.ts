@@ -406,3 +406,16 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: PaginationMeta;
 }
+
+// Update request types
+export interface UpdateQuizTitleRequest {
+  title: string;
+}
+
+export interface UpdateFlashcardSetTitleRequest {
+  title: string;
+}
+
+export interface UpdateContentTitleRequest {
+  title: string;
+}
