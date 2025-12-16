@@ -13,6 +13,12 @@ export const HIGHLIGHT_COLORS = {
   pink: 'bg-pink-200 dark:bg-pink-900/50',
 };
 
+export const NOTE_HIGHLIGHT_COLORS = {
+  yellow: 'bg-blue-100/60 dark:bg-blue-900/30',
+  green: 'bg-blue-100/60 dark:bg-blue-900/30',
+  pink: 'bg-blue-100/60 dark:bg-blue-900/30',
+};
+
 export const HIGHLIGHT_BORDER_COLORS = {
   yellow: 'border-yellow-400 dark:border-yellow-700',
   green: 'border-green-400 dark:border-green-700',
@@ -45,8 +51,10 @@ export const applyHighlights = (
     const regex = new RegExp(escapedText, 'g');
 
     const colorKey = highlight.color as keyof typeof HIGHLIGHT_COLORS;
-    const colorClass =
-      HIGHLIGHT_COLORS[colorKey] || 'bg-yellow-200 dark:bg-yellow-900/50';
+    // Use different color for notes (with opacity)
+    const colorClass = highlight.note
+      ? NOTE_HIGHLIGHT_COLORS[colorKey] || 'bg-blue-100/60 dark:bg-blue-900/30'
+      : HIGHLIGHT_COLORS[colorKey] || 'bg-yellow-200 dark:bg-yellow-900/50';
 
     processed = processed.replace(regex, (match) => {
       const placeholder = `__HL_${replacements.size}__`;
@@ -61,7 +69,7 @@ export const applyHighlights = (
 
       replacements.set(
         placeholder,
-        `<mark class="${colorClass} rounded px-0.5" data-highlight-id="${highlight.id}">${match}${noteIndicator}</mark>`
+        `<mark class="highlight-mark ${colorClass} rounded px-0.5 cursor-pointer hover:opacity-80 transition-opacity" data-highlight-id="${highlight.id}" data-has-note="${!!highlight.note}" title="${highlight.note ? 'Click to view note' : 'Click to remove highlight'}">${match}${noteIndicator}</mark>`
       );
       return placeholder;
     });

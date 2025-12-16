@@ -275,18 +275,38 @@
 .content-markdown mark {
   padding: 0.125rem 0.25rem;
   border-radius: 0.125rem;
+  color: #1f2937; /* Default light mode text color */
 }
 
+.dark .content-markdown mark {
+  color: #f9fafb; /* Dark mode text color */
+}
+
+/* Yellow Highlight */
 .content-markdown mark.bg-yellow-200 {
-  background-color: #fef08a;
+  background-color: #fef08a; /* Yellow-200 */
 }
 
+.dark .content-markdown mark.bg-yellow-200 {
+  background-color: rgba(113, 63, 18, 0.5); /* Yellow-900/50 */
+}
+
+/* Green Highlight */
 .content-markdown mark.bg-green-200 {
-  background-color: #bbf7d0;
+  background-color: #bbf7d0; /* Green-200 */
 }
 
+.dark .content-markdown mark.bg-green-200 {
+  background-color: rgba(20, 83, 45, 0.5); /* Green-900/50 */
+}
+
+/* Pink Highlight */
 .content-markdown mark.bg-pink-200 {
-  background-color: #fbcfe8;
+  background-color: #fbcfe8; /* Pink-200 */
+}
+
+.dark .content-markdown mark.bg-pink-200 {
+  background-color: rgba(131, 24, 67, 0.5); /* Pink-900/50 */
 }
 
 /* Mobile Responsiveness */

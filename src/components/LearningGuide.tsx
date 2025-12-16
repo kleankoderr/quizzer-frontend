@@ -70,7 +70,28 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
     setCompletedSections(newCompleted);
   }, [guide]);
-  const [activeSection, setActiveSection] = useState<number>(-1);
+  // Initialize activeSection - prioritize first uncompleted section
+  const [activeSection, setActiveSection] = useState<number>(() => {
+    // Find the first uncompleted section
+    const firstUncompletedIndex = guide.sections.findIndex(section => !section.completed);
+    
+    // Try to get stored section from localStorage
+    try {
+      const stored = localStorage.getItem(`activeSection-${contentId}`);
+      if (stored) {
+        const storedIndex = parseInt(stored, 10);
+        // Only use stored section if it's valid and uncompleted
+        if (storedIndex >= 0 && storedIndex < guide.sections.length && !guide.sections[storedIndex].completed) {
+          return storedIndex;
+        }
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+    
+    // Default to first uncompleted section, or -1 if all are completed
+    return firstUncompletedIndex;
+  });
   const [generatedContent, setGeneratedContent] = useState<
     Record<string, string>
   >(() => {
@@ -128,12 +149,26 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         ],
         attributes: {
           ...defaultSchema.attributes,
-          mark: [['className'], ['data-highlight-id']],
-          span: [['className'], ['title'], ['style']],
-          div: [['className']],
-          math: [['xmlns'], ['display']],
-          code: [['className']],
-          pre: [['className']],
+          mark: [
+            'className',
+            'class',
+            'style',
+            'data-highlight-id',
+            'data-has-note',
+            'title',
+          ],
+          span: [
+            'className',
+            'class',
+            'title',
+            'style',
+            'data-note-id',
+            'data-note-text',
+          ],
+          div: ['className'],
+          math: ['xmlns', 'display'],
+          code: ['className'],
+          pre: ['className'],
         },
       },
     ],
@@ -143,7 +178,30 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   const markdownRemarkPlugins = React.useMemo(() => [remarkGfm, remarkMath], []);
 
   const toggleSection = (index: number) => {
-    setActiveSection(activeSection === index ? -1 : index);
+    const newActiveSection = activeSection === index ? -1 : index;
+    setActiveSection(newActiveSection);
+    
+    // Store in localStorage
+    try {
+      if (newActiveSection === -1) {
+        localStorage.removeItem(`activeSection-${contentId}`);
+      } else {
+        localStorage.setItem(`activeSection-${contentId}`, String(newActiveSection));
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+
+    // Scroll to top of section when opening
+    if (newActiveSection !== -1) {
+      // Use setTimeout to wait for the section to expand
+      setTimeout(() => {
+        const sectionElement = document.querySelector(`[data-section-index="${index}"]`);
+        if (sectionElement) {
+          sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   };
 
   const markAsComplete = (index: number, e: React.MouseEvent) => {
@@ -164,15 +222,32 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
       // Auto-advance to next section or close if last
       if (index === activeSection) {
-        if (index < guide.sections.length - 1) {
-          setTimeout(() => {
-            setActiveSection(index + 1);
-          }, 300);
-        } else {
-          setTimeout(() => {
-            setActiveSection(-1);
-          }, 300);
-        }
+        const nextSection = index < guide.sections.length - 1 ? index + 1 : -1;
+        
+        setTimeout(() => {
+          setActiveSection(nextSection);
+          
+          // Update localStorage
+          try {
+            if (nextSection === -1) {
+              localStorage.removeItem(`activeSection-${contentId}`);
+            } else {
+              localStorage.setItem(`activeSection-${contentId}`, String(nextSection));
+            }
+          } catch {
+            // Ignore localStorage errors
+          }
+          
+          // Scroll to top of next section
+          if (nextSection !== -1) {
+            setTimeout(() => {
+              const sectionElement = document.querySelector(`[data-section-index="${nextSection}"]`);
+              if (sectionElement) {
+                sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }
+        }, 300);
       }
     } else {
       newCompleted.delete(index);

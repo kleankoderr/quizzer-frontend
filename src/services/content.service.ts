@@ -25,7 +25,7 @@ export interface Content {
       knowledgeCheck?: {
         question: string;
         options: string[];
-        answer: string;
+        correctAnswer: number;
         explanation: string;
         userScore?: number;
         userAnswer?: string;
@@ -164,9 +164,7 @@ export const contentService = {
     return response.data;
   },
 
-  async getJobStatus(
-    jobId: string
-  ): Promise<{
+  async getJobStatus(jobId: string): Promise<{
     jobId: string;
     status: string;
     progress: number;
