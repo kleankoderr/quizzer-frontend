@@ -209,6 +209,7 @@ export const FlashcardStudyPage = () => {
           totalScore={knowCount}
           totalQuestions={totalCards}
           userName={user?.name}
+          title={flashcardSet.title}
           stats={flashcardStats}
           showConfetti={percentage >= 70}
           onBack={() => navigate('/flashcards')}

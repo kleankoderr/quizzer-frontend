@@ -241,6 +241,7 @@ export const ChallengeResultsPage = () => {
         totalScore={totalScore}
         totalQuestions={totalQuestions}
         userName={user?.name}
+        title={challenge.title}
         stats={statsData}
         showConfetti={showConfetti}
         shareId={id}

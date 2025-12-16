@@ -147,6 +147,7 @@ export const QuizReviewPage = () => {
         totalScore={result.score}
         totalQuestions={result.totalQuestions}
         userName={user?.name}
+        title={quiz.title}
         showConfetti={showConfetti}
         onBack={handleBack}
         backLabel={challengeId ? 'Back to Challenge' : 'Back to Quizzes'}

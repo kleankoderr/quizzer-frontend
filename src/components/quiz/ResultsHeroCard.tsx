@@ -19,23 +19,17 @@ const SCORE_THRESHOLDS = {
 } as const;
 
 // Helper functions
-const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard' = 'quiz') => {
-  let contextWord: string;
-
-  if (context === 'flashcard') {
-    contextWord = 'cards';
-  } else if (context === 'challenge') {
-    contextWord = 'challenge';
-  } else {
-    contextWord = 'quiz';
-  }
+const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard' = 'quiz', title?: string) => {
+  const fallbackTitle = context === 'flashcard' ? 'these cards' : `this ${context}`;
 
   if (score >= SCORE_THRESHOLDS.EXCELLENT) {
     return {
       color: 'text-emerald-400',
       grade: 'A+',
       message: 'Outstanding Performance!',
-      description: `You've mastered ${context === 'flashcard' ? 'these' : 'this'} ${contextWord} with exceptional skill.`,
+      descriptionPrefix: "You've mastered ",
+      descriptionSuffix: '!',
+      titleDisplay: title || fallbackTitle,
     };
   }
   if (score >= SCORE_THRESHOLDS.GOOD) {
@@ -43,7 +37,9 @@ const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard'
       color: 'text-blue-400',
       grade: 'A',
       message: 'Great Job!',
-      description: 'Solid performance! You\'re on the right track.',
+      descriptionPrefix: 'Strong performance on ',
+      descriptionSuffix: '!',
+      titleDisplay: title || fallbackTitle,
     };
   }
   if (score >= SCORE_THRESHOLDS.PASS) {
@@ -51,14 +47,18 @@ const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard'
       color: 'text-amber-400',
       grade: 'B',
       message: 'Well Done!',
-      description: 'Good effort. Keep practicing to reach the top.',
+      descriptionPrefix: 'Good effort! Keep practicing ',
+      descriptionSuffix: '.',
+      titleDisplay: title || fallbackTitle,
     };
   }
   return {
     color: 'text-rose-400',
     grade: 'C',
     message: context === 'flashcard' ? 'Session Completed' : context === 'challenge' ? 'Challenge Completed' : 'Quiz Completed',
-    description: 'Review your answers and try again to improve.',
+    descriptionPrefix: 'Review ',
+    descriptionSuffix: ' and try again.',
+    titleDisplay: title || fallbackTitle,
   };
 };
 
@@ -94,6 +94,8 @@ export interface ResultsHeroCardProps {
   totalQuestions: number;
   /** User's name to display in congratulations message */
   userName?: string;
+  /** Title of the quiz/challenge/flashcard set */
+  title?: string;
   /** Optional stats to display (if not provided, only Score and Grade will be shown) */
   stats?: ResultsStat[];
   /** Whether to show confetti animation */
@@ -125,6 +127,7 @@ export const ResultsHeroCard = ({
                                   totalScore,
                                   totalQuestions,
                                   userName,
+                                  title,
                                   stats,
                                   showConfetti = false,
                                   onBack,
@@ -141,9 +144,12 @@ export const ResultsHeroCard = ({
   const { width, height } = useWindowSize();
   const resultsRef = useRef<HTMLDivElement>(null);
 
+  // Extract first name from userName
+  const firstName = userName ? userName.split(' ')[0] : undefined;
+
   // Use contentContext if provided, otherwise fall back to completionType
   const context = contentContext || (completionType === 'challenge' ? 'challenge' : 'quiz');
-  const gradeInfo = useMemo(() => getGradeInfo(score, context), [score, context]);
+  const gradeInfo = useMemo(() => getGradeInfo(score, context, title), [score, context, title]);
 
   // Default stats if none provided
   const defaultStats: ResultsStat[] = useMemo(
@@ -274,35 +280,43 @@ export const ResultsHeroCard = ({
           {/* Hero Content */}
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
             {/* Trophy Icon */}
-            <div className="relative mb-6">
+            <div className="relative mb-4">
               <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
               <div
-                className="relative inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 border border-white/20 shadow-2xl animate-float">
-                <Trophy className="w-10 h-10 md:w-12 md:h-12 text-white drop-shadow-lg" />
+                className="relative inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 border border-white/20 shadow-2xl animate-float">
+                <Trophy className="w-8 h-8 md:w-10 md:h-10 text-white drop-shadow-lg" />
               </div>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-semibold text-white mb-2 md:mb-3 tracking-tight">
+            <h1 className="text-xl md:text-3xl font-semibold text-white mb-2 tracking-tight">
               {customTitle ? (
                 customTitle
               ) : (
                 <>
                   Congratulations
-                  {userName && (
+                  {firstName && (
                     <>
                       {' '}
-                      <span className="text-blue-200 font-bold">{userName}</span>
+                      <span className="text-blue-200 font-bold">{firstName}</span>
                       ,
                     </>
                   )}
-                  {userName ? '' : '!'}
+                  {firstName ? '' : '!'}
                   {' you\'ve completed the '}
                   {completionType === 'challenge' ? 'challenge' : 'quiz'}!
                 </>
               )}
             </h1>
-            <p className="text-primary-100 text-base md:text-xl mb-8 md:mb-12 max-w-xl mx-auto leading-relaxed">
-              {customDescription || gradeInfo.description}
+            <p className="text-primary-100 text-sm md:text-lg mb-6 md:mb-10 max-w-xl mx-auto leading-relaxed">
+              {customDescription ? (
+                customDescription
+              ) : (
+                <>
+                  {gradeInfo.descriptionPrefix}
+                  <span className="text-blue-200 font-semibold">{gradeInfo.titleDisplay}</span>
+                  {gradeInfo.descriptionSuffix}
+                </>
+              )}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 w-full items-center">
@@ -311,7 +325,7 @@ export const ResultsHeroCard = ({
                 <div className="relative">
                   <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full transform scale-110" />
 
-                  <svg className="transform -rotate-90 w-48 h-48 md:w-56 md:h-56 drop-shadow-xl relative z-10">
+                  <svg className="transform -rotate-90 w-40 h-40 md:w-48 md:h-48 drop-shadow-xl relative z-10">
                     <circle
                       cx="50%"
                       cy="50%"
@@ -339,10 +353,10 @@ export const ResultsHeroCard = ({
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                    <span className="text-5xl md:text-6xl font-bold tracking-tighter text-white">
+                    <span className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
                       {score}%
                     </span>
-                    <span className="text-sm font-medium text-white/70 uppercase tracking-widest mt-1">
+                    <span className="text-xs font-medium text-white/70 uppercase tracking-widest mt-1">
                       Final Score
                     </span>
                   </div>
