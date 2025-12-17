@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
+import { apiClient } from '../services/api';
 import type { JobStatus, UseJobPollingOptions } from '../types/job';
 
 const POLLING_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
