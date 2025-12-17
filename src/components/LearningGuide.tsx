@@ -146,6 +146,30 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   
   const [activeKnowledgeCheckSectionIndex, setActiveKnowledgeCheckSectionIndex] = useState<number | null>(null);
 
+  // Smooth scroll to active section when completed sections change
+  React.useEffect(() => {
+    if (activeSection !== -1 && sectionRefs.current[activeSection]?.current) {
+      // Small delay to allow DOM to update after section visibility changes
+      const timer = setTimeout(() => {
+        const sectionElement = sectionRefs.current[activeSection]?.current;
+        if (sectionElement) {
+          const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+          const currentScroll = window.pageYOffset;
+          
+          // Only scroll if the section is not already in view
+          if (Math.abs(elementTop - currentScroll - 80) > 50) {
+            window.scrollTo({
+              top: elementTop - 80,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [completedSections, activeSection]);
+
   const markdownRehypePlugins = React.useMemo(() => [
     rehypeRaw,
     rehypeKatex,
@@ -401,6 +425,35 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                 </span>
               </div>
             </div>
+            <div className="hidden md:block">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="transparent"
+                    className="text-gray-200 dark:text-gray-700"
+                  />
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="transparent"
+                    strokeDasharray={175.93}
+                    strokeDashoffset={175.93 - (175.93 * progress) / 100}
+                    className="text-primary-600 transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <span className="absolute text-xs font-bold text-primary-600 dark:text-primary-400">
+                  {progress}%
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Overview */}
@@ -452,6 +505,12 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             idx
           );
           const isCompleted = completedSections.has(idx);
+          const isActive = activeSection === idx;
+
+          // Hide completed sections unless they're actively selected
+          if (isCompleted && !isActive) {
+            return null;
+          }
 
           return (
             <LearningGuideSection
@@ -459,7 +518,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               ref={sectionRefs.current[idx]}
               section={section}
               index={idx}
-              isActive={activeSection === idx}
+              isActive={isActive}
               isCompleted={isCompleted}
               processedContent={processedContent}
               generatedContent={generatedContent}
@@ -590,12 +649,20 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
              // Auto-advance or close if last
              if (index === activeSection) {
                if (index < guide.sections.length - 1) {
+                  const nextSection = index + 1;
                   setTimeout(() => {
-                    setActiveSection(index + 1);
+                    setActiveSection(nextSection);
 
-                    // Scroll to top of next section
+                    // Update localStorage
+                    try {
+                      localStorage.setItem(`activeSection-${contentId}`, String(nextSection));
+                    } catch {
+                      // Ignore localStorage errors
+                    }
+
+                    // Scroll to top of next section with smooth behavior
                     setTimeout(() => {
-                      const sectionElement = sectionRefs.current[index + 1]?.current;
+                      const sectionElement = sectionRefs.current[nextSection]?.current;
                       if (sectionElement) {
                         const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
                         window.scrollTo({
@@ -603,12 +670,17 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                           behavior: 'smooth'
                         });
                       }
-                    }, 200);
+                    }, 300); // Increased delay to allow section to appear first
                   }, 300);
                } else {
                   setTimeout(() => {
                     setActiveSection(-1);
-
+                    // Remove from localStorage
+                    try {
+                      localStorage.removeItem(`activeSection-${contentId}`);
+                    } catch {
+                      // Ignore localStorage errors
+                    }
                   }, 300);
                }
              }
