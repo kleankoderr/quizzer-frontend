@@ -11,20 +11,6 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add Authorization token
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 // Response interceptor to handle unified API response format
 apiClient.interceptors.response.use(
   (response) => {
@@ -87,8 +73,7 @@ apiClient.interceptors.response.use(
       ) {
         return Promise.reject(error);
       }
-      // Clear token and redirect to login
-      localStorage.removeItem('accessToken');
+      // Clear user data and redirect to login
       localStorage.removeItem('user');
       window.location.href = '/login';
     }

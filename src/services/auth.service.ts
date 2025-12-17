@@ -1,4 +1,4 @@
-import { apiClient /*, setCsrfToken */ } from './api';
+import { apiClient } from './api';
 import { AUTH_ENDPOINTS } from '../config/api';
 import type { User } from '../types';
 
@@ -13,9 +13,9 @@ export const authService = {
       password,
     });
 
-    // Save user data and token to localStorage for persistence
-    const { user, accessToken } = response.data;
-    authService.saveAuthData(user, accessToken);
+    // Save user data to localStorage (token stored in HttpOnly cookie)
+    const { user } = response.data;
+    authService.saveAuthData(user);
 
     return user;
   },
@@ -35,9 +35,9 @@ export const authService = {
       name,
     });
 
-    // Save user data and token to localStorage for persistence
-    const { user, accessToken } = response.data;
-    authService.saveAuthData(user, accessToken);
+    // Save user data to localStorage (token stored in HttpOnly cookie)
+    const { user } = response.data;
+    authService.saveAuthData(user);
 
     return user;
   },
@@ -56,9 +56,9 @@ export const authService = {
       { idToken }
     );
 
-    // Save user data and token to localStorage for persistence
-    const { user, accessToken } = response.data;
-    authService.saveAuthData(user, accessToken);
+    // Save user data to localStorage (token stored in HttpOnly cookie)
+    const { user } = response.data;
+    authService.saveAuthData(user);
 
     return user;
   },
@@ -73,15 +73,10 @@ export const authService = {
   logout: async (): Promise<void> => {
     await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
     localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
   },
 
-  // Save auth data (only user info now)
-  // Save auth data
-  saveAuthData: (user: User, accessToken?: string) => {
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-    }
+  // Save auth data (user info only, token in HttpOnly cookie)
+  saveAuthData: (user: User) => {
     localStorage.setItem('user', JSON.stringify(user));
   },
 
@@ -89,10 +84,5 @@ export const authService = {
   getStoredUser: (): User | null => {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
-  },
-
-  // Get stored token
-  getToken: (): string | null => {
-    return localStorage.getItem('accessToken');
   },
 };

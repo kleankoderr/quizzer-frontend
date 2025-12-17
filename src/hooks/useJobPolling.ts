@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import type { JobStatus, UseJobPollingOptions } from '../types/job';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const POLLING_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
 /**
@@ -61,45 +60,14 @@ export const useJobPolling = ({
     queryFn: async (): Promise<JobStatus> => {
       if (!jobId) throw new Error('No job ID provided');
 
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(
-        `${API_BASE_URL}/${endpoint}/status/${jobId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
+      // Use apiClient which automatically sends cookies
+      const response = await apiClient.get<JobStatus | { data: JobStatus }>(
+        `/${endpoint}/status/${jobId}`
       );
 
-      if (!response.ok) {
-        // Parse error response
-        let errorMessage = 'Failed to fetch job status';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (_e) {
-          // If parsing fails, use default message
-        }
-
-        // For 404, treat as job not found (likely expired or never existed)
-        if (response.status === 404) {
-          // Return a failed job status instead of throwing
-          return {
-            jobId: jobId,
-            status: 'failed',
-            progress: 0,
-            error: errorMessage,
-          };
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const responseData = await response.json();
-
-      // Handle new API response format where job status is wrapped in 'data'
-      const jobStatus: JobStatus = responseData.data || responseData;
+      // Handle both direct JobStatus and wrapped { data: JobStatus } responses
+      const jobStatus: JobStatus =
+        'data' in response.data ? response.data.data : response.data;
 
       // Extract user-friendly error message from verbose AI errors
       if (jobStatus.status === 'failed' && jobStatus.error) {

@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { useProfile } from '../hooks';
+import { useAuth } from '../contexts/AuthContext';
 import {
   User,
   Mail,
@@ -13,10 +14,23 @@ import {
   Trophy,
   Settings,
   Zap,
+  LogOut,
 } from 'lucide-react';
 
 export const ProfilePage = () => {
   const { data: profile, isLoading: loading, error } = useProfile();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (_error) {
+      toast.error('Failed to logout');
+    }
+  };
 
   if (error) {
     toast.error('Failed to load profile');
@@ -74,13 +88,22 @@ export const ProfilePage = () => {
                 View and manage your learning profile
               </p>
             </div>
-            <Link
-              to="/settings"
-              className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-lg transition-colors border border-white/30"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Edit Profile</span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/settings"
+                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-lg transition-colors border border-white/30"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit Profile</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-red-500/80 hover:bg-red-600 backdrop-blur-sm text-white rounded-lg transition-colors border border-red-400/50"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
