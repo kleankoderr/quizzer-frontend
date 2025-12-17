@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, createRef } from 'react';
 import {
   CheckCircle,
-  ChevronRight,
-  Lightbulb,
-  MessageCircle,
-  Sparkles,
-  Loader2,
   Brain,
   BookOpen,
 } from 'lucide-react';
@@ -21,6 +16,8 @@ import 'highlight.js/styles/github-dark.css';
 import { contentService, type Content } from '../services/content.service';
 import { applyHighlights, type Highlight } from '../utils/contentUtils';
 import { KnowledgeCheckModal } from './KnowledgeCheckModal';
+import { LearningGuideSection } from './LearningGuideSection';
+import { SectionNavigator } from './SectionNavigator';
 
 interface LearningGuideProps {
   guide: NonNullable<Content['learningGuide']>;
@@ -50,6 +47,14 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   onGenerateFlashcards,
   onSectionUpdate,
 }) => {
+  // Create refs for each section
+  const sectionRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
+  
+  // Initialize refs array
+  useEffect(() => {
+    sectionRefs.current = guide.sections.map((_, i) => sectionRefs.current[i] || createRef<HTMLDivElement>());
+  }, [guide.sections.length]);
+
   const [completedSections, setCompletedSections] = useState<Set<number>>(
     () => {
       const initial = new Set<number>();
@@ -70,6 +75,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
     setCompletedSections(newCompleted);
   }, [guide]);
+  
   // Initialize activeSection - prioritize first uncompleted section
   const [activeSection, setActiveSection] = useState<number>(() => {
     // Find the first uncompleted section
@@ -79,7 +85,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     try {
       const stored = localStorage.getItem(`activeSection-${contentId}`);
       if (stored) {
-        const storedIndex = parseInt(stored, 10);
+        const storedIndex = Number.parseInt(stored, 10);
         // Only use stored section if it's valid and uncompleted
         if (storedIndex >= 0 && storedIndex < guide.sections.length && !guide.sections[storedIndex].completed) {
           return storedIndex;
@@ -92,6 +98,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     // Default to first uncompleted section, or -1 if all are completed
     return firstUncompletedIndex;
   });
+  
   const [generatedContent, setGeneratedContent] = useState<
     Record<string, string>
   >(() => {
@@ -115,6 +122,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
     return initial;
   });
+  
   const [visibleContent, setVisibleContent] = useState<Record<string, boolean>>(
     () => {
       const initial: Record<string, boolean> = {};
@@ -130,10 +138,12 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       return initial;
     }
   );
+  
   const [loadingAction, setLoadingAction] = useState<{
     section: number;
     type: 'explain' | 'example';
   } | null>(null);
+  
   const [activeKnowledgeCheckSectionIndex, setActiveKnowledgeCheckSectionIndex] = useState<number | null>(null);
 
   const markdownRehypePlugins = React.useMemo(() => [
@@ -193,14 +203,17 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
 
     // Scroll to top of section when opening
-    if (newActiveSection !== -1) {
-      // Use setTimeout to wait for the section to expand
+    if (newActiveSection !== -1 && sectionRefs.current[index]?.current) {
       setTimeout(() => {
-        const sectionElement = document.querySelector(`[data-section-index="${index}"]`);
+        const sectionElement = sectionRefs.current[index]?.current;
         if (sectionElement) {
-          sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: elementTop - 80, // 80px offset to position below sticky header
+            behavior: 'smooth'
+          });
         }
-      }, 100);
+      }, 200);
     }
   };
 
@@ -237,16 +250,21 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           } catch {
             // Ignore localStorage errors
           }
-          
+
           // Scroll to top of next section
-          if (nextSection !== -1) {
+          if (nextSection !== -1 && sectionRefs.current[nextSection]?.current) {
             setTimeout(() => {
-              const sectionElement = document.querySelector(`[data-section-index="${nextSection}"]`);
+              const sectionElement = sectionRefs.current[nextSection]?.current;
               if (sectionElement) {
-                sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({
+                  top: elementTop - 80, // 80px offset to position below sticky header
+                  behavior: 'smooth'
+                });
               }
-            }, 100);
+            }, 200);
           }
+
         }, 300);
       }
     } else {
@@ -354,7 +372,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   // Custom heading renderer
   const HeadingRenderer = ({ level, children }: any) => {
     const text = children?.[0]?.toString() || '';
-    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+    const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
     const Tag = `h${level}` as React.ElementType;
     return <Tag id={id}>{children}</Tag>;
   };
@@ -366,77 +384,66 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       onClick={onContentClick}
     >
       {/* Header Section */}
-      <div className="bg-white dark:bg-gray-800 sm:rounded-2xl p-4 md:p-6 sm:shadow-sm sm:border border-gray-200 dark:border-gray-700">
-        <div className="flex items-start justify-between gap-6 mb-6">
-          <div>
-            <h1
-              className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4"
-              style={{ fontFamily: 'Lexend' }}
-            >
-              {title}
-            </h1>
-            <div
-              className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none"
-              style={{ fontFamily: 'Lexend' }}
-            >
-              {(guide.overview || description) && (
-                <ReactMarkdown
-                  remarkPlugins={markdownRemarkPlugins}
-                  rehypePlugins={markdownRehypePlugins}
-                >
-                  {guide.overview || description || ''}
-                </ReactMarkdown>
-              )}
-            </div>
-          </div>
-          <div className="hidden md:block">
-            <div className="relative w-20 h-20 flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="36"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="transparent"
-                  className="text-gray-200 dark:text-gray-700"
-                />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="36"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="transparent"
-                  strokeDasharray={226.2}
-                  strokeDashoffset={226.2 - (226.2 * progress) / 100}
-                  className="text-primary-600 transition-all duration-1000 ease-out"
-                />
-              </svg>
-              <span className="absolute text-sm font-bold text-primary-600 dark:text-primary-400">
-                {progress}%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Key Concepts */}
-        {guide.keyConcepts && guide.keyConcepts.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {guide.keyConcepts.map((concept, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium border border-primary-100 dark:border-primary-800"
+      <div className="bg-white dark:bg-gray-800 sm:rounded-2xl sm:shadow-sm sm:border border-gray-200 dark:border-gray-700">
+        <div className="p-4 md:p-6">
+          <div className="flex items-start justify-between gap-6 mb-4">
+            <div className="flex-1">
+              <h1
+                className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
                 style={{ fontFamily: 'Lexend' }}
               >
-                {concept}
-              </span>
-            ))}
+                {title}
+              </h1>
+              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <span className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  {completedSections.size} of {guide.sections.length} sections completed
+                </span>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Overview */}
+          {(guide.overview || description) && (
+            <div
+              className="text-base text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none mb-4"
+              style={{ fontFamily: 'Lexend' }}
+            >
+              <ReactMarkdown
+                remarkPlugins={markdownRemarkPlugins}
+                rehypePlugins={markdownRehypePlugins}
+              >
+                {guide.overview || description || ''}
+              </ReactMarkdown>
+            </div>
+          )}
+
+          {/* Key Concepts */}
+          {guide.keyConcepts && guide.keyConcepts.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {guide.keyConcepts.map((concept, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg text-sm font-medium border border-primary-100 dark:border-primary-800"
+                  style={{ fontFamily: 'Lexend' }}
+                >
+                  {concept}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Sections */}
+      {/* Table of Contents - Navigation & Progress */}
+      <SectionNavigator
+        sections={guide.sections}
+        activeSection={activeSection}
+        completedSections={completedSections}
+        onSectionClick={toggleSection}
+      />
+
+      {/* All Sections in Natural Order */}
       <div className="space-y-4">
         {guide.sections.map((section, idx) => {
           const processedContent = applyHighlights(
@@ -447,332 +454,42 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           const isCompleted = completedSections.has(idx);
 
           return (
-            <div
+            <LearningGuideSection
               key={idx}
-              data-section-index={idx}
-              className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${
-                activeSection === idx
-                  ? 'sm:border-primary-500 sm:shadow-md sm:ring-1 ring-primary-500/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              <div
-                onClick={() => toggleSection(idx)}
-                className="p-4 md:p-6 flex items-center justify-between cursor-pointer select-none"
-              >
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={(e) => markAsComplete(idx, e)}
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
-                      isCompleted
-                        ? 'bg-green-500 border-green-500 text-white'
-                        : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500'
-                    }`}
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                  </button>
-                  <h3
-                    className={`text-lg font-semibold transition-colors ${
-                      isCompleted
-                        ? 'text-gray-500 dark:text-gray-400'
-                        : 'text-gray-900 dark:text-white'
-                    }`}
-                    style={{ fontFamily: 'Lexend' }}
-                  >
-                    {section.title}
-                  </h3>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Trigger note creation for this section
-                      // We can simulate a selection or use a callback
-                      // For now, let's just use the global note handler if possible,
-                      // or we might need to expose a specific handler.
-                      // Since the requirement says "Clicking the note icon allows the user to add a note for that section",
-                      // and "Do not highlight text when adding a note",
-                      // we might need a way to open the note input without text selection.
-                      // But the current note input is "InlineNoteInput" which positions based on selection/toolbar.
-
-                      // Let's emit a custom event or callback if provided,
-                      // or we can rely on the parent to handle "add note to section".
-                      // For this iteration, I'll add the button and we can wire it up in ContentPage.
-                      const rect = (
-                        e.target as HTMLElement
-                      ).getBoundingClientRect();
-                      const event = new CustomEvent('add-section-note', {
-                        detail: {
-                          sectionIndex: idx,
-                          sectionTitle: section.title,
-                          x: rect.left,
-                          y: rect.bottom + window.scrollY,
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }}
-                    className="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                    title="Add Note to Section"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                  </button>
-                  <ChevronRight
-                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
-                      activeSection === idx ? 'rotate-90' : ''
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div
-                className={`grid transition-all duration-300 ease-in-out ${
-                  activeSection === idx
-                    ? 'grid-rows-[1fr] opacity-100'
-                    : 'grid-rows-[0fr] opacity-0'
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700/50 mt-2">
-                    <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown">
-                      <ReactMarkdown
-                        remarkPlugins={markdownRemarkPlugins}
-                        rehypePlugins={markdownRehypePlugins}
-                        components={{
-                          h1: (props) => (
-                            <HeadingRenderer level={1} {...props} />
-                          ),
-                          h2: (props) => (
-                            <HeadingRenderer level={2} {...props} />
-                          ),
-                          h3: (props) => (
-                            <HeadingRenderer level={3} {...props} />
-                          ),
-                        }}
-                      >
-                        {processedContent}
-                      </ReactMarkdown>
-                    </div>
-
-                    {section.example && (
-                      <div className="mt-4 relative overflow-hidden sm:rounded-xl sm:border border-blue-100 dark:border-blue-900/50 bg-blue-50/30 sm:bg-gradient-to-br sm:from-blue-50/50 sm:to-white dark:from-blue-900/10 dark:to-gray-800 sm:shadow-sm border-l-4 sm:border-l border-l-blue-500 sm:border-l-blue-100">
-                        <div className="hidden sm:block absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-400 to-blue-600"></div>
-                        <div className="p-4">
-                          <div className="flex items-center gap-2.5 mb-2">
-                            <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0">
-                              <Lightbulb className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <h4
-                                className="font-bold text-gray-900 dark:text-white text-sm"
-                                style={{ fontFamily: 'Lexend' }}
-                              >
-                                Key Example
-                              </h4>
-                            </div>
-                          </div>
-                          <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20">
-                            <div
-                              className="m-0 leading-relaxed text-sm"
-                              style={{ fontFamily: 'Lexend' }}
-                            >
-                              <ReactMarkdown
-                                remarkPlugins={markdownRemarkPlugins}
-                                rehypePlugins={markdownRehypePlugins}
-                              >
-                                {section.example}
-                              </ReactMarkdown>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {section.assessment && (
-                      <div className="mt-4 relative overflow-hidden sm:rounded-xl sm:border border-green-100 dark:border-green-900/50 bg-green-50/30 sm:bg-gradient-to-br sm:from-green-50/50 sm:to-white dark:from-green-900/10 dark:to-gray-800 sm:shadow-sm border-l-4 sm:border-l border-l-green-500 sm:border-l-green-100">
-                        <div className="hidden sm:block absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400 to-green-600"></div>
-                        <div className="p-4">
-                          <div className="flex items-center gap-2.5 mb-2">
-                            <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-green-100 dark:border-green-800 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
-                              <Brain className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <h4
-                                className="font-bold text-gray-900 dark:text-white text-sm"
-                                style={{ fontFamily: 'Lexend' }}
-                              >
-                                Knowledge Check
-                              </h4>
-                            </div>
-                          </div>
-                          <div className="prose prose-green prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-green-50 dark:border-green-900/20">
-                            <div
-                              className="m-0 leading-relaxed text-sm"
-                              style={{ fontFamily: 'Lexend' }}
-                            >
-                              <ReactMarkdown
-                                remarkPlugins={markdownRemarkPlugins}
-                                rehypePlugins={markdownRehypePlugins}
-                              >
-                                {section.assessment}
-                              </ReactMarkdown>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {activeSection === idx && (
-                      <div className="mt-8 space-y-6">
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            onClick={() => handleAskQuestion(idx, 'explain')}
-                            disabled={!!loadingAction}
-                            className="group relative flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-800 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-1 sm:flex-none justify-center h-auto min-h-[44px]"
-                          >
-                            <div className="absolute inset-0 bg-purple-50 dark:bg-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            {loadingAction?.section === idx &&
-                            loadingAction?.type === 'explain' ? (
-                              <Loader2 className="w-4 h-4 animate-spin relative z-10 flex-shrink-0" />
-                            ) : (
-                              <MessageCircle className="w-4 h-4 relative z-10 flex-shrink-0" />
-                            )}
-                            <span
-                              className="relative z-10 font-medium text-sm text-center leading-tight"
-                              style={{ fontFamily: 'Lexend' }}
-                            >
-                              Explain this better
-                            </span>
-                          </button>
-
-                          <button
-                            onClick={() => handleAskQuestion(idx, 'example')}
-                            disabled={!!loadingAction}
-                            className="group relative flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl hover:text-amber-600 dark:hover:text-amber-400 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-amber-200 dark:hover:border-amber-800 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-1 sm:flex-none justify-center h-auto min-h-[44px]"
-                          >
-                            <div className="absolute inset-0 bg-amber-50 dark:bg-amber-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            {loadingAction?.section === idx &&
-                            loadingAction?.type === 'example' ? (
-                              <Loader2 className="w-4 h-4 animate-spin relative z-10 flex-shrink-0" />
-                            ) : (
-                              <Sparkles className="w-4 h-4 relative z-10 flex-shrink-0" />
-                            )}
-                            <span
-                              className="relative z-10 font-medium text-sm text-center leading-tight"
-                              style={{ fontFamily: 'Lexend' }}
-                            >
-                              Give more examples
-                            </span>
-                          </button>
-                        </div>
-
-                        {/* Generated Content Display */}
-                        {generatedContent[`${idx}-explain`] &&
-                          visibleContent[`${idx}-explain`] && (
-                            <div className="relative overflow-hidden sm:rounded-2xl sm:border border-purple-100 dark:border-purple-900/50 bg-purple-50/30 sm:bg-gradient-to-br sm:from-purple-50/50 sm:to-white dark:from-purple-900/10 dark:to-gray-800 sm:shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 border-l-4 sm:border-l border-l-purple-500 sm:border-l-purple-100">
-                              <div className="hidden sm:block absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-purple-400 to-purple-600"></div>
-                              <div className="p-4 md:p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-purple-100 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-shrink-0">
-                                      <MessageCircle className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                      <h4
-                                        className="font-bold text-gray-900 dark:text-white text-base"
-                                        style={{ fontFamily: 'Lexend' }}
-                                      >
-                                        Simpler Explanation
-                                      </h4>
-                                      <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                                        Smart Tutor
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <button
-                                    onClick={() =>
-                                      toggleContentVisibility(idx, 'explain')
-                                    }
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                  >
-                                    <ChevronRight className="w-5 h-5 rotate-90" />
-                                  </button>
-                                </div>
-                                <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
-                                  <ReactMarkdown
-                                    remarkPlugins={markdownRemarkPlugins}
-                                    rehypePlugins={markdownRehypePlugins}
-                                  >
-                                    {generatedContent[`${idx}-explain`]}
-                                  </ReactMarkdown>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                        {generatedContent[`${idx}-example`] &&
-                          visibleContent[`${idx}-example`] && (
-                            <div className="relative overflow-hidden sm:rounded-2xl sm:border border-amber-100 dark:border-amber-900/50 bg-amber-50/30 sm:bg-gradient-to-br sm:from-amber-50/50 sm:to-white dark:from-amber-900/10 dark:to-gray-800 sm:shadow-sm animate-in fade-in slide-in-from-top-4 duration-500 border-l-4 sm:border-l border-l-amber-500 sm:border-l-amber-100">
-                              <div className="hidden sm:block absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-amber-600"></div>
-                              <div className="p-4 md:p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
-                                      <Sparkles className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                      <h4
-                                        className="font-bold text-gray-900 dark:text-white text-base"
-                                        style={{ fontFamily: 'Lexend' }}
-                                      >
-                                        Real-World Examples
-                                      </h4>
-                                      <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                                        Smart Tutor
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <button
-                                    onClick={() =>
-                                      toggleContentVisibility(idx, 'example')
-                                    }
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                  >
-                                    <ChevronRight className="w-5 h-5 rotate-90" />
-                                  </button>
-                                </div>
-                                <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
-                                  <ReactMarkdown
-                                    remarkPlugins={markdownRemarkPlugins}
-                                    rehypePlugins={markdownRehypePlugins}
-                                  >
-                                    {generatedContent[`${idx}-example`]}
-                                  </ReactMarkdown>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                      </div>
-                    )}
-
-                    {!isCompleted && (
-                      <div className="mt-8 flex justify-end">
-                        <button
-                          onClick={(e) => markAsComplete(idx, e)}
-                          className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md flex items-center gap-2"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          <span>Complete Section</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+              ref={sectionRefs.current[idx]}
+              section={section}
+              index={idx}
+              isActive={activeSection === idx}
+              isCompleted={isCompleted}
+              processedContent={processedContent}
+              generatedContent={generatedContent}
+              visibleContent={visibleContent}
+              loadingAction={loadingAction}
+              markdownRemarkPlugins={markdownRemarkPlugins}
+              markdownRehypePlugins={markdownRehypePlugins}
+              HeadingRenderer={HeadingRenderer}
+              onToggleSection={toggleSection}
+              onMarkComplete={markAsComplete}
+              onAddSectionNote={(e) => {
+                e.stopPropagation();
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                const event = new CustomEvent('add-section-note', {
+                  detail: {
+                    sectionIndex: idx,
+                    sectionTitle: section.title,
+                    x: rect.left,
+                    y: rect.bottom + window.scrollY,
+                  },
+                });
+                window.dispatchEvent(event);
+              }}
+              onAskQuestion={handleAskQuestion}
+              onToggleContentVisibility={toggleContentVisibility}
+            />
           );
         })}
       </div>
+      
       {progress === 100 && (
         <div className="bg-gradient-to-br from-primary-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl p-4 md:p-6 border border-primary-100 dark:border-gray-700 text-center animate-in zoom-in duration-500">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -875,10 +592,23 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                if (index < guide.sections.length - 1) {
                   setTimeout(() => {
                     setActiveSection(index + 1);
+
+                    // Scroll to top of next section
+                    setTimeout(() => {
+                      const sectionElement = sectionRefs.current[index + 1]?.current;
+                      if (sectionElement) {
+                        const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({
+                          top: elementTop - 80, // 80px offset to position below sticky header
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 200);
                   }, 300);
                } else {
                   setTimeout(() => {
                     setActiveSection(-1);
+
                   }, 300);
                }
              }
