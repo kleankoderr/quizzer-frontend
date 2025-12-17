@@ -175,7 +175,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
           key={packTitle}
           title={packTitle}
           count={packSets.length}
-          defaultOpen={true}
+          defaultOpen={false}
           className="mb-8 last:mb-0"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

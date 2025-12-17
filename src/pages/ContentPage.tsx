@@ -455,7 +455,8 @@ export const ContentPage = () => {
 
     navigate('/quiz', {
       state: {
-        topic: content.title,
+        openGenerator: true,
+        sourceTitle: content.title,
         sourceId: content.id,
         contentId: content.id,
         breadcrumb: [
@@ -477,7 +478,7 @@ export const ContentPage = () => {
 
     navigate('/flashcards', {
       state: {
-        topic: content.topic,
+        openGenerator: true,
         sourceId: content.id,
         sourceTitle: content.title,
         contentId: content.id,

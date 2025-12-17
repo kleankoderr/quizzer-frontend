@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LayoutList,
   Folder,
+  BookOpen,
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
@@ -22,6 +23,7 @@ interface FlashcardGeneratorProps {
     topic?: string;
     content?: string;
     mode?: 'topic' | 'content' | 'files';
+    sourceTitle?: string;
     contentId?: string;
     studyPackId?: string;
   };
@@ -47,7 +49,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
   useEffect(() => {
     if (initialValues) {
-      if (initialValues.topic) setTopic(initialValues.topic);
+      if (initialValues.sourceTitle) setTopic(initialValues.sourceTitle);
+      else if (initialValues.topic) setTopic(initialValues.topic);
       if (initialValues.content) setContent(initialValues.content);
       if (initialValues.mode) setMode(initialValues.mode);
       if (initialValues.studyPackId)
@@ -89,6 +92,24 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           Generate New Flashcard Set
         </h2>
       </div>
+
+      {initialValues?.sourceTitle && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-0.5">
+                Generating flashcards from study material
+              </p>
+              <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                {initialValues.sourceTitle}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
         <button
@@ -152,10 +173,17 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., French Vocabulary, Chemistry Formulas"
+              placeholder={initialValues?.sourceTitle ? "Topic from study material" : "e.g., French Vocabulary, Chemistry Formulas"}
               className="input-field"
               required
+              readOnly={!!initialValues?.sourceTitle}
+              disabled={!!initialValues?.sourceTitle}
             />
+            {initialValues?.sourceTitle && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
+                Topic is set from your study material and cannot be changed
+              </p>
+            )}
           </div>
         ) : mode === 'content' ? (
           <div>

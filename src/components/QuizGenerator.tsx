@@ -45,7 +45,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [mode, setMode] = useState<'topic' | 'content' | 'files'>(
     initialValues?.mode || 'topic'
   );
-  const [topic, setTopic] = useState(initialValues?.topic || '');
+  const [topic, setTopic] = useState(initialValues?.sourceTitle || initialValues?.topic || '');
   const [content, setContent] = useState(initialValues?.content || '');
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
@@ -114,10 +114,20 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
       </div>
 
       {initialValues?.sourceTitle && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2 text-blue-800">
-          <BookOpen className="w-5 h-5" />
-          <span className="font-medium">Generating from content:</span>
-          <span className="font-bold">{initialValues.sourceTitle}</span>
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-0.5">
+                Generating quiz from study material
+              </p>
+              <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                {initialValues.sourceTitle}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -183,10 +193,17 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., World War II, Photosynthesis, Python Programming"
+              placeholder={initialValues?.sourceTitle ? "Topic from study material" : "e.g., World War II, Photosynthesis, Python Programming"}
               className="input-field"
               required
+              readOnly={!!initialValues?.sourceTitle}
+              disabled={!!initialValues?.sourceTitle}
             />
+            {initialValues?.sourceTitle && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
+                Topic is set from your study material and cannot be changed
+              </p>
+            )}
           </div>
         )}
 

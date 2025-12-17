@@ -36,6 +36,7 @@ export const FlashcardsPage = () => {
         topic?: string;
         content?: string;
         mode?: 'topic' | 'content' | 'files';
+        sourceTitle?: string;
         contentId?: string;
         studyPackId?: string;
       }
@@ -48,10 +49,11 @@ export const FlashcardsPage = () => {
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, contentId, openGenerator } =
+      const { topic, contentText, sourceTitle, contentId, openGenerator } =
         location.state as {
           topic?: string;
           contentText?: string;
+          sourceTitle?: string;
           contentId?: string;
           openGenerator?: boolean; // Added flag
           studyPackId?: string;
@@ -62,6 +64,7 @@ export const FlashcardsPage = () => {
           topic,
           content: contentText,
           mode: contentText ? 'content' : 'topic',
+          sourceTitle,
           contentId,
           studyPackId: (location.state as any).studyPackId,
         });
