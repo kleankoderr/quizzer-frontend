@@ -5,6 +5,7 @@ import type {
   UpdateProfileRequest,
   UpdateSettingsRequest,
   ChangePasswordRequest,
+  QuotaStatus,
 } from '../types';
 
 export const userService = {
@@ -45,6 +46,11 @@ export const userService = {
     const response = await apiClient.delete<{ message: string }>(
       USER_ENDPOINTS.DELETE_ACCOUNT
     );
+    return response.data;
+  },
+
+  getQuotaStatus: async (): Promise<QuotaStatus> => {
+    const response = await apiClient.get<QuotaStatus>(USER_ENDPOINTS.GET_QUOTA);
     return response.data;
   },
 };

@@ -92,6 +92,19 @@ const StudyPackDetailsPage = lazy(() =>
   }))
 );
 
+const PricingPage = lazy(() =>
+  import('./pages/PricingPage').then((m) => ({ default: m.PricingPage }))
+);
+
+
+const VerifyPaymentPage = lazy(() =>
+  import('./pages/VerifyPaymentPage').then((m) => ({ default: m.VerifyPaymentPage }))
+);
+
+const ManageSubscriptionPage = lazy(() =>
+  import('./pages/ManageSubscriptionPage').then((m) => ({ default: m.ManageSubscriptionPage }))
+);
+
 // Lazy load admin pages
 const AdminDashboard = lazy(() =>
   import('./pages/admin/AdminDashboard').then((m) => ({
@@ -231,6 +244,9 @@ function AppRoutes() {
           <Route path="study-packs/:id" element={<StudyPackDetailsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="pricing" element={<PricingPage />} />
+          <Route path="subscription/manage" element={<ManageSubscriptionPage />} />
+          <Route path="subscription/verify" element={<VerifyPaymentPage />} />
 
           {/* Admin Routes */}
           <Route

@@ -422,3 +422,81 @@ export interface UpdateFlashcardSetTitleRequest {
 export interface UpdateContentTitleRequest {
   title: string;
 }
+
+// Quota types
+export interface QuotaFeatureStatus {
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface QuotaStatus {
+  isPremium: boolean;
+  resetAt: string;
+  quiz: QuotaFeatureStatus;
+  flashcard: QuotaFeatureStatus;
+  learningGuide: QuotaFeatureStatus;
+  explanation: QuotaFeatureStatus;
+  fileUpload?: QuotaFeatureStatus;
+  fileStorage?: QuotaFeatureStatus;
+}
+
+// Subscription types
+export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'PENDING';
+export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  interval: 'MONTHLY' | 'YEARLY' | 'monthly' | 'yearly';
+  isActive: boolean;
+  quotas: {
+    quizzes: number;
+    flashcards: number;
+    learningGuides: number;
+    explanations: number;
+    filesPerMonth: number;
+    storageLimitMB: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  planId: string;
+  status: SubscriptionStatus;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+  updatedAt: string;
+  plan?: SubscriptionPlan;
+}
+
+export interface Payment {
+  id: string;
+  userId: string;
+  planId: string;
+  amount: number;
+  status: PaymentStatus;
+  reference: string;
+  paystackReference?: string;
+  createdAt: string;
+  updatedAt: string;
+  plan?: SubscriptionPlan;
+}
+
+export interface CheckoutResponse {
+  authorizationUrl: string;
+  reference: string;
+}
+
+export interface VerifyPaymentResponse {
+  success: boolean;
+  message: string;
+  subscription?: Subscription;
+}

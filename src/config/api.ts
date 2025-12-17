@@ -69,6 +69,15 @@ export const ATTEMPTS_ENDPOINTS = {
   GET_BY_ID: (id: string) => `${API_BASE_URL}/attempts/${id}`,
 };
 
+// Subscription endpoints
+export const SUBSCRIPTION_ENDPOINTS = {
+  GET_PLANS: `${API_BASE_URL}/subscription/plans`,
+  CHECKOUT: `${API_BASE_URL}/subscription/checkout`,
+  VERIFY_PAYMENT: `${API_BASE_URL}/subscription/verify`,
+  GET_MY_SUBSCRIPTION: `${API_BASE_URL}/subscription/me`,
+  CANCEL_SUBSCRIPTION: `${API_BASE_URL}/subscription/cancel`,
+};
+
 // User endpoints
 export const USER_ENDPOINTS = {
   GET_PROFILE: `${API_BASE_URL}/user/profile`,
@@ -76,4 +85,5 @@ export const USER_ENDPOINTS = {
   UPDATE_SETTINGS: `${API_BASE_URL}/user/settings`,
   CHANGE_PASSWORD: `${API_BASE_URL}/user/password`,
   DELETE_ACCOUNT: `${API_BASE_URL}/user/account`,
+  GET_QUOTA: `${API_BASE_URL}/user/quota`,
 };
