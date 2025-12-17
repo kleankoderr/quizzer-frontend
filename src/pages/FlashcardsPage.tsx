@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import type { FlashcardGenerateRequest } from '../types';
-import type { AppEvent } from '../types/events';
 import {
   CreditCard,
   Plus,
@@ -20,7 +19,7 @@ import { useFlashcardSets } from '../hooks';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSSEEvent } from '../hooks/useSSE';
+import { useJobPolling } from '../hooks/useJobPolling';
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
@@ -43,9 +42,9 @@ export const FlashcardsPage = () => {
     | undefined
   >(undefined);
 
-  // Use refs to avoid race conditions with SSE events
-  const currentJobIdRef = useRef<string | null>(null);
-  const toastIdRef = useRef<string | null>(null);
+  // Job polling state
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const toastIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (location.state) {
@@ -71,90 +70,68 @@ export const FlashcardsPage = () => {
         setShowGenerator(true);
       }
     }
+
+    // Cleanup function to reset state when leaving the page
+    return () => {
+      setInitialValues(undefined);
+      setShowGenerator(false);
+    };
   }, [location.state]);
-    useCallback((event: AppEvent) => {
-        // Progress is now handled automatically by the toast component
-        if (event.eventType === 'flashcard.progress' && currentJobIdRef.current) {
-            // Toast updates disabled to allow auto-progress
-        }
-    }, []);
 
-    const handleCompleted = useCallback(
-        async (event: AppEvent) => {
-            if (
-                event.eventType === 'flashcard.completed' &&
-                currentJobIdRef.current &&
-                toastIdRef.current
-            ) {
-                const completedEvent = event;
+  // Poll for job status with exponential backoff
+  useJobPolling({
+    jobId: currentJobId,
+    endpoint: 'flashcards',
+    onCompleted: async (result) => {
+      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
 
-                // Verify that this completion event matches our current job
-                if (completedEvent.jobId !== currentJobIdRef.current) {
-                    return;
-                }
-
-                await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
-
-                if (initialValues?.contentId) {
-                    await queryClient.invalidateQueries({
-                        queryKey: ['content', initialValues.contentId],
-                    });
-                }
-
-                toast.custom(
-                    (t) => (
-                        <ProgressToast
-                            t={t}
-                            title="Flashcards Ready!"
-                            message="Opening your flashcards..."
-                            progress={100}
-                            status="success"
-                        />
-                    ),
-                    { id: toastIdRef.current, duration: 2000 }
-                );
-
-                setTimeout(() => {
-                    navigate(`/flashcards/${completedEvent.flashcardSetId}`);
-                }, 500);
-
-                setLoading(false);
-                currentJobIdRef.current = null;
-                toastIdRef.current = null;
-            }
-        },
-        [queryClient, initialValues, navigate]
-    );
-    const handleFailed = useCallback((event: AppEvent) => {
-    if (
-      event.eventType === 'flashcard.failed' &&
-      currentJobIdRef.current &&
-      toastIdRef.current
-    ) {
-      const failedEvent = event as any;
-      if (failedEvent.jobId === currentJobIdRef.current) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Creation Failed"
-              message={failedEvent.error}
-              progress={0}
-              status="error"
-            />
-          ),
-          { id: toastIdRef.current, duration: 5000 }
-        );
-
-        setLoading(false);
-        currentJobIdRef.current = null;
-        toastIdRef.current = null;
+      if (initialValues?.contentId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['content', initialValues.contentId],
+        });
       }
-    }
-  }, []);
 
-  useSSEEvent('flashcard.completed', handleCompleted);
-  useSSEEvent('flashcard.failed', handleFailed);
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Flashcards Ready!"
+            message="Opening your flashcards..."
+            progress={100}
+            status="success"
+          />
+        ),
+        { id: toastIdRef.current, duration: 2000 }
+      );
+
+      setTimeout(() => {
+        navigate(`/flashcards/${result.id}`);
+      }, 500);
+
+      setLoading(false);
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
+    },
+    onFailed: (error) => {
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Creation Failed"
+            message={error}
+            progress={0}
+            status="error"
+          />
+        ),
+        { id: toastIdRef.current, duration: 5000 }
+      );
+
+      setLoading(false);
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
+    },
+    enabled: !!currentJobId,
+  });
 
   const handleGenerate = async (
     request: FlashcardGenerateRequest,
@@ -181,14 +158,15 @@ export const FlashcardsPage = () => {
 
     try {
       const { jobId } = await flashcardService.generate(request, files);
-      currentJobIdRef.current = jobId;
-    } catch (_error) {
+      setCurrentJobId(jobId);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong';
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Create Flashcards"
-            message="Something went wrong"
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -196,8 +174,8 @@ export const FlashcardsPage = () => {
         { id: toastId, duration: 5000 }
       );
       setLoading(false);
-      currentJobIdRef.current = null;
-      toastIdRef.current = null;
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
     }
   };
 
@@ -346,7 +324,10 @@ export const FlashcardsPage = () => {
       {showGenerator && (
         <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
           <button
-            onClick={() => setShowGenerator(false)}
+            onClick={() => {
+              setShowGenerator(false);
+              setInitialValues(undefined);
+            }}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
           >
             <X className="w-5 h-5" />

@@ -50,6 +50,8 @@ export interface AuthResponse {
 
 // Quiz types
 export type QuizType = 'standard' | 'timed' | 'scenario';
+export * from './events';
+export * from './job';
 export type QuestionType =
   | 'true-false'
   | 'single-select'

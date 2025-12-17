@@ -4,7 +4,6 @@ import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import type { AppEvent } from '../types/events';
 import {
   Plus,
   ChevronRight,
@@ -28,7 +27,7 @@ import { FileSelector } from '../components/FileSelector';
 import { FileUpload } from '../components/FileUpload';
 import { Card } from '../components/Card';
 import { StudyPackSelector } from '../components/StudyPackSelector';
-import { useSSEEvent } from '../hooks/useSSE';
+import { useJobPolling } from '../hooks/useJobPolling';
 import { CardMenu, Pencil } from '../components/CardMenu';
 import { EditTitleModal } from '../components/EditTitleModal';
 import { formatDate } from '../utils/dateFormat';
@@ -71,9 +70,9 @@ export const StudyPage = () => {
   const [showUpload, setShowUpload] = useState(false);
   const [showExistingFiles, setShowExistingFiles] = useState(false);
 
-  // Use refs to avoid race conditions with SSE events
-  const currentJobIdRef = useRef<string | null>(null);
-  const toastIdRef = useRef<string | null>(null);
+  // Job polling state
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const toastIdRef = useRef<string | undefined>(undefined);
 
   // Delete state
   const [deleteContentId, setDeleteContentId] = useState<string | null>(null);
@@ -180,77 +179,54 @@ export const StudyPage = () => {
       </Card>
     );
   };
-    useCallback((event: AppEvent) => {
-        // Progress is now handled automatically by the toast component
-        if (event.eventType === 'content.progress' && currentJobIdRef.current) {
-            // Toast updates disabled to allow auto-progress
-        }
-    }, []);
 
-    const handleCompleted = useCallback(
-        async (event: AppEvent) => {
-            if (
-                event.eventType === 'content.completed' &&
-                currentJobIdRef.current &&
-                toastIdRef.current
-            ) {
-                const completedEvent = event as any;
+  // Poll for job status with exponential backoff
+  useJobPolling({
+    jobId: currentJobId,
+    endpoint: 'content',
+    onCompleted: async (result) => {
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Content Ready!"
+            message="Opening your study material..."
+            progress={100}
+            status="success"
+          />
+        ),
+        { id: toastIdRef.current, duration: 2000 }
+      );
 
-                toast.custom(
-                    (t) => (
-                        <ProgressToast
-                            t={t}
-                            title="Content Ready!"
-                            message="Opening your study material..."
-                            progress={100}
-                            status="success"
-                        />
-                    ),
-                    { id: toastIdRef.current, duration: 2000 }
-                );
+      setTimeout(() => {
+        navigate(`/content/${result.id}`);
+      }, 500);
 
-                setTimeout(() => {
-                    navigate(`/content/${completedEvent.contentId}`);
-                }, 500);
+      setContentLoading(false);
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
+      refetch();
+    },
+    onFailed: (error) => {
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Generation Failed"
+            message={error}
+            progress={0}
+            status="error"
+          />
+        ),
+        { id: toastIdRef.current, duration: 5000 }
+      );
 
-                setContentLoading(false);
-                currentJobIdRef.current = null;
-                toastIdRef.current = null;
-                refetch();
-            }
-        },
-        [navigate, refetch]
-    );
-    const handleFailed = useCallback((event: AppEvent) => {
-    if (
-      event.eventType === 'content.failed' &&
-      currentJobIdRef.current &&
-      toastIdRef.current
-    ) {
-      const failedEvent = event as any;
-      if (failedEvent.jobId === currentJobIdRef.current) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Generation Failed"
-              message={failedEvent.error}
-              progress={0}
-              status="error"
-            />
-          ),
-          { id: toastIdRef.current, duration: 5000 }
-        );
-
-        setContentLoading(false);
-        currentJobIdRef.current = null;
-        toastIdRef.current = null;
-      }
-    }
-  }, []);
-
-  useSSEEvent('content.completed', handleCompleted);
-  useSSEEvent('content.failed', handleFailed);
+      setContentLoading(false);
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
+    },
+    enabled: !!currentJobId,
+  });
 
   const handleGenerateFromTopic = useCallback(async () => {
     if (!topic.trim()) {
@@ -281,14 +257,15 @@ export const StudyPage = () => {
         topic,
         studyPackId: selectedStudyPackId || undefined,
       });
-      currentJobIdRef.current = jobId;
-    } catch (_error) {
+      setCurrentJobId(jobId);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong';
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Generate Content"
-            message="Something went wrong"
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -296,8 +273,8 @@ export const StudyPage = () => {
         { id: toastId, duration: 5000 }
       );
       setContentLoading(false);
-      currentJobIdRef.current = null;
-      toastIdRef.current = null;
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
     }
   }, [topic, selectedStudyPackId]);
 
@@ -331,14 +308,15 @@ export const StudyPage = () => {
         topic: textTopic || undefined,
         studyPackId: selectedStudyPackId || undefined,
       });
-      currentJobIdRef.current = jobId;
-    } catch (_error) {
+      setCurrentJobId(jobId);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to process content';
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Generation Failed"
-            message="Failed to process content"
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -346,8 +324,8 @@ export const StudyPage = () => {
         { id: toastId, duration: 5000 }
       );
       setContentLoading(false);
-      currentJobIdRef.current = null;
-      toastIdRef.current = null;
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
     }
   }, [textTitle, textContent, textTopic, selectedStudyPackId]);
 
@@ -416,14 +394,15 @@ export const StudyPage = () => {
         { id: toastId }
       );
 
-      currentJobIdRef.current = jobId;
+      setCurrentJobId(jobId);
     } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to process files';
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Upload Failed"
-            message={error.message || 'Failed to process files'}
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -431,8 +410,8 @@ export const StudyPage = () => {
         { id: toastId, duration: 5000 }
       );
       setContentLoading(false);
-      currentJobIdRef.current = null;
-      toastIdRef.current = null;
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
     }
   }, [files, selectedFileIds, selectedStudyPackId]);
 

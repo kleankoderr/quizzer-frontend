@@ -114,16 +114,16 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
       </div>
 
       {initialValues?.sourceTitle && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl shadow-sm">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+            <div className="flex-shrink-0 p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-300" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-0.5">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300 mb-0.5">
                 Generating quiz from study material
               </p>
-              <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+              <p className="text-sm sm:text-base md:text-lg font-bold text-blue-900 dark:text-blue-100 break-words">
                 {initialValues.sourceTitle}
               </p>
             </div>

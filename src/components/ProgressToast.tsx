@@ -35,26 +35,23 @@ export const ProgressToast: React.FC<
           // Determine speed based on progress
           let increment: number;
 
-          if (prev < 20) {
-            // Initializing - Fast
+          if (prev < 30) {
+            // Initializing - Very Fast
+            increment = Math.random() * 3 + 2; // 2-5%
+          } else if (prev < 60) {
+            // Processing - Fast
             increment = Math.random() * 2 + 1; // 1-3%
-          } else if (prev < 40) {
-            // Processing - Medium
-            increment = Math.random() * 1.5 + 0.5; // 0.5-2%
-          } else if (prev < 70) {
-            // Generating - Medium Slow
-            increment = Math.random() + 0.2; // 0.2-1.2%
           } else if (prev < 90) {
-            // Formatting - Slow
-            increment = Math.random() * 0.5 + 0.1; // 0.1-0.6%
+            // Generating - Medium
+            increment = Math.random() * 1.5 + 0.5; // 0.5-2%
           } else {
-            // Finalizing - Crawling (90-99%)
-            increment = Math.random() * 0.2; // 0-0.2%
+            // Finalizing - Very Slow (90-98%)
+            increment = Math.random() * 0.15; // 0-0.15%
           }
 
           return Math.min(98, prev + increment);
         });
-      }, 300); // Update every 300ms
+      }, 250); // Update every 250ms
 
       return () => clearInterval(interval);
     } else {
@@ -80,14 +77,19 @@ export const ProgressToast: React.FC<
         }
         
         setCurrentMessage(newMessage);
+    } else if ((status === 'error' || status === 'success') && message) {
+      // For error and success states, use the provided message prop
+      setCurrentMessage(message);
     }
   }, [currentProgress, status, autoProgress, message]);
 
   useEffect(() => {
     if (status === 'success' || status === 'error') {
+      // Different delays for success vs error
+      const delay = status === 'error' ? 6000 : 3000; // 6s for errors, 3s for success
       const timer = setTimeout(() => {
         toast.dismiss(t.id);
-      }, 3000);
+      }, delay);
       return () => clearTimeout(timer);
     }
   }, [status, t.id]);
@@ -104,23 +106,14 @@ export const ProgressToast: React.FC<
     return 'bg-red-50 dark:bg-red-900/20';
   };
 
-  const truncateMessage = (msg: string, maxLength: number = 60) => {
-    if (msg.length <= maxLength) return msg;
-    return msg.substring(0, maxLength) + '...';
-  };
-
-  const displayMessage =
-    status === 'error'
-      ? '.....'
-      : currentMessage
-        ? truncateMessage(currentMessage)
-        : undefined;
+  // Display message without truncation
+  const displayMessage = currentMessage || undefined;
 
   return (
     <div
       className={`${
         t.visible ? 'animate-enter' : 'animate-leave'
-      } max-w-md w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg pointer-events-auto border-l-4 ${getBorderColor()} overflow-hidden`}
+      } max-w-lg w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg pointer-events-auto border-l-4 ${getBorderColor()} overflow-hidden`}
     >
       <div className="p-4">
         <div className="flex items-center gap-3">

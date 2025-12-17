@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { quizService } from '../services/quiz.service';
 import type { QuizGenerateRequest } from '../types';
-import type { AppEvent } from '../types/events';
 import {
   Brain,
   Plus,
@@ -20,7 +19,7 @@ import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQuizzes } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSSEEvent } from '../hooks/useSSE';
+import { useJobPolling } from '../hooks/useJobPolling';
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
@@ -45,9 +44,9 @@ export const QuizPage = () => {
   const [deleteQuizId, setDeleteQuizId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Use refs to avoid race conditions with SSE events
-  const currentJobIdRef = useRef<string | null>(null);
-  const toastIdRef = useRef<string | null>(null);
+  // Job polling state
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const toastIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (location.state) {
@@ -84,94 +83,77 @@ export const QuizPage = () => {
         setShowGenerator(true);
       }
     }
+
+    // Cleanup function to reset state when leaving the page
+    return () => {
+      setInitialValues(undefined);
+      setShowGenerator(false);
+    };
   }, [location.state]);
-    useCallback((event: AppEvent) => {
-        // Progress is now handled automatically by the toast component
-        if (event.eventType === 'quiz.progress' && currentJobIdRef.current) {
-            // Toast updates disabled to allow auto-progress
-        }
-    }, []);
 
-    const handleCompleted = useCallback(
-        async (event: AppEvent) => {
-            if (
-                event.eventType === 'quiz.completed' &&
-                currentJobIdRef.current &&
-                toastIdRef.current
-            ) {
-                const completedEvent = event as any;
+  // Poll for job status with exponential backoff
+  useJobPolling({
+    jobId: currentJobId,
+    endpoint: 'quiz',
+    onCompleted: async (result) => {
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
 
-                await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-
-                if (initialValues?.contentId) {
-                    await queryClient.invalidateQueries({
-                        queryKey: ['content', initialValues.contentId],
-                    });
-                }
-
-                toast.custom(
-                    (t) => (
-                        <ProgressToast
-                            t={t}
-                            title="Quiz Ready!"
-                            message="Opening your quiz..."
-                            progress={100}
-                            status="success"
-                        />
-                    ),
-                    { id: toastIdRef.current, duration: 2000 }
-                );
-
-                setTimeout(() => {
-                    navigate(`/quiz/${completedEvent.quizId}`, {
-                        state: {
-                            breadcrumb: initialValues?.breadcrumb
-                                ? [
-                                    ...initialValues.breadcrumb,
-                                    { label: 'Quiz', path: `/quiz/${completedEvent.quizId}` },
-                                ]
-                                : undefined,
-                        },
-                    });
-                }, 500);
-
-                setGenerating(false);
-                currentJobIdRef.current = null;
-                toastIdRef.current = null;
-            }
-        },
-        [queryClient, initialValues, navigate]
-    );
-    const handleFailed = useCallback((event: AppEvent) => {
-    if (
-      event.eventType === 'quiz.failed' &&
-      currentJobIdRef.current &&
-      toastIdRef.current
-    ) {
-      const failedEvent = event as any;
-      if (failedEvent.jobId === currentJobIdRef.current) {
-        toast.custom(
-          (t) => (
-            <ProgressToast
-              t={t}
-              title="Generation Failed"
-              message={failedEvent.error}
-              progress={0}
-              status="error"
-            />
-          ),
-          { id: toastIdRef.current, duration: 5000 }
-        );
-
-        setGenerating(false);
-        currentJobIdRef.current = null;
-        toastIdRef.current = null;
+      if (initialValues?.contentId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['content', initialValues.contentId],
+        });
       }
-    }
-  }, []);
 
-  useSSEEvent('quiz.completed', handleCompleted);
-  useSSEEvent('quiz.failed', handleFailed);
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Quiz Ready!"
+            message="Opening your quiz..."
+            progress={100}
+            status="success"
+          />
+        ),
+        { id: toastIdRef.current, duration: 2000 }
+      );
+
+      setTimeout(() => {
+        navigate(`/quiz/${result.id}`, {
+          state: {
+            breadcrumb: initialValues?.breadcrumb
+              ? [
+                  ...initialValues.breadcrumb,
+                  { label: 'Quiz', path: `/quiz/${result.id}` },
+                ]
+              : undefined,
+          },
+        });
+      }, 500);
+
+      setGenerating(false);
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
+    },
+    onFailed: (error) => {
+      toast.custom(
+        (t) => (
+          <ProgressToast
+            t={t}
+            title="Generation Failed"
+            message={error}
+            progress={0}
+            status="error"
+          />
+        ),
+        { id: toastIdRef.current, duration: 5000 }
+      );
+
+      setGenerating(false);
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
+    },
+    enabled: !!currentJobId,
+  });
 
   const handleGenerate = async (
     request: QuizGenerateRequest,
@@ -198,14 +180,16 @@ export const QuizPage = () => {
 
     try {
       const { jobId } = await quizService.generate(request, files);
-      currentJobIdRef.current = jobId;
-    } catch (_error) {
+      setCurrentJobId(jobId);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong';
+      
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Generate Quiz"
-            message="Something went wrong"
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -213,8 +197,8 @@ export const QuizPage = () => {
         { id: toastId, duration: 5000 }
       );
       setGenerating(false);
-      currentJobIdRef.current = null;
-      toastIdRef.current = null;
+      setCurrentJobId(undefined);
+      toastIdRef.current = undefined;
     }
   };
 
@@ -363,7 +347,10 @@ export const QuizPage = () => {
       {showGenerator && (
         <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
           <button
-            onClick={() => setShowGenerator(false)}
+            onClick={() => {
+              setShowGenerator(false);
+              setInitialValues(undefined);
+            }}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
           >
             <X className="w-5 h-5" />
