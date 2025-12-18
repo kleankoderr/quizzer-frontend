@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { User } from '../types';
 import { authService } from '../services/auth.service';
 
@@ -55,6 +56,8 @@ initializeAuth();
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const queryClient = useQueryClient();
+  
   const state = useSyncExternalStore(
     authStore.subscribe,
     authStore.getSnapshot,
@@ -87,9 +90,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await authService.logout();
     } catch (_error) {
     } finally {
+      // Clear all React Query cache to prevent stale data
+      queryClient.clear();
       authStore.setState({ user: null });
     }
-  }, []);
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({

@@ -50,7 +50,9 @@ export const userService = {
   },
 
   getQuotaStatus: async (): Promise<QuotaStatus> => {
-    const response = await apiClient.get<QuotaStatus>(USER_ENDPOINTS.GET_QUOTA);
+    const response = await apiClient.get<QuotaStatus>(
+      '/subscription/current-plan'
+    );
     return response.data;
   },
 };

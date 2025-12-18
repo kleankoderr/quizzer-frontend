@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { subscriptionService } from '../services/subscription.service';
-import { useSubscription, useCheckout } from '../hooks/useSubscription';
+import { useCurrentPlan, useCheckout } from '../hooks/useSubscription';
 import { PricingCard } from '../components/PricingCard';
 import { AlertCircle } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { Toast as toast } from '../utils/toast';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 export const PricingPage: React.FC = () => {
-  const { data: subscription, isLoading: isSubscriptionLoading } = useSubscription();
+  const { data: currentPlan, isLoading: isCurrentPlanLoading } = useCurrentPlan();
   const { mutate: checkout, isPending: isCheckoutLoading } = useCheckout();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   
@@ -32,7 +32,20 @@ export const PricingPage: React.FC = () => {
     // Usually handled by verify page, but good to have context
   }, [location]);
 
-  const handleSubscribe = (planId: string) => {
+  const handleSubscribe = (planId: string, isFree: boolean) => {
+    // If trying to downgrade to free from premium, show warning toast
+    if (isFree && currentPlan?.isPremium) {
+      toast.warning('Downgrade to Free', {
+        description: 'To downgrade, please cancel your current subscription from the Subscription page. You\'ll be moved to the free tier at the end of your billing period.'
+      });
+      return;
+    }
+
+    // Don't allow clicking on current plan (this shouldn't happen as button is disabled)
+    if (isFree && !currentPlan?.isPremium) {
+      return;
+    }
+
     setSelectedPlanId(planId);
     checkout(planId, {
       onError: (error: any) => {
@@ -45,7 +58,7 @@ export const PricingPage: React.FC = () => {
     });
   };
 
-  if (isSubscriptionLoading || isPlansLoading) {
+  if (isCurrentPlanLoading || isPlansLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24">
         {/* Header Skeleton */}
@@ -122,23 +135,30 @@ export const PricingPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-8">
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight">
+      <div className="text-center max-w-3xl mx-auto mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
           Simple, Transparent Pricing
         </h1>
-        <p className="text-xl text-gray-500 dark:text-gray-400">
+        <p className="text-base text-gray-500 dark:text-gray-400">
           Choose the plan that fits your learning needs. Upgrade or downgrade at any time.
         </p>
       </div>
 
       {/* Plans Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
         {plans
-          ?.sort((a, b) => b.price - a.price) // Sort by price descending (Premium first)
+          ?.sort((a, b) => a.price - b.price) // Sort by price ascending (Free first, Premium on right)
           .map((plan) => {
-            const isCurrentPlan = subscription?.planId === plan.id;
+            const isPlanPremium = plan.price > 0;
+            
+            // Determine if this is the current plan based on price matching
+            // If user is premium (currentPlan.price > 0), match premium plan
+            // If user is free (currentPlan.price === 0), match free plan
+            const isCurrentPlan = currentPlan 
+              ? (currentPlan.price > 0 ? isPlanPremium : !isPlanPremium)
+              : !isPlanPremium; // Default to free if no current plan
           
           return (
             <PricingCard
@@ -147,14 +167,14 @@ export const PricingPage: React.FC = () => {
               isCurrent={isCurrentPlan}
               isLoading={isCheckoutLoading && selectedPlanId === plan.id}
               onSubscribe={handleSubscribe}
-              className={isCurrentPlan ? 'ring-2 ring-primary-500 ring-offset-2 dark:ring-offset-gray-900' : ''}
+              className={`${isPlanPremium ? 'order-first md:order-last' : 'order-last md:order-first'}`}
             />
           );
         })}
       </div>
 
       {/* FAQ or Trust Badges could go here */}
-      <div className="mt-20 text-center">
+      <div className="mt-8 text-center">
         <p className="text-sm text-gray-400 dark:text-gray-500">
           Secure payments processed by Paystack. Cancel anytime.
         </p>

@@ -5,7 +5,7 @@ import type { SubscriptionPlan } from '../types';
 interface PricingCardProps {
   plan: SubscriptionPlan;
   isCurrent?: boolean;
-  onSubscribe?: (planId: string) => void;
+  onSubscribe?: (planId: string, isFree: boolean) => void;
   isLoading?: boolean;
   className?: string;
 }
@@ -22,17 +22,13 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   // Format price
   const formattedPrice = useMemo(() => {
     if (isFree) return 'Free';
-    // Assuming price is in kobo/cents based on typical Paystack integration
-    // But verify based on usage. Usually backend stores smallest currency unit.
-    // If usage showed 200000 for 2000, then it's subunits.
-    // Let's assume passed plan.price is in minor units (kobo).
-    // Price is in kobo (subunits), convert to Naira
+    // Price is already in Naira, no conversion needed
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(plan.price / 100);
+    }).format(plan.price);
   }, [plan.price, isFree]);
 
   const features = useMemo(() => {
@@ -74,14 +70,22 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   return (
     <div
       className={`relative overflow-hidden rounded-2xl flex flex-col h-full transition-all duration-300 ${
-        isCurrent
-          ? 'bg-white dark:bg-gray-800 border-2 border-primary-500 shadow-xl scale-[1.02]'
-          : isFree
+        isFree
           ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg'
           : 'bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-700/50 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-xl hover:-translate-y-1'
       } ${className}`}
     >
-      {/* Popular/Current Badge */}
+      {/* Current Plan Badge - Top Left Corner */}
+      {isCurrent && (
+        <div className="absolute top-0 left-0 z-10">
+          <div className="bg-primary-600 text-white text-xs font-bold px-3 py-1.5 rounded-br-lg shadow-lg flex items-center gap-1.5">
+            <Check className="w-3.5 h-3.5" strokeWidth={3} />
+            Current Plan
+          </div>
+        </div>
+      )}
+      
+      {/* Recommended Badge - Top Right Corner */}
       {!isFree && !isCurrent && (
         <div className="absolute top-0 right-0">
           <div className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
@@ -89,26 +93,17 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           </div>
         </div>
       )}
-      
-      {isCurrent && (
-        <div className="absolute top-0 right-0 left-0 bg-primary-500 h-1"></div>
-      )}
 
-      <div className="p-6 md:p-8 flex-1 flex flex-col">
+      <div className="p-5 md:p-6 flex-1 flex flex-col">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               {plan.name}
             </h3>
-            {isCurrent && (
-               <span className="text-xs font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded-full border border-primary-100 dark:border-primary-800">
-                 Current Plan
-               </span>
-            )}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
+            <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
               {formattedPrice}
             </span>
             {!isFree && (
@@ -117,18 +112,20 @@ export const PricingCard: React.FC<PricingCardProps> = ({
               </span>
             )}
           </div>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2.5em]">
-            {plan.description}
-          </p>
+          {plan.description && (
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2em]">
+              {plan.description}
+            </p>
+          )}
         </div>
 
         {/* Divider */}
-        <div className="h-px w-full bg-gray-100 dark:bg-gray-700 mb-6"></div>
+        <div className="h-px w-full bg-gray-100 dark:bg-gray-700 mb-4"></div>
 
         {/* Features */}
-        <ul className="space-y-4 mb-8 flex-1">
+        <ul className="space-y-2.5 mb-6 flex-1">
           {features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-3">
+            <li key={index} className="flex items-start gap-2.5">
               <div className={`p-1 rounded-full mt-0.5 shrink-0 ${
                 isFree 
                   ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400' 
@@ -159,7 +156,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
             </button>
           ) : (
             <button
-              onClick={() => onSubscribe?.(plan.id)}
+              onClick={() => onSubscribe?.(plan.id, isFree)}
               disabled={isLoading}
               className={`w-full py-3 px-4 rounded-xl font-semibold text-sm shadow-sm transition-all duration-200 flex items-center justify-center gap-2 ${
                 isFree
@@ -173,7 +170,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
                   Processing...
                 </>
               ) : (
-                isFree ? 'Downgrade' : 'Subscribe Now'
+                isFree ? 'Get Started' : 'Subscribe Now'
               )}
             </button>
           )}

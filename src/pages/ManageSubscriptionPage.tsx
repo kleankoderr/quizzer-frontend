@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  CreditCard,
   CheckCircle,
-  AlertCircle,
   Upload,
   FileText,
   Brain,
@@ -11,39 +9,30 @@ import {
   BookOpen,
   Calendar,
   Shield,
-  ChevronRight,
   AlertTriangle,
+  Crown,
+  ArrowRight,
 } from 'lucide-react';
-import { useSubscription, useCancelSubscription } from '../hooks/useSubscription';
-import { useQuota } from '../hooks/useQuota';
+import { useCurrentPlan, useCancelSubscription } from '../hooks/useSubscription';
 import { format } from 'date-fns';
 import { LoadingScreen } from '../components/LoadingScreen';
 
 export const ManageSubscriptionPage = () => {
   const navigate = useNavigate();
-  const { data: subscription, isLoading: subLoading, refetch: refetchSub } = useSubscription();
-  const { data: quota, isLoading: quotaLoading } = useQuota();
+  const { data: currentPlan, isLoading, refetch } = useCurrentPlan();
   const { mutate: cancelSubscription, isPending: isCancelling } = useCancelSubscription();
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-
-  const isLoading = subLoading || quotaLoading;
 
   if (isLoading) {
     return <LoadingScreen message="Loading subscription details..." />;
   }
 
-  const isPremium = quota?.isPremium || false;
-  const planName = subscription?.plan?.name || 'Free Plan';
-  const planPrice = subscription?.plan?.price 
-    ? new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(subscription.plan.price / 100) +
-      ` / ${subscription.plan.interval.toLowerCase() === 'monthly' ? 'Month' : 'Year'}`
-    : 'Free';
+  if (!currentPlan) {
+    return <LoadingScreen message="Loading subscription details..." />;
+  }
+
+  const isPremium = currentPlan.isPremium;
 
   const handleCancelClick = () => {
     setShowCancelDialog(true);
@@ -53,7 +42,7 @@ export const ManageSubscriptionPage = () => {
     cancelSubscription(undefined, {
       onSuccess: () => {
         setShowCancelDialog(false);
-        refetchSub();
+        refetch();
       },
     });
   };
@@ -63,7 +52,7 @@ export const ManageSubscriptionPage = () => {
     const percentage = (used / limit) * 100;
     if (percentage >= 100) return 'bg-red-500';
     if (percentage >= 80) return 'bg-yellow-500';
-    return 'bg-green-500'; // was primary-600, but green is safer for 'good' status
+    return 'bg-primary-600';
   };
 
   const getPercentage = (used: number, limit: number) => {
@@ -73,284 +62,225 @@ export const ManageSubscriptionPage = () => {
   return (
     <div className="space-y-6 pb-8 max-w-7xl mx-auto">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <CreditCard className="w-8 h-8 text-primary-600" />
-            Manage Subscription
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            {isPremium && <Crown className="w-8 h-8 text-amber-500" />}
+            Subscription
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            View your plan details and usage limits
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
+            Manage your plan and monitor your usage limits
           </p>
         </div>
         {!isPremium && (
           <button
             onClick={() => navigate('/pricing')}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center gap-2 group"
           >
+            <Crown className="w-5 h-5" />
             Upgrade to Premium
-            <ChevronRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         )}
-      </header>
+      </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Plan Details */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="card p-6 border-t-4 border-t-primary-600">
-            <div className="flex justify-between items-start mb-4">
+        {/* Current Plan Card */}
+        <div className="lg:col-span-1">
+          <div className={`card p-6 h-full ${isPremium ? 'border-t-4 border-t-amber-500' : 'border-t-4 border-t-gray-300'}`}>
+            <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Current Plan</h2>
-                <p className="text-primary-600 font-medium text-xl mt-1">{planName}</p>
+                <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                  Current Plan
+                </h2>
+                <p className={`font-bold text-2xl ${isPremium ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>
+                  {isPremium ? 'Premium' : 'Free Plan'}
+                </p>
               </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                isPremium ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+              <div className={`px-3 py-1.5 rounded-full text-xs font-bold ${
+                isPremium 
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' 
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
               }`}>
                 {isPremium ? 'PREMIUM' : 'FREE'}
               </div>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                  <CreditCard className="w-4 h-4" />
-                  <span>Price</span>
-                </div>
-                <span className="font-semibold text-gray-900 dark:text-white">{planPrice}</span>
-              </div>
-
-              {subscription && (
+            <div className="space-y-4">
+              {isPremium && (
                 <>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <Calendar className="w-4 h-4" />
-                      <span>{subscription.cancelAtPeriodEnd ? 'Expires On' : 'Renews On'}</span>
+                      <span className="text-sm">{currentPlan.cancelAtPeriodEnd ? 'Expires On' : 'Renews On'}</span>
                     </div>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy')}
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}
                     </span>
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <Shield className="w-4 h-4" />
-                      <span>Status</span>
+                      <span className="text-sm">Status</span>
                     </div>
-                    <span className={`font-semibold ${
-                      subscription.status === 'ACTIVE' 
-                        ? subscription.cancelAtPeriodEnd 
+                    <span className={`font-semibold text-sm ${
+                      currentPlan.status === 'ACTIVE' 
+                        ? currentPlan.cancelAtPeriodEnd 
                           ? 'text-yellow-600' 
                           : 'text-green-600'
                         : 'text-red-600'
                     }`}>
-                      {subscription.status === 'ACTIVE' && subscription.cancelAtPeriodEnd 
+                      {currentPlan.status === 'ACTIVE' && currentPlan.cancelAtPeriodEnd 
                         ? 'Cancelling' 
-                        : subscription.status}
+                        : currentPlan.status}
                     </span>
                   </div>
                 </>
               )}
-
-              {/* Status Message for Free Users */}
-              {!isPremium && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex gap-3 text-sm text-blue-700 dark:text-blue-300 mt-4">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <p>Upgrade to Premium to unlock unlimited quizzes, flashcards, and advanced AI features.</p>
-                </div>
-              )}
             </div>
 
             {/* Actions */}
-            {isPremium && subscription?.status === 'ACTIVE' && !subscription.cancelAtPeriodEnd && (
-              <div className="pt-6 mt-2 border-t border-gray-100 dark:border-gray-800">
+            {isPremium && currentPlan.status === 'ACTIVE' && !currentPlan.cancelAtPeriodEnd && (
+              <div className="pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
                 <button 
                   onClick={handleCancelClick}
-                  className="w-full py-2 px-4 border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
+                  className="w-full py-2.5 px-4 border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
                 >
                   Cancel Subscription
                 </button>
                 <p className="text-xs text-center text-gray-400 mt-2">
-                  You'll keep access until the end of the billing period.
+                  You'll keep access until {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd')}
                 </p>
               </div>
             )}
             
-            {isPremium && subscription?.cancelAtPeriodEnd && (
-              <div className="pt-6 mt-2 border-t border-gray-100 dark:border-gray-800">
-                 <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-800 dark:text-yellow-200">
-                    Your subscription is set to cancel on {format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy')}.
+            {isPremium && currentPlan.cancelAtPeriodEnd && (
+              <div className="pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
+                 <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>Subscription ends on {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}</span>
                  </div>
-                 {/* Potential "Resume" button could go here if supported */}
+              </div>
+            )}
+
+            {!isPremium && (
+              <div className="pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <h4 className="font-bold text-blue-900 dark:text-blue-300 text-sm mb-3 flex items-center gap-2">
+                    <Zap className="w-4 h-4" />
+                    Why Upgrade?
+                  </h4>
+                  <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-400">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      15x more AI generations daily
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      1GB storage (20x more)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      Priority support
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: Quota & Usage */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="card p-6">
+        {/* Usage & Limits Card */}
+        <div className="lg:col-span-2">
+          <div className="card p-6 h-full">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Zap className="w-5 h-5 text-yellow-500" />
               Usage & Limits
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Feature Usage */}
+              {/* AI Features */}
               <div className="space-y-6">
-                <h3 className="font-semibold text-gray-700 dark:text-gray-300 border-b pb-2 mb-4">AI Features</h3>
+                <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide border-b pb-2 mb-4">
+                  AI Features
+                </h3>
                 
                 {/* Quiz Usage */}
-                <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Brain className="w-4 h-4" /> Quizzes Generated
-                      </span>
-                      <span className="font-medium">
-                        {quota?.quiz.used} / {quota?.quiz.limit === -1 ? '∞' : quota?.quiz.limit}
-                      </span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ${quota?.quiz.limit === -1 ? 'bg-primary-600' : getUsageColor(quota?.quiz.used || 0, quota?.quiz.limit || 1)}`}
-                        style={{ width: quota?.quiz.limit === -1 ? '100%' : `${getPercentage(quota?.quiz.used || 0, quota?.quiz.limit || 1)}%` }}
-                      ></div>
-                   </div>
-                </div>
+                <UsageBar
+                  icon={Brain}
+                  label="Quizzes Generated"
+                  used={currentPlan.quiz.used}
+                  limit={currentPlan.quiz.limit}
+                  color={getUsageColor(currentPlan.quiz.used, currentPlan.quiz.limit)}
+                  percentage={getPercentage(currentPlan.quiz.used, currentPlan.quiz.limit)}
+                />
 
                 {/* Flashcard Usage */}
-                <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <CopyIcon className="w-4 h-4" /> Flashcards
-                      </span>
-                      <span className="font-medium">
-                        {quota?.flashcard.used} / {quota?.flashcard.limit === -1 ? '∞' : quota?.flashcard.limit}
-                      </span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                       <div 
-                        className={`h-full rounded-full transition-all duration-500 ${quota?.flashcard.limit === -1 ? 'bg-primary-600' : getUsageColor(quota?.flashcard.used || 0, quota?.flashcard.limit || 1)}`}
-                        style={{ width: quota?.flashcard.limit === -1 ? '100%' : `${getPercentage(quota?.flashcard.used || 0, quota?.flashcard.limit || 1)}%` }}
-                      ></div>
-                   </div>
-                </div>
+                <UsageBar
+                  icon={Layers}
+                  label="Flashcard Sets"
+                  used={currentPlan.flashcard.used}
+                  limit={currentPlan.flashcard.limit}
+                  color={getUsageColor(currentPlan.flashcard.used, currentPlan.flashcard.limit)}
+                  percentage={getPercentage(currentPlan.flashcard.used, currentPlan.flashcard.limit)}
+                />
 
                 {/* Explanations Usage */}
-                <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Brain className="w-4 h-4" /> AI Explanations
-                      </span>
-                      <span className="font-medium">
-                        {quota?.explanation.used} / {quota?.explanation.limit === -1 ? '∞' : quota?.explanation.limit}
-                      </span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                       <div 
-                        className={`h-full rounded-full transition-all duration-500 ${quota?.explanation.limit === -1 ? 'bg-primary-600' : getUsageColor(quota?.explanation.used || 0, quota?.explanation.limit || 1)}`}
-                        style={{ width: quota?.explanation.limit === -1 ? '100%' : `${getPercentage(quota?.explanation.used || 0, quota?.explanation.limit || 1)}%` }}
-                      ></div>
-                   </div>
-                </div>
+                <UsageBar
+                  icon={Brain}
+                  label="AI Explanations"
+                  used={currentPlan.explanation.used}
+                  limit={currentPlan.explanation.limit}
+                  color={getUsageColor(currentPlan.explanation.used, currentPlan.explanation.limit)}
+                  percentage={getPercentage(currentPlan.explanation.used, currentPlan.explanation.limit)}
+                />
                  
-                 {/* Learning Guides Usage */}
-                <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <BookOpen className="w-4 h-4" /> Learning Guides
-                      </span>
-                      <span className="font-medium">
-                         {quota?.learningGuide.used} / {quota?.learningGuide.limit === -1 ? '∞' : quota?.learningGuide.limit}
-                      </span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                       <div 
-                        className={`h-full rounded-full transition-all duration-500 ${quota?.learningGuide.limit === -1 ? 'bg-primary-600' : getUsageColor(quota?.learningGuide.used || 0, quota?.learningGuide.limit || 1)}`}
-                        style={{ width: quota?.learningGuide.limit === -1 ? '100%' : `${getPercentage(quota?.learningGuide.used || 0, quota?.learningGuide.limit || 1)}%` }}
-                      ></div>
-                   </div>
-                </div>
+                {/* Learning Guides Usage */}
+                <UsageBar
+                  icon={BookOpen}
+                  label="Learning Guides"
+                  used={currentPlan.learningGuide.used}
+                  limit={currentPlan.learningGuide.limit}
+                  color={getUsageColor(currentPlan.learningGuide.used, currentPlan.learningGuide.limit)}
+                  percentage={getPercentage(currentPlan.learningGuide.used, currentPlan.learningGuide.limit)}
+                />
               </div>
 
-              {/* Storage Usage */}
+              {/* Storage & Files */}
               <div className="space-y-6">
-                <h3 className="font-semibold text-gray-700 dark:text-gray-300 border-b pb-2 mb-4">Storage & Files</h3>
+                <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide border-b pb-2 mb-4">
+                  Storage & Files
+                </h3>
                 
-                 {/* File Uploads (Count) */}
-                 <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <FileText className="w-4 h-4" /> Files Uploaded
-                      </span>
-                      {/* Note: Quota type might need a fileUpload property based on recent changes, checking useQuota hook previously... 
-                          Wait, index.ts showed QuotaPlan features, but QuotaStatus usually mirrors them. 
-                          I will assume it is available or I might need to adjust.
-                          Actually index.ts QuotaStatus had quiz, flashcard, learningGuide, explanation.
-                          It DID NOT typically show fileUpload in the QuotaStatus interface I saw in Step 14. 
-                          Wait, let me double check Step 14 output.
-                          Lines 433-440:
-                          export interface QuotaStatus {
-                            isPremium: boolean;
-                            resetAt: string;
-                            quiz: QuotaFeatureStatus;
-                            flashcard: QuotaFeatureStatus;
-                            learningGuide: QuotaFeatureStatus;
-                            explanation: QuotaFeatureStatus;
-                          }
-                          It SEEMS fileUpload is missing from QuotaStatus interface in the file I read!
-                          However, SubscriptionPlan (lines 454-460) has fileUploadLimit and fileStorageLimitMB.
-                          This suggests the QuotaStatus MIGHT need updating or I should just hide it if not available.
-                          I will comments out file limits if they are undefined to avoid crashes, or check if I need to update types.
-                          Since I am only implementing the frontend page now, I will safely access them.
-                      */}
-                      {/* Temporary Safe Access if extended in backend but not TS types yet, or just hide */}
-                       <span className="font-medium">
-                        {quota?.fileUpload?.used || 0} / {quota?.fileUpload?.limit === -1 ? '∞' : quota?.fileUpload?.limit || 5}
-                      </span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                       <div 
-                        className="h-full bg-blue-500 rounded-full"
-                        style={{ width: `${getPercentage(quota?.fileUpload?.used || 0, quota?.fileUpload?.limit || 5)}%` }}
-                      ></div>
-                   </div>
-                </div>
+                {/* File Uploads (Count) */}
+                <UsageBar
+                  icon={FileText}
+                  label="Files Uploaded"
+                  used={currentPlan.fileUpload.dailyUsed}
+                  limit={currentPlan.fileUpload.dailyLimit}
+                  color="bg-blue-500"
+                  percentage={getPercentage(currentPlan.fileUpload.dailyUsed, currentPlan.fileUpload.dailyLimit)}
+                />
 
                 {/* Storage Space */}
-                 <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Upload className="w-4 h-4" /> Storage Used
-                      </span>
-                       <span className="font-medium">
-                        {(quota?.fileStorage?.used || 0).toFixed(1)} MB / {quota?.fileStorage?.limit === -1 ? '∞' : (quota?.fileStorage?.limit ? quota.fileStorage.limit + ' MB' : '50 MB')}
-                      </span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                       <div 
-                        className="h-full bg-purple-500 rounded-full"
-                        style={{ width: `${getPercentage(quota?.fileStorage?.used || 0, quota?.fileStorage?.limit || 50)}%` }}
-                      ></div>
-                   </div>
-                </div>
-
-                 {!isPremium && (
-                   <div className="mt-8 p-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800 rounded-xl">
-                      <h4 className="font-bold text-indigo-900 dark:text-indigo-300 text-sm mb-2">Why Upgrade?</h4>
-                      <ul className="space-y-2 text-sm text-indigo-800 dark:text-indigo-400">
-                        <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Unlimited AI Quizzes</li>
-                        <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> 1GB Storage Space</li>
-                        <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Priority Support</li>
-                      </ul>
-                   </div>
-                 )}
+                <UsageBar
+                  icon={Upload}
+                  label="Storage Used"
+                  used={currentPlan.fileStorage.used}
+                  limit={currentPlan.fileStorage.limit}
+                  color="bg-purple-500"
+                  percentage={getPercentage(currentPlan.fileStorage.used, currentPlan.fileStorage.limit)}
+                  unit="MB"
+                />
               </div>
             </div>
             
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-              <p className="text-xs text-gray-500">
-                Quotas reset on {format(new Date(quota?.resetAt || new Date()), 'MMM dd, yyyy')}.
+              <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Daily quotas reset on {format(new Date(currentPlan.resetAt), 'MMM dd, yyyy')}
               </p>
             </div>
           </div>
@@ -371,20 +301,20 @@ export const ManageSubscriptionPage = () => {
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
               Are you sure you want to cancel your Premium subscription? 
               <br /><br />
-              You will lose access to premium features at the end of your current billing period ({subscription?.currentPeriodEnd ? format(new Date(subscription.currentPeriodEnd), 'MMM dd, yyyy') : 'soon'}).
+              You will lose access to premium features at the end of your current billing period ({format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}).
             </p>
 
             <div className="grid grid-cols-2 gap-3 mt-6">
               <button
                 onClick={() => setShowCancelDialog(false)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors"
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors"
               >
                 Keep Plan
               </button>
               <button
                 onClick={confirmCancel}
                 disabled={isCancelling}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isCancelling ? 'Cancelling...' : 'Yes, Cancel'}
               </button>
@@ -395,8 +325,40 @@ export const ManageSubscriptionPage = () => {
     </div>
   );
 };
-// Icon component helper
-const CopyIcon = (props: any) => (
+
+// Reusable Usage Bar Component
+interface UsageBarProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  used: number;
+  limit: number;
+  color: string;
+  percentage: number;
+  unit?: string;
+}
+
+const UsageBar: React.FC<UsageBarProps> = ({ icon: Icon, label, used, limit, color, percentage, unit = '' }) => (
+  <div className="space-y-2">
+    <div className="flex justify-between text-sm">
+      <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+        <Icon className="w-4 h-4" />
+        {label}
+      </span>
+      <span className="font-medium text-gray-900 dark:text-white">
+        {used}{unit} / {limit === -1 ? '∞' : `${limit}${unit}`}
+      </span>
+    </div>
+    <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div 
+        className={`h-full rounded-full transition-all duration-500 ${limit === -1 ? 'bg-primary-600' : color}`}
+        style={{ width: limit === -1 ? '100%' : `${percentage}%` }}
+      ></div>
+    </div>
+  </div>
+);
+
+// Missing Icon Component
+const Layers = (props: any) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"

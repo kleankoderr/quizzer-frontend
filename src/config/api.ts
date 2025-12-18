@@ -76,6 +76,7 @@ export const SUBSCRIPTION_ENDPOINTS = {
   VERIFY_PAYMENT: `${API_BASE_URL}/subscription/verify`,
   GET_MY_SUBSCRIPTION: `${API_BASE_URL}/subscription/me`,
   CANCEL_SUBSCRIPTION: `${API_BASE_URL}/subscription/cancel`,
+  GET_CURRENT_PLAN: `${API_BASE_URL}/subscription/current-plan`,
 };
 
 // User endpoints

@@ -20,9 +20,11 @@ import { ProgressToast } from '../components/ProgressToast';
 import { useQuizzes } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { useJobPolling } from '../hooks/useJobPolling';
+import { useInvalidateQuota } from '../hooks/useQuota';
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
+  const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
@@ -97,6 +99,7 @@ export const QuizPage = () => {
     endpoint: 'quiz',
     onCompleted: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await invalidateQuota();
 
       if (initialValues?.contentId) {
         await queryClient.invalidateQueries({

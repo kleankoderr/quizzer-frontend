@@ -20,7 +20,7 @@ export const LoadingScreen = ({
         <img
           src="/quiz-emoji.svg"
           alt="Quizzer Logo"
-          className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-6 shadow-xl rounded-2xl"
+          className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-6 shadow-xl rounded-2xl"
         />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {message}

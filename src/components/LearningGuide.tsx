@@ -18,6 +18,7 @@ import { applyHighlights, type Highlight } from '../utils/contentUtils';
 import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 import { LearningGuideSection } from './LearningGuideSection';
 import { SectionNavigator } from './SectionNavigator';
+import { useInvalidateQuota } from '../hooks/useQuota';
 
 interface LearningGuideProps {
   guide: NonNullable<Content['learningGuide']>;
@@ -47,6 +48,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   onGenerateFlashcards,
   onSectionUpdate,
 }) => {
+  const invalidateQuota = useInvalidateQuota();
   // Create refs for each section
   const sectionRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
   
@@ -359,6 +361,9 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
       // Persist to backend
       const updatedGuide = structuredClone(guide);
+      // Invalidate quota
+      await invalidateQuota();
+
       if (updatedGuide.sections[sectionIndex]) {
         if (type === 'explain') {
           updatedGuide.sections[sectionIndex].generatedExplanation = result;

@@ -5,6 +5,7 @@ import type {
   Subscription,
   CheckoutResponse,
   VerifyPaymentResponse,
+  CurrentPlan,
 } from '../types';
 
 /**
@@ -29,9 +30,15 @@ export const subscriptionService = {
    * @returns Promise<CheckoutResponse> Contains authorization URL and payment reference
    */
   checkout: async (planId: string): Promise<CheckoutResponse> => {
+    // Construct the callback URL for Paystack to redirect to after payment
+    const callbackUrl = `${window.location.origin}/subscription/verify`;
+
     const response = await apiClient.post<CheckoutResponse>(
       SUBSCRIPTION_ENDPOINTS.CHECKOUT,
-      { planId }
+      {
+        planId,
+        callbackUrl,
+      }
     );
     return response.data;
   },
@@ -66,6 +73,18 @@ export const subscriptionService = {
       }
       throw error;
     }
+  },
+
+  /**
+   * Get current user's plan with all quota information
+   * Creates a free tier plan if user has no subscription
+   * @returns Promise<CurrentPlan> Current plan details with quota usage
+   */
+  getCurrentPlan: async (): Promise<CurrentPlan> => {
+    const response = await apiClient.get<CurrentPlan>(
+      '/subscription/current-plan'
+    );
+    return response.data;
   },
 
   /**

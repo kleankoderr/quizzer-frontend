@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '../services/subscription.service';
 import { LoadingScreen } from '../components/LoadingScreen';
-import toast from 'react-hot-toast';
+import { Toast } from '../utils/toast';
 import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { SUBSCRIPTION_QUERY_KEY, CURRENT_PLAN_QUERY_KEY } from '../hooks/useSubscription';
+import { QUOTA_QUERY_KEY } from '../hooks/useQuota';
 
 export const VerifyPaymentPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const reference = searchParams.get('reference');
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -27,13 +31,22 @@ export const VerifyPaymentPage: React.FC = () => {
         await subscriptionService.verifyPayment(reference);
         
         if (mounted) {
+          // Invalidate all related caches to update UI immediately
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: QUOTA_QUERY_KEY }),
+          ]);
+
           setStatus('success');
           setMessage('Payment verified successfully! Redirecting...');
-          toast.success('Subscription activated successfully!');
+          Toast.success('Subscription activated successfully!', {
+            description: 'Your premium features are now active!'
+          });
           
           // Redirect after a short delay to let user see success message
           setTimeout(() => {
-            navigate('/dashboard'); // or /start-planning if onboarding flow
+            navigate('/dashboard');
           }, 2000);
         }
       } catch (error: any) {
@@ -44,7 +57,7 @@ export const VerifyPaymentPage: React.FC = () => {
             error.response?.data?.message || 
             'Failed to verify payment. Please contact support if you were charged.'
           );
-          toast.error('Payment verification failed');
+          Toast.error('Payment verification failed');
         }
       }
     };
@@ -54,7 +67,7 @@ export const VerifyPaymentPage: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [reference, navigate]);
+  }, [reference, navigate, queryClient]);
 
   if (status === 'loading') {
     return (

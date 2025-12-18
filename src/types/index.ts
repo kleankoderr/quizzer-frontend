@@ -433,12 +433,19 @@ export interface QuotaFeatureStatus {
 export interface QuotaStatus {
   isPremium: boolean;
   resetAt: string;
+  monthlyResetAt?: string;
+  planName?: string;
+  price?: number;
+  interval?: string;
+  status?: SubscriptionStatus;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd?: boolean;
   quiz: QuotaFeatureStatus;
   flashcard: QuotaFeatureStatus;
   learningGuide: QuotaFeatureStatus;
   explanation: QuotaFeatureStatus;
-  fileUpload?: QuotaFeatureStatus;
-  fileStorage?: QuotaFeatureStatus;
+  fileUpload?: FileUploadQuota;
+  fileStorage?: FileStorageQuota;
 }
 
 // Subscription types
@@ -499,4 +506,37 @@ export interface VerifyPaymentResponse {
   success: boolean;
   message: string;
   subscription?: Subscription;
+}
+
+export interface FileUploadQuota {
+  dailyUsed: number;
+  dailyLimit: number;
+  dailyRemaining: number;
+  monthlyUsed: number;
+  monthlyLimit: number;
+  monthlyRemaining: number;
+}
+
+export interface FileStorageQuota {
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface CurrentPlan {
+  planName: string;
+  price: number;
+  interval: string;
+  status: SubscriptionStatus;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  isPremium: boolean;
+  quiz: QuotaFeatureStatus;
+  flashcard: QuotaFeatureStatus;
+  explanation: QuotaFeatureStatus;
+  learningGuide: QuotaFeatureStatus;
+  fileUpload: FileUploadQuota;
+  fileStorage: FileStorageQuota;
+  resetAt: string;
+  monthlyResetAt: string;
 }

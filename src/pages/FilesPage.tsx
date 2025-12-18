@@ -32,6 +32,7 @@ import { DeleteModal } from '../components/DeleteModal';
 import { FileUpload } from '../components/FileUpload';
 import { useUserDocuments } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
+import { useInvalidateQuota } from '../hooks/useQuota';
 
 type SortField = 'name' | 'date' | 'size';
 type SortOrder = 'asc' | 'desc';
@@ -41,6 +42,7 @@ export const FilesPage = () => {
   const navigate = useNavigate();
   const { data: documents = [], isLoading: loading } = useUserDocuments();
   const queryClient = useQueryClient();
+  const invalidateQuota = useInvalidateQuota();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -136,6 +138,7 @@ export const FilesPage = () => {
 
       // Invalidate queries instead of local state update
       await queryClient.invalidateQueries({ queryKey: ['userDocuments'] });
+      await invalidateQuota();
 
       setDeleteModalOpen(false);
       setSelectedDocument(null);
@@ -175,6 +178,7 @@ export const FilesPage = () => {
       });
       // Invalidate queries to refresh list
       await queryClient.invalidateQueries({ queryKey: ['userDocuments'] });
+      await invalidateQuota();
 
       setUploadModalOpen(false);
       setUploadFiles([]);

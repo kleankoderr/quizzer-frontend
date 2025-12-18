@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { userService } from '../services/user.service.ts';
 import type { QuotaStatus } from '../types';
 
@@ -18,4 +18,16 @@ export const useQuota = () => {
     staleTime: 2 * 60 * 1000, // 2 minutes (shorter than typical because quota changes frequently)
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
+};
+
+/**
+ * Hook to invalidate quota cache
+ * Useful after actions that consume quota (generating content, uploading files)
+ */
+export const useInvalidateQuota = () => {
+  const queryClient = useQueryClient();
+
+  return () => {
+    return queryClient.invalidateQueries({ queryKey: QUOTA_QUERY_KEY });
+  };
 };

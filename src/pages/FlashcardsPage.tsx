@@ -20,9 +20,11 @@ import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useJobPolling } from '../hooks/useJobPolling';
+import { useInvalidateQuota } from '../hooks/useQuota';
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
+  const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
@@ -84,6 +86,7 @@ export const FlashcardsPage = () => {
     endpoint: 'flashcards',
     onCompleted: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      await invalidateQuota();
 
       if (initialValues?.contentId) {
         await queryClient.invalidateQueries({
