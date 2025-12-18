@@ -72,8 +72,8 @@ export const FileSelector = ({
       loadingRef.current = true;
       setLoading(true);
       const docs = await userDocumentService.getUserDocuments();
-      setDocuments(docs);
-      setFilteredDocuments(docs);
+      setDocuments(docs.data);
+      setFilteredDocuments(docs.data);
     } catch (_error) {
     } finally {
       setLoading(false);
