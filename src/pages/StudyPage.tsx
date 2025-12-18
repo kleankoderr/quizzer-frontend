@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
+import { sanitizeErrorMessage } from '../utils/errorMessages';
 import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
@@ -259,7 +260,7 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong';
+      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
@@ -310,7 +311,7 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to process content';
+      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
@@ -396,7 +397,7 @@ export const StudyPage = () => {
 
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to process files';
+      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
