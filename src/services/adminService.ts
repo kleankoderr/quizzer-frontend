@@ -17,6 +17,17 @@ export interface SystemStats {
     totalAttempts: number;
     attemptsLast7Days: number;
   };
+  subscriptions?: {
+    total: number;
+    active: number;
+    canceled: number;
+    mrr: number;
+  };
+  quotas?: {
+    totalStorageUsedGB: number;
+    premiumUsers: number;
+    freeUsers: number;
+  };
 }
 
 export interface User {
@@ -29,6 +40,13 @@ export interface User {
   schoolName?: string;
   grade?: string;
   createdAt: string;
+  subscription?: {
+    status: string;
+    currentPeriodEnd: Date;
+    plan: {
+      name: string;
+    };
+  };
   _count?: {
     quizzes: number;
     flashcardSets: number;
@@ -40,8 +58,66 @@ export interface UserFilter {
   search?: string;
   role?: string;
   isActive?: boolean;
+  isPremium?: boolean;
   page?: number;
   limit?: number;
+}
+
+export interface SubscriptionStats {
+  // User breakdown
+  totalUsers: number;
+  premiumUsers: number;
+  freeUsers: number;
+  premiumPercentage: number;
+
+  // Subscription counts
+  total: number;
+  active: number;
+  canceled: number;
+  newLast30Days: number;
+
+  // Revenue metrics
+  mrr: number;
+  totalRevenue: number;
+  revenueByPlan: Array<{
+    planName: string;
+    revenue: number;
+    count: number;
+  }>;
+
+  // Performance metrics
+  growthRate: number;
+  churnRate: number;
+
+  // Chart data
+  growthData: Array<{
+    date: string;
+    count: number;
+  }>;
+}
+
+export interface QuotaStats {
+  totalQuizzesGenerated: number;
+  totalFlashcardsGenerated: number;
+  totalLearningGuidesGenerated: number;
+  totalExplanationsGenerated: number;
+  totalFileUploads: number;
+  totalStorageUsedMB: number;
+  totalStorageUsedGB: number;
+  premiumUsers: number;
+  freeUsers: number;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  interval: string;
+  quotas: Record<string, any>;
+  isActive: boolean;
+  subscriberCount?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const adminService = {
@@ -193,6 +269,51 @@ export const adminService = {
 
   generateHotChallenges: async () => {
     const response = await api.post('/admin/challenges/generate/hot');
+    return response.data;
+  },
+
+  // Subscription Management Methods
+
+  getSubscriptionStats: async (): Promise<SubscriptionStats> => {
+    const response = await api.get('/admin/subscription-stats');
+    return response.data;
+  },
+
+  getQuotaStats: async (): Promise<QuotaStats> => {
+    const response = await api.get('/admin/quota-stats');
+    return response.data;
+  },
+
+  getAllSubscriptions: async (filter?: any) => {
+    const response = await api.get('/admin/subscriptions', { params: filter });
+    return response.data;
+  },
+
+  getSubscriptionPlans: async (): Promise<SubscriptionPlan[]> => {
+    const response = await api.get('/admin/subscription-plans');
+    return response.data;
+  },
+
+  createSubscriptionPlan: async (data: any): Promise<SubscriptionPlan> => {
+    const response = await api.post('/admin/subscription-plans', data);
+    return response.data;
+  },
+
+  updateSubscriptionPlan: async (
+    id: string,
+    data: any
+  ): Promise<SubscriptionPlan> => {
+    const response = await api.patch(`/admin/subscription-plans/${id}`, data);
+    return response.data;
+  },
+
+  deleteSubscriptionPlan: async (id: string) => {
+    const response = await api.delete(`/admin/subscription-plans/${id}`);
+    return response.data;
+  },
+
+  getUserQuota: async (userId: string) => {
+    const response = await api.get(`/admin/users/${userId}/quota`);
     return response.data;
   },
 };

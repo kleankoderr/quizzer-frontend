@@ -160,8 +160,13 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Keyboard shortuct Cmd+K / Ctrl+K
+  // Keyboard shortcut Cmd+K / Ctrl+K (only for non-admin users)
   useEffect(() => {
+    // Don't enable search shortcut for admins
+    if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') {
+      return;
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -171,7 +176,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
 
     globalThis.addEventListener('keydown', handleKeyDown);
     return () => globalThis.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [user?.role]);
 
   return (
     <>
@@ -185,40 +190,48 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Search Trigger - Desktop */}
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className="hidden md:flex items-center w-full max-w-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-500 hover:border-gray-300 dark:hover:border-gray-600 transition-colors group"
-          >
-            <Search className="w-4 h-4 mr-2 text-gray-400 group-hover:text-primary-500 transition-colors flex-shrink-0" />
-            <span className="flex-1 text-left truncate">
-              Search topics, quizzes, flashcards...
-            </span>
-            <div className="hidden lg:flex items-center gap-1 text-xs text-gray-400 bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600 flex-shrink-0">
-              <span className="text-xs">⌘</span>
-              <span>K</span>
-            </div>
-          </button>
+          {/* Search Trigger - Desktop (non-admin only) */}
+          {user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN' && (
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="hidden md:flex items-center w-full max-w-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-500 hover:border-gray-300 dark:hover:border-gray-600 transition-colors group"
+            >
+              <Search className="w-4 h-4 mr-2 text-gray-400 group-hover:text-primary-500 transition-colors flex-shrink-0" />
+              <span className="flex-1 text-left truncate">
+                Search topics, quizzes, flashcards...
+              </span>
+              <div className="hidden lg:flex items-center gap-1 text-xs text-gray-400 bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600 flex-shrink-0">
+                <span className="text-xs">⌘</span>
+                <span>K</span>
+              </div>
+            </button>
+          )}
 
-          {/* Mobile Search Icon */}
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-200 flex-shrink-0"
-            aria-label="Search"
-          >
-            <Search className="w-5 h-5" />
-          </button>
+          {/* Mobile Search Icon (non-admin only) */}
+          {user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN' && (
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-200 flex-shrink-0"
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
-          {/* Pricing Link for Non-Premium */}
+          {/* Pricing Link for Non-Premium (non-admin only) */}
           {quotaLoading ? (
-            <div className="hidden sm:block w-20 lg:w-24">
-              <Skeleton height={36} borderRadius={8} />
-            </div>
+            !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') ? (
+              <div className="hidden sm:block w-20 lg:w-24">
+                <Skeleton height={36} borderRadius={8} />
+              </div>
+            ) : null
           ) : (
             quota &&
-            !quota.isPremium && (
+            !quota.isPremium &&
+            user?.role !== 'ADMIN' &&
+            user?.role !== 'SUPER_ADMIN' && (
               <Link
                 to="/pricing"
                 className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 lg:px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all group flex-shrink-0"
@@ -229,13 +242,17 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
             )
           )}
 
-          {/* Quota Display */}
+          {/* Quota Display (non-admin only) */}
           {quotaLoading ? (
-            <div className="w-20 sm:w-28">
-              <Skeleton height={36} borderRadius={8} />
-            </div>
+            !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') ? (
+              <div className="w-20 sm:w-28">
+                <Skeleton height={36} borderRadius={8} />
+              </div>
+            ) : null
           ) : (
-            quota && (
+            quota &&
+            user?.role !== 'ADMIN' &&
+            user?.role !== 'SUPER_ADMIN' && (
               <div className="relative" ref={quotaDropdownRef}>
                 <button
                   onClick={() => setIsQuotaDropdownOpen(!isQuotaDropdownOpen)}

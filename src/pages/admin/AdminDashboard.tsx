@@ -4,15 +4,16 @@ import {
   Users,
   BookOpen,
   Activity,
-  TrendingUp,
   UserPlus,
   FileText,
   Layers,
   SettingsIcon,
-  Brain,
   Trophy,
   Folder,
   File,
+  CreditCard,
+  Package,
+  Database,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Toast as toast } from '../../utils/toast';
@@ -25,6 +26,16 @@ export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['systemStats'],
     queryFn: adminService.getSystemStats,
+  });
+
+  const { data: subscriptionStats } = useQuery({
+    queryKey: ['subscriptionStats'],
+    queryFn: adminService.getSubscriptionStats,
+  });
+
+  const { data: quotaStats } = useQuery({
+    queryKey: ['quotaStats'],
+    queryFn: adminService.getQuotaStats,
   });
 
   const queryClient = useQueryClient();
@@ -96,8 +107,8 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Stat Cards Skeleton */}
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCardSkeleton count={4} />
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <StatCardSkeleton count={6} />
         </div>
 
         {/* Quick Actions and Content Overview Skeleton */}
@@ -143,27 +154,69 @@ export const AdminDashboard = () => {
       ),
     },
     {
-      title: 'Active Users',
-      value: stats?.users.active || 0,
-      icon: Activity,
+      title: 'Premium Users',
+      value: subscriptionStats?.premiumUsers || 0,
+      icon: CreditCard,
       color: 'green' as const,
-      trend: <span className="text-green-600">Currently active</span>,
+      trend: (
+        <span className="text-gray-500">
+          {subscriptionStats?.premiumPercentage || 0}% of total users
+        </span>
+      ),
     },
     {
-      title: 'Total Quizzes',
-      value: stats?.content.quizzes || 0,
-      icon: BookOpen,
+      title: 'Free Users',
+      value: subscriptionStats?.freeUsers || 0,
+      icon: Users,
+      color: 'cyan' as const,
+      trend: (
+        <span className="text-gray-500">
+          {subscriptionStats?.freeUsers && subscriptionStats?.totalUsers
+            ? ((subscriptionStats.freeUsers / subscriptionStats.totalUsers) * 100).toFixed(1)
+            : 0}% of total users
+        </span>
+      ),
+    },
+    {
+      title: 'Monthly Revenue (MRR)',
+      value: `₦${(subscriptionStats?.mrr || 0).toLocaleString('en-NG')}`,
+      icon: CreditCard,
       color: 'purple' as const,
-      trend: <span className="text-gray-500">Platform wide</span>,
+      trend: (
+        <span className="text-gray-500">
+          Total: ₦{(subscriptionStats?.totalRevenue || 0).toLocaleString('en-NG')}
+        </span>
+      ),
     },
     {
-      title: 'Total Attempts',
-      value: stats?.engagement.totalAttempts || 0,
-      icon: TrendingUp,
+      title: 'Total Content',
+      value: (
+        (stats?.content.quizzes || 0) +
+        (stats?.content.flashcards || 0) +
+        (stats?.content.studyMaterials || 0)
+      ).toLocaleString(),
+      icon: FileText,
+      color: 'indigo' as const,
+      trend: (
+        <span className="text-gray-500">
+          {stats?.content.quizzes || 0} quizzes, {stats?.content.flashcards || 0} flashcards
+        </span>
+      ),
+    },
+    {
+      title: 'Total Storage',
+      value: (() => {
+        const totalMB = quotaStats?.totalStorageUsedMB || 0;
+        if (totalMB >= 1024) {
+          return `${(totalMB / 1024).toFixed(2)} GB`;
+        }
+        return `${totalMB.toFixed(1)} MB`;
+      })(),
+      icon: Database,
       color: 'orange' as const,
       trend: (
-        <span className="text-green-600">
-          +{stats?.engagement.attemptsLast7Days || 0} this week
+        <span className="text-gray-500">
+          {quotaStats?.premiumUsers || 0} premium users
         </span>
       ),
     },
@@ -180,7 +233,7 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat, index) => (
           <StatCard
             key={index}
@@ -233,18 +286,18 @@ export const AdminDashboard = () => {
               </div>
             </Link>
             <Link
-              to="/admin/generation-analytics"
+              to="/admin/plans"
               className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
             >
               <div className="rounded-full bg-purple-100 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
-                <Brain className="h-5 w-5" />
+                <Package className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  Generation Management
+                  Manage Plans
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Generation stats & prompts
+                  Subscription plans & pricing
                 </p>
               </div>
             </Link>
@@ -277,6 +330,22 @@ export const AdminDashboard = () => {
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Platform configuration
+                </p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/subscriptions"
+              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+            >
+              <div className="rounded-full bg-green-100 p-2 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Manage Subscriptions
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  View all user subscriptions
                 </p>
               </div>
             </Link>

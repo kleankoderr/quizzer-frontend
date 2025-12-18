@@ -35,6 +35,11 @@ export const AnalyticsDashboard = () => {
     queryFn: adminService.getAnalytics,
   });
 
+  const { data: subscriptionStats } = useQuery({
+    queryKey: ['subscriptionStats'],
+    queryFn: adminService.getSubscriptionStats,
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6 p-4 sm:p-6">
@@ -231,6 +236,56 @@ export const AnalyticsDashboard = () => {
 
       {/* Charts Row 2 */}
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Subscription Revenue Trends */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            Subscription Growth (Last 30 Days)
+          </h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={subscriptionStats?.growthData || []}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                }
+              />
+              <YAxis />
+              <Tooltip
+                labelFormatter={(value) => new Date(value).toLocaleDateString()}
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#10b981"
+                strokeWidth={2}
+                name="New Subscriptions"
+                fill="#10b981"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="rounded-lg bg-green-50 dark:bg-green-900/10 p-3">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Active Subscriptions
+              </p>
+              <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                {subscriptionStats?.active || 0}
+              </p>
+            </div>
+            <div className="rounded-lg bg-purple-50 dark:bg-purple-900/10 p-3">
+              <p className="text-xs text-gray-600 dark:text-gray-400">MRR</p>
+              <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                ₦{(subscriptionStats?.mrr || 0).toLocaleString('en-NG')}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* User Distribution by Role */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">

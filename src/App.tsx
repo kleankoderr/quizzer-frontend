@@ -145,6 +145,16 @@ const AnalyticsDashboard = lazy(() =>
   }))
 );
 const UserDetailsPage = lazy(() => import('./pages/admin/UserDetailsPage'));
+const SubscriptionPlanManagement = lazy(() =>
+  import('./pages/admin/SubscriptionPlanManagement').then((m) => ({
+    default: m.SubscriptionPlanManagement,
+  }))
+);
+const SubscriptionsPage = lazy(() =>
+  import('./pages/admin/SubscriptionsPage').then((m) => ({
+    default: m.SubscriptionsPage,
+  }))
+);
 
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
@@ -318,6 +328,22 @@ function AppRoutes() {
             element={
               <AdminRoute>
                 <PlatformSettings />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/plans"
+            element={
+              <AdminRoute>
+                <SubscriptionPlanManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/subscriptions"
+            element={
+              <AdminRoute>
+                <SubscriptionsPage />
               </AdminRoute>
             }
           />

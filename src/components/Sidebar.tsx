@@ -16,6 +16,7 @@ import {
   Calendar,
   FileText,
   CreditCard,
+  Package,
   type LucideProps,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -102,6 +103,7 @@ export const Sidebar = ({
       items: [
         { path: '/admin/users', icon: User, label: 'Users' },
         { path: '/admin/content', icon: Layers, label: 'Content' },
+        { path: '/admin/plans', icon: Package, label: 'Subscription Plans' },
       ],
     },
     {

@@ -18,6 +18,7 @@ import { TableSkeleton } from '../../components/skeletons';
 export const UserManagement = () => {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [premiumFilter, setPremiumFilter] = useState('');
   const [page, setPage] = useState(1);
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -37,13 +38,14 @@ export const UserManagement = () => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['users', page, search, roleFilter],
+    queryKey: ['users', page, search, roleFilter, premiumFilter],
     queryFn: () =>
       adminService.getUsers({
         page,
         limit: 10,
         search,
         role: roleFilter || undefined,
+        isPremium: premiumFilter === '' ? undefined : premiumFilter === 'true',
       }),
   });
 
@@ -131,6 +133,15 @@ export const UserManagement = () => {
             <option value="ADMIN">Admin</option>
             <option value="SUPER_ADMIN">Super Admin</option>
           </select>
+          <select
+            value={premiumFilter}
+            onChange={(e) => setPremiumFilter(e.target.value)}
+            className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">All Users</option>
+            <option value="true">Premium</option>
+            <option value="false">Free</option>
+          </select>
         </div>
       </div>
 
@@ -186,8 +197,17 @@ export const UserManagement = () => {
                           )}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {user.name}
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {user.name}
+                            </div>
+                            {user.subscription?.status === 'ACTIVE' &&
+                              user.subscription.currentPeriodEnd >
+                                new Date() && (
+                                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                  {user.subscription.plan.name}
+                                </span>
+                              )}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
                             {user.email}
