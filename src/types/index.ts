@@ -432,8 +432,7 @@ export interface QuotaFeatureStatus {
 
 export interface QuotaStatus {
   isPremium: boolean;
-  resetAt: string;
-  monthlyResetAt?: string;
+  monthlyResetAt: string;
   planName?: string;
   price?: number;
   interval?: string;
@@ -442,8 +441,10 @@ export interface QuotaStatus {
   cancelAtPeriodEnd?: boolean;
   quiz: QuotaFeatureStatus;
   flashcard: QuotaFeatureStatus;
-  learningGuide: QuotaFeatureStatus;
-  explanation: QuotaFeatureStatus;
+  studyMaterial: QuotaFeatureStatus;
+  conceptExplanation: QuotaFeatureStatus;
+  smartRecommendation: QuotaFeatureStatus;
+  smartCompanion: QuotaFeatureStatus;
   fileUpload?: FileUploadQuota;
   fileStorage?: FileStorageQuota;
 }
@@ -462,8 +463,10 @@ export interface SubscriptionPlan {
   quotas: {
     quizzes: number;
     flashcards: number;
-    learningGuides: number;
-    explanations: number;
+    studyMaterials: number;
+    conceptExplanations: number;
+    smartRecommendations: number;
+    smartCompanions: number;
     filesPerMonth: number;
     storageLimitMB: number;
   };
@@ -509,12 +512,9 @@ export interface VerifyPaymentResponse {
 }
 
 export interface FileUploadQuota {
-  dailyUsed: number;
-  dailyLimit: number;
-  dailyRemaining: number;
-  monthlyUsed: number;
-  monthlyLimit: number;
-  monthlyRemaining: number;
+  used: number;
+  limit: number;
+  remaining: number;
 }
 
 export interface FileStorageQuota {
@@ -533,10 +533,11 @@ export interface CurrentPlan {
   isPremium: boolean;
   quiz: QuotaFeatureStatus;
   flashcard: QuotaFeatureStatus;
-  explanation: QuotaFeatureStatus;
-  learningGuide: QuotaFeatureStatus;
+  studyMaterial: QuotaFeatureStatus;
+  conceptExplanation: QuotaFeatureStatus;
+  smartRecommendation: QuotaFeatureStatus;
+  smartCompanion: QuotaFeatureStatus;
   fileUpload: FileUploadQuota;
   fileStorage: FileStorageQuota;
-  resetAt: string;
   monthlyResetAt: string;
 }

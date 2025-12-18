@@ -14,7 +14,6 @@ import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
 
 import { contentService, type Content } from '../services/content.service';
-import { applyHighlights, type Highlight } from '../utils/contentUtils';
 import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 import { LearningGuideSection } from './LearningGuideSection';
 import { SectionNavigator } from './SectionNavigator';
@@ -23,9 +22,7 @@ import { useInvalidateQuota } from '../hooks/useQuota';
 interface LearningGuideProps {
   guide: NonNullable<Content['learningGuide']>;
   title: string;
-  highlights?: Highlight[];
   onToggleSectionComplete?: (index: number, isComplete: boolean) => void;
-  onContentClick?: (e: React.MouseEvent) => void;
   contentRef?: React.RefObject<HTMLDivElement | null>;
   contentId: string;
   topic?: string;
@@ -38,9 +35,7 @@ interface LearningGuideProps {
 export const LearningGuide: React.FC<LearningGuideProps> = ({
   guide,
   title,
-  highlights = [],
   onToggleSectionComplete,
-  onContentClick,
   contentRef,
   contentId,
   description,
@@ -410,7 +405,6 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     <div
       className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500"
       ref={contentRef}
-      onClick={onContentClick}
     >
       {/* Header Section */}
       <div className="bg-white dark:bg-gray-800 sm:rounded-2xl sm:shadow-sm sm:border border-gray-200 dark:border-gray-700">
@@ -504,11 +498,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       {/* All Sections in Natural Order */}
       <div className="space-y-4">
         {guide.sections.map((section, idx) => {
-          const processedContent = applyHighlights(
-            section.content,
-            highlights,
-            idx
-          );
+          const processedContent = section.content;
           const isCompleted = completedSections.has(idx);
           const isActive = activeSection === idx;
 
@@ -534,19 +524,6 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               HeadingRenderer={HeadingRenderer}
               onToggleSection={toggleSection}
               onMarkComplete={markAsComplete}
-              onAddSectionNote={(e) => {
-                e.stopPropagation();
-                const rect = (e.target as HTMLElement).getBoundingClientRect();
-                const event = new CustomEvent('add-section-note', {
-                  detail: {
-                    sectionIndex: idx,
-                    sectionTitle: section.title,
-                    x: rect.left,
-                    y: rect.bottom + window.scrollY,
-                  },
-                });
-                window.dispatchEvent(event);
-              }}
               onAskQuestion={handleAskQuestion}
               onToggleContentVisibility={toggleContentVisibility}
             />

@@ -35,23 +35,23 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     const q = plan.quotas || {};
     return [
       {
-        label: 'Quizzes per day',
+        label: 'Quizzes per month',
         value: q.quizzes === -1 ? 'Unlimited' : q.quizzes ?? 0,
         icon: Zap,
       },
       {
-        label: 'Flashcard sets per day',
+        label: 'Flashcard sets per month',
         value: q.flashcards === -1 ? 'Unlimited' : q.flashcards ?? 0,
         icon: Zap,
       },
       {
-        label: 'Learning Guides per day',
-        value: q.learningGuides === -1 ? 'Unlimited' : q.learningGuides ?? 0,
+        label: 'Study Materials per month',
+        value: q.studyMaterials === -1 ? 'Unlimited' : q.studyMaterials ?? 0,
         icon: Zap,
       },
       {
-        label: 'AI Explanations per day',
-        value: q.explanations === -1 ? 'Unlimited' : q.explanations ?? 0,
+        label: 'AI Explanations per month',
+        value: q.conceptExplanations === -1 ? 'Unlimited' : q.conceptExplanations ?? 0,
         icon: Zap,
       },
       {

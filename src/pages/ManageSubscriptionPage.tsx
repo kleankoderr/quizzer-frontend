@@ -227,24 +227,24 @@ export const ManageSubscriptionPage = () => {
                   percentage={getPercentage(currentPlan.flashcard.used, currentPlan.flashcard.limit)}
                 />
 
-                {/* Explanations Usage */}
+                {/* Concept Explanations Usage */}
                 <UsageBar
                   icon={Brain}
                   label="AI Explanations"
-                  used={currentPlan.explanation.used}
-                  limit={currentPlan.explanation.limit}
-                  color={getUsageColor(currentPlan.explanation.used, currentPlan.explanation.limit)}
-                  percentage={getPercentage(currentPlan.explanation.used, currentPlan.explanation.limit)}
+                  used={currentPlan.conceptExplanation.used}
+                  limit={currentPlan.conceptExplanation.limit}
+                  color={getUsageColor(currentPlan.conceptExplanation.used, currentPlan.conceptExplanation.limit)}
+                  percentage={getPercentage(currentPlan.conceptExplanation.used, currentPlan.conceptExplanation.limit)}
                 />
                  
-                {/* Learning Guides Usage */}
+                {/* Study Materials Usage */}
                 <UsageBar
                   icon={BookOpen}
-                  label="Learning Guides"
-                  used={currentPlan.learningGuide.used}
-                  limit={currentPlan.learningGuide.limit}
-                  color={getUsageColor(currentPlan.learningGuide.used, currentPlan.learningGuide.limit)}
-                  percentage={getPercentage(currentPlan.learningGuide.used, currentPlan.learningGuide.limit)}
+                  label="Study Materials"
+                  used={currentPlan.studyMaterial.used}
+                  limit={currentPlan.studyMaterial.limit}
+                  color={getUsageColor(currentPlan.studyMaterial.used, currentPlan.studyMaterial.limit)}
+                  percentage={getPercentage(currentPlan.studyMaterial.used, currentPlan.studyMaterial.limit)}
                 />
               </div>
 
@@ -257,11 +257,11 @@ export const ManageSubscriptionPage = () => {
                 {/* File Uploads (Count) */}
                 <UsageBar
                   icon={FileText}
-                  label="Files Uploaded"
-                  used={currentPlan.fileUpload.dailyUsed}
-                  limit={currentPlan.fileUpload.dailyLimit}
+                  label="Files Uploaded (Monthly)"
+                  used={currentPlan.fileUpload.used}
+                  limit={currentPlan.fileUpload.limit}
                   color="bg-blue-500"
-                  percentage={getPercentage(currentPlan.fileUpload.dailyUsed, currentPlan.fileUpload.dailyLimit)}
+                  percentage={getPercentage(currentPlan.fileUpload.used, currentPlan.fileUpload.limit)}
                 />
 
                 {/* Storage Space */}
@@ -280,7 +280,7 @@ export const ManageSubscriptionPage = () => {
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
               <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Daily quotas reset on {format(new Date(currentPlan.resetAt), 'MMM dd, yyyy')}
+                Monthly quotas reset on {format(new Date(currentPlan.monthlyResetAt), 'MMM dd, yyyy')}
               </p>
             </div>
           </div>

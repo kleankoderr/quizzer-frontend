@@ -14,6 +14,17 @@ export interface UserDocument {
   };
 }
 
+export interface PaginatedUserDocuments {
+  data: UserDocument[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+}
+
 export interface CreateUserDocumentDto {
   documentId: string;
   displayName?: string;
@@ -21,10 +32,18 @@ export interface CreateUserDocumentDto {
 
 class UserDocumentService {
   /**
-   * Get all user documents
+   * Get all user documents (paginated)
    */
-  async getUserDocuments(): Promise<UserDocument[]> {
-    const response = await apiClient.get<UserDocument[]>('/user-documents');
+  async getUserDocuments(
+    page: number = 1,
+    limit: number = 20
+  ): Promise<PaginatedUserDocuments> {
+    const response = await apiClient.get<PaginatedUserDocuments>(
+      '/user-documents',
+      {
+        params: { page, limit },
+      }
+    );
     return response.data;
   }
 

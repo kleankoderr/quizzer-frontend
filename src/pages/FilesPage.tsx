@@ -19,8 +19,7 @@ import {
   SortAsc,
   SortDesc,
 } from 'lucide-react';
-import { CardSkeleton } from '../components/skeletons';
-import { TableSkeleton } from '../components/skeletons';
+import { CardSkeleton, TableSkeleton } from '../components/skeletons';
 import { format } from 'date-fns';
 import { Toast as toast } from '../utils/toast';
 import {
@@ -40,9 +39,17 @@ type ViewMode = 'grid' | 'list';
 
 export const FilesPage = () => {
   const navigate = useNavigate();
-  const { data: documents = [], isLoading: loading } = useUserDocuments();
+  const {
+    data,
+    isLoading: loading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useUserDocuments();
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
+
+  const documents = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -569,6 +576,19 @@ export const FilesPage = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {!loading && filteredDocuments.length > 0 && hasNextPage && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+          >
+            {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+          </button>
         </div>
       )}
 

@@ -15,53 +15,10 @@ const getTotalRemaining = (quota: QuotaStatus): number => {
   let total =
     quota.quiz.remaining +
     quota.flashcard.remaining +
-    quota.learningGuide.remaining +
-    quota.explanation.remaining;
+    quota.studyMaterial.remaining +
+    quota.conceptExplanation.remaining;
 
   if (quota.fileStorage) {
-    // Add file storage as 1 unit per remaining MB (or however we want to weigh it,
-    // but simple addition seems to be what was requested: "include the file")
-    // Wait, the user said "the 10 left showing on the ui did not include the file".
-    // This implies they expect the count to increase.
-    // However, file storage is in MB. Adding MB to "items" might be weird.
-    // But let's check the types and what `remaining` means there.
-    // In QuotaService, `remaining` for fileStorage is in MB.
-    // But `fileUpload` also has a count limit?
-    // Let's check the quota object structure in `useQuota.ts` / `types/index.ts`.
-    // Actually, QuotaStatus usually has `fileUpload` feature too.
-    // In QuotaService.ts we saw `fileUpload: { ... }`.
-    // Let's check `Header.tsx` QuotaItem usage.
-    // It seems `fileUpload` is NOT in the list of QuotaItems in Header.tsx lines 230-270.
-    // But `fileStorage` IS.
-    // Let's assume user wants to track *actions* remaining.
-    // File uploads have a `monthlyLimit` or `dailyLimit`?
-    // Let's check `QuotaService.ts` again. It has `fileUpload` property in return object.
-    // `fileUpload` has `dailyRemaining` and `monthlyRemaining`.
-    // Maybe we should add `fileUpload.dailyRemaining`?
-    // Or `fileStorage.remaining` (MB)?
-    // "did not include the file" -> probably means the file upload *action* count.
-    // But wait, the user previously asked for "rounding up to nearest whole number", which we did for *storage*.
-    // So "the file" might refer to "file storage" value?
-    // If I have 50MB and use 1MB, I have 49MB left.
-    // Quizzes: 10 left.
-    // Total: 10 + 49 = 59?
-    // Or maybe they mean "file upload count"?
-    // In QuotaService, `fileUpload` is returned.
-    // Let's check `Header.tsx` again.
-    // It imports `QuotaStatus`. Let's see `types/index.ts`.
-    // I need to be sure what `QuotaStatus` looks like on frontend.
-    // I will read `types/index.ts` first.
-    // BUT I am in `replace_file_content`. I should abort or make a safe bet.
-    // The previous prompt context showed `Header.tsx`.
-    // It uses `quota.quiz.remaining`.
-    // And it has `quota.fileStorage`.
-    // It DOES NOT show `quota.fileUpload` in the list of items in the dropdown!
-    // It shows `quota.fileStorage` (line 264).
-    // So the user likely sees "Storage" in the dropdown but its value is NOT in the total "X left" badge.
-    // So I should add `quota.fileStorage.remaining` (which is MBs).
-    // Let's do that for now.
-    
-    // Oh, wait, `quota.fileStorage` might be undefined (optional).
      if (quota.fileStorage) {
        total += quota.fileStorage.remaining;
      }
@@ -307,20 +264,20 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                         remaining={quota.flashcard.remaining}
                       />
 
-                      {/* Learning Guide Quota */}
+                      {/* Study Material Quota */}
                       <QuotaItem
                         label="Study Material"
-                        used={quota.learningGuide.used}
-                        limit={quota.learningGuide.limit}
-                        remaining={quota.learningGuide.remaining}
+                        used={quota.studyMaterial.used}
+                        limit={quota.studyMaterial.limit}
+                        remaining={quota.studyMaterial.remaining}
                       />
 
-                      {/* Explanation Quota */}
+                      {/* Concept Explanation Quota */}
                       <QuotaItem
                         label="Explanations"
-                        used={quota.explanation.used}
-                        limit={quota.explanation.limit}
-                        remaining={quota.explanation.remaining}
+                        used={quota.conceptExplanation.used}
+                        limit={quota.conceptExplanation.limit}
+                        remaining={quota.conceptExplanation.remaining}
                       />
 
                       {/* File Storage Quota (Premium only) */}

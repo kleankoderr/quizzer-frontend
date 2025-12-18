@@ -198,28 +198,6 @@ export const contentService = {
     await apiClient.delete(`/content/${id}`);
   },
 
-  async addHighlight(
-    contentId: string,
-    data: {
-      text: string;
-      color?: string;
-      startOffset: number;
-      endOffset: number;
-      note?: string;
-      sectionIndex?: number;
-    }
-  ): Promise<unknown> {
-    const response = await apiClient.post(
-      `/content/${contentId}/highlights`,
-      data
-    );
-    return response.data;
-  },
-
-  async deleteHighlight(highlightId: string): Promise<void> {
-    await apiClient.delete(`/content/highlights/${highlightId}`);
-  },
-
   async getPopularTopics(): Promise<string[]> {
     const response = await apiClient.get('/content/popular-topics');
     return response.data;

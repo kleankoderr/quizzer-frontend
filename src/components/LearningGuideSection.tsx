@@ -25,7 +25,6 @@ interface LearningGuideSectionProps {
   HeadingRenderer: React.FC<{ level: number; children?: any }>;
   onToggleSection: (index: number) => void;
   onMarkComplete: (index: number, e: React.MouseEvent) => void;
-  onAddSectionNote: (e: React.MouseEvent) => void;
   onAskQuestion: (index: number, type: 'explain' | 'example') => void;
   onToggleContentVisibility: (index: number, type: 'explain' | 'example') => void;
   sectionRef?: React.RefObject<HTMLDivElement>;
@@ -47,7 +46,6 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
       HeadingRenderer,
       onToggleSection,
       onMarkComplete,
-      onAddSectionNote,
       onAskQuestion,
       onToggleContentVisibility,
     },
@@ -91,20 +89,11 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
               {section.title}
             </h3>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onAddSectionNote}
-              className="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              title="Add Note to Section"
-            >
-              <MessageCircle className="w-5 h-5" />
-            </button>
-            <ChevronRight
-              className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
-                isActive ? 'rotate-90' : ''
-              }`}
-            />
-          </div>
+          <ChevronRight
+            className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+              isActive ? 'rotate-90' : ''
+            }`}
+          />
         </div>
 
         <div

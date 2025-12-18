@@ -7,7 +7,6 @@ import {
   Trash2,
   Check,
   X,
-  DollarSign,
   Users,
   Zap,
 } from 'lucide-react';
@@ -178,7 +177,6 @@ export const SubscriptionPlanManagement = () => {
 
             <div className="mt-6 space-y-4">
               <div className="flex items-baseline gap-2">
-                <DollarSign className="h-5 w-5 text-gray-400" />
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">
                   ₦{plan.price.toLocaleString()}
                 </span>
@@ -199,16 +197,22 @@ export const SubscriptionPlanManagement = () => {
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.quizzes || 0}</span> quizzes/day
+                    <span className="font-medium">{plan.quotas?.quizzes || 0}</span> quizzes/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.flashcards || 0}</span> flashcards/day
+                    <span className="font-medium">{plan.quotas?.flashcards || 0}</span> flashcards/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.learningGuides || 0}</span> guides/day
+                    <span className="font-medium">{plan.quotas?.studyMaterials || 0}</span> materials/mo
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-400">
+                    <span className="font-medium">{plan.quotas?.conceptExplanations || 0}</span> explanations/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
                     <span className="font-medium">{plan.quotas?.storageLimitMB || 0}</span> MB storage
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-400">
+                    <span className="font-medium">{plan.quotas?.filesPerMonth || 0}</span> files/mo
                   </div>
                 </div>
               </div>
@@ -299,8 +303,10 @@ const PlanFormModal = ({
     quotas: {
       quizzes: plan?.quotas?.quizzes || 0,
       flashcards: plan?.quotas?.flashcards || 0,
-      learningGuides: plan?.quotas?.learningGuides || 0,
-      explanations: plan?.quotas?.explanations || 0,
+      studyMaterials: plan?.quotas?.studyMaterials || 0,
+      conceptExplanations: plan?.quotas?.conceptExplanations || 0,
+      smartRecommendations: plan?.quotas?.smartRecommendations || 0,
+      smartCompanions: plan?.quotas?.smartCompanions || 0,
       storageLimitMB: plan?.quotas?.storageLimitMB || 0,
       filesPerMonth: plan?.quotas?.filesPerMonth || 0,
     },
@@ -396,12 +402,12 @@ const PlanFormModal = ({
 
           <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
             <h4 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
-              Daily Quotas
+              Monthly Quotas
             </h4>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Quizzes per Day
+                  Quizzes per Month
                 </label>
                 <input
                   type="number"
@@ -423,7 +429,7 @@ const PlanFormModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Flashcards per Day
+                  Flashcards per Month
                 </label>
                 <input
                   type="number"
@@ -445,19 +451,19 @@ const PlanFormModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Learning Guides per Day
+                  Study Materials per Month
                 </label>
                 <input
                   type="number"
                   required
                   min="0"
-                  value={formData.quotas.learningGuides}
+                  value={formData.quotas.studyMaterials}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
                       quotas: {
                         ...formData.quotas,
-                        learningGuides: Number(e.target.value),
+                        studyMaterials: Number(e.target.value),
                       },
                     })
                   }
@@ -467,19 +473,63 @@ const PlanFormModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Explanations per Day
+                  Concept Explanations per Month
                 </label>
                 <input
                   type="number"
                   required
                   min="0"
-                  value={formData.quotas.explanations}
+                  value={formData.quotas.conceptExplanations}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
                       quotas: {
                         ...formData.quotas,
-                        explanations: Number(e.target.value),
+                        conceptExplanations: Number(e.target.value),
+                      },
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Smart Recommendations per Month
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={formData.quotas.smartRecommendations}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      quotas: {
+                        ...formData.quotas,
+                        smartRecommendations: Number(e.target.value),
+                      },
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Smart Companions per Month
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={formData.quotas.smartCompanions}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      quotas: {
+                        ...formData.quotas,
+                        smartCompanions: Number(e.target.value),
                       },
                     })
                   }
