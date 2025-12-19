@@ -1,6 +1,10 @@
 import { apiClient } from './api';
 import { FLASHCARD_ENDPOINTS } from '../config/api';
-import type { FlashcardSet, FlashcardGenerateRequest } from '../types';
+import type {
+  FlashcardSet,
+  FlashcardGenerateRequest,
+  FlashcardAttempt,
+} from '../types';
 
 export const flashcardService = {
   // Generate flashcards
@@ -95,6 +99,14 @@ export const flashcardService = {
     const response = await apiClient.post(
       FLASHCARD_ENDPOINTS.RECORD_SESSION(id),
       { cardResponses }
+    );
+    return response.data;
+  },
+
+  // Get flashcard attempts
+  getAttempts: async (id: string): Promise<FlashcardAttempt[]> => {
+    const response = await apiClient.get<FlashcardAttempt[]>(
+      `/flashcards/${id}/attempts`
     );
     return response.data;
   },

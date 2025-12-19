@@ -163,8 +163,8 @@ export const QuizReviewPage = () => {
 
   // Navigate to study pack
   const handleStudyPackClick = () => {
-    if (!quiz?.studyPackId) return;
-    navigate(`/study-packs/${quiz.studyPackId}`);
+    if (!quiz?.studyPack?.id) return;
+    navigate(`/study-packs/${quiz.studyPack.id}`);
   };
 
   if (loading) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation , Link } from 'react-router-dom';
 import {
   BookOpen,
   Brain,
@@ -8,7 +8,6 @@ import {
   Calendar,
   MoreVertical,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -46,7 +45,7 @@ const MarkdownContent = ({
   // Custom heading renderer to add IDs
   const HeadingRenderer = ({ level, children }: any) => {
     const text = children?.[0]?.toString() || '';
-    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+    const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
     const Tag = `h${level}` as React.ElementType;
     return <Tag id={id}>{children}</Tag>;
   };
@@ -165,11 +164,40 @@ export const ContentPage = () => {
     isLoading: loading,
   } = useContent(id);
   const contentRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   // Modal states
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] =
     useState(false);
   const [isDeletingContent, setIsDeletingContent] = useState(false);
+
+  // Set breadcrumb when content loads
+  useEffect(() => {
+    if (!content || !id || loading || location.state?.breadcrumb) return;
+
+    const breadcrumbItems = [];
+    
+    // Item 1: Home (Link to /dashboard)
+    breadcrumbItems.push({ label: 'Home', path: '/dashboard' });
+    
+    // Item 2: Study Pack or Study
+    if (content.studyPack) {
+      breadcrumbItems.push({
+        label: content.studyPack.title,
+        path: `/study-packs/${content.studyPack.id}`
+      });
+    } else {
+      breadcrumbItems.push({ label: 'Study', path: '/study' });
+    }
+    
+    // Item 3: Content Title (Plain Text, No Link)
+    breadcrumbItems.push({ label: content.title, path: null });
+
+    navigate(location.pathname + location.search, {
+      replace: true,
+      state: { breadcrumb: breadcrumbItems },
+    });
+  }, [content, id, loading, location, navigate]);
 
 
 
@@ -180,8 +208,18 @@ export const ContentPage = () => {
   const handleGenerateQuiz = () => {
     if (!content) return;
 
+    const baseBreadcrumb = [
+      { label: 'Home', path: '/dashboard' },
+      content.studyPack
+        ? { label: content.studyPack.title, path: `/study-packs/${content.studyPack.id}` }
+        : { label: 'Study', path: '/study' },
+      { label: content.title, path: `/content/${content.id}` },
+    ];
+
     if (content.quizId) {
-      navigate(`/quiz/${content.quizId}`);
+      navigate(`/quiz/${content.quizId}`, {
+        state: { breadcrumb: baseBreadcrumb },
+      });
       return;
     }
 
@@ -191,11 +229,7 @@ export const ContentPage = () => {
         sourceTitle: content.title,
         sourceId: content.id,
         contentId: content.id,
-        breadcrumb: [
-          { label: 'Study', path: '/study' },
-          { label: content.title, path: `/content/${content.id}` },
-          { label: 'Generate Quiz' },
-        ],
+        breadcrumb: [...baseBreadcrumb, { label: 'Generate Quiz', path: null }],
       },
     });
   };
@@ -203,8 +237,18 @@ export const ContentPage = () => {
   const handleGenerateFlashcards = () => {
     if (!content) return;
 
+    const baseBreadcrumb = [
+      { label: 'Home', path: '/dashboard' },
+      content.studyPack
+        ? { label: content.studyPack.title, path: `/study-packs/${content.studyPack.id}` }
+        : { label: 'Study', path: '/study' },
+      { label: content.title, path: `/content/${content.id}` },
+    ];
+
     if (content.flashcardSetId) {
-      navigate(`/flashcards/${content.flashcardSetId}`);
+      navigate(`/flashcards/${content.flashcardSetId}`, {
+        state: { breadcrumb: baseBreadcrumb },
+      });
       return;
     }
 
@@ -214,11 +258,7 @@ export const ContentPage = () => {
         sourceId: content.id,
         sourceTitle: content.title,
         contentId: content.id,
-        breadcrumb: [
-          { label: 'Study', path: '/study' },
-          { label: content.title, path: `/content/${content.id}` },
-          { label: 'Generate Flashcards' },
-        ],
+        breadcrumb: [...baseBreadcrumb, { label: 'Generate Flashcards', path: null }],
       },
     });
   };

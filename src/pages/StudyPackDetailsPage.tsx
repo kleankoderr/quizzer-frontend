@@ -395,9 +395,21 @@ export const StudyPackDetailsPage: React.FC = () => {
                 content: '/content',
             } as const;
 
-            navigate(`${routeMap[type]}/${itemId}`);
+            // Add breadcrumb context for content navigation
+            if (type === 'content' && studyPack) {
+                navigate(`${routeMap[type]}/${itemId}`, {
+                    state: {
+                        breadcrumb: [
+                            { label: 'Home', path: '/dashboard' },
+                            { label: studyPack.title, path: `/study-packs/${studyPack.id}` },
+                        ],
+                    },
+                });
+            } else {
+                navigate(`${routeMap[type]}/${itemId}`);
+            }
         },
-        [navigate]
+        [navigate, studyPack]
     );
 
     const renderEmptyState = useCallback(

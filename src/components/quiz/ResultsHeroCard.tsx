@@ -131,6 +131,10 @@ export interface ResultsHeroCardProps {
   onStudyPackClick?: () => void;
   /** Title of the study pack to display in button label */
   studyPackTitle?: string;
+  /** Callback for viewing latest attempt */
+  onViewAttempts?: () => void;
+  /** Current attempt ID (used to determine if View Attempts button should show) */
+  attemptId?: string;
 }
 
 export const ResultsHeroCard = ({
@@ -155,6 +159,8 @@ export const ResultsHeroCard = ({
                                   onReview,
                                   onStudyPackClick,
                                   studyPackTitle,
+                                  onViewAttempts,
+                                  attemptId,
                                 }: ResultsHeroCardProps) => {
   const { width, height } = useWindowSize();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -411,47 +417,60 @@ export const ResultsHeroCard = ({
             </div>
 
             {/* Action Buttons */}
-            {(onReview || onRetake || onStudyPackClick) && (
+            {(onReview || onRetake || onStudyPackClick || onViewAttempts) && (
               <div
                 data-html2canvas-ignore="true"
-                className="mt-8 md:mt-10 flex flex-col md:flex-row gap-3 md:gap-4 w-full max-w-2xl mx-auto"
+                className="mt-8 md:mt-10 w-full max-w-3xl mx-auto"
               >
-                {/* Review Answers Button */}
-                {onReview && (
-                  <button
-                    onClick={onReview}
-                    className="flex-1 px-6 py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <Eye className="w-5 h-5" />
-                    <span>
-                      {context === 'flashcard' ? 'Review Cards' : 'Review Answers'}
-                    </span>
-                  </button>
-                )}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Review Answers Button */}
+                  {onReview && (
+                    <button
+                      onClick={onReview}
+                      className="flex-1 px-6 py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <Eye className="w-5 h-5" />
+                      <span>
+                        {context === 'flashcard' ? 'Review Cards' : 'Review Answers'}
+                      </span>
+                    </button>
+                  )}
 
-                {/* Retake/Restart Button */}
-                {onRetake && (
-                  <button
-                    onClick={onRetake}
-                    className="flex-1 px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-white/20 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                    <span>{getRetakeLabel()}</span>
-                  </button>
-                )}
+                  {/* Retake/Restart Button */}
+                  {onRetake && (
+                    <button
+                      onClick={onRetake}
+                      className="flex-1 px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-white/20 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                      <span>{getRetakeLabel()}</span>
+                    </button>
+                  )}
 
-                {/* Back to Study Pack Button */}
-                {onStudyPackClick && (
-                  <button
-                    onClick={onStudyPackClick}
-                    className="flex-1 px-6 py-3.5 bg-transparent hover:bg-white/10 text-white/90 hover:text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <BookOpen className="w-5 h-5" />
-                    <span>
-                      {studyPackTitle ? `Back to ${studyPackTitle}` : 'Back to Study Pack'}
-                    </span>
-                  </button>
-                )}
+                  {/* View Attempts Button - Only show for quizzes with attemptId */}
+                  {onViewAttempts && context === 'quiz' && attemptId && (
+                    <button
+                      onClick={onViewAttempts}
+                      className="flex-1 px-6 py-3.5 bg-emerald-500/90 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-emerald-400/30 hover:border-emerald-300/50 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                    >
+                      <Eye className="w-5 h-5" />
+                      <span>View Attempts</span>
+                    </button>
+                  )}
+
+                  {/* Back to Study Pack Button */}
+                  {onStudyPackClick && (
+                    <button
+                      onClick={onStudyPackClick}
+                      className="flex-1 px-6 py-3.5 bg-transparent hover:bg-white/10 text-white/90 hover:text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      <span>
+                        {studyPackTitle ? `Back to ${studyPackTitle}` : 'Back to Study Pack'}
+                      </span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

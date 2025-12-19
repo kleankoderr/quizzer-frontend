@@ -11,7 +11,6 @@ import { useQuizTimer } from '../hooks/useQuizTimer';
 import { useQuizStorage } from '../hooks/useQuizStorage';
 import { QuizHeader } from '../components/quiz/QuizHeader';
 import { QuizNavigation } from '../components/quiz/QuizNavigation';
-import { QuizAttemptsHistory } from '../components/quiz/QuizAttemptsHistory';
 
 export const QuizTakePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +27,6 @@ export const QuizTakePage = () => {
   >([]);
   const [submitting, setSubmitting] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
 
   const questions = useMemo(() => quiz?.questions ?? [], [quiz?.questions]);
 
@@ -205,18 +203,6 @@ export const QuizTakePage = () => {
     });
   }, [quiz, id, loading, location, navigate]);
 
-  // Check if quiz has attempts and show history view
-  useEffect(() => {
-    if (!quiz || loading) return;
-    
-    // Show history if quiz has attempts and user hasn't explicitly started retaking
-    const hasAttempts = quiz.attempts && quiz.attempts.length > 0;
-    const hasStoredProgress = localStorage.getItem(getStorageKey('answers'));
-    
-    // Show history only if there are attempts and no stored progress
-    setShowHistory(Boolean(hasAttempts && !hasStoredProgress));
-  }, [quiz, loading, getStorageKey]);
-
   // Initialize quiz state (runs once when quiz loads)
   useMemo(() => {
     if (!quiz || !id || initialized) return;
@@ -323,17 +309,6 @@ export const QuizTakePage = () => {
           Back to Quizzes
         </button>
       </div>
-    );
-  }
-
-  // Show attempts history if applicable
-  if (showHistory && quiz.attempts && quiz.attempts.length > 0) {
-    return (
-      <QuizAttemptsHistory
-        quizTitle={quiz.title}
-        attempts={quiz.attempts}
-        onRetake={() => setShowHistory(false)}
-      />
     );
   }
 

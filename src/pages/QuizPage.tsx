@@ -126,8 +126,8 @@ export const QuizPage = () => {
           state: {
             breadcrumb: initialValues?.breadcrumb
               ? [
-                  ...initialValues.breadcrumb,
-                  { label: 'Quiz', path: `/quiz/${result.id}` },
+                  ...initialValues.breadcrumb.slice(0, -1), // Remove "Generate Quiz"
+                  { label: result.title || 'Quiz', path: null },
                 ]
               : undefined,
           },

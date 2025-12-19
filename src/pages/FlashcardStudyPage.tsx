@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import {
@@ -14,6 +14,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Target,
+  Clock,
 } from 'lucide-react';
 import { useFlashcardSet } from '../hooks';
 import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
@@ -26,10 +27,29 @@ const renderMarkdown = (text: string) => {
   return { __html: formatted };
 };
 
+// Helper function to build breadcrumb items
+const buildBreadcrumbItems = (
+  flashcardSet: any,
+  includeResults = false,
+  includeHistory = false
+) => {
+  return [
+    { label: 'Home', path: '/dashboard' },
+    flashcardSet.studyPack
+      ? { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}` }
+      : { label: 'Flashcards', path: '/flashcards' },
+    { label: flashcardSet.title, path: null },
+    ...(includeResults ? [{ label: 'Results', path: null }] : []),
+    ...(includeHistory ? [{ label: 'History', path: null }] : []),
+  ];
+};
+
 export const FlashcardStudyPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const viewHistory = searchParams.get('view') === 'history';
   const { data: flashcardSet, isLoading: loading, error } = useFlashcardSet(id);
   const { user } = useAuth();
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -78,25 +98,9 @@ export const FlashcardStudyPage = () => {
 
   // Set breadcrumb when flashcard set loads
   useEffect(() => {
-    if (!flashcardSet ||!id || loading || location.state?.breadcrumb) return;
+    if (!flashcardSet || !id || loading || location.state?.breadcrumb) return;
 
-    const breadcrumbItems = [];
-
-    // Add study pack if it exists
-    if (flashcardSet.studyPack) {
-      breadcrumbItems.push(
-        { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}` }
-      );
-    } else {
-      breadcrumbItems.push(
-        { label: 'Flashcards', path: '/flashcards' }
-      );
-    }
-
-    // Add flashcard set title (non-clickable)
-    breadcrumbItems.push(
-      { label: flashcardSet.title, path: null }
-    );
+    const breadcrumbItems = buildBreadcrumbItems(flashcardSet, false, viewHistory);
 
     navigate(location.pathname + location.search, {
       replace: true,
@@ -104,7 +108,49 @@ export const FlashcardStudyPage = () => {
         breadcrumb: breadcrumbItems,
       },
     });
-  }, [flashcardSet, id, loading, location, navigate]);
+  }, [flashcardSet, id, loading, location, navigate, viewHistory]);
+
+  const updateBreadcrumb = (includeResults = false) => {
+    if (!flashcardSet) return;
+
+    const breadcrumbItems = buildBreadcrumbItems(flashcardSet, includeResults, false);
+
+    navigate(location.pathname + location.search, {
+      replace: true,
+      state: {
+        breadcrumb: breadcrumbItems,
+      },
+    });
+  };
+
+  const advanceToNextCard = (responses: typeof cardResponses) => {
+    if (currentCardIndex < (flashcardSet?.cards.length || 0) - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setIsFlipped(false);
+    } else {
+      handleFinishSession(responses);
+    }
+  };
+
+  const updateCardResponse = (response: 'know' | 'dont-know') => {
+    const existingIndex = cardResponses.findIndex(
+      (r) => r.cardIndex === currentCardIndex
+    );
+
+    if (existingIndex >= 0) {
+      const updatedResponses = [...cardResponses];
+      updatedResponses[existingIndex] = {
+        cardIndex: currentCardIndex,
+        response,
+      };
+      return updatedResponses;
+    }
+
+    return [
+      ...cardResponses,
+      { cardIndex: currentCardIndex, response },
+    ];
+  };
 
   if (error) {
     toast.error('Failed to load flashcard set');
@@ -115,14 +161,12 @@ export const FlashcardStudyPage = () => {
 
   const handleNext = () => {
     if (currentCardIndex < (flashcardSet?.cards.length || 0) - 1) {
-      const newIndex = currentCardIndex + 1;
-      setCurrentCardIndex(newIndex);
+      setCurrentCardIndex(currentCardIndex + 1);
       setIsFlipped(false);
     } else if (
       flashcardSet &&
       currentCardIndex === flashcardSet.cards.length - 1
     ) {
-      // Last card - finish session
       const hasResponse = cardResponses.some(
         (r) => r.cardIndex === currentCardIndex
       );
@@ -136,8 +180,7 @@ export const FlashcardStudyPage = () => {
 
   const handlePrevious = () => {
     if (currentCardIndex > 0) {
-      const newIndex = currentCardIndex - 1;
-      setCurrentCardIndex(newIndex);
+      setCurrentCardIndex(currentCardIndex - 1);
       setIsFlipped(false);
     }
   };
@@ -147,58 +190,38 @@ export const FlashcardStudyPage = () => {
   };
 
   const handleResponse = (response: 'know' | 'dont-know') => {
-    // Update or add response for current card
-    const existingIndex = cardResponses.findIndex(
-      (r) => r.cardIndex === currentCardIndex
-    );
-    let updatedResponses;
-
-    if (existingIndex >= 0) {
-      updatedResponses = [...cardResponses];
-      updatedResponses[existingIndex] = {
-        cardIndex: currentCardIndex,
-        response,
-      };
-    } else {
-      updatedResponses = [
-        ...cardResponses,
-        { cardIndex: currentCardIndex, response },
-      ];
-    }
-
+    const updatedResponses = updateCardResponse(response);
     setCardResponses(updatedResponses);
 
     if (response === 'know') {
-      // If they know it, auto-advance to next card immediately
-      setTimeout(() => {
-        if (currentCardIndex < (flashcardSet?.cards.length || 0) - 1) {
-          setCurrentCardIndex(currentCardIndex + 1);
-          setIsFlipped(false);
-        } else {
-          // Last card - finish session
-          handleFinishSession(updatedResponses);
-        }
-      }, 300);
+      setTimeout(() => advanceToNextCard(updatedResponses), 300);
     } else {
-      // If they don't know it, flip the card to show the answer
-      // They'll manually navigate to the next card
       setIsFlipped(true);
     }
   };
 
   const handleFinishSession = async (responses: typeof cardResponses) => {
-    if (!id) return;
+    if (!id || !flashcardSet) return;
 
     try {
       setSubmitting(true);
       await flashcardService.recordSession(id, responses);
       setShowResults(true);
       toast.success('Session completed! 🎉');
+      updateBreadcrumb(true);
     } catch (_error) {
       toast.error('Failed to save session');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleRetake = () => {
+    setCurrentCardIndex(0);
+    setIsFlipped(false);
+    setCardResponses([]);
+    setShowResults(false);
+    updateBreadcrumb(false);
   };
 
   if (loading) {
@@ -231,6 +254,7 @@ export const FlashcardStudyPage = () => {
   const currentCard = flashcardSet.cards[currentCardIndex];
   const progress = ((currentCardIndex + 1) / flashcardSet.cards.length) * 100;
 
+
   // Show results screen
   if (showResults) {
     return (
@@ -250,27 +274,14 @@ export const FlashcardStudyPage = () => {
           completionType="quiz"
           customTitle="Study Session Complete!"
           contentContext="flashcard"
+          onRetake={handleRetake}
+          onStudyPackClick={
+            flashcardSet.studyPack
+              ? () => navigate(`/study-packs/${flashcardSet.studyPack?.id}`)
+              : undefined
+          }
+          studyPackTitle={flashcardSet.studyPack?.title}
         />
-
-        <div className="flex gap-4">
-          <button
-            onClick={() => navigate('/flashcards')}
-            className="flex-1 btn-secondary"
-          >
-            Back to Flashcards
-          </button>
-          <button
-            onClick={() => {
-              setCurrentCardIndex(0);
-              setIsFlipped(false);
-              setCardResponses([]);
-              setShowResults(false);
-            }}
-            className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg"
-          >
-            Study Again
-          </button>
-        </div>
       </div>
     );
   }
@@ -307,12 +318,26 @@ export const FlashcardStudyPage = () => {
               <Layers className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {flashcardSet.title}
-              </h1>
-              <p className="text-primary-100 dark:text-primary-200">
-                {flashcardSet.topic}
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    {flashcardSet.title}
+                  </h1>
+                  <p className="text-primary-100 dark:text-primary-200">
+                    {flashcardSet.topic}
+                  </p>
+                </div>
+                {flashcardSet._count && flashcardSet._count.attempts > 0 && (
+                  <button
+                    onClick={() => navigate(`/flashcards/${id}?view=history`)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-medium rounded-lg transition-colors border border-white/30"
+                  >
+                    <Clock className="w-4 h-4" />
+                    <span className="hidden sm:inline">View Attempts</span>
+                    <span className="sm:hidden">{flashcardSet._count.attempts}</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -357,11 +382,7 @@ export const FlashcardStudyPage = () => {
           >
             <button
               onClick={handleFlip}
-              className={`inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 ${
-                isFlipped
-                  ? 'bg-primary-600 text-white border-white/30 hover:bg-primary-700'
-                  : 'bg-primary-600 text-white border-white/30 hover:bg-primary-700'
-              }`}
+              className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 bg-primary-600 text-white border-white/30 hover:bg-primary-700"
             >
               <RotateCw
                 className="w-4 h-4 transition-transform duration-600"

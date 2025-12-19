@@ -161,6 +161,20 @@ export interface FlashcardSet {
     id: string;
     title: string;
   };
+  _count?: {
+    attempts: number;
+  };
+}
+
+export interface FlashcardAttempt {
+  id: string;
+  score: number;
+  totalQuestions: number;
+  completedAt: string;
+  answers: Array<{
+    cardIndex: number;
+    response: 'know' | 'dont-know' | 'skipped';
+  }>;
 }
 
 export interface FlashcardGenerateRequest {

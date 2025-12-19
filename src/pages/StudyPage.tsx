@@ -161,7 +161,14 @@ export const StudyPage = () => {
         key={content.id}
         title={content.title}
         subtitle={content.topic}
-        onClick={() => navigate(`/content/${content.id}`)}
+        onClick={() => navigate(`/content/${content.id}`, {
+          state: {
+            breadcrumb: [
+              { label: 'Home', path: '/dashboard' },
+              { label: 'Study', path: '/study' },
+            ],
+          },
+        })}
         actions={<CardMenu items={menuItems} />}
       >
         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
@@ -200,7 +207,14 @@ export const StudyPage = () => {
       );
 
       setTimeout(() => {
-        navigate(`/content/${result.id}`);
+        navigate(`/content/${result.id}`, {
+          state: {
+            breadcrumb: [
+              { label: 'Home', path: '/dashboard' },
+              { label: 'Study', path: '/study' },
+            ],
+          },
+        });
       }, 500);
 
       setContentLoading(false);
