@@ -35,7 +35,7 @@ const buildBreadcrumbItems = (
 ) => {
   return [
     flashcardSet.studyPack
-      ? { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}` }
+      ? { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}?tab=flashcards` }
       : { label: 'Flashcards', path: '/flashcards' },
     { label: flashcardSet.title, path: null },
     ...(includeResults ? [{ label: 'Results', path: null }] : []),

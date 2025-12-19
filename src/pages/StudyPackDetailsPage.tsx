@@ -1,5 +1,5 @@
 import React, {useState, useMemo, useCallback} from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
+import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {studyPackService} from '../services/studyPackService';
 import {quizService} from '../services/quiz.service';
@@ -16,16 +16,12 @@ import {
     Layers,
     HelpCircle,
     FileText,
-    ArrowLeft,
     Trash2,
     Folder,
     Plus,
     Edit2,
 } from 'lucide-react';
 
-// ============================================================================
-// Types & Constants
-// ============================================================================
 
 type TabId = 'quizzes' | 'flashcards' | 'materials' | 'files';
 type ItemType = 'quiz' | 'flashcard' | 'content' | 'userDocument';
@@ -171,7 +167,17 @@ export const StudyPackDetailsPage: React.FC = () => {
         }
     }, [isError, navigate]);
 
-    const [activeTab, setActiveTab] = useState<TabId>('quizzes');
+    const [searchParams] = useSearchParams();
+    const initialTab = (searchParams.get('tab') as TabId) || 'quizzes';
+    const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+
+    // Update URL when tab changes
+    const handleTabChange = (tabId: TabId) => {
+      setActiveTab(tabId);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('tab', tabId);
+      navigate(`?${newParams.toString()}`, { replace: true });
+    };
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showDeleteItemModal, setShowDeleteItemModal] = useState(false);
@@ -506,13 +512,7 @@ export const StudyPackDetailsPage: React.FC = () => {
         <Container>
             {/* Header Section */}
             <div className="mb-8">
-                <button
-                    onClick={() => navigate('/study-packs')}
-                    className="flex items-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-4 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4 mr-1"/>
-                    Back to Study Packs
-                </button>
+
 
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
@@ -568,7 +568,7 @@ export const StudyPackDetailsPage: React.FC = () => {
                     <button
                         role="tab"
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => handleTabChange(tab.id)}
                         className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium whitespace-nowrap transition-colors ${
                             activeTab === tab.id
                                 ? 'border-primary-600 text-primary-600 dark:text-primary-400'

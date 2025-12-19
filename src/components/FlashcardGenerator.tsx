@@ -111,53 +111,55 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
-        <button
-          type="button"
-          onClick={() => setMode('topic')}
-          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-            mode === 'topic'
-              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
-          }`}
-        >
-          <Sparkles className="w-5 h-5 md:w-5 md:h-5" />
-          <span className="text-xs md:text-base">
-            <span className="md:hidden">Topic</span>
-            <span className="hidden md:inline">From Topic</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('content')}
-          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-            mode === 'content'
-              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
-          }`}
-        >
-          <FileText className="w-5 h-5 md:w-5 md:h-5" />
-          <span className="text-xs md:text-base">
-            <span className="md:hidden">Content</span>
-            <span className="hidden md:inline">From Content</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('files')}
-          className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
-            mode === 'files'
-              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
-          }`}
-        >
-          <Upload className="w-5 h-5 md:w-5 md:h-5" />
-          <span className="text-xs md:text-base">
-            <span className="md:hidden">Files</span>
-            <span className="hidden md:inline">From Files</span>
-          </span>
-        </button>
-      </div>
+      {!initialValues?.sourceTitle && (
+        <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            onClick={() => setMode('topic')}
+            className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
+              mode === 'topic'
+                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
+            }`}
+          >
+            <Sparkles className="w-5 h-5 md:w-5 md:h-5" />
+            <span className="text-xs md:text-base">
+              <span className="md:hidden">Topic</span>
+              <span className="hidden md:inline">From Topic</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('content')}
+            className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
+              mode === 'content'
+                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
+            }`}
+          >
+            <FileText className="w-5 h-5 md:w-5 md:h-5" />
+            <span className="text-xs md:text-base">
+              <span className="md:hidden">Content</span>
+              <span className="hidden md:inline">From Content</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('files')}
+            className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
+              mode === 'files'
+                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 md:border-primary-600 dark:md:border-primary-400'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:border-transparent'
+            }`}
+          >
+            <Upload className="w-5 h-5 md:w-5 md:h-5" />
+            <span className="text-xs md:text-base">
+              <span className="md:hidden">Files</span>
+              <span className="hidden md:inline">From Files</span>
+            </span>
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'topic' ? (

@@ -502,11 +502,6 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           const isCompleted = completedSections.has(idx);
           const isActive = activeSection === idx;
 
-          // Hide completed sections unless they're actively selected
-          if (isCompleted && !isActive) {
-            return null;
-          }
-
           return (
             <LearningGuideSection
               key={idx}

@@ -3,10 +3,13 @@ import { useParams, useNavigate, useLocation , Link } from 'react-router-dom';
 import {
   BookOpen,
   Brain,
-  ArrowLeft,
   Trash2,
-  Calendar,
   MoreVertical,
+  ChevronRight,
+  Home,
+  Edit2,
+  Check,
+  X,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -16,7 +19,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
-import { format } from 'date-fns';
+
 
 import { contentService, type Content } from '../services/content.service';
 
@@ -170,6 +173,33 @@ export const ContentPage = () => {
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] =
     useState(false);
   const [isDeletingContent, setIsDeletingContent] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+
+  useEffect(() => {
+    if (content) {
+      setEditedTitle(content.title);
+    }
+  }, [content]);
+
+  const handleTitleUpdate = async () => {
+    if (!content || !editedTitle.trim() || editedTitle === content.title) {
+        setIsEditingTitle(false);
+        return;
+    }
+
+    try {
+        await contentService.update(content.id, { title: editedTitle });
+        queryClient.setQueryData(['content', id], (old: Content | undefined) => {
+            if (!old) return old;
+            return { ...old, title: editedTitle };
+        });
+        toast.success('Title updated');
+        setIsEditingTitle(false);
+    } catch (_error) {
+        toast.error('Failed to update title');
+    }
+  };
 
   // Set breadcrumb when content loads
   useEffect(() => {
@@ -310,98 +340,222 @@ export const ContentPage = () => {
   return (
     <div className="max-w-[1600px] mx-auto pb-20 px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-8 sticky top-0 z-50 bg-white dark:bg-gray-900 pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+         {/* Breadcrumbs - placed outside sticky header */}
+        <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 overflow-hidden mb-4">
             <Link
-              to="/study"
-              className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            to="/"
+            className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center p-1 -ml-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            title="Home"
             >
-              <ArrowLeft className="w-5 h-5" />
+            <Home className="w-4 h-4" />
             </Link>
-            <div>
-              <div className="hidden sm:flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded text-nowrap">
-                  {content.topic}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {format(new Date(content.createdAt), 'MMM d')}
-                </span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-md">
-                {content.title}
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {content.quizId ? (
-              <button
-                onClick={() => navigate(`/quiz/${content.quizId}`)}
-                className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-sm font-medium"
-                title="View Quiz"
-              >
-                <Brain className="w-4 h-4 flex-shrink-0" />
-                <span className="hidden sm:inline">View Quiz</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleGenerateQuiz}
-                className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-sm font-medium"
-                title="Generate Quiz"
-              >
-                <Brain className="w-4 h-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Generate Quiz</span>
-              </button>
-            )}
-
-            {content.flashcardSetId ? (
-              <button
-                onClick={() =>
-                  navigate(`/flashcards/${content.flashcardSetId}`)
-                }
-                className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-sm font-medium"
-                title="View Flashcards"
-              >
-                <BookOpen className="w-4 h-4 flex-shrink-0" />
-                <span className="hidden sm:inline">View Flashcards</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleGenerateFlashcards}
-                className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm text-sm font-medium"
-                title="Generate Flashcards"
-              >
-                <BookOpen className="w-4 h-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Generate Flashcards</span>
-              </button>
-            )}
-            {/* Desktop Actions */}
-            <div className="hidden sm:flex items-center gap-2">
-              <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
-              <button
-                onClick={handleDelete}
-                className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                title="Delete Content"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Mobile Actions Dropdown */}
-            <div className="sm:hidden relative group">
-              <button className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <MoreVertical className="w-5 h-5" />
-              </button>
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 hidden group-hover:block group-focus-within:block z-50">
-                <button
-                  onClick={handleDelete}
-                  className="w-full text-left px-4 py-2 text-sm text-re d-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+            <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+            
+            {content.studyPack ? (
+            <>
+                <Link
+                to={`/study-packs/${content.studyPack.id}?tab=materials`}
+                className="hover:text-gray-900 dark:hover:text-white transition-colors truncate max-w-[150px] sm:max-w-[200px] font-medium"
                 >
-                  <Trash2 className="w-4 h-4" /> Delete
-                </button>
+                {content.studyPack.title}
+                </Link>
+                <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+            </>
+            ) : (
+            <>
+                <Link
+                to="/study"
+                className="hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
+                >
+                Study
+                </Link>
+                <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+            </>
+            )}
+            
+            <span className="font-semibold text-gray-900 dark:text-white truncate">
+            {content.title}
+            </span>
+        </nav>
+      </div>
+
+      {/* Sticky Header - Title and Actions only */}
+      <div className="mb-6 sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 transition-all duration-200 supports-[backdrop-filter]:bg-white/60">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-4">
+            <div className="flex flex-row items-center justify-between gap-4">
+              
+              {/* Title Row */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {isEditingTitle ? (
+                    <div className="flex items-center gap-2 w-full max-w-2xl">
+                        <input
+                            type="text"
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            className="flex-1 px-3 py-1.5 text-xl font-bold bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                            autoFocus
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleTitleUpdate();
+                                if (e.key === 'Escape') {
+                                    setEditedTitle(content.title);
+                                    setIsEditingTitle(false);
+                                }
+                            }}
+                        />
+                        <button
+                            onClick={handleTitleUpdate}
+                            className="p-1 sm:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors flex-shrink-0"
+                        >
+                            <Check className="w-5 h-5"/>
+                        </button>
+                         <button
+                            onClick={() => {
+                                setEditedTitle(content.title);
+                                setIsEditingTitle(false);
+                            }}
+                            className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                        >
+                            <X className="w-5 h-5"/>
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white truncate">
+                        {content.title}
+                        </h1>
+                        <button
+                            onClick={() => setIsEditingTitle(true)}
+                            className="hidden sm:block p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                            title="Edit Title"
+                        >
+                            <Edit2 className="w-4 h-4" />
+                        </button>
+                    </>
+                )}
+               
+
               </div>
+
+               {/* Desktop Actions - Reversed Order */}
+                <div className="hidden sm:flex items-center gap-2">
+                  {/* Quiz Button */}
+                  {content.quizId ? (
+                    <button
+                      onClick={() => navigate(`/quiz/${content.quizId}`)}
+                      className="flex items-center gap-2 px-3 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors shadow-sm text-sm font-medium"
+                      title="View Quiz"
+                    >
+                      <Brain className="w-4 h-4 flex-shrink-0" />
+                      <span>View Quiz</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleGenerateQuiz}
+                      className="flex items-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-sm font-medium"
+                      title="Generate Quiz"
+                    >
+                      <Brain className="w-4 h-4 flex-shrink-0" />
+                      <span>Generate Quiz</span>
+                    </button>
+                  )}
+
+                  {/* Flashcards Button */}
+                  {content.flashcardSetId ? (
+                    <button
+                      onClick={() =>
+                        navigate(`/flashcards/${content.flashcardSetId}`)
+                      }
+                      className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors shadow-sm text-sm font-medium"
+                      title="View Flashcards"
+                    >
+                      <BookOpen className="w-4 h-4 flex-shrink-0" />
+                      <span>View Flashcards</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleGenerateFlashcards}
+                      className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm text-sm font-medium"
+                      title="Generate Flashcards"
+                    >
+                      <BookOpen className="w-4 h-4 flex-shrink-0" />
+                      <span>Generate Flashcards</span>
+                    </button>
+                  )}
+
+                  <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                  <button
+                    onClick={handleDelete}
+                    className="p-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                    title="Delete Content"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Mobile Menu Button */}
+                {!isEditingTitle && (
+                <div className="sm:hidden relative group">
+                  <button className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 hidden group-hover:block group-focus-within:block z-50">
+                    {/* Mobile Actions in Dropdown */}
+                    <button
+                        onClick={() => setIsEditingTitle(true)}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                    >
+                        <Edit2 className="w-4 h-4" /> Edit Title
+                    </button>
+                    
+                    {/* Quiz */}
+                    {content.quizId ? (
+                      <button
+                        onClick={() => navigate(`/quiz/${content.quizId}`)}
+                        className="w-full text-left px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center gap-2"
+                      >
+                        <Brain className="w-4 h-4" /> View Quiz
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleGenerateQuiz}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <Brain className="w-4 h-4" /> Generate Quiz
+                      </button>
+                    )}
+
+                    {/* Flashcards */}
+                    {content.flashcardSetId ? (
+                      <button
+                        onClick={() =>
+                          navigate(`/flashcards/${content.flashcardSetId}`)
+                        }
+                        className="w-full text-left px-4 py-2 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 flex items-center gap-2"
+                      >
+                        <BookOpen className="w-4 h-4" /> View Cards
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleGenerateFlashcards}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <BookOpen className="w-4 h-4" /> Generate Cards
+                      </button>
+                    )}
+                    
+                    <div className="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                    <button
+                      onClick={handleDelete}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </div>
+                </div>
+                )}
             </div>
           </div>
         </div>

@@ -352,8 +352,12 @@ export const QuizPage = () => {
         <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
           <button
             onClick={() => {
-              setShowGenerator(false);
-              setInitialValues(undefined);
+              if (initialValues?.studyPackId) {
+                navigate(`/study-packs/${initialValues.studyPackId}?tab=quizzes`);
+              } else {
+                setShowGenerator(false);
+                setInitialValues(undefined);
+              }
             }}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
           >

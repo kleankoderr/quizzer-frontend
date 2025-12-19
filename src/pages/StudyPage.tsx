@@ -491,7 +491,13 @@ export const StudyPage = () => {
         <div className="card shadow-lg dark:bg-gray-800 animate-in fade-in slide-in-from-top-4 duration-300 relative">
           {/* Close Button */}
           <button
-            onClick={() => setShowCreator(false)}
+            onClick={() => {
+              if (selectedStudyPackId) {
+                navigate(`/study-packs/${selectedStudyPackId}?tab=materials`);
+              } else {
+                setShowCreator(false);
+              }
+            }}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
