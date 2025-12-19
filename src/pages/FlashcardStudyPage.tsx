@@ -34,7 +34,6 @@ const buildBreadcrumbItems = (
   includeHistory = false
 ) => {
   return [
-    { label: 'Home', path: '/dashboard' },
     flashcardSet.studyPack
       ? { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}` }
       : { label: 'Flashcards', path: '/flashcards' },

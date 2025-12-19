@@ -400,7 +400,6 @@ export const StudyPackDetailsPage: React.FC = () => {
                 navigate(`${routeMap[type]}/${itemId}`, {
                     state: {
                         breadcrumb: [
-                            { label: 'Home', path: '/dashboard' },
                             { label: studyPack.title, path: `/study-packs/${studyPack.id}` },
                         ],
                     },

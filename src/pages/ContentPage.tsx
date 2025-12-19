@@ -177,10 +177,7 @@ export const ContentPage = () => {
 
     const breadcrumbItems = [];
     
-    // Item 1: Home (Link to /dashboard)
-    breadcrumbItems.push({ label: 'Home', path: '/dashboard' });
-    
-    // Item 2: Study Pack or Study
+    // Item 1: Study Pack or Study
     if (content.studyPack) {
       breadcrumbItems.push({
         label: content.studyPack.title,
@@ -190,7 +187,7 @@ export const ContentPage = () => {
       breadcrumbItems.push({ label: 'Study', path: '/study' });
     }
     
-    // Item 3: Content Title (Plain Text, No Link)
+    // Item 2: Content Title (Plain Text, No Link)
     breadcrumbItems.push({ label: content.title, path: null });
 
     navigate(location.pathname + location.search, {
@@ -209,7 +206,6 @@ export const ContentPage = () => {
     if (!content) return;
 
     const baseBreadcrumb = [
-      { label: 'Home', path: '/dashboard' },
       content.studyPack
         ? { label: content.studyPack.title, path: `/study-packs/${content.studyPack.id}` }
         : { label: 'Study', path: '/study' },
@@ -238,7 +234,6 @@ export const ContentPage = () => {
     if (!content) return;
 
     const baseBreadcrumb = [
-      { label: 'Home', path: '/dashboard' },
       content.studyPack
         ? { label: content.studyPack.title, path: `/study-packs/${content.studyPack.id}` }
         : { label: 'Study', path: '/study' },

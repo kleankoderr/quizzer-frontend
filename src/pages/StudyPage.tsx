@@ -164,7 +164,6 @@ export const StudyPage = () => {
         onClick={() => navigate(`/content/${content.id}`, {
           state: {
             breadcrumb: [
-              { label: 'Home', path: '/dashboard' },
               { label: 'Study', path: '/study' },
             ],
           },
@@ -210,7 +209,6 @@ export const StudyPage = () => {
         navigate(`/content/${result.id}`, {
           state: {
             breadcrumb: [
-              { label: 'Home', path: '/dashboard' },
               { label: 'Study', path: '/study' },
             ],
           },
