@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import {
@@ -29,6 +29,7 @@ const renderMarkdown = (text: string) => {
 export const FlashcardStudyPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: flashcardSet, isLoading: loading, error } = useFlashcardSet(id);
   const { user } = useAuth();
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -74,6 +75,36 @@ export const FlashcardStudyPage = () => {
     ],
     [knowCount, dontKnowCount, totalCards]
   );
+
+  // Set breadcrumb when flashcard set loads
+  useEffect(() => {
+    if (!flashcardSet ||!id || loading || location.state?.breadcrumb) return;
+
+    const breadcrumbItems = [];
+
+    // Add study pack if it exists
+    if (flashcardSet.studyPack) {
+      breadcrumbItems.push(
+        { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}` }
+      );
+    } else {
+      breadcrumbItems.push(
+        { label: 'Flashcards', path: '/flashcards' }
+      );
+    }
+
+    // Add flashcard set title (non-clickable)
+    breadcrumbItems.push(
+      { label: flashcardSet.title, path: null }
+    );
+
+    navigate(location.pathname + location.search, {
+      replace: true,
+      state: {
+        breadcrumb: breadcrumbItems,
+      },
+    });
+  }, [flashcardSet, id, loading, location, navigate]);
 
   if (error) {
     toast.error('Failed to load flashcard set');

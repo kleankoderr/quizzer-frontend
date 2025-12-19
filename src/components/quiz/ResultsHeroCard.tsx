@@ -5,6 +5,9 @@ import {
   Target,
   Award,
   ArrowLeft,
+  RotateCcw,
+  Eye,
+  BookOpen,
 } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
@@ -120,6 +123,14 @@ export interface ResultsHeroCardProps {
   completionType?: 'challenge' | 'quiz';
   /** Content context for descriptions - 'quiz', 'challenge', or 'flashcard' (defaults to completionType) */
   contentContext?: 'quiz' | 'challenge' | 'flashcard';
+  /** Callback for retaking the quiz/flashcard session */
+  onRetake?: () => void;
+  /** Callback for reviewing answers */
+  onReview?: () => void;
+  /** Callback for navigating to study pack */
+  onStudyPackClick?: () => void;
+  /** Title of the study pack to display in button label */
+  studyPackTitle?: string;
 }
 
 export const ResultsHeroCard = ({
@@ -140,6 +151,10 @@ export const ResultsHeroCard = ({
                                   customTitle,
                                   completionType = 'quiz',
                                   contentContext,
+                                  onRetake,
+                                  onReview,
+                                  onStudyPackClick,
+                                  studyPackTitle,
                                 }: ResultsHeroCardProps) => {
   const { width, height } = useWindowSize();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -150,6 +165,13 @@ export const ResultsHeroCard = ({
   // Use contentContext if provided, otherwise fall back to completionType
   const context = contentContext || (completionType === 'challenge' ? 'challenge' : 'quiz');
   const gradeInfo = useMemo(() => getGradeInfo(score, context, title), [score, context, title]);
+
+  // Helper to get retake button label based on context
+  const getRetakeLabel = () => {
+    if (context === 'flashcard') return 'Restart Flashcards';
+    if (context === 'challenge') return 'Retry Challenge';
+    return 'Retake Quiz';
+  };
 
   // Default stats if none provided
   const defaultStats: ResultsStat[] = useMemo(
@@ -387,6 +409,51 @@ export const ResultsHeroCard = ({
                 ))}
               </div>
             </div>
+
+            {/* Action Buttons */}
+            {(onReview || onRetake || onStudyPackClick) && (
+              <div
+                data-html2canvas-ignore="true"
+                className="mt-8 md:mt-10 flex flex-col md:flex-row gap-3 md:gap-4 w-full max-w-2xl mx-auto"
+              >
+                {/* Review Answers Button */}
+                {onReview && (
+                  <button
+                    onClick={onReview}
+                    className="flex-1 px-6 py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Eye className="w-5 h-5" />
+                    <span>
+                      {context === 'flashcard' ? 'Review Cards' : 'Review Answers'}
+                    </span>
+                  </button>
+                )}
+
+                {/* Retake/Restart Button */}
+                {onRetake && (
+                  <button
+                    onClick={onRetake}
+                    className="flex-1 px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-white/20 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    <span>{getRetakeLabel()}</span>
+                  </button>
+                )}
+
+                {/* Back to Study Pack Button */}
+                {onStudyPackClick && (
+                  <button
+                    onClick={onStudyPackClick}
+                    className="flex-1 px-6 py-3.5 bg-transparent hover:bg-white/10 text-white/90 hover:text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 border border-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    <span>
+                      {studyPackTitle ? `Back to ${studyPackTitle}` : 'Back to Study Pack'}
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

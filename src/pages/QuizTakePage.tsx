@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Toast as toast } from '../utils/toast';
 import { quizService } from '../services/quiz.service';
@@ -11,6 +11,7 @@ import { useQuizTimer } from '../hooks/useQuizTimer';
 import { useQuizStorage } from '../hooks/useQuizStorage';
 import { QuizHeader } from '../components/quiz/QuizHeader';
 import { QuizNavigation } from '../components/quiz/QuizNavigation';
+import { QuizAttemptsHistory } from '../components/quiz/QuizAttemptsHistory';
 
 export const QuizTakePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ export const QuizTakePage = () => {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const challengeId = searchParams.get('challengeId');
+  const location = useLocation();
 
   const { data: quiz, isLoading: loading, error } = useQuiz(id);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -26,6 +28,7 @@ export const QuizTakePage = () => {
   >([]);
   const [submitting, setSubmitting] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const questions = useMemo(() => quiz?.questions ?? [], [quiz?.questions]);
 
@@ -80,11 +83,17 @@ export const QuizTakePage = () => {
                 `/quiz/attempt/${submissionResult.attemptId}/review?challengeId=${challengeId}`,
                 {
                   state: {
-                    breadcrumb: [
-                      { label: 'Quizzes', path: '/quiz' },
-                      { label: quiz.title, path: `/quiz/${id}` },
-                      { label: 'Attempt', path: null },
-                    ],
+                    breadcrumb: quiz.studyPack
+                      ? [
+                          { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
+                          { label: quiz.title, path: null },
+                          { label: 'Review', path: null },
+                        ]
+                      : [
+                          { label: 'Quizzes', path: '/quiz' },
+                          { label: quiz.title, path: null },
+                          { label: 'Review', path: null },
+                        ],
                   },
                 }
               );
@@ -94,11 +103,17 @@ export const QuizTakePage = () => {
               `/quiz/attempt/${submissionResult.attemptId}/review?challengeId=${challengeId}`,
               {
                 state: {
-                  breadcrumb: [
-                    { label: 'Quizzes', path: '/quiz' },
-                    { label: quiz.title, path: `/quiz/${id}` },
-                    { label: 'Attempt', path: null },
-                  ],
+                  breadcrumb: quiz.studyPack
+                    ? [
+                        { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
+                        { label: quiz.title, path: null },
+                        { label: 'Review', path: null },
+                      ]
+                    : [
+                        { label: 'Quizzes', path: '/quiz' },
+                        { label: quiz.title, path: null },
+                        { label: 'Review', path: null },
+                      ],
                 },
               }
             );
@@ -106,11 +121,17 @@ export const QuizTakePage = () => {
         } else {
           navigate(`/quiz/attempt/${submissionResult.attemptId}/review`, {
             state: {
-              breadcrumb: [
-                { label: 'Quizzes', path: '/quiz' },
-                { label: quiz.title, path: `/quiz/${id}` },
-                { label: 'Attempt', path: null },
-              ],
+              breadcrumb: quiz.studyPack
+                ? [
+                    { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
+                    { label: quiz.title, path: null },
+                    { label: 'Review', path: null },
+                  ]
+                : [
+                    { label: 'Quizzes', path: '/quiz' },
+                    { label: quiz.title, path: null },
+                    { label: 'Review', path: null },
+                  ],
             },
           });
         }
@@ -143,6 +164,58 @@ export const QuizTakePage = () => {
     onTimeUp: handleAutoSubmit,
     showResults: false,
   });
+
+  // Set breadcrumb based on whether quiz has been attempted before
+  useEffect(() => {
+    if (!quiz || !id || loading || location.state?.breadcrumb) return;
+
+    const hasAttempts = (quiz.attemptCount && quiz.attemptCount > 0) || 
+                        (quiz.attempts && quiz.attempts.length > 0);
+
+    const breadcrumbItems = [];
+
+    // Add study pack if it exists
+    if (quiz.studyPack) {
+      breadcrumbItems.push(
+        { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` }
+      );
+    } else {
+      breadcrumbItems.push(
+        { label: 'Quizzes', path: '/quiz' }
+      );
+    }
+
+    // Add quiz title (non-clickable)
+    breadcrumbItems.push(
+      { label: quiz.title, path: null }
+    );
+
+    // Add "Retake" if applicable
+    if (hasAttempts) {
+      breadcrumbItems.push(
+        { label: 'Retake', path: null }
+      );
+    }
+
+    navigate(location.pathname + location.search, {
+      replace: true,
+      state: {
+        breadcrumb: breadcrumbItems,
+      },
+    });
+  }, [quiz, id, loading, location, navigate]);
+
+  // Check if quiz has attempts and show history view
+  useEffect(() => {
+    if (!quiz || loading) return;
+    
+    // Show history if quiz has attempts and user hasn't explicitly started retaking
+    const hasAttempts = quiz.attempts && quiz.attempts.length > 0;
+    const hasStoredProgress = localStorage.getItem(getStorageKey('answers'));
+    
+    // Show history only if there are attempts and no stored progress
+    setShowHistory(Boolean(hasAttempts && !hasStoredProgress));
+  }, [quiz, loading, getStorageKey]);
 
   // Initialize quiz state (runs once when quiz loads)
   useMemo(() => {
@@ -250,6 +323,17 @@ export const QuizTakePage = () => {
           Back to Quizzes
         </button>
       </div>
+    );
+  }
+
+  // Show attempts history if applicable
+  if (showHistory && quiz.attempts && quiz.attempts.length > 0) {
+    return (
+      <QuizAttemptsHistory
+        quizTitle={quiz.title}
+        attempts={quiz.attempts}
+        onRetake={() => setShowHistory(false)}
+      />
     );
   }
 

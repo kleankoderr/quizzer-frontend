@@ -29,6 +29,9 @@ export const QuizReviewPage = () => {
   const [showExplanations, setShowExplanations] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // Ref for smooth scrolling to review section
+  const reviewSectionRef = useRef<HTMLDivElement>(null);
+
   // Use a ref to track if we've already fetched for this attemptId to prevent double calls in Strict Mode
   const fetchedAttemptIdRef = useRef<string | null>(null);
 
@@ -95,14 +98,33 @@ export const QuizReviewPage = () => {
   // Handle breadcrumb update separately after quiz data is loaded
   useEffect(() => {
     if (!loading && quiz && !location.state?.breadcrumb) {
+      const breadcrumbItems = [];
+
+      // Add study pack if it exists
+      if (quiz.studyPack) {
+        breadcrumbItems.push(
+          { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` }
+        );
+      } else {
+        breadcrumbItems.push(
+          { label: 'Quizzes', path: '/quiz' }
+        );
+      }
+
+      // Add quiz title (non-clickable)
+      breadcrumbItems.push(
+        { label: quiz.title, path: null }
+      );
+
+      // Add "Review"
+      breadcrumbItems.push(
+        { label: 'Review', path: null }
+      );
+
       navigate(location.pathname + location.search, {
         replace: true,
         state: {
-          breadcrumb: [
-            { label: 'Quizzes', path: '/quiz' },
-            { label: quiz.title, path: `/quiz/${quiz.id}` },
-            { label: 'Attempt', path: null },
-          ],
+          breadcrumb: breadcrumbItems,
         },
       });
     }
@@ -114,6 +136,35 @@ export const QuizReviewPage = () => {
     } else {
       navigate('/quiz');
     }
+  };
+
+  // Smooth scroll to review section
+  const handleReview = () => {
+    reviewSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+    // Optionally expand explanations when reviewing
+    if (!showExplanations) {
+      setShowExplanations(true);
+    }
+  };
+
+  // Navigate to retake quiz
+  const handleRetake = () => {
+    if (!quiz?.id) return;
+    
+    if (challengeId) {
+      navigate(`/quiz/${quiz.id}?challengeId=${challengeId}`);
+    } else {
+      navigate(`/quiz/${quiz.id}`);
+    }
+  };
+
+  // Navigate to study pack
+  const handleStudyPackClick = () => {
+    if (!quiz?.studyPackId) return;
+    navigate(`/study-packs/${quiz.studyPackId}`);
   };
 
   if (loading) {
@@ -153,15 +204,21 @@ export const QuizReviewPage = () => {
         backLabel={challengeId ? 'Back to Challenge' : 'Back to Quizzes'}
         shareId={attemptId}
         shareTitle={quiz.title}
+        onReview={handleReview}
+        onRetake={handleRetake}
+        onStudyPackClick={quiz.studyPack ? handleStudyPackClick : undefined}
+        studyPackTitle={quiz.studyPack?.title}
       />
 
-      <QuizReviewContent
-        quiz={quiz}
-        result={result}
-        selectedAnswers={selectedAnswers}
-        showExplanations={showExplanations}
-        onToggleExplanations={() => setShowExplanations(!showExplanations)}
-      />
+      <div ref={reviewSectionRef}>
+        <QuizReviewContent
+          quiz={quiz}
+          result={result}
+          selectedAnswers={selectedAnswers}
+          showExplanations={showExplanations}
+          onToggleExplanations={() => setShowExplanations(!showExplanations)}
+        />
+      </div>
     </div>
   );
 };

@@ -88,8 +88,11 @@ export interface Quiz {
   tags?: string[];
   createdAt: string;
   attempts?: {
+    id: string;
     score: number;
+    totalQuestions: number;
     completedAt: string;
+    timeSpent?: number;
   }[];
   attemptCount?: number; // Count for list view (when attempts array not loaded)
   studyPackId?: string;
