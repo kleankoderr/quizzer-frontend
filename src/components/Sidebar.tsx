@@ -56,12 +56,12 @@ export const Sidebar = ({
       // Core - Most frequently accessed
       items: [
         { path: '/dashboard', icon: Home, label: 'Dashboard' },
-        { path: '/study', icon: BookOpen, label: 'Study' },
       ],
     },
     {
       label: 'Learning Tools',
       items: [
+        { path: '/study', icon: BookOpen, label: 'Study' },
         { path: '/quiz', icon: Brain, label: 'Quizzes' },
         { path: '/flashcards', icon: Layers, label: 'Flashcards' },
         { path: '/study-packs', icon: Folder, label: 'Study Packs' },

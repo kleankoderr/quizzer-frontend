@@ -423,191 +423,199 @@ export default function UserDetailsPage() {
 
           <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Quiz Quota Card */}
-            <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-blue-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-blue-900/10 dark:to-gray-900">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Quizzes
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                    {userQuota.quiz.used}
-                    <span className="text-base font-normal text-gray-500 dark:text-gray-400">
-                      /{userQuota.quiz.limit}
-                    </span>
-                  </p>
-                </div>
-                <div className="relative h-12 w-12">
-                  <svg className="h-12 w-12 -rotate-90 transform">
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      className="text-gray-200 dark:text-gray-700"
-                    />
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 20}`}
-                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - userQuota.quiz.used / userQuota.quiz.limit)}`}
-                      className="text-blue-500 transition-all"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                      {Math.round((userQuota.quiz.used / userQuota.quiz.limit) * 100)}%
-                    </span>
+            {userQuota?.quiz && (
+              <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-blue-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-blue-900/10 dark:to-gray-900">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Quizzes
+                    </p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                      {userQuota.quiz.used}
+                      <span className="text-base font-normal text-gray-500 dark:text-gray-400">
+                        /{userQuota.quiz.limit}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="relative h-12 w-12">
+                    <svg className="h-12 w-12 -rotate-90 transform">
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        className="text-gray-200 dark:text-gray-700"
+                      />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 20}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - (userQuota.quiz.used || 0) / (userQuota.quiz.limit || 1))}`}
+                        className="text-blue-500 transition-all"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                        {Math.round(((userQuota.quiz.used || 0) / (userQuota.quiz.limit || 1)) * 100)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Flashcard Quota Card */}
-            <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-green-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-green-900/10 dark:to-gray-900">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Flashcards
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                    {userQuota.flashcard.used}
-                    <span className="text-base font-normal text-gray-500 dark:text-gray-400">
-                      /{userQuota.flashcard.limit}
-                    </span>
-                  </p>
-                </div>
-                <div className="relative h-12 w-12">
-                  <svg className="h-12 w-12 -rotate-90 transform">
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      className="text-gray-200 dark:text-gray-700"
-                    />
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 20}`}
-                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - userQuota.flashcard.used / userQuota.flashcard.limit)}`}
-                      className="text-green-500 transition-all"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-green-600 dark:text-green-400">
-                      {Math.round((userQuota.flashcard.used / userQuota.flashcard.limit) * 100)}%
-                    </span>
+            {userQuota?.flashcard && (
+              <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-green-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-green-900/10 dark:to-gray-900">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Flashcards
+                    </p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                      {userQuota.flashcard.used}
+                      <span className="text-base font-normal text-gray-500 dark:text-gray-400">
+                        /{userQuota.flashcard.limit}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="relative h-12 w-12">
+                    <svg className="h-12 w-12 -rotate-90 transform">
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        className="text-gray-200 dark:text-gray-700"
+                      />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 20}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - (userQuota.flashcard.used || 0) / (userQuota.flashcard.limit || 1))}`}
+                        className="text-green-500 transition-all"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                        {Math.round(((userQuota.flashcard.used || 0) / (userQuota.flashcard.limit || 1)) * 100)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Learning Guide Quota Card */}
-            <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-purple-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-purple-900/10 dark:to-gray-900">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Study Guides
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                    {userQuota.learningGuide.used}
-                    <span className="text-base font-normal text-gray-500 dark:text-gray-400">
-                      /{userQuota.learningGuide.limit}
-                    </span>
-                  </p>
-                </div>
-                <div className="relative h-12 w-12">
-                  <svg className="h-12 w-12 -rotate-90 transform">
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      className="text-gray-200 dark:text-gray-700"
-                    />
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 20}`}
-                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - userQuota.learningGuide.used / userQuota.learningGuide.limit)}`}
-                      className="text-purple-500 transition-all"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                      {Math.round((userQuota.learningGuide.used / userQuota.learningGuide.limit) * 100)}%
-                    </span>
+            {userQuota?.learningGuide && (
+              <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-purple-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-purple-900/10 dark:to-gray-900">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Study Guides
+                    </p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                      {userQuota.learningGuide.used}
+                      <span className="text-base font-normal text-gray-500 dark:text-gray-400">
+                        /{userQuota.learningGuide.limit}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="relative h-12 w-12">
+                    <svg className="h-12 w-12 -rotate-90 transform">
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        className="text-gray-200 dark:text-gray-700"
+                      />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 20}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - (userQuota.learningGuide.used || 0) / (userQuota.learningGuide.limit || 1))}`}
+                        className="text-purple-500 transition-all"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
+                        {Math.round(((userQuota.learningGuide.used || 0) / (userQuota.learningGuide.limit || 1)) * 100)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Explanation Quota Card */}
-            <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-indigo-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-indigo-900/10 dark:to-gray-900">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Explanations
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                    {userQuota.explanation.used}
-                    <span className="text-base font-normal text-gray-500 dark:text-gray-400">
-                      /{userQuota.explanation.limit}
-                    </span>
-                  </p>
-                </div>
-                <div className="relative h-12 w-12">
-                  <svg className="h-12 w-12 -rotate-90 transform">
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      className="text-gray-200 dark:text-gray-700"
-                    />
-                    <circle
-                      cx="24"
-                      cy="24"
-                      r="20"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 20}`}
-                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - userQuota.explanation.used / userQuota.explanation.limit)}`}
-                      className="text-indigo-500 transition-all"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                      {Math.round((userQuota.explanation.used / userQuota.explanation.limit) * 100)}%
-                    </span>
+            {userQuota?.explanation && (
+              <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-indigo-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-indigo-900/10 dark:to-gray-900">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Explanations
+                    </p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                      {userQuota.explanation.used}
+                      <span className="text-base font-normal text-gray-500 dark:text-gray-400">
+                        /{userQuota.explanation.limit}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="relative h-12 w-12">
+                    <svg className="h-12 w-12 -rotate-90 transform">
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        className="text-gray-200 dark:text-gray-700"
+                      />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 20}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - (userQuota.explanation.used || 0) / (userQuota.explanation.limit || 1))}`}
+                        className="text-indigo-500 transition-all"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                        {Math.round(((userQuota.explanation.used || 0) / (userQuota.explanation.limit || 1)) * 100)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* File Storage Card */}
-            {userQuota.fileStorage && (
+            {userQuota?.fileStorage && (
               <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-amber-50/50 to-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:from-amber-900/10 dark:to-gray-900 sm:col-span-2">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -615,21 +623,21 @@ export default function UserDetailsPage() {
                       File Storage
                     </p>
                     <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                      {formatStorage(userQuota.fileStorage.used)}
+                      {formatStorage(userQuota.fileStorage.used || 0)}
                       <span className="text-base font-normal text-gray-500 dark:text-gray-400">
-                        /{formatStorage(userQuota.fileStorage.limit)}
+                        /{formatStorage(userQuota.fileStorage.limit || 0)}
                       </span>
                     </p>
                     <div className="mt-3 w-full">
                       <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
                         <span>Used</span>
-                        <span>{Math.round((userQuota.fileStorage.used / userQuota.fileStorage.limit) * 100)}% capacity</span>
+                        <span>{Math.round(((userQuota.fileStorage.used || 0) / (userQuota.fileStorage.limit || 1)) * 100)}% capacity</span>
                       </div>
                       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all"
                           style={{
-                            width: `${Math.min((userQuota.fileStorage.used / userQuota.fileStorage.limit) * 100, 100)}%`,
+                            width: `${Math.min(((userQuota.fileStorage.used || 0) / (userQuota.fileStorage.limit || 1)) * 100, 100)}%`,
                           }}
                         />
                       </div>
@@ -654,13 +662,13 @@ export default function UserDetailsPage() {
                         strokeWidth="4"
                         fill="none"
                         strokeDasharray={`${2 * Math.PI * 20}`}
-                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - userQuota.fileStorage.used / userQuota.fileStorage.limit)}`}
+                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - (userQuota.fileStorage.used || 0) / (userQuota.fileStorage.limit || 1))}`}
                         className="text-amber-500 transition-all"
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-                        {Math.round((userQuota.fileStorage.used / userQuota.fileStorage.limit) * 100)}%
+                        {Math.round(((userQuota.fileStorage.used || 0) / (userQuota.fileStorage.limit || 1)) * 100)}%
                       </span>
                     </div>
                   </div>

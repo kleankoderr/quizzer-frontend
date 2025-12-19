@@ -170,7 +170,7 @@ export const ManageSubscriptionPage = () => {
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                   <h4 className="font-bold text-blue-900 dark:text-blue-300 text-sm mb-3 flex items-center gap-2">
                     <Zap className="w-4 h-4" />
-                    Why Upgrade?
+                    Why Upgrade Premium ?
                   </h4>
                   <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-400">
                     <li className="flex items-center gap-2">

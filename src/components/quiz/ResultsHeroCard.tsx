@@ -37,7 +37,7 @@ const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard'
       color: 'text-blue-400',
       grade: 'A',
       message: 'Great Job!',
-      descriptionPrefix: 'Strong performance on ',
+      descriptionPrefix: 'Strong performance in ',
       descriptionSuffix: '!',
       titleDisplay: title || fallbackTitle,
     };
