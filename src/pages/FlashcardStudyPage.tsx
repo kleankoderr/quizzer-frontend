@@ -50,6 +50,7 @@ export const FlashcardStudyPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const viewHistory = searchParams.get('view') === 'history';
+  const viewStudy = searchParams.get('view') === 'study';
   const attemptId = searchParams.get('attemptId');
   const { data: flashcardSet, isLoading: loading, error } = useFlashcardSet(id);
   const { user } = useAuth();
@@ -105,11 +106,12 @@ export const FlashcardStudyPage = () => {
   useEffect(() => {
     if (!flashcardSet || !id || loading || location.state?.breadcrumb) return;
     const breadcrumbItems = buildBreadcrumbItems(flashcardSet, false, isStudying === false);
+    // Preserve existing search params (like ?view=study) when updating breadcrumbs
     navigate(location.pathname + location.search, {
       replace: true,
       state: { breadcrumb: breadcrumbItems },
     });
-  }, [flashcardSet, id, loading, location, navigate, isStudying]);
+  }, [flashcardSet, id, loading, location.pathname, location.state?.breadcrumb, navigate, isStudying]);
 
   // Initializing isStudying state
   useEffect(() => {
@@ -119,22 +121,27 @@ export const FlashcardStudyPage = () => {
 
     if (viewHistory) {
       setIsStudying(false);
+    } else if (viewStudy) {
+      setIsStudying(true);
     } else if (hasAttempts) {
       setIsStudying(false);
     } else {
       setIsStudying(true);
     }
-  }, [flashcardSet, isStudying, viewHistory]);
+  }, [flashcardSet, isStudying, viewHistory, viewStudy]);
 
-  // Sync isStudying with URL changes (handle "View Attempts" button or back button)
+  // Sync isStudying with URL changes - this ensures URL is the source of truth
   useEffect(() => {
-    if (viewHistory && isStudying === true) {
+    if (viewHistory && isStudying !== false) {
       setIsStudying(false);
-    } else if (!viewHistory && isStudying === false && !showResults) {
-      // Don't auto-switch back to studying if we're on the results page or if user came from listing items with attempts
-      // Logic handled by handleRetake and initial state
+    } else if (viewStudy && isStudying !== true) {
+      setIsStudying(true);
+      // Also clear showResults when explicitly switching to study mode
+      if (showResults) {
+        setShowResults(false);
+      }
     }
-  }, [viewHistory, isStudying, showResults]);
+  }, [viewHistory, viewStudy, isStudying, showResults]);
 
   // Fetch attempts when history view is active
   useEffect(() => {
@@ -283,9 +290,13 @@ export const FlashcardStudyPage = () => {
     setCardResponses([]);
     setShowResults(false);
     setIsStudying(true);
-    // Remove view=history and attemptId from URL to ensure breadcrumbs and state stay in sync
-    navigate(location.pathname, { replace: true });
-    updateBreadcrumb(false);
+    
+    // Consolidate navigation and breadcrumb update into a single call
+    const breadcrumbItems = flashcardSet ? buildBreadcrumbItems(flashcardSet, false, false) : [];
+    navigate(location.pathname + '?view=study', { 
+      replace: true,
+      state: { breadcrumb: breadcrumbItems }
+    });
   };
 
   if (loading) {
