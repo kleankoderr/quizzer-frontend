@@ -101,7 +101,7 @@ export const QuizList: React.FC<QuizListProps> = ({
     return (
       <Card
         key={quiz.id}
-        to={`/quiz/${quiz.id}`}
+        to={`/quiz/${quiz.id}${quiz.attemptCount && quiz.attemptCount > 0 ? '?view=history' : ''}`}
         title={quiz.title}
         subtitle={quiz.topic}
         actions={<CardMenu items={menuItems} />}

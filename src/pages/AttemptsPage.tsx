@@ -32,6 +32,7 @@ import {
   StatCardSkeleton,
 } from '../components/skeletons';
 import { StatCard } from '../components/StatCard';
+import { AttemptListItem } from '../components/AttemptListItem';
 
 const COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
 
@@ -293,6 +294,24 @@ export function AttemptsPage() {
             {
               label:
                 attempt.quiz?.title || attempt.challenge?.title || 'Unknown',
+              path: null,
+            },
+            { label: 'Attempt', path: null },
+          ],
+        },
+      });
+    } else if (attempt.type === 'flashcard') {
+      const setId = attempt.flashcardSetId || (attempt as any).flashcardSet?.id;
+      if (!setId) {
+        toast.error('Flashcard set not found');
+        return;
+      }
+      navigate(`/flashcards/${setId}?view=history&attemptId=${attempt.id}`, {
+        state: {
+          breadcrumb: [
+            { label: 'Attempts', path: '/attempts' },
+            {
+              label: (attempt as any).flashcardSet?.title || 'Unknown',
               path: null,
             },
             { label: 'Attempt', path: null },
@@ -593,53 +612,13 @@ export function AttemptsPage() {
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredAttempts.map((attempt, index) => (
-              <div
+              <AttemptListItem
                 key={attempt.id}
+                attempt={attempt}
+                index={index}
+                totalCount={filteredAttempts.length}
                 onClick={() => handleAttemptClick(attempt)}
-                className={`p-6 ${
-                  attempt.type === 'quiz' || attempt.type === 'challenge'
-                    ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700'
-                    : ''
-                } transition-colors`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 font-semibold">
-                      #{filteredAttempts.length - index}
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {format(
-                          parseISO(attempt.completedAt),
-                          'MMM dd, yyyy • h:mm a'
-                        )}
-                      </p>
-                      {attempt.score !== undefined &&
-                        attempt.totalQuestions && (
-                          <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                            {attempt.score} / {attempt.totalQuestions} questions
-                          </p>
-                        )}
-                    </div>
-                  </div>
-                  {attempt.score !== undefined && attempt.totalQuestions && (
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {Math.round(
-                          Math.max(
-                            0,
-                            (attempt.score / attempt.totalQuestions) * 100
-                          )
-                        )}
-                        %
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-500">
-                        Score
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              />
             ))}
           </div>
         </div>

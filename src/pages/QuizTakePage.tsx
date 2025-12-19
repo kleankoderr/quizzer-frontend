@@ -11,6 +11,7 @@ import { useQuizTimer } from '../hooks/useQuizTimer';
 import { useQuizStorage } from '../hooks/useQuizStorage';
 import { QuizHeader } from '../components/quiz/QuizHeader';
 import { QuizNavigation } from '../components/quiz/QuizNavigation';
+import { QuizAttemptsView } from '../components/quiz/QuizAttemptsView';
 
 export const QuizTakePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,7 @@ export const QuizTakePage = () => {
   >([]);
   const [submitting, setSubmitting] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [isTaking, setIsTaking] = useState<boolean | null>(null);
 
   const questions = useMemo(() => quiz?.questions ?? [], [quiz?.questions]);
 
@@ -39,6 +41,56 @@ export const QuizTakePage = () => {
   });
 
   // Handle submit
+  // Extract challenge completion logic to reduce complexity
+  const handleChallengeCompletion = async (submissionResult: any) => {
+    if (!challengeId || !id || !quiz) return;
+
+    try {
+      const { challengeService } = await import('../services');
+      const challengeCompletionResult = await challengeService.completeQuizInChallenge(
+        challengeId,
+        id,
+        {
+          score: submissionResult.score,
+          totalQuestions: submissionResult.totalQuestions,
+          attemptId: submissionResult.attemptId,
+        }
+      );
+
+      await queryClient.invalidateQueries({ queryKey: ['challenges'] });
+
+      if (challengeCompletionResult.completed) {
+        navigate(`/challenges/${challengeId}/results`);
+      } else {
+        navigateToReview(submissionResult.attemptId, true);
+      }
+    } catch {
+      navigateToReview(submissionResult.attemptId, true);
+    }
+  };
+
+  const navigateToReview = (attemptId: string, isChallenge = false) => {
+    if (!quiz) return;
+    
+    const breadcrumb = quiz.studyPack
+      ? [
+          { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
+          { label: quiz.title, path: null },
+          { label: 'Review', path: null },
+        ]
+      : [
+          { label: 'Quizzes', path: '/quiz' },
+          { label: quiz.title, path: null },
+          { label: 'Review', path: null },
+        ];
+
+    const path = isChallenge 
+      ? `/quiz/attempt/${attemptId}/review?challengeId=${challengeId}`
+      : `/quiz/attempt/${attemptId}/review`;
+
+    navigate(path, { state: { breadcrumb } });
+  };
+
   const handleSubmit = useCallback(
     async (force = false) => {
       if (!quiz || !id) return;
@@ -56,82 +108,12 @@ export const QuizTakePage = () => {
         });
 
         clearStorage();
+        toast.success(force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!');
 
-        toast.success(
-          force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!'
-        );
-
-        // Handle challenge completion
         if (challengeId) {
-          try {
-            const { challengeService } = await import('../services');
-            const challengeCompletionResult =
-              await challengeService.completeQuizInChallenge(challengeId, id, {
-                score: submissionResult.score,
-                totalQuestions: submissionResult.totalQuestions,
-                attemptId: submissionResult.attemptId,
-              });
-
-            await queryClient.invalidateQueries({ queryKey: ['challenges'] });
-
-            if (challengeCompletionResult.completed) {
-              navigate(`/challenges/${challengeId}/results`);
-            } else {
-              navigate(
-                `/quiz/attempt/${submissionResult.attemptId}/review?challengeId=${challengeId}`,
-                {
-                  state: {
-                    breadcrumb: quiz.studyPack
-                      ? [
-                          { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
-                          { label: quiz.title, path: null },
-                          { label: 'Review', path: null },
-                        ]
-                      : [
-                          { label: 'Quizzes', path: '/quiz' },
-                          { label: quiz.title, path: null },
-                          { label: 'Review', path: null },
-                        ],
-                  },
-                }
-              );
-            }
-          } catch {
-            navigate(
-              `/quiz/attempt/${submissionResult.attemptId}/review?challengeId=${challengeId}`,
-              {
-                state: {
-                  breadcrumb: quiz.studyPack
-                    ? [
-                        { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
-                        { label: quiz.title, path: null },
-                        { label: 'Review', path: null },
-                      ]
-                    : [
-                        { label: 'Quizzes', path: '/quiz' },
-                        { label: quiz.title, path: null },
-                        { label: 'Review', path: null },
-                      ],
-                },
-              }
-            );
-          }
+          await handleChallengeCompletion(submissionResult);
         } else {
-          navigate(`/quiz/attempt/${submissionResult.attemptId}/review`, {
-            state: {
-              breadcrumb: quiz.studyPack
-                ? [
-                    { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
-                    { label: quiz.title, path: null },
-                    { label: 'Review', path: null },
-                  ]
-                : [
-                    { label: 'Quizzes', path: '/quiz' },
-                    { label: quiz.title, path: null },
-                    { label: 'Review', path: null },
-                  ],
-            },
-          });
+          navigateToReview(submissionResult.attemptId);
         }
       } catch {
         toast.error('Failed to submit quiz. Please try again.');
@@ -139,15 +121,7 @@ export const QuizTakePage = () => {
         setSubmitting(false);
       }
     },
-    [
-      quiz,
-      id,
-      selectedAnswers,
-      challengeId,
-      clearStorage,
-      queryClient,
-      navigate,
-    ]
+    [quiz, id, selectedAnswers, challengeId, clearStorage, queryClient, navigate]
   );
 
   // Auto-submit handler for timer
@@ -188,10 +162,10 @@ export const QuizTakePage = () => {
       { label: quiz.title, path: null }
     );
 
-    // Add "Retake" if applicable
+    // Add "Attempts" or "Retake" if applicable
     if (hasAttempts) {
       breadcrumbItems.push(
-        { label: 'Retake', path: null }
+        { label: isTaking ? 'Retake' : 'Attempts', path: null }
       );
     }
 
@@ -201,29 +175,17 @@ export const QuizTakePage = () => {
         breadcrumb: breadcrumbItems,
       },
     });
-  }, [quiz, id, loading, location, navigate]);
+  }, [quiz, id, loading, location, navigate, isTaking]);
 
-  // Initialize quiz state (runs once when quiz loads)
-  useMemo(() => {
+  // Initialize answers
+  useEffect(() => {
     if (!quiz || !id || initialized) return;
-
+    
     const savedAnswers = localStorage.getItem(getStorageKey('answers'));
-    const savedQuestionIndex = localStorage.getItem(
-      getStorageKey('questionIndex')
-    );
-    const savedTimeRemaining = localStorage.getItem(
-      getStorageKey('timeRemaining')
-    );
-    const savedTimestamp = localStorage.getItem(getStorageKey('timestamp'));
-
-    // Restore answers
     if (savedAnswers) {
       try {
         const parsedAnswers = JSON.parse(savedAnswers);
-        if (
-          Array.isArray(parsedAnswers) &&
-          parsedAnswers.length === questions.length
-        ) {
+        if (Array.isArray(parsedAnswers) && parsedAnswers.length === questions.length) {
           setSelectedAnswers(parsedAnswers);
         } else {
           setSelectedAnswers(new Array(questions.length).fill(null));
@@ -234,18 +196,31 @@ export const QuizTakePage = () => {
     } else {
       setSelectedAnswers(new Array(questions.length).fill(null));
     }
+  }, [quiz, id, initialized, questions.length, getStorageKey]);
 
-    // Restore question index
+  // Initialize remaining state
+  useEffect(() => {
+    if (!quiz || !id || initialized) return;
+
+    const savedQuestionIndex = localStorage.getItem(getStorageKey('questionIndex'));
+    const savedTimeRemaining = localStorage.getItem(getStorageKey('timeRemaining'));
+    const savedTimestamp = localStorage.getItem(getStorageKey('timestamp'));
+
     if (savedQuestionIndex) {
-      const index = parseInt(savedQuestionIndex, 10);
-      if (!isNaN(index) && index >= 0 && index < questions.length) {
+      const index = Number.parseInt(savedQuestionIndex, 10);
+      if (!Number.isNaN(index) && index >= 0 && index < questions.length) {
         setCurrentQuestionIndex(index);
       }
     }
 
-    // Start timer for timed quizzes
     if (quiz.quizType === 'timed' && quiz.timeLimit) {
       startTimer(savedTimeRemaining, savedTimestamp);
+    }
+
+    if (isTaking === null) {
+      const hasAttempts = (quiz.attemptCount && quiz.attemptCount > 0) ||
+                          (quiz.attempts && quiz.attempts.length > 0);
+      setIsTaking(!hasAttempts);
     }
 
     setInitialized(true);
@@ -318,6 +293,26 @@ export const QuizTakePage = () => {
   const progressPercentage =
     questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
+  if (isTaking === false) {
+    return (
+      <QuizAttemptsView
+        quiz={quiz}
+        attempts={quiz.attempts || []}
+        onRetake={() => setIsTaking(true)}
+        onBack={() => navigate('/quiz')}
+      />
+    );
+  }
+
+  // Loading state while determining mode
+  if (isTaking === null) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-6 sm:pb-8">
       <QuizHeader
@@ -327,11 +322,18 @@ export const QuizTakePage = () => {
         answeredCount={answeredCount}
         progressPercentage={progressPercentage}
         timeRemaining={timeRemaining}
-        onBack={() => navigate('/quiz')}
+        onBack={() => {
+          if (quiz.attemptCount && quiz.attemptCount > 0) {
+            setIsTaking(false);
+          } else {
+            navigate('/quiz');
+          }
+        }}
       />
 
-      <div
+      <section
         className="card dark:bg-gray-800 border border-primary-200 dark:border-primary-700 shadow-lg p-4 sm:p-6 select-none"
+        aria-label="Quiz Questions"
         onCopy={(e) => e.preventDefault()}
         onCut={(e) => e.preventDefault()}
         onPaste={(e) => e.preventDefault()}
@@ -352,7 +354,7 @@ export const QuizTakePage = () => {
           onNext={handleNext}
           onSubmit={() => handleSubmit()}
         />
-      </div>
+      </section>
     </div>
   );
 };

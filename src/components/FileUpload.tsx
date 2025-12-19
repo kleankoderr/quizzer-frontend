@@ -104,18 +104,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`border-3 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+        className={`border-3 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
           isDragging
             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
             : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700/50'
         }`}
       >
-        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-3" />
         <div>
-          <p className="text-lg font-bold text-primary-600 dark:text-primary-400 mb-1">
+          <p className="text-base font-bold text-primary-600 dark:text-primary-400 mb-1">
             Click to upload
           </p>
-          <p className="text-gray-600 dark:text-gray-100 mb-2">
+          <p className="text-sm text-gray-600 dark:text-gray-100 mb-2">
             or drag and drop PDF files
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -148,7 +148,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   <FileText className="h-8 w-8 text-primary-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-200 truncate">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
                     {file.name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">

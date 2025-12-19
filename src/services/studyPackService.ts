@@ -10,12 +10,13 @@ import type {
 export const studyPackService = {
   getAll: async (
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    search?: string
   ): Promise<PaginatedResponse<StudyPack>> => {
     const response = await apiClient.get<PaginatedResponse<StudyPack>>(
       '/study-packs',
       {
-        params: { page, limit },
+        params: { page, limit, search },
       }
     );
     return response.data;

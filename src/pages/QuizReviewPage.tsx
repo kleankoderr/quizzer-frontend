@@ -84,7 +84,7 @@ export const QuizReviewPage = () => {
           const timer = setTimeout(() => setShowConfetti(false), 5000);
           return () => clearTimeout(timer);
         }
-      } catch (_error) {
+      } catch {
         toast.error('Failed to load attempt details');
         navigate('/quiz');
       } finally {
@@ -98,28 +98,13 @@ export const QuizReviewPage = () => {
   // Handle breadcrumb update separately after quiz data is loaded
   useEffect(() => {
     if (!loading && quiz && !location.state?.breadcrumb) {
-      const breadcrumbItems = [];
-
-      // Add study pack if it exists
-      if (quiz.studyPack) {
-        breadcrumbItems.push(
-          { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` }
-        );
-      } else {
-        breadcrumbItems.push(
-          { label: 'Quizzes', path: '/quiz' }
-        );
-      }
-
-      // Add quiz title (non-clickable)
-      breadcrumbItems.push(
-        { label: quiz.title, path: null }
-      );
-
-      // Add "Review"
-      breadcrumbItems.push(
-        { label: 'Review', path: null }
-      );
+      const breadcrumbItems = [
+        quiz.studyPack
+          ? { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` }
+          : { label: 'Quizzes', path: '/quiz' },
+        { label: quiz.title, path: null },
+        { label: 'Review', path: null },
+      ];
 
       navigate(location.pathname + location.search, {
         replace: true,
@@ -133,6 +118,8 @@ export const QuizReviewPage = () => {
   const handleBack = () => {
     if (challengeId) {
       navigate(`/challenges/${challengeId}`);
+    } else if (quiz?.id) {
+      navigate(`/quiz/${quiz.id}`);
     } else {
       navigate('/quiz');
     }
@@ -185,7 +172,7 @@ export const QuizReviewPage = () => {
           Review not found
         </h3>
         <button onClick={handleBack} className="btn-primary mt-4">
-          {challengeId ? 'Back to Challenge' : 'Back to Quizzes'}
+          {challengeId ? 'Back to Challenge' : 'Back to Quiz attempts'}
         </button>
       </div>
     );
@@ -201,7 +188,7 @@ export const QuizReviewPage = () => {
         title={quiz.title}
         showConfetti={showConfetti}
         onBack={handleBack}
-        backLabel={challengeId ? 'Back to Challenge' : 'Back to Quizzes'}
+        backLabel={challengeId ? 'Back to Challenge' : 'Back to Quiz attempts'}
         shareId={attemptId}
         shareTitle={quiz.title}
         onReview={handleReview}

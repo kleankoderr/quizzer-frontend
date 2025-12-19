@@ -214,7 +214,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
               <button
                 type="button"
-                onClick={() => setShowExistingFiles(!showExistingFiles)}
+                onClick={() => {
+                  if (!showExistingFiles) setShowUpload(false);
+                  setShowExistingFiles(!showExistingFiles);
+                }}
                 className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
               >
                 <div className="flex items-center gap-2">
@@ -251,7 +254,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
               <button
                 type="button"
-                onClick={() => setShowUpload(!showUpload)}
+                onClick={() => {
+                  if (!showUpload) setShowExistingFiles(false);
+                  setShowUpload(!showUpload);
+                }}
                 className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
               >
                 <div className="flex items-center gap-2">

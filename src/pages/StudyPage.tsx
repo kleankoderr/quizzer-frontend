@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Folder,
   Trash2,
+  Info,
 } from 'lucide-react';
 
 import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
@@ -742,11 +743,13 @@ export const StudyPage = () => {
 
             {activeTab === 'file' && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 p-4 md:p-6 rounded-xl border border-green-200 dark:border-gray-700">
-                  <div className="flex items-start gap-3 mb-4">
-                    <Upload className="w-6 h-6 text-green-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                <div className="bg-blue-50/30 dark:bg-gray-800/30 p-4 rounded-xl border border-blue-100 dark:border-gray-700">
+                  <div className="flex gap-4 items-start">
+                    <div className="flex-shrink-0 p-2 bg-blue-100/50 dark:bg-blue-900/30 rounded-lg">
+                      <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
                         Upload or Select Documents
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -762,7 +765,10 @@ export const StudyPage = () => {
                 <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mb-6">
                   <button
                     type="button"
-                    onClick={() => setShowExistingFiles(!showExistingFiles)}
+                    onClick={() => {
+                      if (!showExistingFiles) setShowUpload(false);
+                      setShowExistingFiles(!showExistingFiles);
+                    }}
                     className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
@@ -799,7 +805,10 @@ export const StudyPage = () => {
                 <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mt-6">
                   <button
                     type="button"
-                    onClick={() => setShowUpload(!showUpload)}
+                    onClick={() => {
+                      if (!showUpload) setShowExistingFiles(false);
+                      setShowUpload(!showUpload);
+                    }}
                     className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">

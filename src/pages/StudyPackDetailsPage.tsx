@@ -392,7 +392,7 @@ export const StudyPackDetailsPage: React.FC = () => {
     );
 
     const handleNavigateToItem = useCallback(
-        (itemId: string, type: ItemType) => {
+        (itemId: string, type: ItemType, item?: any) => {
             if (type === 'userDocument') return;
 
             const routeMap = {
@@ -400,6 +400,9 @@ export const StudyPackDetailsPage: React.FC = () => {
                 flashcard: '/flashcards',
                 content: '/content',
             } as const;
+
+            const hasAttempts = (item?._count?.attempts || 0) > 0;
+            const historyParam = hasAttempts ? '?view=history' : '';
 
             // Add breadcrumb context for content navigation
             if (type === 'content' && studyPack) {
@@ -411,7 +414,7 @@ export const StudyPackDetailsPage: React.FC = () => {
                     },
                 });
             } else {
-                navigate(`${routeMap[type]}/${itemId}`);
+                navigate(`${routeMap[type]}/${itemId}${historyParam}`);
             }
         },
         [navigate, studyPack]
@@ -471,7 +474,7 @@ export const StudyPackDetailsPage: React.FC = () => {
                                 onClick={
                                     config.itemType === 'userDocument'
                                         ? undefined
-                                        : () => handleNavigateToItem(item.id, config.itemType)
+                                        : () => handleNavigateToItem(item.id, config.itemType, item)
                                 }
                                 onMove={
                                     config.itemType === 'userDocument'

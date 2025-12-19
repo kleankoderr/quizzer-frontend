@@ -73,7 +73,8 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
 
   const renderSetCard = (set: FlashcardSet) => {
     const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
-    const hasStudied = !!set.lastStudiedAt;
+    const attemptCount = set.attemptCount || set._count?.attempts || 0;
+    const hasStudied = attemptCount > 0;
 
     const menuItems = [
       {
@@ -101,7 +102,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
     return (
       <Card
         key={set.id}
-        to={`/flashcards/${set.id}`}
+        to={`/flashcards/${set.id}${hasStudied ? '?view=history' : ''}`}
         title={set.title}
         subtitle={set.topic}
         actions={<CardMenu items={menuItems} />}

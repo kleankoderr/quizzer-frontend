@@ -161,13 +161,16 @@ export interface FlashcardSet {
     id: string;
     title: string;
   };
+  attemptCount?: number;
   _count?: {
     attempts: number;
+    cards?: number;
   };
 }
 
 export interface FlashcardAttempt {
   id: string;
+  flashcardSetId: string;
   score: number;
   totalQuestions: number;
   completedAt: string;
