@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FileText,
@@ -69,6 +69,7 @@ export const FilesPage = () => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filteredDocuments = useMemo(() => {
     // Determine which list to filter - use data from hook
@@ -216,8 +217,31 @@ export const FilesPage = () => {
     0
   );
 
+  // Infinite scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      const scrolledToBottom = scrollHeight - scrollTop <= clientHeight + 200; // 200px threshold
+
+      if (scrolledToBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div 
+      ref={scrollContainerRef}
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-screen overflow-y-auto"
+    >
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -579,16 +603,13 @@ export const FilesPage = () => {
         </div>
       )}
 
-      {/* Load More Button */}
-      {!loading && filteredDocuments.length > 0 && hasNextPage && (
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-          >
-            {isFetchingNextPage ? 'Loading more...' : 'Load More'}
-          </button>
+      {/* Loading More Indicator */}
+      {isFetchingNextPage && !loading && (
+        <div className="mt-6 flex items-center justify-center py-4">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-medium">Loading more files...</span>
+          </div>
         </div>
       )}
 

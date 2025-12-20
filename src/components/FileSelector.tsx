@@ -36,8 +36,12 @@ export const FileSelector = ({
     []
   );
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const loadingRef = useRef(false); // Prevent duplicate calls
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Only load if not already loading
@@ -62,7 +66,7 @@ export const FileSelector = ({
     }
   }, [searchQuery, documents]);
 
-  const loadDocuments = async () => {
+  const loadDocuments = async (pageNum: number = 1, append: boolean = false) => {
     // Prevent duplicate calls
     if (loadingRef.current) {
       return;
@@ -70,14 +74,38 @@ export const FileSelector = ({
 
     try {
       loadingRef.current = true;
-      setLoading(true);
-      const docs = await userDocumentService.getUserDocuments();
-      setDocuments(docs.data);
-      setFilteredDocuments(docs.data);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      
+      const docs = await userDocumentService.getUserDocuments(pageNum, 20);
+      
+      if (append) {
+        setDocuments(prev => [...prev, ...docs.data]);
+      } else {
+        setDocuments(docs.data);
+      }
+      
+      setHasMore(docs.pagination.hasMore);
+      setPage(pageNum);
     } catch (_error) {
+      console.error(_error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
       loadingRef.current = false;
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrolledToBottom =
+      target.scrollHeight - target.scrollTop <= target.clientHeight + 50; // 50px threshold
+
+    if (scrolledToBottom && hasMore && !loadingMore && !loadingRef.current && !searchQuery) {
+      loadDocuments(page + 1, true);
     }
   };
 
@@ -198,7 +226,11 @@ export const FileSelector = ({
       </div>
 
       {/* File List */}
-      <div className="max-h-64 overflow-y-auto">
+      <div 
+        ref={listRef}
+        className="max-h-64 overflow-y-auto" 
+        onScroll={handleScroll}
+      >
         {filteredDocuments.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
             No files found
@@ -252,6 +284,16 @@ export const FileSelector = ({
                 </button>
               );
             })}
+          </div>
+        )}
+        
+        {/* Loading More Indicator */}
+        {loadingMore && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+              Loading more files...
+            </span>
           </div>
         )}
       </div>
