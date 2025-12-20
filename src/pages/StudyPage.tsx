@@ -107,14 +107,20 @@ export const StudyPage = () => {
 
   // Group contents by study pack
   const groupedContents = useMemo(() => {
-    const groups: Record<string, (typeof contents)[0][]> = {};
+    const groups: Record<string, { id: string; title: string; contents: (typeof contents)[0][] }> = {};
     const noPack: (typeof contents)[0][] = [];
 
     for (const content of contents) {
       if (content.studyPack) {
-        const title = content.studyPack.title;
-        if (!groups[title]) groups[title] = [];
-        groups[title].push(content);
+        const packId = content.studyPack.id;
+        if (!groups[packId]) {
+          groups[packId] = {
+            id: packId,
+            title: content.studyPack.title,
+            contents: [],
+          };
+        }
+        groups[packId].contents.push(content);
       } else {
         noPack.push(content);
       }
@@ -900,17 +906,17 @@ export const StudyPage = () => {
           ) : contents.length > 0 ? (
             <>
               <>
-                {Object.entries(groupedContents.groups).map(
-                  ([packTitle, packContents]) => (
+                {Object.values(groupedContents.groups).map((pack) => (
                     <CollapsibleSection
-                      key={packTitle}
-                      title={packTitle}
-                      count={packContents.length}
+                      key={pack.id}
+                      title={pack.title}
+                      count={pack.contents.length}
                       defaultOpen={false}
+                      onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=materials`)}
                       className="mb-8 last:mb-0"
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {packContents.map((content) =>
+                        {pack.contents.map((content) =>
                           renderContentCard(content)
                         )}
                       </div>

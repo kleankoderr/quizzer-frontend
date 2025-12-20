@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { FlashcardSet, StudyPack } from '../types';
 import { Card } from './Card';
 import { Layers, Plus } from 'lucide-react';
@@ -23,6 +24,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   onCreateNew,
   onItemMoved,
 }) => {
+  const navigate = useNavigate();
   const [moveSetId, setMoveSetId] = React.useState<string | null>(null);
   const [editSetId, setEditSetId] = React.useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -55,14 +57,20 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   };
 
   const groupedSets = React.useMemo(() => {
-    const groups: { [key: string]: FlashcardSet[] } = {};
+    const groups: { [key: string]: { id: string; title: string; sets: FlashcardSet[] } } = {};
     const noPack: FlashcardSet[] = [];
 
     sets.forEach((set) => {
       if (set.studyPack) {
-        const title = set.studyPack.title;
-        if (!groups[title]) groups[title] = [];
-        groups[title].push(set);
+        const packId = set.studyPack.id;
+        if (!groups[packId]) {
+          groups[packId] = {
+            id: packId,
+            title: set.studyPack.title,
+            sets: [],
+          };
+        }
+        groups[packId].sets.push(set);
       } else {
         noPack.push(set);
       }
@@ -171,16 +179,17 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
           {sets.length} set{sets.length === 1 ? '' : 's'}
         </span>
       </div>
-      {Object.entries(groupedSets.groups).map(([packTitle, packSets]) => (
+      {Object.values(groupedSets.groups).map((pack) => (
         <CollapsibleSection
-          key={packTitle}
-          title={packTitle}
-          count={packSets.length}
+          key={pack.id}
+          title={pack.title}
+          count={pack.sets.length}
           defaultOpen={false}
+          onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=flashcards`)}
           className="mb-8 last:mb-0"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {packSets.map((set) => renderSetCard(set))}
+            {pack.sets.map((set) => renderSetCard(set))}
           </div>
         </CollapsibleSection>
       ))}

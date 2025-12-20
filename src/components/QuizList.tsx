@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from './Card';
 import type { Quiz, StudyPack } from '../types';
 import { Brain, Plus } from 'lucide-react';
@@ -24,6 +25,7 @@ export const QuizList: React.FC<QuizListProps> = ({
   onCreateNew,
   onItemMoved,
 }) => {
+  const navigate = useNavigate ();
   const [moveQuizId, setMoveQuizId] = React.useState<string | null>(null);
   const [editQuizId, setEditQuizId] = React.useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -56,14 +58,20 @@ export const QuizList: React.FC<QuizListProps> = ({
   };
 
   const groupedQuizzes = React.useMemo(() => {
-    const groups: { [key: string]: Quiz[] } = {};
+    const groups: { [key: string]: { id: string; title: string; quizzes: Quiz[] } } = {};
     const noPack: Quiz[] = [];
 
     quizzes.forEach((quiz) => {
       if (quiz.studyPack) {
-        const packTitle = quiz.studyPack.title;
-        if (!groups[packTitle]) groups[packTitle] = [];
-        groups[packTitle].push(quiz);
+        const packId = quiz.studyPack.id;
+        if (!groups[packId]) {
+          groups[packId] = {
+            id: packId,
+            title: quiz.studyPack.title,
+            quizzes: [],
+          };
+        }
+        groups[packId].quizzes.push(quiz);
       } else {
         noPack.push(quiz);
       }
@@ -191,20 +199,19 @@ export const QuizList: React.FC<QuizListProps> = ({
         </span>
       </div>
       <div className="space-y-6">
-        {Object.entries(groupedQuizzes.groups).map(
-          ([packTitle, packQuizzes]) => (
-            <CollapsibleSection
-              key={packTitle}
-              title={packTitle}
-              count={packQuizzes.length}
-              defaultOpen={false}
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {packQuizzes.map((quiz) => renderQuizCard(quiz))}
-              </div>
-            </CollapsibleSection>
-          )
-        )}
+        {Object.values(groupedQuizzes.groups).map((pack) => (
+          <CollapsibleSection
+            key={pack.id}
+            title={pack.title}
+            count={pack.quizzes.length}
+            defaultOpen={false}
+            onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=quizzes`)}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {pack.quizzes.map((quiz) => renderQuizCard(quiz))}
+            </div>
+          </CollapsibleSection>
+        ))}
 
         {/* Uncategorized Quizzes */}
         {groupedQuizzes.noPack.length > 0 && (
