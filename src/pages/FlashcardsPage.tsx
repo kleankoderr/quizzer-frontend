@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { sanitizeErrorMessage } from '../utils/errorMessages';
 import { flashcardService } from '../services/flashcard.service';
 import type { FlashcardGenerateRequest } from '../types';
 import {
@@ -164,13 +163,12 @@ export const FlashcardsPage = () => {
       const { jobId } = await flashcardService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Create Flashcards"
-            message={errorMessage}
+            message={error?.response?.message}
             progress={0}
             status="error"
           />

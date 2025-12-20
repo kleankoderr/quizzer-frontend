@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { sanitizeErrorMessage } from '../utils/errorMessages';
 import { contentService } from '../services';
 import { useContents, usePopularTopics } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
@@ -273,13 +272,12 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Generate Content"
-            message={errorMessage}
+            message={error?.response?.message}
             progress={0}
             status="error"
           />
@@ -324,13 +322,12 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Generation Failed"
-            message={errorMessage}
+            message={error?.response?.message}
             progress={0}
             status="error"
           />
@@ -410,13 +407,12 @@ export const StudyPage = () => {
 
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = sanitizeErrorMessage(error);
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Upload Failed"
-            message={errorMessage}
+            message={error?.response?.message}
             progress={0}
             status="error"
           />

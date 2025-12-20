@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { sanitizeErrorMessage } from '../utils/errorMessages';
 import { quizService } from '../services/quiz.service';
 import type { QuizGenerateRequest } from '../types';
 import {
@@ -186,14 +185,13 @@ export const QuizPage = () => {
       const { jobId } = await quizService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
-      const errorMessage = sanitizeErrorMessage(error);
-      
+
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Generate Quiz"
-            message={errorMessage}
+            message={error?.response?.message}
             progress={0}
             status="error"
           />
