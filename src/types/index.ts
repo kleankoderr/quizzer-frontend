@@ -347,9 +347,11 @@ export interface ChallengeLeaderboard {
 
 // Recommendation types
 export interface Recommendation {
+  id?: string;
   topic: string;
   reason: string;
   priority: 'high' | 'medium' | 'low';
+  visible?: boolean;
 }
 
 // Attempt types

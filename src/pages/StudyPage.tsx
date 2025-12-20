@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
@@ -82,6 +82,18 @@ export const StudyPage = () => {
   const [editContentId, setEditContentId] = useState<string | null>(null);
 
   const editingContent = contents.find((c) => c.id === editContentId);
+
+  // Handle location state for prefilling from recommendations
+  useEffect(() => {
+    if (location.state?.topic) {
+      setTopic(location.state.topic);
+      setActiveTab('topic');
+    }
+    if (location.state?.contentText) {
+      setTextContent(location.state.contentText);
+      setActiveTab('text');
+    }
+  }, [location.state]);
 
   const getSummary = (content: any) => {
     if (content.description) {
@@ -489,7 +501,9 @@ export const StudyPage = () => {
           {/* Close Button */}
           <button
             onClick={() => {
-              if (selectedStudyPackId) {
+              if (location.state?.cancelRoute) {
+                navigate(location.state.cancelRoute);
+              } else if (selectedStudyPackId) {
                 navigate(`/study-packs/${selectedStudyPackId}?tab=materials`);
               } else {
                 setShowCreator(false);

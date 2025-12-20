@@ -10,7 +10,6 @@ import {
   BarChart3,
   Sparkles,
   Target,
-  Zap,
   Brain,
   Award,
   Calendar,
@@ -19,7 +18,7 @@ import { StatCardSkeleton, ChartSkeleton } from '../components/skeletons';
 import { StatCard } from '../components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { studyService } from '../services/study.service';
-import { contentService, coachingService } from '../services';
+import { contentService, coachingService, recommendationService } from '../services';
 import { statisticsService } from '../services/statistics.service';
 import {
   AreaChart,
@@ -77,7 +76,14 @@ export const DashboardPage = () => {
     staleTime: 1000 * 60 * 15, // 15 minutes
   });
 
-  // Get the top recommendation
+  // Fetch AI-powered recommendations
+  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['ai-recommendations'],
+    queryFn: recommendationService.getAll,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
+  // Get the top recommendation (legacy support)
   const topRecommendation = useMemo(() => {
     if (studyInsights?.suggestions && studyInsights.suggestions.length > 0) {
       return studyInsights.suggestions[0];
@@ -203,8 +209,31 @@ export const DashboardPage = () => {
         </div>
       )}
 
-      {/* Smart Recommendation - High Priority Action */}
-      {topRecommendation ? (
+      {/* Smart Recommendations CTA */}
+      {!recommendationsLoading && recommendations.length > 0 && (
+        <button
+          onClick={() => navigate('/recommendations')}
+          className="w-full flex items-center justify-between p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-600 rounded-lg">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {recommendations.length} Smart Recommendation{recommendations.length !== 1 ? 's' : ''} Available
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Click to view personalized study suggestions
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+        </button>
+      )}
+
+      {/* Smart Recommendation - High Priority Action (Legacy - Hidden if new recommendations exist) */}
+      {!recommendations.length && topRecommendation ? (
         <div className="card relative overflow-hidden border-0 shadow-lg group">
           <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
 
@@ -269,26 +298,7 @@ export const DashboardPage = () => {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="card p-4 md:p-6 dark:bg-gray-800">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Get Started
-            </h3>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Begin your learning journey by creating your first study material!
-          </p>
-          <button
-            onClick={() => navigate('/study')}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors text-sm font-medium"
-          >
-            Create Content
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      ) : null}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

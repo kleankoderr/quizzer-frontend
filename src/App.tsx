@@ -156,6 +156,12 @@ const SubscriptionsPage = lazy(() =>
   }))
 );
 
+const RecommendationsPage = lazy(() =>
+  import('./pages/RecommendationsPage').then((m) => ({
+    default: m.RecommendationsPage,
+  }))
+);
+
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
 
@@ -257,6 +263,7 @@ function AppRoutes() {
           <Route path="pricing" element={<PricingPage />} />
           <Route path="subscription/manage" element={<ManageSubscriptionPage />} />
           <Route path="subscription/verify" element={<VerifyPaymentPage />} />
+          <Route path="recommendations" element={<RecommendationsPage />} />
 
           {/* Admin Routes */}
           <Route

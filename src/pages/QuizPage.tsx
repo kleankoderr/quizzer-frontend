@@ -350,7 +350,9 @@ export const QuizPage = () => {
         <div className="relative animate-in fade-in slide-in-from-top-4 duration-300">
           <button
             onClick={() => {
-              if (initialValues?.studyPackId) {
+              if (location.state?.cancelRoute) {
+                navigate(location.state.cancelRoute);
+              } else if (initialValues?.studyPackId) {
                 navigate(`/study-packs/${initialValues.studyPackId}?tab=quizzes`);
               } else {
                 setShowGenerator(false);
