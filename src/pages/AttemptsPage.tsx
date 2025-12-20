@@ -36,6 +36,30 @@ import { AttemptListItem } from '../components/AttemptListItem';
 
 const COLORS = ['#3b82f6', '#10b981', 'rgb(236, 72, 153)'];
 
+// Custom dot component for the line chart
+interface CustomDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: {
+    fill: string;
+  };
+}
+
+function CustomDot({ cx, cy, payload }: Readonly<CustomDotProps>) {
+  if (!cx || !cy || !payload) return null;
+  
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill={payload.fill}
+      stroke="#fff"
+      strokeWidth={2}
+    />
+  );
+}
+
 export function AttemptsPage() {
   const navigate = useNavigate();
   const { id: routeChallengeId } = useParams(); // Get ID from URL path if present
@@ -206,18 +230,23 @@ export function AttemptsPage() {
     .map((attempt, index) => {
       const rawPercent = (attempt.score! / attempt.totalQuestions!) * 100;
       const scorePercent = Math.round(Math.max(0, rawPercent));
+      
+      // Determine color based on performance
+      let performanceColor: string;
+      if (scorePercent >= 70) {
+        performanceColor = '#10b981'; // Green - Good performance
+      } else if (scorePercent >= 50) {
+        performanceColor = '#f59e0b'; // Yellow - Fair performance
+      } else {
+        performanceColor = '#ef4444'; // Red - Needs improvement
+      }
+      
       return {
         name: format(parseISO(attempt.completedAt), 'MMM dd'),
         fullDate: format(parseISO(attempt.completedAt), 'MMM dd, yyyy h:mm a'),
         score: scorePercent,
         type: attempt.type,
-        // Color based on performance
-        fill:
-          scorePercent >= 70
-            ? '#10b981'
-            : scorePercent >= 50
-              ? '#f59e0b'
-              : '#ef4444',
+        fill: performanceColor,
         attemptNumber: filteredAttempts.length - index,
       };
     });
@@ -353,7 +382,11 @@ export function AttemptsPage() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
+      <div className={`grid gap-3 md:gap-4 mb-6 ${
+        filterType === 'all' 
+          ? 'grid-cols-2 md:grid-cols-5' 
+          : 'grid-cols-2 md:grid-cols-2'
+      }`}>
         <StatCard
           title="Total"
           value={attemptStats.total}
@@ -362,29 +395,33 @@ export function AttemptsPage() {
           variant="minimal"
         />
 
-        <StatCard
-          title="Quizzes"
-          value={attemptStats.quizzes}
-          icon={BookOpen}
-          color="indigo"
-          variant="minimal"
-        />
+        {filterType === 'all' && (
+          <>
+            <StatCard
+              title="Quizzes"
+              value={attemptStats.quizzes}
+              icon={BookOpen}
+              color="indigo"
+              variant="minimal"
+            />
 
-        <StatCard
-          title="Flashcards"
-          value={attemptStats.flashcards}
-          icon={Layers}
-          color="emerald"
-          variant="minimal"
-        />
+            <StatCard
+              title="Flashcards"
+              value={attemptStats.flashcards}
+              icon={Layers}
+              color="emerald"
+              variant="minimal"
+            />
 
-        <StatCard
-          title="Challenges"
-          value={attemptStats.challenges}
-          icon={TrendingUp}
-          color="pink"
-          variant="minimal"
-        />
+            <StatCard
+              title="Challenges"
+              value={attemptStats.challenges}
+              icon={TrendingUp}
+              color="pink"
+              variant="minimal"
+            />
+          </>
+        )}
 
         <StatCard
           title="Avg Score"
@@ -392,7 +429,7 @@ export function AttemptsPage() {
           icon={Award}
           color="yellow"
           variant="minimal"
-          className="col-span-2 md:col-span-1"
+          className={filterType === 'all' ? 'col-span-2 md:col-span-1' : ''}
         />
       </div>
 
@@ -522,19 +559,7 @@ export function AttemptsPage() {
                   dataKey="score"
                   stroke="#3b82f6"
                   strokeWidth={2}
-                  dot={(props: any) => {
-                    const { cx, cy, payload } = props;
-                    return (
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={5}
-                        fill={payload.fill}
-                        stroke="#fff"
-                        strokeWidth={2}
-                      />
-                    );
-                  }}
+                  dot={<CustomDot />}
                   activeDot={{ r: 7, strokeWidth: 2 }}
                   name="Score (%)"
                 />
@@ -629,30 +654,36 @@ export function AttemptsPage() {
             Attempts by Item
           </h2>
           {Object.values(groupedAttempts).map((item: any) => (
-            <div
+            <button
               key={`${item.type}-${item.id}`}
               onClick={() => handleItemClick(item)}
-              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+              className="w-full text-left bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div
-                    className={`flex items-center justify-center w-12 h-12 rounded-lg ${
-                      item.type === 'quiz'
-                        ? 'bg-blue-100 dark:bg-blue-900'
-                        : item.type === 'challenge'
-                          ? 'bg-pink-100 dark:bg-pink-900'
-                          : 'bg-green-100 dark:bg-green-900'
-                    }`}
-                  >
-                    {item.type === 'quiz' ? (
-                      <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    ) : item.type === 'challenge' ? (
-                      <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />
-                    ) : (
-                      <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />
-                    )}
-                  </div>
+                  {(() => {
+                    let iconBgClass: string;
+                    let IconComponent: React.ReactNode;
+                    
+                    if (item.type === 'quiz') {
+                      iconBgClass = 'bg-blue-100 dark:bg-blue-900';
+                      IconComponent = <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />;
+                    } else if (item.type === 'challenge') {
+                      iconBgClass = 'bg-pink-100 dark:bg-pink-900';
+                      IconComponent = <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />;
+                    } else {
+                      iconBgClass = 'bg-green-100 dark:bg-green-900';
+                      IconComponent = <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />;
+                    }
+                    
+                    return (
+                      <div
+                        className={`flex items-center justify-center w-12 h-12 rounded-lg ${iconBgClass}`}
+                      >
+                        {IconComponent}
+                      </div>
+                    );
+                  })()}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {item.title || 'Untitled'}
@@ -666,44 +697,50 @@ export function AttemptsPage() {
               </div>
 
               {/* Mini chart for this item */}
-              {item.attempts.length > 1 && (
-                <div className="mt-4">
-                  <ResponsiveContainer width="100%" height={80}>
-                    <LineChart
-                      data={item.attempts
-                        .slice(0, 10)
-                        .reverse()
-                        .map((a: Attempt, i: number) => ({
-                          name: `#${i + 1}`,
-                          score:
-                            a.score && a.totalQuestions
-                              ? Math.round(
-                                  Math.max(
-                                    0,
-                                    (a.score / a.totalQuestions) * 100
+              {item.attempts.length > 1 && (() => {
+                // Determine stroke color based on item type
+                let lineStrokeColor: string;
+                if (item.type === 'quiz') {
+                  lineStrokeColor = '#3b82f6'; // Blue
+                } else if (item.type === 'challenge') {
+                  lineStrokeColor = 'rgb(236, 72, 153)'; // Pink
+                } else {
+                  lineStrokeColor = '#10b981'; // Green
+                }
+                
+                return (
+                  <div className="mt-4">
+                    <ResponsiveContainer width="100%" height={80}>
+                      <LineChart
+                        data={item.attempts
+                          .slice(0, 10)
+                          .reverse()
+                          .map((a: Attempt, i: number) => ({
+                            name: `#${i + 1}`,
+                            score:
+                              a.score && a.totalQuestions
+                                ? Math.round(
+                                    Math.max(
+                                      0,
+                                      (a.score / a.totalQuestions) * 100
+                                    )
                                   )
-                                )
-                              : 0,
-                        }))}
-                    >
-                      <Line
-                        type="monotone"
-                        dataKey="score"
-                        stroke={
-                          item.type === 'quiz'
-                            ? '#3b82f6'
-                            : item.type === 'challenge'
-                              ? 'rgb(236, 72, 153)'
-                              : '#10b981'
-                        }
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </div>
+                                : 0,
+                          }))}
+                      >
+                        <Line
+                          type="monotone"
+                          dataKey="score"
+                          stroke={lineStrokeColor}
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                );
+              })()}
+            </button>
           ))}
         </div>
       )}
@@ -716,9 +753,9 @@ export function AttemptsPage() {
             No attempts found
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            {filterType !== 'all'
-              ? `You haven't attempted any ${filterType}es yet.`
-              : "You haven't attempted any quizzes or flashcards yet."}
+            {filterType === 'all'
+              ? "You haven't attempted any quizzes or flashcards yet."
+              : `You haven't attempted any ${filterType}es yet.`}
           </p>
         </div>
       )}
