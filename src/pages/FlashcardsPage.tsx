@@ -330,7 +330,7 @@ export const FlashcardsPage = () => {
               if (location.state?.cancelRoute) {
                 navigate(location.state.cancelRoute);
               } else if (initialValues?.studyPackId) {
-                navigate(`/study-packs/${initialValues.studyPackId}?tab=flashcards`);
+                navigate(`/study-pack/${initialValues.studyPackId}?tab=flashcards`);
               } else {
                 setShowGenerator(false);
                 setInitialValues(undefined);

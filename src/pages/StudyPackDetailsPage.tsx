@@ -163,7 +163,7 @@ export const StudyPackDetailsPage: React.FC = () => {
     React.useEffect(() => {
         if (isError) {
             toast.error('Failed to load study pack');
-            navigate('/study-packs');
+            navigate('/study-pack');
         }
     }, [isError, navigate]);
 
@@ -278,7 +278,7 @@ export const StudyPackDetailsPage: React.FC = () => {
             await studyPackService.delete(studyPack.id);
             toast.success('Study pack deleted');
             queryClient.invalidateQueries({queryKey: ['studyPacks']});
-            navigate('/study-packs');
+            navigate('/study-pack');
         } catch (error) {
             toast.error('Failed to delete study pack');
             console.error('Failed to delete study pack:', error);
@@ -409,7 +409,7 @@ export const StudyPackDetailsPage: React.FC = () => {
                 navigate(`${routeMap[type]}/${itemId}`, {
                     state: {
                         breadcrumb: [
-                            { label: studyPack.title, path: `/study-packs/${studyPack.id}` },
+                            { label: studyPack.title, path: `/study-pack/${studyPack.id}` },
                         ],
                     },
                 });

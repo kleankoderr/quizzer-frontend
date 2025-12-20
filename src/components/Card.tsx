@@ -33,18 +33,18 @@ export const Card: React.FC<CardProps> = ({
   const containerProps = to
     ? {
         to,
-        className: `group relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1 block ${className}`,
+        className: `group relative ${actions ? 'overflow-visible' : 'overflow-hidden'} border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1 block ${className}`,
       }
     : {
         onClick,
-        className: `group relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1 ${onClick ? 'cursor-pointer' : ''} ${className}`,
+        className: `group relative ${actions ? 'overflow-visible' : 'overflow-hidden'} border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1 ${onClick ? 'cursor-pointer' : ''} ${className}`,
       };
 
   return (
     <Container {...containerProps} data-testid={testId}>
       {/* Gradient accent */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 ${gradientColor}`}
+        className={`absolute top-0 left-0 right-0 h-1 ${gradientColor} overflow-hidden rounded-t-xl`}
       ></div>
 
       {/* Top right actions */}

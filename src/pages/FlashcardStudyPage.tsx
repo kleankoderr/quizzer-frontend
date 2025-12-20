@@ -36,7 +36,7 @@ const buildBreadcrumbItems = (
 ) => {
   return [
     flashcardSet.studyPack
-      ? { label: flashcardSet.studyPack.title, path: `/study-packs/${flashcardSet.studyPack.id}?tab=flashcards` }
+      ? { label: flashcardSet.studyPack.title, path: `/study-pack/${flashcardSet.studyPack.id}?tab=flashcards` }
       : { label: 'Flashcards', path: '/flashcards' },
     { label: flashcardSet.title, path: null },
     ...(includeResults ? [{ label: 'Results', path: null }] : []),
@@ -358,7 +358,7 @@ export const FlashcardStudyPage = () => {
           onRetake={handleRetake}
           onStudyPackClick={
             flashcardSet.studyPack
-              ? () => navigate(`/study-packs/${flashcardSet.studyPack?.id}`)
+              ? () => navigate(`/study-pack/${flashcardSet.studyPack?.id}`)
               : undefined
           }
           studyPackTitle={flashcardSet.studyPack?.title}

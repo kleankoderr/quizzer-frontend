@@ -504,7 +504,7 @@ export const StudyPage = () => {
               if (location.state?.cancelRoute) {
                 navigate(location.state.cancelRoute);
               } else if (selectedStudyPackId) {
-                navigate(`/study-packs/${selectedStudyPackId}?tab=materials`);
+                navigate(`/study-pack/${selectedStudyPackId}?tab=materials`);
               } else {
                 setShowCreator(false);
               }

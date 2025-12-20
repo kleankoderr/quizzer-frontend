@@ -100,7 +100,7 @@ export const QuizReviewPage = () => {
     if (!loading && quiz && !location.state?.breadcrumb) {
       const breadcrumbItems = [
         quiz.studyPack
-          ? { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` }
+          ? { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` }
           : { label: 'Quizzes', path: '/quiz' },
         { label: quiz.title, path: null },
         { label: 'Review', path: null },
@@ -151,7 +151,7 @@ export const QuizReviewPage = () => {
   // Navigate to study pack
   const handleStudyPackClick = () => {
     if (!quiz?.studyPack?.id) return;
-    navigate(`/study-packs/${quiz.studyPack.id}`);
+    navigate(`/study-pack/${quiz.studyPack.id}`);
   };
 
   if (loading) {

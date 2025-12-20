@@ -268,8 +268,8 @@ function AppRoutes() {
           <Route path="statistics" element={<StatisticsPage />} />
           <Route path="attempts" element={<AttemptsPage />} />
           <Route path="files" element={<FilesPage />} />
-          <Route path="study-packs" element={<StudyPacksPage />} />
-          <Route path="study-packs/:id" element={<StudyPackDetailsPage />} />
+          <Route path="study-pack" element={<StudyPacksPage />} />
+          <Route path="study-pack/:id" element={<StudyPackDetailsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="pricing" element={<PricingPage />} />

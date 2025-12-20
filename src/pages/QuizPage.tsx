@@ -353,7 +353,7 @@ export const QuizPage = () => {
               if (location.state?.cancelRoute) {
                 navigate(location.state.cancelRoute);
               } else if (initialValues?.studyPackId) {
-                navigate(`/study-packs/${initialValues.studyPackId}?tab=quizzes`);
+                navigate(`/study-pack/${initialValues.studyPackId}?tab=quizzes`);
               } else {
                 setShowGenerator(false);
                 setInitialValues(undefined);

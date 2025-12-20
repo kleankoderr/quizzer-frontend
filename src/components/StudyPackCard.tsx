@@ -96,7 +96,7 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
       icon={
         <Folder className="w-6 h-6 text-primary-600 dark:text-primary-400" />
       }
-      to={`/study-packs/${studyPack.id}`}
+      to={`/study-pack/${studyPack.id}`}
       gradientColor="bg-blue-500"
       actions={
         <div className="flex items-center gap-1">

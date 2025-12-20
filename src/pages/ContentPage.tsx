@@ -211,7 +211,7 @@ export const ContentPage = () => {
     if (content.studyPack) {
       breadcrumbItems.push({
         label: content.studyPack.title,
-        path: `/study-packs/${content.studyPack.id}`
+        path: `/study-pack/${content.studyPack.id}`
       });
     } else {
       breadcrumbItems.push({ label: 'Study', path: '/study' });
@@ -237,7 +237,7 @@ export const ContentPage = () => {
 
     const baseBreadcrumb = [
       content.studyPack
-        ? { label: content.studyPack.title, path: `/study-packs/${content.studyPack.id}` }
+        ? { label: content.studyPack.title, path: `/study-pack/${content.studyPack.id}` }
         : { label: 'Study', path: '/study' },
       { label: content.title, path: `/content/${content.id}` },
     ];
@@ -265,7 +265,7 @@ export const ContentPage = () => {
 
     const baseBreadcrumb = [
       content.studyPack
-        ? { label: content.studyPack.title, path: `/study-packs/${content.studyPack.id}` }
+        ? { label: content.studyPack.title, path: `/study-pack/${content.studyPack.id}` }
         : { label: 'Study', path: '/study' },
       { label: content.title, path: `/content/${content.id}` },
     ];
@@ -355,7 +355,7 @@ export const ContentPage = () => {
             {content.studyPack ? (
             <>
                 <Link
-                to={`/study-packs/${content.studyPack.id}?tab=materials`}
+                to={`/study-pack/${content.studyPack.id}?tab=materials`}
                 className="hover:text-gray-900 dark:hover:text-white transition-colors truncate max-w-[150px] sm:max-w-[200px] font-medium"
                 >
                 {content.studyPack.title}

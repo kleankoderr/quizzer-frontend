@@ -65,7 +65,7 @@ export const Sidebar = ({
         { path: '/study', icon: BookOpen, label: 'Study' },
         { path: '/quiz', icon: Brain, label: 'Quizzes' },
         { path: '/flashcards', icon: Layers, label: 'Flashcards' },
-        { path: '/study-packs', icon: Folder, label: 'Study Packs' },
+        { path: '/study-pack', icon: Folder, label: 'Study Pack' },
       ],
     },
     {

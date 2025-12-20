@@ -74,7 +74,7 @@ export const QuizTakePage = () => {
     
     const breadcrumb = quiz.studyPack
       ? [
-          { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` },
+          { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` },
           { label: quiz.title, path: null },
           { label: 'Review', path: null },
         ]
@@ -149,7 +149,7 @@ export const QuizTakePage = () => {
     // Add study pack if it exists
     if (quiz.studyPack) {
       breadcrumbItems.push(
-        { label: quiz.studyPack.title, path: `/study-packs/${quiz.studyPack.id}` }
+        { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` }
       );
     } else {
       breadcrumbItems.push(

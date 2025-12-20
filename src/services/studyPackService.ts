@@ -14,7 +14,7 @@ export const studyPackService = {
     search?: string
   ): Promise<PaginatedResponse<StudyPack>> => {
     const response = await apiClient.get<PaginatedResponse<StudyPack>>(
-      '/study-packs',
+      '/study-pack',
       {
         params: { page, limit, search },
       }
@@ -39,12 +39,12 @@ export const studyPackService = {
         contents: any[];
         userDocuments: any[];
       }
-    >(`/study-packs/${id}`);
+    >(`/study-pack/${id}`);
     return response.data;
   },
 
   create: async (data: CreateStudyPackRequest): Promise<StudyPack> => {
-    const response = await apiClient.post<StudyPack>('/study-packs', data);
+    const response = await apiClient.post<StudyPack>('/study-pack', data);
     return response.data;
   },
 
@@ -53,21 +53,21 @@ export const studyPackService = {
     data: UpdateStudyPackRequest
   ): Promise<StudyPack> => {
     const response = await apiClient.patch<StudyPack>(
-      `/study-packs/${id}`,
+      `/study-pack/${id}`,
       data
     );
     return response.data;
   },
 
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/study-packs/${id}`);
+    await apiClient.delete(`/study-pack/${id}`);
   },
 
   moveItem: async (id: string, data: MoveItemRequest): Promise<void> => {
-    await apiClient.post(`/study-packs/${id}/move`, data);
+    await apiClient.post(`/study-pack/${id}/move`, data);
   },
 
   removeItem: async (id: string, data: MoveItemRequest): Promise<void> => {
-    await apiClient.post(`/study-packs/${id}/remove-item`, data);
+    await apiClient.post(`/study-pack/${id}/remove-item`, data);
   },
 };
