@@ -12,7 +12,7 @@ import { CardSkeleton } from '../components/skeletons';
 
 export const ReviewPage = () => {
   const { data: reviewData, isLoading } = useQuery({
-    queryKey: ['due-for-review'],
+    queryKey: ['due-reviews'],
     queryFn: studyService.getDueForReview,
   });
 

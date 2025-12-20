@@ -85,7 +85,7 @@ export const DashboardPage = () => {
 
   // Fetch due reviews count
   const { data: dueReviewsData } = useQuery({
-    queryKey: ['due-reviews-dashboard'],
+    queryKey: ['due-reviews'],
     queryFn: studyService.getDueForReview,
     refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
   });

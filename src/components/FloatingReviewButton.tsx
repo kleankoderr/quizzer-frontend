@@ -8,7 +8,7 @@ export const FloatingReviewButton = () => {
   const location = useLocation();
 
   const { data: dueReviews } = useQuery({
-    queryKey: ['due-reviews-count'],
+    queryKey: ['due-reviews'],
     queryFn: studyService.getDueForReview,
     refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
   });
