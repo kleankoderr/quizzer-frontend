@@ -83,6 +83,13 @@ export const DashboardPage = () => {
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
+  // Fetch due reviews count
+  const { data: dueReviewsData } = useQuery({
+    queryKey: ['due-reviews-dashboard'],
+    queryFn: studyService.getDueForReview,
+    refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
+  });
+
   // Get the top recommendation (legacy support)
   const topRecommendation = useMemo(() => {
     if (studyInsights?.suggestions && studyInsights.suggestions.length > 0) {
@@ -229,6 +236,62 @@ export const DashboardPage = () => {
             </div>
           </div>
           <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+        </button>
+      )}
+
+      {/* Review Now Card - Items Due for Review */}
+      {dueReviewsData && dueReviewsData.totalDue > 0 && (
+        <button
+          onClick={() => navigate('/review')}
+          className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all group ${
+            dueReviewsData.overdueCount > 0
+              ? 'border-red-200 dark:border-red-800 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 hover:border-red-300 dark:hover:border-red-700'
+              : 'border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 hover:border-orange-300 dark:hover:border-orange-700'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-2 rounded-lg ${
+                dueReviewsData.overdueCount > 0
+                  ? 'bg-red-600'
+                  : 'bg-orange-600'
+              }`}
+            >
+              <Clock className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left">
+              <p
+                className={`font-semibold ${
+                  dueReviewsData.overdueCount > 0
+                    ? 'text-red-900 dark:text-red-100'
+                    : 'text-orange-900 dark:text-orange-100'
+                }`}
+              >
+                {dueReviewsData.totalDue} Item{dueReviewsData.totalDue !== 1 ? 's' : ''} Due for Review
+                {dueReviewsData.overdueCount > 0 && (
+                  <span className="ml-2 text-sm">• {dueReviewsData.overdueCount} Overdue</span>
+                )}
+              </p>
+              <p
+                className={`text-sm ${
+                  dueReviewsData.overdueCount > 0
+                    ? 'text-red-700 dark:text-red-300'
+                    : 'text-orange-700 dark:text-orange-300'
+                }`}
+              >
+                {dueReviewsData.overdueCount > 0
+                  ? "Don't let your knowledge fade. Review now!"
+                  : 'Keep your learning fresh with regular reviews'}
+              </p>
+            </div>
+          </div>
+          <ArrowRight
+            className={`w-5 h-5 text-gray-400 transition-all group-hover:translate-x-1 ${
+              dueReviewsData.overdueCount > 0
+                ? 'group-hover:text-red-600 dark:group-hover:text-red-400'
+                : 'group-hover:text-orange-600 dark:group-hover:text-orange-400'
+            }`}
+          />
         </button>
       )}
 

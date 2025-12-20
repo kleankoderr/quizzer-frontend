@@ -563,3 +563,27 @@ export interface CurrentPlan {
   fileStorage: FileStorageQuota;
   monthlyResetAt: string;
 }
+
+// Spaced Repetition / Review types
+export type RetentionLevel =
+  | 'LEARNING'
+  | 'REINFORCEMENT'
+  | 'RECALL'
+  | 'MASTERY';
+
+export interface TopicProgress {
+  id: string;
+  userId: string;
+  topic: string;
+  retentionLevel: RetentionLevel;
+  strength: number;
+  lastReviewedAt: string;
+  nextReviewAt: string;
+  contentId?: string;
+}
+
+export interface ReviewCalendarDay {
+  date: string;
+  count: number;
+  isToday: boolean;
+}

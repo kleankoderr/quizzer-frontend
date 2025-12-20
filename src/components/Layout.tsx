@@ -3,7 +3,8 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Breadcrumb } from './Breadcrumb';
-import { useBreadcrumbs } from '../hooks/useBreadcrumbs';
+import { FloatingReviewButton } from './FloatingReviewButton';
+import { useBreadcrumbs } from '../hooks';
 
 export const Layout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,6 +39,9 @@ export const Layout = () => {
           </div>
         </main>
       </div>
+
+      {/* Global Floating Review Button */}
+      <FloatingReviewButton />
     </div>
   );
 };

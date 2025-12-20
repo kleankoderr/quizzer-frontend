@@ -168,6 +168,12 @@ const WeakAreasPage = lazy(() =>
   }))
 );
 
+const ReviewPage = lazy(() =>
+  import('./pages/ReviewPage').then((m) => ({
+    default: m.ReviewPage,
+  }))
+);
+
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
 
@@ -271,6 +277,7 @@ function AppRoutes() {
           <Route path="subscription/verify" element={<VerifyPaymentPage />} />
           <Route path="recommendations" element={<RecommendationsPage />} />
           <Route path="weak-areas" element={<WeakAreasPage />} />
+          <Route path="review" element={<ReviewPage />} />
 
           {/* Admin Routes */}
           <Route
