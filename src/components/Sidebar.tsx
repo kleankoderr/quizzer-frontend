@@ -17,6 +17,7 @@ import {
   FileText,
   CreditCard,
   Package,
+  AlertTriangle,
   type LucideProps,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -73,6 +74,7 @@ export const Sidebar = ({
         { path: '/challenges', icon: Trophy, label: 'Challenges' },
         { path: '/leaderboard', icon: Medal, label: 'Leaderboard' },
         { path: '/attempts', icon: Calendar, label: 'Attempts' },
+        { path: '/weak-areas', icon: AlertTriangle, label: 'Weak Areas' },
       ],
     },
     {

@@ -26,7 +26,7 @@ export const QuizReviewPage = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<
     (AnswerValue | null)[]
   >([]);
-  const [showExplanations, setShowExplanations] = useState(false);
+  const [showExplanations, setShowExplanations] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Ref for smooth scrolling to review section

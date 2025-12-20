@@ -14,7 +14,7 @@ export const RecommendationsPage = () => {
     staleTime: 1000 * 60 * 10,
   });
 
-  const { data: quotaStatus } = useQuery({
+  const { data: quotaStatus, isLoading: quotaStatusLoading } = useQuery({
     queryKey: ['user-quota'],
     queryFn: userService.getQuotaStatus,
     staleTime: 1000 * 60 * 5,
@@ -57,7 +57,9 @@ export const RecommendationsPage = () => {
     }
   };
 
-  const isPremium = quotaStatus?.isPremium || false;
+  // Wait for both queries to complete before determining user tier
+  const isLoading = recommendationsLoading || quotaStatusLoading;
+  const isPremium = quotaStatus?.isPremium;
   const displayedRecommendations = isPremium
     ? recommendations.slice(0, 3)
     : recommendations.slice(0, 1);
@@ -83,7 +85,7 @@ export const RecommendationsPage = () => {
       </div>
 
       {/* Premium Badge */}
-      {!isPremium && recommendations.length > 1 && (
+      {!isLoading && !isPremium && recommendations.length > 1 && (
         <div className="card p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-800">
           <div className="flex items-center gap-3">
             <Crown className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
@@ -102,7 +104,7 @@ export const RecommendationsPage = () => {
       )}
 
       {/* Loading State */}
-      {recommendationsLoading && (
+      {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <div
@@ -119,7 +121,7 @@ export const RecommendationsPage = () => {
       )}
 
       {/* Empty State */}
-      {!recommendationsLoading && recommendations.length === 0 && (
+      {!isLoading && recommendations.length === 0 && (
         <div className="card p-8 text-center dark:bg-gray-800">
           <Sparkles className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -138,7 +140,7 @@ export const RecommendationsPage = () => {
       )}
 
       {/* Recommendations Grid */}
-      {!recommendationsLoading && displayedRecommendations.length > 0 && (
+      {!isLoading && displayedRecommendations.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedRecommendations.map((rec) => (
             <div

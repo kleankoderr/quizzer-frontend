@@ -162,6 +162,12 @@ const RecommendationsPage = lazy(() =>
   }))
 );
 
+const WeakAreasPage = lazy(() =>
+  import('./pages/WeakAreasPage').then((m) => ({
+    default: m.WeakAreasPage,
+  }))
+);
+
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
 
@@ -264,6 +270,7 @@ function AppRoutes() {
           <Route path="subscription/manage" element={<ManageSubscriptionPage />} />
           <Route path="subscription/verify" element={<VerifyPaymentPage />} />
           <Route path="recommendations" element={<RecommendationsPage />} />
+          <Route path="weak-areas" element={<WeakAreasPage />} />
 
           {/* Admin Routes */}
           <Route
