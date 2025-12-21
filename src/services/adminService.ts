@@ -36,6 +36,7 @@ export interface User {
   name: string;
   avatar?: string;
   role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  plan: 'FREE' | 'PREMIUM';
   isActive: boolean;
   schoolName?: string;
   grade?: string;

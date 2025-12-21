@@ -18,6 +18,7 @@ import {
   CreditCard,
   Package,
   AlertTriangle,
+  Sparkles,
   type LucideProps,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -63,6 +64,7 @@ export const Sidebar = ({
       label: 'Learning Tools',
       items: [
         { path: '/study', icon: BookOpen, label: 'Study' },
+        { path: '/summaries', icon: Sparkles, label: 'Summaries' },
         { path: '/quiz', icon: Brain, label: 'Quizzes' },
         { path: '/flashcards', icon: Layers, label: 'Flashcards' },
         { path: '/study-pack', icon: Folder, label: 'Study Pack' },
@@ -139,8 +141,10 @@ export const Sidebar = ({
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[90] lg:hidden"
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 bg-black/50 z-[90] lg:hidden w-full h-full border-none outline-none cursor-default"
           onClick={closeMobile}
         />
       )}

@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           authStore.setState({ user: freshUser });
           authService.saveAuthData(freshUser);
         } catch (_error) {
-          // If 401, maybe logout? But api interceptor handles that.
+         console.error('Failed to refresh user', _error);
         }
       }
     };
@@ -89,12 +90,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await authService.logout();
     } catch (_error) {
+      console.error('Logout failed', _error);
     } finally {
       // Clear all React Query cache to prevent stale data
       queryClient.clear();
       authStore.setState({ user: null });
     }
   }, [queryClient]);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const freshUser = await authService.getCurrentUser();
+      authStore.setState({ user: freshUser });
+      authService.saveAuthData(freshUser);
+    } catch (_error) {
+      console.error('Failed to refresh user', _error);
+    }
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -103,8 +115,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       login,
       logout,
       isAuthenticated: !!state.user,
+      refreshUser,
     }),
-    [state.user, state.loading, login, logout]
+    [state.user, state.loading, login, logout, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -16,9 +16,11 @@ import {
 import { useCurrentPlan, useCancelSubscription } from '../hooks/useSubscription';
 import { format } from 'date-fns';
 import { LoadingScreen } from '../components/LoadingScreen';
+import { useAuth } from '../contexts/AuthContext';
 
 export const ManageSubscriptionPage = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const { data: currentPlan, isLoading, refetch } = useCurrentPlan();
   const { mutate: cancelSubscription, isPending: isCancelling } = useCancelSubscription();
 
@@ -42,6 +44,7 @@ export const ManageSubscriptionPage = () => {
     cancelSubscription(undefined, {
       onSuccess: () => {
         setShowCancelDialog(false);
+        refreshUser();
         refetch();
       },
     });

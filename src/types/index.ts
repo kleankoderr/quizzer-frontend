@@ -5,6 +5,7 @@ export interface User {
   name: string;
   avatar?: string;
   role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  plan: 'FREE' | 'PREMIUM';
   schoolName?: string;
   grade?: string;
   preferences?: Record<string, any>;

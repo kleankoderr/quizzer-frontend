@@ -7,10 +7,12 @@ import { Toast } from '../utils/toast';
 import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { SUBSCRIPTION_QUERY_KEY, CURRENT_PLAN_QUERY_KEY } from '../hooks/useSubscription';
 import { QUOTA_QUERY_KEY } from '../hooks/useQuota';
+import { useAuth } from '../contexts/AuthContext';
 
 export const VerifyPaymentPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const queryClient = useQueryClient();
   const reference = searchParams.get('reference');
   
@@ -33,6 +35,7 @@ export const VerifyPaymentPage: React.FC = () => {
         if (mounted) {
           // Invalidate all related caches to update UI immediately
           await Promise.all([
+            refreshUser(),
             queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
             queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY }),
             queryClient.invalidateQueries({ queryKey: QUOTA_QUERY_KEY }),
@@ -103,7 +106,7 @@ export const VerifyPaymentPage: React.FC = () => {
               
               <div className="space-y-3 w-full">
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => globalThis.location.reload()}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-primary/90 transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />

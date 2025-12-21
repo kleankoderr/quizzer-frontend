@@ -132,9 +132,19 @@ export const ProfilePage = () => {
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {profile.name}
               </h2>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium mt-2">
-                <Brain className="w-4 h-4" />
-                Level {profile.statistics.level} Learner
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+                  <Brain className="w-4 h-4" />
+                  Level {profile.statistics.level} Learner
+                </div>
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  profile.plan === 'PREMIUM' 
+                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+                }`}>
+                  <Zap className={`w-4 h-4 ${profile.plan === 'PREMIUM' ? 'text-amber-500' : 'text-gray-500'}`} />
+                  {profile.plan === 'PREMIUM' ? 'Premium Plan' : 'Free Plan'}
+                </div>
               </div>
             </div>
 

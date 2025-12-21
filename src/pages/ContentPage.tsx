@@ -10,6 +10,7 @@ import {
   Edit2,
   Check,
   X,
+  LayoutTemplate,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -22,6 +23,7 @@ import 'highlight.js/styles/github-dark.css';
 
 
 import { contentService, type Content } from '../services/content.service';
+import { summaryService } from '../services';
 
 import { Toast as toast } from '../utils/toast';
 import { DeleteModal } from '../components/DeleteModal';
@@ -288,6 +290,26 @@ export const ContentPage = () => {
     });
   };
 
+  const handleGenerateSummary = async () => {
+    if (!content) return;
+
+    if (content.summary) {
+      navigate(`/s/${content.summary.shortCode}`);
+      return;
+    }
+
+    const loadingToast = toast.loading('Generating summary...');
+    try {
+      await summaryService.generateSummary(content.id);
+      toast.success('Summary generation started! It will be ready in a moment.', {
+        id: loadingToast,
+      });
+    } catch (_error: any) {
+      const message = _error.response?.data?.message || 'Failed to generate summary';
+      toast.error(message, { id: loadingToast });
+    }
+  };
+
   const handleDelete = () => {
     setIsDeleteContentModalOpen(true);
   };
@@ -444,20 +466,19 @@ export const ContentPage = () => {
                   {content.quizId ? (
                     <button
                       onClick={() => navigate(`/quiz/${content.quizId}`)}
-                      className="flex items-center gap-2 px-3 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors shadow-sm text-sm font-medium"
+                      className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all shadow-sm"
                       title="View Quiz"
                     >
-                      <Brain className="w-4 h-4 flex-shrink-0" />
-                      <span>View Quiz</span>
+                      <Brain className="w-4 h-4" />
                     </button>
                   ) : (
                     <button
                       onClick={handleGenerateQuiz}
-                      className="flex items-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-sm font-medium"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
                       title="Generate Quiz"
                     >
-                      <Brain className="w-4 h-4 flex-shrink-0" />
-                      <span>Generate Quiz</span>
+                      <Brain className="w-3.5 h-3.5" />
+                      <span>Quiz</span>
                     </button>
                   )}
 
@@ -467,20 +488,39 @@ export const ContentPage = () => {
                       onClick={() =>
                         navigate(`/flashcards/${content.flashcardSetId}`)
                       }
-                      className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors shadow-sm text-sm font-medium"
+                      className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all shadow-sm"
                       title="View Flashcards"
                     >
-                      <BookOpen className="w-4 h-4 flex-shrink-0" />
-                      <span>View Flashcards</span>
+                      <BookOpen className="w-4 h-4" />
                     </button>
                   ) : (
                     <button
                       onClick={handleGenerateFlashcards}
-                      className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm text-sm font-medium"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
                       title="Generate Flashcards"
                     >
-                      <BookOpen className="w-4 h-4 flex-shrink-0" />
-                      <span>Generate Flashcards</span>
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Cards</span>
+                    </button>
+                  )}
+
+                  {/* Summary Button */}
+                  {content.summary ? (
+                    <button
+                      onClick={() => navigate(`/s/${content.summary?.shortCode}`)}
+                      className="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all shadow-sm"
+                      title="View Summary"
+                    >
+                      <LayoutTemplate className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleGenerateSummary}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
+                      title="Generate Summary"
+                    >
+                      <LayoutTemplate className="w-3.5 h-3.5" />
+                      <span>Summary</span>
                     </button>
                   )}
 
@@ -545,6 +585,23 @@ export const ContentPage = () => {
                         <BookOpen className="w-4 h-4" /> Generate Cards
                       </button>
                     )}
+
+                    {/* Summary Mobile */}
+                    {content.summary ? (
+                      <button
+                        onClick={() => navigate(`/s/${content.summary?.shortCode}`)}
+                        className="w-full text-left px-4 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-2"
+                      >
+                        <LayoutTemplate className="w-4 h-4" /> View Summary
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleGenerateSummary}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <LayoutTemplate className="w-4 h-4" /> Generate Summary
+                      </button>
+                    )}
                     
                     <div className="my-1 border-t border-gray-100 dark:border-gray-700"></div>
                     <button
@@ -579,11 +636,13 @@ export const ContentPage = () => {
                 description={content.description}
                 onGenerateQuiz={handleGenerateQuiz}
                 onGenerateFlashcards={handleGenerateFlashcards}
+                onGenerateSummary={handleGenerateSummary}
+                hasSummary={!!content.summary}
                 onSectionUpdate={async (index, updates) => {
                   if (!content?.learningGuide) return;
 
-                  const updatedGuide = JSON.parse(
-                    JSON.stringify(content.learningGuide)
+                  const updatedGuide = structuredClone(
+                    content.learningGuide
                   );
                   
                   if (updatedGuide.sections[index]) {
@@ -609,7 +668,7 @@ export const ContentPage = () => {
                   queryClient.setQueryData(
                     ['content', id],
                     (old: Content | undefined) => {
-                      if (!old || !old.learningGuide) return old;
+                      if (!old?.learningGuide) return old;
                       return {
                         ...old,
                         learningGuide: updatedGuide,

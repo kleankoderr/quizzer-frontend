@@ -3,20 +3,13 @@ import {
   CheckCircle,
   Brain,
   BookOpen,
+  LayoutTemplate,
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github-dark.css';
-
 import { contentService, type Content } from '../services/content.service';
 import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 import { LearningGuideSection } from './LearningGuideSection';
 import { SectionNavigator } from './SectionNavigator';
+import { MarkdownRenderer } from './MarkdownRenderer';
 import { useInvalidateQuota } from '../hooks/useQuota';
 
 interface LearningGuideProps {
@@ -29,7 +22,9 @@ interface LearningGuideProps {
   description?: string;
   onGenerateQuiz?: () => void;
   onGenerateFlashcards?: () => void;
+  onGenerateSummary?: () => void;
   onSectionUpdate?: (index: number, updates: any) => void;
+  hasSummary?: boolean;
 }
 
 export const LearningGuide: React.FC<LearningGuideProps> = ({
@@ -38,10 +33,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   onToggleSectionComplete,
   contentRef,
   contentId,
+  topic,
   description,
   onGenerateQuiz,
   onGenerateFlashcards,
+  onGenerateSummary,
   onSectionUpdate,
+  hasSummary,
 }) => {
   const invalidateQuota = useInvalidateQuota();
   // Create refs for each section
@@ -167,46 +165,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
   }, [completedSections, activeSection]);
 
-  const markdownRehypePlugins = React.useMemo(() => [
-    rehypeRaw,
-    rehypeKatex,
-    [
-      rehypeSanitize,
-      {
-        ...defaultSchema,
-        tagNames: [
-          ...(defaultSchema.tagNames || []),
-          'mark', 'span', 'div', 'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd', 'code', 'pre'
-        ],
-        attributes: {
-          ...defaultSchema.attributes,
-          mark: [
-            'className',
-            'class',
-            'style',
-            'data-highlight-id',
-            'data-has-note',
-            'title',
-          ],
-          span: [
-            'className',
-            'class',
-            'title',
-            'style',
-            'data-note-id',
-            'data-note-text',
-          ],
-          div: ['className'],
-          math: ['xmlns', 'display'],
-          code: ['className'],
-          pre: ['className'],
-        },
-      },
-    ],
-    rehypeHighlight,
-  ] as any, []);
 
-  const markdownRemarkPlugins = React.useMemo(() => [remarkGfm, remarkMath], []);
 
   const toggleSection = (index: number) => {
     const newActiveSection = activeSection === index ? -1 : index;
@@ -411,6 +370,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         <div className="p-4 md:p-6">
           <div className="flex items-start justify-between gap-6 mb-4">
             <div className="flex-1">
+              {topic && (
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider rounded border border-primary-100 dark:border-primary-800">
+                    {topic}
+                  </span>
+                </div>
+              )}
               <h1
                 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
                 style={{ fontFamily: 'Lexend' }}
@@ -458,15 +424,10 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           {/* Overview */}
           {(guide.overview || description) && (
             <div
-              className="text-base text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none mb-4"
+              className="text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-none mb-4"
               style={{ fontFamily: 'Lexend' }}
             >
-              <ReactMarkdown
-                remarkPlugins={markdownRemarkPlugins}
-                rehypePlugins={markdownRehypePlugins}
-              >
-                {guide.overview || description || ''}
-              </ReactMarkdown>
+              <MarkdownRenderer content={guide.overview || description || ''} />
             </div>
           )}
 
@@ -514,8 +475,6 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               generatedContent={generatedContent}
               visibleContent={visibleContent}
               loadingAction={loadingAction}
-              markdownRemarkPlugins={markdownRemarkPlugins}
-              markdownRehypePlugins={markdownRehypePlugins}
               HeadingRenderer={HeadingRenderer}
               onToggleSection={toggleSection}
               onMarkComplete={markAsComplete}
@@ -558,15 +517,9 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                     className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none"
                     style={{ fontFamily: 'Lexend' }}
                   >
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => (
-                          <span className="m-0">{children}</span>
-                        ),
-                      }}
-                    >
-                      {step}
-                    </ReactMarkdown>
+                    <MarkdownRenderer 
+                      content={step}
+                    />
                   </div>
                 </div>
               ))}
@@ -582,17 +535,24 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700 max-w-2xl mx-auto">
             <button
               onClick={onGenerateQuiz}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-sm hover:shadow font-medium"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all shadow-sm hover:shadow-md font-bold text-sm"
             >
               <Brain className="w-5 h-5 flex-shrink-0" />
               Take a Quiz
             </button>
             <button
               onClick={onGenerateFlashcards}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm hover:shadow font-medium"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md font-bold text-sm"
             >
               <BookOpen className="w-5 h-5 flex-shrink-0" />
               Review Flashcards
+            </button>
+            <button
+              onClick={onGenerateSummary}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all shadow-sm hover:shadow-md font-bold text-sm"
+            >
+              <LayoutTemplate className="w-5 h-5 flex-shrink-0" />
+              {hasSummary ? 'View Summary' : 'Get Summary'}
             </button>
           </div>
         </div>

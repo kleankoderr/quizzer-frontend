@@ -5,6 +5,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { useClickOutside } from '../hooks/useClickOutside';
 
 interface SchoolSearchProps {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -12,6 +13,7 @@ interface SchoolSearchProps {
 }
 
 export const SchoolSearch = ({
+  id,
   value,
   onChange,
   placeholder = 'Search for your school...',
@@ -45,6 +47,7 @@ export const SchoolSearch = ({
         const data = await schoolService.searchSchools(debouncedQuery);
         setResults(data);
       } catch (_error) {
+        console.error('Failed to search schools', _error);
       } finally {
         setLoading(false);
       }
@@ -64,6 +67,7 @@ export const SchoolSearch = ({
       <div className="relative">
         <SchoolIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
+          id={id}
           type="text"
           value={query}
           onChange={(e) => {
@@ -87,13 +91,15 @@ export const SchoolSearch = ({
           {results.length > 0 ? (
             <ul className="py-1">
               {results.map((school) => (
-                <li
-                  key={school.id}
-                  onClick={() => handleSelect(school.name)}
-                  className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2 text-gray-700 dark:text-gray-200"
-                >
-                  <Search className="w-4 h-4 text-gray-400" />
-                  {school.name}
+                <li key={school.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(school.name)}
+                    className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-200 text-left transition-colors"
+                  >
+                    <Search className="w-4 h-4 text-gray-400" />
+                    <span>{school.name}</span>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -103,6 +109,7 @@ export const SchoolSearch = ({
                 No schools found
               </p>
               <button
+                type="button"
                 onClick={() => handleSelect(query)}
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center justify-center gap-1 mx-auto"
               >

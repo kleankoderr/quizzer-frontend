@@ -2,8 +2,10 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import {QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { MaintenanceBanner } from './components/MaintenanceOverlay';
@@ -16,9 +18,13 @@ const LoginPage = lazy(() =>
 const SignupPage = lazy(() =>
   import('./pages/SignupPage').then((m) => ({ default: m.SignupPage }))
 );
+const SummaryPage = lazy(() =>
+  import('./pages/SummaryPage').then((m) => ({ default: m.SummaryPage }))
+);
 const OnboardingPage = lazy(() =>
   import('./pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage }))
 );
+
 
 const DashboardPage = lazy(() =>
   import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
@@ -174,6 +180,12 @@ const ReviewPage = lazy(() =>
   }))
 );
 
+const SummariesPage = lazy(() =>
+  import('./pages/SummariesPage').then((m) => ({
+    default: m.SummariesPage,
+  }))
+);
+
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
 
@@ -198,29 +210,37 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <MaintenanceBanner />
-            <AssessmentPopup />
-            <AppRoutes />
-            <Toaster position="top-right" />
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <MaintenanceBanner />
+              <AssessmentPopup />
+              <AppRoutes />
+              <Toaster position="top-right" />
+            </BrowserRouter>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 
+
+
 function AppRoutes() {
-  // const { user } = useAuth(); // Now we can use the hook
+
 
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
+        {/* Public Summary Route */}
+        <Route path="/s/:shortCode" element={<SummaryPage />} />
+        
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+
         <Route
           path="/onboarding"
           element={
@@ -270,6 +290,7 @@ function AppRoutes() {
           <Route path="files" element={<FilesPage />} />
           <Route path="study-pack" element={<StudyPacksPage />} />
           <Route path="study-pack/:id" element={<StudyPackDetailsPage />} />
+          <Route path="summaries" element={<SummariesPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="pricing" element={<PricingPage />} />

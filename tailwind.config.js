@@ -6,6 +6,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      screens: {
+        xs: "480px",
+      },
       colors: {
         primary: {
           DEFAULT: "#3B82F6", // Blue 500

@@ -8,7 +8,7 @@ import {
   Loader2,
   Brain,
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { MarkdownRenderer } from './MarkdownRenderer';
 import type { Content } from '../services/content.service';
 
 interface LearningGuideSectionProps {
@@ -20,14 +20,11 @@ interface LearningGuideSectionProps {
   generatedContent: Record<string, string>;
   visibleContent: Record<string, boolean>;
   loadingAction: { section: number; type: 'explain' | 'example' } | null;
-  markdownRemarkPlugins: any[];
-  markdownRehypePlugins: any[];
+  onToggleContentVisibility: (index: number, type: 'explain' | 'example') => void;
   HeadingRenderer: React.FC<{ level: number; children?: any }>;
   onToggleSection: (index: number) => void;
   onMarkComplete: (index: number, e: React.MouseEvent) => void;
   onAskQuestion: (index: number, type: 'explain' | 'example') => void;
-  onToggleContentVisibility: (index: number, type: 'explain' | 'example') => void;
-  sectionRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGuideSectionProps>(
@@ -41,8 +38,6 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
       generatedContent,
       visibleContent,
       loadingAction,
-      markdownRemarkPlugins,
-      markdownRehypePlugins,
       HeadingRenderer,
       onToggleSection,
       onMarkComplete,
@@ -106,17 +101,10 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
           <div className="overflow-hidden">
             <div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700/50 mt-2">
               <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown">
-                <ReactMarkdown
-                  remarkPlugins={markdownRemarkPlugins}
-                  rehypePlugins={markdownRehypePlugins}
-                  components={{
-                    h1: (props) => <HeadingRenderer {...props} level={1} />,
-                    h2: (props) => <HeadingRenderer {...props} level={2} />,
-                    h3: (props) => <HeadingRenderer {...props} level={3} />,
-                  }}
-                >
-                  {processedContent}
-                </ReactMarkdown>
+                <MarkdownRenderer
+                  content={processedContent}
+                  HeadingRenderer={HeadingRenderer}
+                />
               </div>
 
               {section.example && (
@@ -141,12 +129,7 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
                         className="m-0 leading-relaxed text-sm"
                         style={{ fontFamily: 'Lexend' }}
                       >
-                        <ReactMarkdown
-                          remarkPlugins={markdownRemarkPlugins}
-                          rehypePlugins={markdownRehypePlugins}
-                        >
-                          {section.example}
-                        </ReactMarkdown>
+                        <MarkdownRenderer content={section.example} />
                       </div>
                     </div>
                   </div>
@@ -175,12 +158,7 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
                         className="m-0 leading-relaxed text-sm"
                         style={{ fontFamily: 'Lexend' }}
                       >
-                        <ReactMarkdown
-                          remarkPlugins={markdownRemarkPlugins}
-                          rehypePlugins={markdownRehypePlugins}
-                        >
-                          {section.assessment}
-                        </ReactMarkdown>
+                        <MarkdownRenderer content={section.assessment} />
                       </div>
                     </div>
                   </div>
@@ -264,12 +242,7 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
                             </button>
                           </div>
                           <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
-                            <ReactMarkdown
-                              remarkPlugins={markdownRemarkPlugins}
-                              rehypePlugins={markdownRehypePlugins}
-                            >
-                              {generatedContent[`${index}-explain`]}
-                            </ReactMarkdown>
+                            <MarkdownRenderer content={generatedContent[`${index}-explain`]} />
                           </div>
                         </div>
                       </div>
@@ -307,12 +280,7 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
                             </button>
                           </div>
                           <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
-                            <ReactMarkdown
-                              remarkPlugins={markdownRemarkPlugins}
-                              rehypePlugins={markdownRehypePlugins}
-                            >
-                              {generatedContent[`${index}-example`]}
-                            </ReactMarkdown>
+                            <MarkdownRenderer content={generatedContent[`${index}-example`]} />
                           </div>
                         </div>
                       </div>

@@ -21,9 +21,9 @@ import { adminService } from '../../services/adminService';
 import { format } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import { Modal } from '../../components/Modal';
-import { CardSkeleton } from '../../components/skeletons/CardSkeleton';
-import { StatCardSkeleton } from '../../components/skeletons/StatCardSkeleton';
-import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
+import { CardSkeleton } from '../../components/skeletons';
+import { StatCardSkeleton } from '../../components/skeletons';
+import { TableSkeleton } from '../../components/skeletons';
 
 type ContentType = 'all' | 'quiz' | 'flashcard' | 'content';
 
@@ -283,6 +283,13 @@ export default function UserDetailsPage() {
                   }`}
                 >
                   {user.role.replace('_', ' ')}
+                </span>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  user.plan === 'PREMIUM'
+                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                    : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                }`}>
+                  {user.plan === 'PREMIUM' ? 'Premium Plan' : 'Free Plan'}
                 </span>
               </div>
               <div className="flex items-center gap-2">

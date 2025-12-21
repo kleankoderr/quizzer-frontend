@@ -38,6 +38,10 @@ export interface Content {
     id: string;
     title: string;
   };
+  summary?: {
+    id: string;
+    shortCode: string;
+  };
 }
 
 export interface GenerateContentDto {

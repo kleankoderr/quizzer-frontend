@@ -19,7 +19,7 @@ import { SchoolSearch } from '../components/SchoolSearch';
 type TabType = 'account' | 'security' | 'theme' | 'danger';
 
 export const SettingsPage = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('account');
@@ -68,6 +68,7 @@ export const SettingsPage = () => {
         grade: grade || undefined,
       });
       toast.success('Profile updated successfully!');
+      refreshUser();
       refetch();
     } catch (_error) {
       toast.error('Failed to update profile');
@@ -85,6 +86,7 @@ export const SettingsPage = () => {
         preferences,
       });
       toast.success('Preferences updated successfully!');
+      refreshUser();
     } catch (_error) {
       toast.error('Failed to update preferences');
     } finally {
@@ -215,10 +217,11 @@ export const SettingsPage = () => {
             </h2>
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Name
                 </label>
                 <input
+                  id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -228,10 +231,11 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email
                 </label>
                 <input
+                  id="email"
                   type="email"
                   value={user?.email || ''}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed"
@@ -243,20 +247,22 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="schoolName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   School Name (Optional)
                 </label>
                 <SchoolSearch
+                  id="schoolName"
                   value={schoolName}
                   onChange={(value) => setSchoolName(value)}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="grade" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Grade (Optional)
                 </label>
                 <input
+                  id="grade"
                   type="text"
                   value={grade}
                   onChange={(e) => setGrade(e.target.value)}
@@ -285,10 +291,11 @@ export const SettingsPage = () => {
             </h2>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Current Password
                 </label>
                 <input
+                  id="currentPassword"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
@@ -298,10 +305,11 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   New Password
                 </label>
                 <input
+                  id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -315,10 +323,11 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Confirm New Password
                 </label>
                 <input
+                  id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -348,9 +357,9 @@ export const SettingsPage = () => {
             </h2>
             <form onSubmit={handleUpdatePreferences} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Theme
-                </label>
+                </div>
                 <div className="flex gap-4">
                   {(['light', 'dark', 'system'] as const).map((themeOption) => (
                     <button
@@ -370,10 +379,11 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="studyGoal" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Daily Study Goal (Minutes)
                 </label>
                 <input
+                  id="studyGoal"
                   type="number"
                   min="5"
                   max="180"
@@ -382,7 +392,7 @@ export const SettingsPage = () => {
                   onChange={(e) =>
                     setPreferences({
                       ...preferences,
-                      studyGoalMinutes: parseInt(e.target.value) || 0,
+                      studyGoalMinutes: Number.parseInt(e.target.value) || 0,
                     })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -419,10 +429,11 @@ export const SettingsPage = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="deleteConfirm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Type <span className="font-bold">DELETE</span> to confirm
                   </label>
                   <input
+                    id="deleteConfirm"
                     type="text"
                     value={deleteConfirmation}
                     onChange={(e) => setDeleteConfirmation(e.target.value)}
