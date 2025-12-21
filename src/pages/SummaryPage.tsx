@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import {
@@ -211,17 +211,15 @@ export function SummaryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans selection:bg-primary-100 dark:selection:bg-primary-900/30">
-      <Helmet>
-        <title>{summary.studyMaterial.title} - Summary | Quizzer</title>
-        <meta name="description" content={getExcerpt(summary.content)} />
-        <meta property="og:title" content={`${summary.studyMaterial.title} - Summary | Quizzer`} />
-        <meta property="og:description" content={getExcerpt(summary.content)} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={globalThis.location.href} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${summary.studyMaterial.title} - Summary | Quizzer`} />
-        <meta name="twitter:description" content={getExcerpt(summary.content)} />
-      </Helmet>
+      <title>{summary.studyMaterial.title} - Summary | Quizzer</title>
+      <meta name="description" content={getExcerpt(summary.content)} />
+      <meta property="og:title" content={`${summary.studyMaterial.title} - Summary | Quizzer`} />
+      <meta property="og:description" content={getExcerpt(summary.content)} />
+      <meta property="og:type" content="article" />
+      <meta property="og:url" content={globalThis.location.href} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={`${summary.studyMaterial.title} - Summary | Quizzer`} />
+      <meta name="twitter:description" content={getExcerpt(summary.content)} />
 
       {/* Reading Progress Bar */}
       <motion.div
