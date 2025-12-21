@@ -24,9 +24,9 @@ export const ProfilePage = () => {
 
   const handleLogout = async () => {
     try {
-      logout();
+      navigate('/login', { replace: true });
+      await logout();
       toast.success('Logged out successfully');
-      navigate('/login', { replace: true, state: {} });
     } catch (_error) {
       toast.error('Failed to logout');
     }

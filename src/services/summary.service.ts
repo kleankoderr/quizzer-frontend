@@ -56,6 +56,16 @@ export const summaryService = {
   },
 
   /**
+   * Get the status of a summary generation job
+   * @param jobId - The ID of the job to check
+   * @returns Promise<any> Job status details
+   */
+  getGenerationStatus: async (jobId: string): Promise<any> => {
+    const response = await apiClient.get<any>(`/summary/job/${jobId}`);
+    return response.data;
+  },
+
+  /**
    * Get a summary by its short code
    * Public endpoint - accessible without authentication
    * @param shortCode - The short code of the summary

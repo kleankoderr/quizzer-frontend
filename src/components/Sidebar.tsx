@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   BookOpen,
@@ -49,8 +49,9 @@ export const Sidebar = ({
   isOpen,
   closeMobile,
 }: SidebarProps) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Organized navigation sections for better UX
   const navSections: NavSection[] = [
@@ -64,7 +65,9 @@ export const Sidebar = ({
       label: 'Learning Tools',
       items: [
         { path: '/study', icon: BookOpen, label: 'Study' },
-        { path: '/summaries', icon: Sparkles, label: 'Summaries' },
+        ...(user?.plan === 'PREMIUM'
+          ? [{ path: '/summaries', icon: Sparkles, label: 'Summaries' }]
+          : []),
         { path: '/quiz', icon: Brain, label: 'Quizzes' },
         { path: '/flashcards', icon: Layers, label: 'Flashcards' },
         { path: '/study-pack', icon: Folder, label: 'Study Pack' },
@@ -119,7 +122,6 @@ export const Sidebar = ({
     },
   ];
 
-  const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
   const sections = isAdmin ? adminNavSections : navSections;
@@ -261,7 +263,12 @@ export const Sidebar = ({
           
           {/* Logout Button */}
           <button
-            onClick={logout}
+            onClick={async () => {
+              // Navigate to login first to prevent "redirect to last place" behavior
+              // This ensures clean state for the next login
+              navigate('/login', { replace: true });
+              await logout();
+            }}
             className={`
               flex items-center gap-3 px-3 py-3 sm:py-2.5 w-full rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors touch-manipulation
               ${isCollapsed ? 'justify-center' : ''}

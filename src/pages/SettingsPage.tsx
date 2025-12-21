@@ -141,8 +141,8 @@ export const SettingsPage = () => {
     try {
       await userService.deleteAccount();
       toast.success('Account deleted successfully');
-      logout();
-      navigate('/login', { replace: true, state: {} });
+      navigate('/login', { replace: true });
+      await logout();
     } catch (_error) {
       toast.error('Failed to delete account');
       setLoading(false);

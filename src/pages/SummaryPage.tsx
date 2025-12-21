@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import {
   Eye,
   Heart,
-  Sparkles,
   Lightbulb,
   Bookmark,
   Share2,
@@ -17,6 +16,7 @@ import {
   Calendar,
   ExternalLink,
   ChevronUp,
+  ThumbsUp,
 } from 'lucide-react';
 import { FaXTwitter, FaFacebook, FaLinkedin, FaWhatsapp } from 'react-icons/fa6';
 import { summaryService, type Summary, type ReactionType } from '../services/summary.service';
@@ -26,8 +26,8 @@ import { Toast } from '../utils/toast';
 
 
 const REACTION_BUTTONS = [
-  { type: 'like' as ReactionType, icon: Heart, label: 'Like', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10' },
-  { type: 'love' as ReactionType, icon: Sparkles, label: 'Love', color: 'text-pink-500', bg: 'bg-pink-50 dark:bg-pink-900/10' },
+  { type: 'like' as ReactionType, icon: ThumbsUp, label: 'Like', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/10' },
+  { type: 'love' as ReactionType, icon: Heart, label: 'Love', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10' },
   { type: 'helpful' as ReactionType, icon: Lightbulb, label: 'Helpful', color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/10' },
   { type: 'bookmark' as ReactionType, icon: Bookmark, label: 'Bookmark', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10' },
 ];
@@ -35,6 +35,7 @@ const REACTION_BUTTONS = [
 export function SummaryPage() {
   const { shortCode } = useParams<{ shortCode: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -91,7 +92,7 @@ export function SummaryPage() {
 
   const handleReaction = async (type: ReactionType) => {
     if (!isAuthenticated) {
-      Toast.info('Sign up to react to summaries!');
+      navigate('/login', { state: { from: location } });
       return;
     }
 

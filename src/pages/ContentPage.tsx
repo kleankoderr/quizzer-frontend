@@ -30,10 +30,23 @@ import { DeleteModal } from '../components/DeleteModal';
 import { LearningGuide } from '../components/LearningGuide';
 import { ContentPageSkeleton } from '../components/skeletons';
 import './ContentPage.css';
-import { useContent } from '../hooks';
+import { useContent, useSummaryGeneration } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 
 
+// Custom heading renderer to add IDs
+const HeadingRenderer = ({ level, children }: any) => {
+  const text = children?.[0]?.toString() || '';
+  const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
+  const Tag = `h${level}` as React.ElementType;
+  return <Tag id={id}>{children}</Tag>;
+};
+
+const  MARKDOWN_COMPONENTS = {
+  h1: (props: any) => <HeadingRenderer level={1} {...props} />,
+  h2: (props: any) => <HeadingRenderer level={2} {...props} />,
+  h3: (props: any) => <HeadingRenderer level={3} {...props} />,
+};
 
 // Markdown Content Component with Scroll Tracking
 const MarkdownContent = ({
@@ -47,13 +60,6 @@ const MarkdownContent = ({
 }) => {
   const [restored, setRestored] = useState(false);
 
-  // Custom heading renderer to add IDs
-  const HeadingRenderer = ({ level, children }: any) => {
-    const text = children?.[0]?.toString() || '';
-    const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
-    const Tag = `h${level}` as React.ElementType;
-    return <Tag id={id}>{children}</Tag>;
-  };
 
   // Restore scroll position
   useEffect(() => {
@@ -148,11 +154,7 @@ const MarkdownContent = ({
           ],
           rehypeHighlight,
         ]}
-        components={{
-          h1: (props) => <HeadingRenderer level={1} {...props} />,
-          h2: (props) => <HeadingRenderer level={2} {...props} />,
-          h3: (props) => <HeadingRenderer level={3} {...props} />,
-        }}
+        components={MARKDOWN_COMPONENTS}
       >
         {processedContent}
       </ReactMarkdown>
@@ -290,6 +292,9 @@ export const ContentPage = () => {
     });
   };
 
+  /* New Hook Integration */
+  const { startPolling } = useSummaryGeneration();
+
   const handleGenerateSummary = async () => {
     if (!content) return;
 
@@ -298,15 +303,21 @@ export const ContentPage = () => {
       return;
     }
 
-    const loadingToast = toast.loading('Generating summary...');
     try {
-      await summaryService.generateSummary(content.id);
-      toast.success('Summary generation started! It will be ready in a moment.', {
-        id: loadingToast,
+      const { jobId } = await summaryService.generateSummary(content.id);
+      
+      toast.success('Summary generation started! It will be ready in a moment.');
+      
+      // Start polling
+      startPolling(jobId, () => {
+        // Optional: Update local cache or UI if needed
+        // The hook already shows a success toast
+        queryClient.invalidateQueries({ queryKey: ['content', id] });
       });
+
     } catch (_error: any) {
       const message = _error.response?.data?.message || 'Failed to generate summary';
-      toast.error(message, { id: loadingToast });
+      toast.error(message || 'Failed to generate summary');
     }
   };
 
@@ -698,7 +709,9 @@ export const ContentPage = () => {
                     await contentService.update(content.id, {
                       lastReadPosition: progress,
                     });
-                  } catch (_error) {}
+                  } catch (_error) {
+                    toast.error('Failed to save progress');
+                  }
                 }}
               />
             )}
