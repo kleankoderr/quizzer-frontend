@@ -143,14 +143,15 @@ export function SummaryPage() {
 
   const shareToSocial = (platform: string) => {
     if (!summary) return;
-    const url = encodeURIComponent(globalThis.location.href);
-    const text = encodeURIComponent(`Check out this summary of "${summary.studyMaterial.title}" on Quizzer! 🎯`);
+    const url = globalThis.location.href;
+    const shareText = `Check out this summary of "${summary.studyMaterial.title}" on Quizzer! 🎯`;
+    const text = encodeURIComponent(`${shareText}\n\n${url}`);
     
     const shareUrls: Record<string, string> = {
-      x: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
-      whatsapp: `https://wa.me/?text=${text}%20${url}`,
+      x: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      linkedin: `https://www.linkedin.com/feed/?shareActive=true&text=${text}`,
+      whatsapp: `https://wa.me/?text=${text}`,
     };
 
     if (shareUrls[platform]) {
@@ -282,7 +283,7 @@ export function SummaryPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="px-4 sm:px-6 lg:px-8 py-12 sm:max-w-4xl sm:mx-auto">
         {/* Article Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -330,86 +331,14 @@ export function SummaryPage() {
           </div>
         </motion.div>
 
-        {/* Share Section - Top Expandable */}
-        <motion.div
-           initial={false}
-           animate={{ height: showShareModal ? 'auto' : 0, opacity: showShareModal ? 1 : 0 }}
-           className="overflow-hidden mb-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl"
-        >
-          <div className="p-6 sm:p-8">
-            <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-              <ExternalLink className="w-5 h-5 text-primary-500" />
-              Share this summary
-            </h3>
-            
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="flex-1">
-                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Social Networks</p>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  <button onClick={() => shareToSocial('x')} className="flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-black/10">
-                    <FaXTwitter className="w-4 h-4" />
-                    <span className="text-sm">X</span>
-                  </button>
-                  <button onClick={() => shareToSocial('whatsapp')} className="flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-green-500/10">
-                    <FaWhatsapp className="w-5 h-5" />
-                    <span className="text-sm">WA</span>
-                  </button>
-                  <button onClick={() => shareToSocial('facebook')} className="flex items-center justify-center gap-2 px-4 py-3 bg-[#1877F2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-500/10">
-                    <FaFacebook className="w-5 h-5" />
-                    <span className="text-sm">FB</span>
-                  </button>
-                  <button onClick={() => shareToSocial('linkedin')} className="flex items-center justify-center gap-2 px-4 py-3 bg-[#0A66C2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-700/10">
-                    <FaLinkedin className="w-5 h-5" />
-                    <span className="text-sm">IN</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex-1">
-                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Direct Link</p>
-                <div className="flex flex-col sm:flex-row gap-2 relative group">
-                  <div className="relative flex-1">
-                    <input 
-                      type="text" 
-                      value={globalThis.location.href} 
-                      readOnly 
-                      className="w-full pl-4 pr-12 sm:pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-600 dark:text-gray-400 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-inner font-mono" 
-                    />
-                    <button 
-                      onClick={copyLink} 
-                      className="absolute right-2 top-1/2 -translate-y-1/2 sm:hidden p-2 text-primary-600"
-                    >
-                      {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <button 
-                    onClick={copyLink} 
-                    className="hidden sm:flex items-center gap-2 px-6 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all font-bold text-sm whitespace-nowrap"
-                  >
-                    {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    <span>{linkCopied ? 'Copied' : 'Copy Link'}</span>
-                  </button>
-                  <button 
-                    onClick={copyLink} 
-                    className="sm:hidden w-full flex items-center justify-center gap-2 py-3 bg-primary-600 text-white rounded-xl font-bold text-sm"
-                  >
-                    {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    <span>{linkCopied ? 'Copied' : 'Copy Link'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Summary Content Card */}
+        {/* Summary Content */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 border border-gray-100 dark:border-gray-700 overflow-hidden relative"
+          className="sm:bg-white sm:dark:bg-gray-800 sm:rounded-3xl sm:shadow-2xl sm:shadow-gray-200/50 sm:dark:shadow-black/20 sm:border sm:border-gray-100 sm:dark:border-gray-700 overflow-hidden relative"
         >
-          <div className="p-6 sm:p-12">
+          <div className="sm:p-12">
             <div className="prose prose-sm sm:prose-lg prose-gray dark:prose-invert max-w-none 
               prose-headings:font-extrabold prose-headings:tracking-tight
               prose-h1:text-2xl sm:prose-h1:text-3xl prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 sm:prose-h2:mt-12 prose-h2:mb-4 sm:prose-h2:mb-6
@@ -424,7 +353,7 @@ export function SummaryPage() {
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 px-4 sm:px-12 py-6 sm:py-8 flex items-center justify-center">
+          <div className="sm:bg-gray-50 sm:dark:bg-gray-800/50 sm:border-t sm:border-gray-100 sm:dark:border-gray-700 px-4 sm:px-12 py-6 sm:py-8 flex items-center justify-center mt-8 sm:mt-0">
             <div className="grid grid-cols-2 xs:flex xs:flex-wrap items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
               {REACTION_BUTTONS.map(({ type, icon: Icon, label, color, bg }) => {
                 const isActive = userReactions.has(type);
@@ -516,6 +445,82 @@ export function SummaryPage() {
       >
         <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
       </motion.button>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowShareModal(false)}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          />
+
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-md sm:max-w-lg md:max-w-2xl z-10"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden">
+              <div className="p-5 sm:p-6 md:p-8">
+                <h3 className="text-base sm:text-lg font-extrabold text-gray-900 dark:text-white mb-5 sm:mb-6 flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500" />
+                  Share this summary
+                </h3>
+                
+                <div className="flex flex-col gap-6 sm:gap-8">
+                  <div className="w-full">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 sm:mb-4">Social Networks</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                      <button onClick={() => shareToSocial('x')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-black text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-black/10">
+                        <FaXTwitter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="text-xs sm:text-sm">X</span>
+                      </button>
+                      <button onClick={() => shareToSocial('whatsapp')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#25D366] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-green-500/10">
+                        <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-xs sm:text-sm">WA</span>
+                      </button>
+                      <button onClick={() => shareToSocial('facebook')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#1877F2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-500/10">
+                        <FaFacebook className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-xs sm:text-sm">FB</span>
+                      </button>
+                      <button onClick={() => shareToSocial('linkedin')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#0A66C2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-700/10">
+                        <FaLinkedin className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-xs sm:text-sm">IN</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 sm:mb-4">Direct Link</p>
+                    <div className="flex flex-col gap-2">
+                      <div className="relative w-full">
+                        <input 
+                          type="text" 
+                          value={globalThis.location.href} 
+                          readOnly 
+                          className="w-full pl-3 sm:pl-4 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-600 dark:text-gray-400 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-inner font-mono truncate" 
+                        />
+                      </div>
+                      <button 
+                        onClick={copyLink} 
+                        className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all font-bold text-xs sm:text-sm"
+                      >
+                        {linkCopied ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        <span>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
