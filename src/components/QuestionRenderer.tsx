@@ -2,6 +2,9 @@ import ReactMarkdown from 'react-markdown';
 import React, { useState } from 'react';
 import type { QuizQuestion, AnswerValue } from '../types';
 import { Check, X, AlertTriangle } from 'lucide-react';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
 
 interface QuestionRendererProps {
     question: QuizQuestion;
@@ -13,6 +16,24 @@ interface QuestionRendererProps {
     showExplanation?: boolean;
     hideQuestionNumber?: boolean;
 }
+
+// Custom paragraph renderer component to avoid re-creation on every render
+const ParagraphRenderer = ({ _node, ...props }: any) => <span {...props} />;
+
+// Reusable Markdown component for questions and options
+const MarkdownText = ({ content, className = '' }: { content: string; className?: string }) => (
+    <div className={`prose prose-sm dark:prose-invert max-w-none ${className} [&_p]:m-0 [&_p]:inline-block`}>
+        <ReactMarkdown
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex]}
+            components={{
+                p: ParagraphRenderer
+            }}
+        >
+            {content}
+        </ReactMarkdown>
+    </div>
+);
 
 // Helper function to get button styling based on state
 const getButtonClasses = (
@@ -89,8 +110,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               >
                 {option === 'True' ? 'T' : 'F'}
               </span>
-                            <span className="text-base text-gray-900 dark:text-white pt-0.5">
-                {option}
+                            <span className="text-base text-gray-900 dark:text-white pt-0.5 w-full">
+                <MarkdownText content={option} />
               </span>
                             {showResults && isCorrect && (
                                 <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-green-700 font-semibold">
@@ -137,8 +158,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               >
                 {String.fromCodePoint(65 + index)}
               </span>
-                            <span className="text-base text-gray-900 dark:text-white pt-0.5">
-                {option}
+                            <span className="text-base text-gray-900 dark:text-white pt-0.5 w-full">
+                <MarkdownText content={option} />
               </span>
                             {showResults && isCorrect && (
                                 <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-green-700 font-semibold">
@@ -255,8 +276,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                   >
                     {(isSelected || isMissed) && '✓'}
                   </span>
-                                    <span className="text-base text-gray-900 dark:text-white pt-0.5">
-                    {option}
+                                    <span className="text-base text-gray-900 dark:text-white pt-0.5 w-full">
+                    <MarkdownText content={option} />
                   </span>
                                     {isMissed && (
                                         <div className="ml-auto flex-shrink-0 flex items-center gap-1 text-orange-700 font-semibold">
@@ -387,6 +408,19 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             return `${baseClass} bg-gray-200 text-gray-400`;
         };
 
+        const getMatchResultClasses = (
+            isCorrect: boolean,
+            isWrong: boolean
+        ): string => {
+            if (isCorrect) {
+                return 'bg-green-200 text-green-800';
+            }
+            if (isWrong) {
+                return 'bg-red-200 text-red-800';
+            }
+            return 'bg-blue-200 text-blue-800';
+        };
+
         return (
             <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
@@ -428,21 +462,18 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                                             {index + 1}
                                         </div>
                                         <div className="flex-1">
-                                            <div className="font-semibold text-gray-900 dark:text-white mb-1">
-                                                {leftItem}
+                                            <div className="font-semibold text-gray-900 dark:text-white mb-1 w-full">
+                                                <MarkdownText content={leftItem} />
                                             </div>
                                             {userMatch && (
                                                 <div className="flex items-center gap-2 mt-2 text-sm">
                           <span
-                              className={`font-medium px-2 py-1 rounded ${
-                                  isCorrect
-                                      ? 'bg-green-200 text-green-800'
-                                      : isWrong
-                                          ? 'bg-red-200 text-red-800'
-                                          : 'bg-blue-200 text-blue-800'
-                              }`}
+                              className={`font-medium px-2 py-1 rounded ${getMatchResultClasses(
+                                  isCorrect,
+                                  isWrong
+                              )}`}
                           >
-                            → {userMatch}
+                            → <MarkdownText content={userMatch} className="inline-block align-middle" />
                           </span>
                                                     {!showResults && (
                                                         <span className="text-xs text-gray-500 italic">
@@ -462,11 +493,11 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                                         <div className="mt-3 pt-3 border-t border-red-200">
                                             <div className="text-sm text-red-700">
                                                 <span className="font-semibold">✗ Your answer:</span>{' '}
-                                                {userMatch}
+                                                <MarkdownText content={userMatch} className="inline-block" />
                                             </div>
                                             <div className="text-sm text-green-700 mt-1">
                                                 <span className="font-semibold">✓ Correct:</span>{' '}
-                                                {correctMatch}
+                                                <MarkdownText content={correctMatch} className="inline-block" />
                                             </div>
                                         </div>
                                     )}
@@ -513,14 +544,14 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                                         </div>
                                         <div className="flex-1">
                                             <div
-                                                className={`font-semibold ${isUsed ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}
+                                                className={`font-semibold w-full ${isUsed ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}
                                             >
-                                                {rightItem}
+                                                <MarkdownText content={rightItem} />
                                             </div>
                                             {isUsed && (
                                                 <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                                     <span className="inline-block w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-                                                    Already matched
+                                                    <span>Already matched</span>
                                                 </div>
                                             )}
                                             {canSelect && (
@@ -559,9 +590,12 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             }
         }
 
-        const displayCorrectAnswer = Array.isArray(correctAnswer)
-            ? correctAnswer.join(' / ')
-            : String(correctAnswer);
+        let displayCorrectAnswer = '';
+        if (Array.isArray(correctAnswer)) {
+            displayCorrectAnswer = correctAnswer.join(' / ');
+        } else if (typeof correctAnswer === 'string' || typeof correctAnswer === 'number') {
+            displayCorrectAnswer = String(correctAnswer);
+        }
 
         const getInputContainerClasses = (): string => {
             if (!showResults || !hasCorrectAnswer) {
@@ -593,8 +627,9 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                                 <div className="text-red-700">
                                     ✗ Your answer: <strong>{userAnswer}</strong>
                                 </div>
-                                <div className="text-green-700">
-                                    ✓ Correct answer: <strong>{displayCorrectAnswer}</strong>
+                                <div className="text-green-700 flex items-center gap-1">
+                                    <span className="font-semibold">✓ Correct answer:</span>
+                                    <span className="font-bold"><MarkdownText content={displayCorrectAnswer} className="inline-block" /></span>
                                 </div>
                             </>
                         )}
@@ -614,7 +649,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                 )}
                 <div className="flex-1 min-w-0">
                     <div className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white w-full max-w-full overflow-hidden break-words [&_p]:m-0 [&_pre]:whitespace-pre-wrap [&_code]:break-all [&_code]:bg-gray-100 dark:[&_code]:bg-gray-700 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em] [&_img]:max-w-full">
-                        <ReactMarkdown>{question.question}</ReactMarkdown>
+                         <MarkdownText content={question.question} className="!prose-lg sm:!prose-xl md:!prose-2xl" />
                     </div>
                 </div>
             </div>
@@ -631,7 +666,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                         💡 Explanation:
                     </p>
                     <div className="text-sm text-blue-800 dark:text-blue-200 [&_strong]:font-bold">
-                        <ReactMarkdown>{question.explanation}</ReactMarkdown>
+                        <MarkdownText content={question.explanation} />
                     </div>
                 </div>
             )}

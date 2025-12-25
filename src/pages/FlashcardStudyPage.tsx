@@ -20,13 +20,10 @@ import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHer
 import { useAuth } from '../contexts/AuthContext';
 import { AttemptsAnalyticsView } from '../components/AttemptsAnalyticsView';
 import type { FlashcardAttempt } from '../types';
-
-// Simple markdown renderer for bold text
-const renderMarkdown = (text: string) => {
-  // Convert **text** to <strong>text</strong>
-  const formatted = text.replaceAll(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  return { __html: formatted };
-};
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
 
 // Helper function to build breadcrumb items
 const buildBreadcrumbItems = (
@@ -43,6 +40,20 @@ const buildBreadcrumbItems = (
     ...(includeHistory ? [{ label: 'History', path: null }] : []),
   ];
 };
+
+const FlashcardMarkdown = ({ content, className = '' }: { content: string; className?: string }) => (
+  <div className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0`}>
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[rehypeKatex]}
+      components={{
+        p: ({node, ...props}) => <div {...props} />
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  </div>
+);
 
 export const FlashcardStudyPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -617,10 +628,9 @@ const FlashcardItem = ({ card, isFlipped, onFlip }: any) => (
         <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
           <BookOpen className="w-8 h-8 text-white" />
         </div>
-        <p
-          className="text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-relaxed"
-          dangerouslySetInnerHTML={renderMarkdown(card.front)}
-        />
+        <div className="text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-relaxed w-full">
+            <FlashcardMarkdown content={card.front} />
+        </div>
       </div>
 
       {/* Back of card */}
@@ -638,24 +648,20 @@ const FlashcardItem = ({ card, isFlipped, onFlip }: any) => (
         <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
           <Sparkles className="w-8 h-8 text-white" />
         </div>
-        <p
-          className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed max-w-2xl"
-          dangerouslySetInnerHTML={renderMarkdown(card.back)}
-        />
+        <div className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed max-w-2xl w-full">
+          <FlashcardMarkdown content={card.back} />
+        </div>
         {card.explanation && (
-          <div className="mt-6 pt-6 border-t-2 border-primary-200 dark:border-gray-600 max-w-2xl">
+          <div className="mt-6 pt-6 border-t-2 border-primary-200 dark:border-gray-600 max-w-2xl w-full">
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="text-2xl">💡</span>
               <p className="text-sm font-bold text-primary-900 dark:text-primary-300 uppercase tracking-wide">
                 Explanation
               </p>
             </div>
-            <p
-              className="text-base text-gray-700 dark:text-gray-300 leading-relaxed bg-white dark:bg-gray-800 p-4 rounded-lg"
-              dangerouslySetInnerHTML={renderMarkdown(
-                card.explanation
-              )}
-            />
+            <div className="text-base text-gray-700 dark:text-gray-300 leading-relaxed bg-white dark:bg-gray-800 p-4 rounded-lg text-left">
+               <FlashcardMarkdown content={card.explanation} />
+            </div>
           </div>
         )}
       </div>
