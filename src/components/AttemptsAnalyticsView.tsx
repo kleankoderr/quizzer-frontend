@@ -340,7 +340,7 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
                   }}
                   itemStyle={{ color: '#fff' }}
                   labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
-                  formatter={(value: number) => [value, 'Sessions']}
+                  formatter={(value: number | undefined) => [value || 0, 'Sessions']}
                   labelFormatter={(label) => `Range: ${label}`}
                 />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]}>

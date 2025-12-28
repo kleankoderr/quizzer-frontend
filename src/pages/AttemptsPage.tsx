@@ -535,7 +535,7 @@ export function AttemptsPage() {
                     borderRadius: '8px',
                     color: '#fff',
                   }}
-                  formatter={(value: number) => [`${value}%`, 'Score']}
+                  formatter={(value: number | undefined) => [`${value}%`, 'Score']}
                   labelFormatter={(label, payload) => {
                     if (payload && payload.length > 0) {
                       return `${payload[0].payload.fullDate} (Attempt #${payload[0].payload.attemptNumber})`;
