@@ -5,8 +5,7 @@ import { subscriptionService } from '../services/subscription.service';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { Toast } from '../utils/toast';
 import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
-import { SUBSCRIPTION_QUERY_KEY, CURRENT_PLAN_QUERY_KEY } from '../hooks/useSubscription';
-import { QUOTA_QUERY_KEY } from '../hooks/useQuota';
+import { SUBSCRIPTION_QUERY_KEY, CURRENT_PLAN_QUERY_KEY, QUOTA_QUERY_KEY } from '../hooks';
 import { useAuth } from '../contexts/AuthContext';
 
 export const VerifyPaymentPage: React.FC = () => {
@@ -29,38 +28,64 @@ export const VerifyPaymentPage: React.FC = () => {
         return;
       }
 
-      try {
-        await subscriptionService.verifyPayment(reference);
-        
-        if (mounted) {
-          // Invalidate all related caches to update UI immediately
-          await Promise.all([
-            refreshUser(),
-            queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
-            queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY }),
-            queryClient.invalidateQueries({ queryKey: QUOTA_QUERY_KEY }),
-          ]);
+      // Retry configuration for handling 409 errors
+      const maxRetries = 5;
+      const baseDelay = 1000; // Start with 1 second
+      let attempt = 0;
 
-          setStatus('success');
-          setMessage('Payment verified successfully! Redirecting...');
-          Toast.success('Subscription activated successfully!', {
-            description: 'Your premium features are now active!'
-          });
+      while (attempt < maxRetries && mounted) {
+        try {
+          await subscriptionService.verifyPayment(reference);
           
-          // Redirect after a short delay to let user see success message
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-        }
-      } catch (error: any) {
-        console.error('Payment verification failed:', error);
-        if (mounted) {
-          setStatus('error');
-          setMessage(
-            error.response?.data?.message || 
-            'Failed to verify payment. Please contact support if you were charged.'
-          );
-          Toast.error('Payment verification failed');
+          if (mounted) {
+            // Invalidate all related caches to update UI immediately
+            await Promise.all([
+              refreshUser(),
+              queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
+              queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY }),
+              queryClient.invalidateQueries({ queryKey: QUOTA_QUERY_KEY }),
+            ]);
+
+            setStatus('success');
+            setMessage('Payment verified successfully! Redirecting...');
+            Toast.success('Subscription activated successfully!', {
+              description: 'Your premium features are now active!'
+            });
+            
+            // Redirect after a short delay to let user see success message
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 2000);
+          }
+          break; // Success - exit retry loop
+        } catch (error: any) {
+          console.error(`Payment verification attempt ${attempt + 1} failed:`, error);
+          
+          // Check if it's a 409 error (verification in progress)
+          if (error.response?.status === 409 && attempt < maxRetries - 1) {
+            // Calculate exponential backoff delay
+            const delay = baseDelay * Math.pow(2, attempt);
+            console.log(`Retrying in ${delay}ms...`);
+            
+            if (mounted) {
+              setMessage(`Payment verification in progress... (Attempt ${attempt + 1}/${maxRetries})`);
+            }
+            
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, delay));
+            attempt++;
+          } else {
+            // Non-409 error or max retries reached
+            if (mounted) {
+              setStatus('error');
+              setMessage(
+                error.response?.data?.message || 
+                'Failed to verify payment. Please contact support if you were charged.'
+              );
+              Toast.error('Payment verification failed');
+            }
+            break; // Exit retry loop
+          }
         }
       }
     };
