@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { GlobalSearch } from './GlobalSearch';
-import { useQuota } from '../hooks/useQuota';
+import { useQuota } from '../hooks';
 import { SubscriptionBadge } from './SubscriptionBadge';
 import type { QuotaStatus } from '../types';
 
@@ -27,15 +27,37 @@ const getTotalRemaining = (quota: QuotaStatus): number => {
 };
 
 // Helper function to format reset time
-const getResetTimeText = (): string => {
-  // const reset = new Date(resetAt); // Unused
-
+const getResetTimeText = (resetAt?: string): string => {
+  if (!resetAt) return '';
+  
   const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+  const resetDate = new Date(resetAt);
+  
+  // If reset date is in the past, it means it resets next month relative to now
+  if (resetDate < now) {
+    const nextMonth = new Date(now);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    nextMonth.setDate(1);
+    nextMonth.setHours(0, 0, 0, 0);
+    
+    const diffMs = nextMonth.getTime() - now.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 0) {
+      return `in ${diffDays} days`;
+    }
+    
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    return `in ${diffHours} hours`;
+  }
 
-  const diffMs = tomorrow.getTime() - now.getTime();
+  const diffMs = resetDate.getTime() - now.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays > 0) {
+    return `in ${diffDays} days`;
+  }
+  
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -240,7 +262,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                   <div className="fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-[4.5rem] sm:top-full sm:mt-2 w-auto sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-[100] max-h-[calc(100vh-6rem)] overflow-y-auto">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-gray-900 dark:text-white">
-                        Daily Quota
+                        Monthly Quota
                       </h3>
                       {quota.isPremium && (
                         <SubscriptionBadge isPremium={true} size="sm" />
@@ -293,7 +315,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
 
                     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Resets {getResetTimeText()}
+                        Resets {getResetTimeText(quota.monthlyResetAt)}
                       </p>
                     </div>
 

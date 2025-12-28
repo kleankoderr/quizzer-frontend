@@ -408,10 +408,10 @@ export default function UserDetailsPage() {
           <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Daily Quota Usage
+                Monthly Quota Usage
               </h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Current usage for today's limits
+                Current usage for this month's limits
               </p>
             </div>
             {userQuota.isPremium && (
