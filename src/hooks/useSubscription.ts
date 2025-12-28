@@ -94,3 +94,21 @@ export const useVerifyPayment = () => {
     },
   });
 };
+
+/**
+ * Hook to schedule a plan downgrade
+ * Automatically refetches subscription data on success
+ */
+export const useScheduleDowngrade = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (planId: string) =>
+      subscriptionService.scheduleDowngrade(planId),
+    onSuccess: () => {
+      // Invalidate and refetch subscription and current plan data
+      queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY });
+    },
+  });
+};

@@ -161,6 +161,11 @@ const SubscriptionsPage = lazy(() =>
     default: m.SubscriptionsPage,
   }))
 );
+const PaymentFailuresPage = lazy(() =>
+  import('./pages/admin/payments/PaymentFailuresPage').then((m) => ({
+    default: m.PaymentFailuresPage,
+  }))
+);
 
 const RecommendationsPage = lazy(() =>
   import('./pages/RecommendationsPage').then((m) => ({
@@ -385,6 +390,14 @@ function AppRoutes() {
             element={
               <AdminRoute>
                 <SubscriptionsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/payments/failures"
+            element={
+              <AdminRoute>
+                <PaymentFailuresPage />
               </AdminRoute>
             }
           />

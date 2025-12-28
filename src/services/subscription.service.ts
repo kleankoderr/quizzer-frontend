@@ -31,7 +31,7 @@ export const subscriptionService = {
    */
   checkout: async (planId: string): Promise<CheckoutResponse> => {
     // Construct the callback URL for Paystack to redirect to after payment
-    const callbackUrl = `${window.location.origin}/subscription/verify`;
+    const callbackUrl = `${globalThis.location.origin}/subscription/verify`;
 
     const response = await apiClient.post<CheckoutResponse>(
       SUBSCRIPTION_ENDPOINTS.CHECKOUT,
@@ -96,6 +96,22 @@ export const subscriptionService = {
     const response = await apiClient.post<{ message: string }>(
       SUBSCRIPTION_ENDPOINTS.CANCEL_SUBSCRIPTION
     );
+    return response.data;
+  },
+
+  /**
+   * Schedule a downgrade to a different plan
+   * The downgrade will take efffect at the end of the current billing period
+   * @param planId - The ID of the plan to downgrade to
+   * @returns Promise<{ message: string; subscription: Subscription }> Success message and updated subscription
+   */
+  scheduleDowngrade: async (
+    planId: string
+  ): Promise<{ message: string; subscription: Subscription }> => {
+    const response = await apiClient.post<{
+      message: string;
+      subscription: Subscription;
+    }>('/subscription/schedule-downgrade', { planId });
     return response.data;
   },
 };

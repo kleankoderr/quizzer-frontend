@@ -317,4 +317,16 @@ export const adminService = {
     const response = await api.get(`/admin/users/${userId}/quota`);
     return response.data;
   },
+
+  getPaymentFailures: async (page = 1, limit = 50) => {
+    const response = await api.get('/subscription/admin/payment-failures', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+
+  getPaymentStats: async () => {
+    const response = await api.get('/subscription/admin/payment-stats');
+    return response.data;
+  },
 };

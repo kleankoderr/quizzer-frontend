@@ -79,6 +79,13 @@ const QuotaItem = ({ label, used, limit, remaining }: QuotaItemProps) => {
   const percentage = limit > 0 ? (used / limit) * 100 : 0;
   const isLow = remaining <= 1;
 
+  let progressBarColor = 'bg-primary-500';
+  if (isLow) {
+    progressBarColor = 'bg-red-500';
+  } else if (percentage > 50) {
+    progressBarColor = 'bg-amber-500';
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
@@ -97,13 +104,7 @@ const QuotaItem = ({ label, used, limit, remaining }: QuotaItemProps) => {
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
         <div
-          className={`h-2 rounded-full transition-all ${
-            isLow
-              ? 'bg-red-500'
-              : percentage > 50
-              ? 'bg-amber-500'
-              : 'bg-primary-500'
-          }`}
+          className={`h-2 rounded-full transition-all ${progressBarColor}`}
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -119,6 +120,17 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
   const { user } = useAuth();
   const { setTheme, resolvedTheme } = useTheme();
   const { data: quota, isLoading: quotaLoading } = useQuota();
+
+  const isStudent = !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN');
+
+  let quotaIconColor = 'text-gray-500 dark:text-gray-400';
+  if (quota) {
+    if (quota.isPremium) {
+      quotaIconColor = 'text-amber-500';
+    } else if (getTotalRemaining(quota) <= 2) {
+      quotaIconColor = 'text-red-500';
+    }
+  }
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isQuotaDropdownOpen, setIsQuotaDropdownOpen] = useState(false);
@@ -170,7 +182,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
           </button>
 
           {/* Search Trigger - Desktop (non-admin only) */}
-          {user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN' && (
+          {isStudent && (
             <button
               onClick={() => setIsSearchOpen(true)}
               className="hidden md:flex items-center w-full max-w-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-500 hover:border-gray-300 dark:hover:border-gray-600 transition-colors group"
@@ -187,7 +199,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
           )}
 
           {/* Mobile Search Icon (non-admin only) */}
-          {user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN' && (
+          {isStudent && (
             <button
               onClick={() => setIsSearchOpen(true)}
               className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-200 flex-shrink-0"
@@ -200,17 +212,17 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
 
         <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
           {/* Pricing Link for Non-Premium (non-admin only) */}
-          {quotaLoading ? (
-            !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') ? (
-              <div className="hidden sm:block w-20 lg:w-24">
-                <Skeleton height={36} borderRadius={8} />
-              </div>
-            ) : null
-          ) : (
+          {/* Pricing Link for Non-Premium (non-admin only) */}
+          {quotaLoading && isStudent && (
+            <div className="hidden sm:block w-20 lg:w-24">
+              <Skeleton height={36} borderRadius={8} />
+            </div>
+          )}
+          
+          {!quotaLoading &&
             quota &&
             !quota.isPremium &&
-            user?.role !== 'ADMIN' &&
-            user?.role !== 'SUPER_ADMIN' && (
+            isStudent && (
               <Link
                 to="/pricing"
                 className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 lg:px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all group flex-shrink-0"
@@ -218,20 +230,19 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                 <Crown className="w-4 h-4 text-amber-100 group-hover:text-white transition-colors flex-shrink-0" />
                 <span className="hidden sm:inline whitespace-nowrap">Pricing</span>
               </Link>
-            )
-          )}
+            )}
 
           {/* Quota Display (non-admin only) */}
-          {quotaLoading ? (
-            !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') ? (
-              <div className="w-20 sm:w-28">
-                <Skeleton height={36} borderRadius={8} />
-              </div>
-            ) : null
-          ) : (
+          {/* Quota Display (non-admin only) */}
+          {quotaLoading && isStudent && (
+            <div className="w-20 sm:w-28">
+              <Skeleton height={36} borderRadius={8} />
+            </div>
+          )}
+          
+          {!quotaLoading &&
             quota &&
-            user?.role !== 'ADMIN' &&
-            user?.role !== 'SUPER_ADMIN' && (
+            isStudent && (
               <div className="relative" ref={quotaDropdownRef}>
                 <button
                   onClick={() => setIsQuotaDropdownOpen(!isQuotaDropdownOpen)}
@@ -243,13 +254,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                   aria-label="Quota status"
                 >
                   <Zap
-                    className={`w-4 h-4 flex-shrink-0 ${
-                      quota.isPremium
-                        ? 'text-amber-500'
-                        : getTotalRemaining(quota) <= 2
-                        ? 'text-red-500'
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}
+                    className={`w-4 h-4 flex-shrink-0 ${quotaIconColor}`}
                   />
                   <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                     {getTotalRemaining(quota)} left
@@ -265,11 +270,18 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                         Monthly Quota
                       </h3>
                       {quota.isPremium && (
-                        <SubscriptionBadge isPremium={true} size="sm" />
+                        <SubscriptionBadge isPremium={true} status={quota.status} size="sm" />
                       )}
                     </div>
 
                     <div className="space-y-3">
+                      {/* Show warning if payment is pending */}
+                      {quota.status === 'PENDING_PAYMENT' && (
+                        <div className="p-2 mb-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-sm text-yellow-700 dark:text-yellow-400">
+                          Your payment is currently being processed. Premium features will be available shortly.
+                        </div>
+                      )}
+
                       {/* Quiz Quota */}
                       <QuotaItem
                         label="Quizzes"
@@ -348,8 +360,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                   </div>
                 )}
               </div>
-            )
-          )}
+            )}
 
           <button
             onClick={() =>

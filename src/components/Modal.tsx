@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
 import { X } from 'lucide-react';
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
-import { useFocusTrap } from '../hooks/useFocusTrap';
-import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
+import { useKeyboardNavigation, useFocusTrap, useBodyScrollLock } from '../hooks';
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,6 +8,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  className?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -18,6 +17,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   children,
   footer,
+  className = '',
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +39,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div
         ref={modalRef}
-        className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-200"
+        className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-200 ${className}`}
       >
         {/* Close button positioned absolutely in the top-right of the modal content */}
         <button

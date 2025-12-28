@@ -8,6 +8,7 @@ interface PricingCardProps {
   onSubscribe?: (planId: string, isFree: boolean) => void;
   isLoading?: boolean;
   className?: string;
+  buttonText?: string;
 }
 
 export const PricingCard: React.FC<PricingCardProps> = ({
@@ -16,8 +17,11 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   onSubscribe,
   isLoading = false,
   className = '',
+  buttonText,
 }) => {
   const isFree = plan.price === 0;
+  const defaultButtonText = isFree ? 'Get Started' : 'Subscribe Now';
+  const displayButtonText = buttonText || defaultButtonText;
 
   // Format price
   const formattedPrice = useMemo(() => {
@@ -170,7 +174,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
                   Processing...
                 </>
               ) : (
-                isFree ? 'Get Started' : 'Subscribe Now'
+                displayButtonText
               )}
             </button>
           )}

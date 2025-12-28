@@ -29,9 +29,9 @@ import {
 import { Modal } from '../components/Modal';
 import { DeleteModal } from '../components/DeleteModal';
 import { FileUpload } from '../components/FileUpload';
-import { useUserDocuments } from '../hooks';
+import { StorageCleanupModal } from '../components/User/StorageCleanupModal';
+import { useUserDocuments, useInvalidateQuota } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useInvalidateQuota } from '../hooks/useQuota';
 
 type SortField = 'name' | 'date' | 'size';
 type SortOrder = 'asc' | 'desc';
@@ -66,6 +66,7 @@ export const FilesPage = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(
     location.state?.openUpload === true
   );
+  const [storageCleanupModalOpen, setStorageCleanupModalOpen] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -90,12 +91,10 @@ export const FilesPage = () => {
     if (selectedType !== 'all') {
       filtered = filtered.filter((doc) => {
         const mimeType = doc.document.mimeType;
-        switch (selectedType) {
-          case 'pdf':
-            return mimeType.includes('pdf');
-          default:
-            return true;
+        if (selectedType === 'pdf') {
+          return mimeType.includes('pdf');
         }
+        return true;
       });
     }
 
@@ -190,8 +189,17 @@ export const FilesPage = () => {
 
       setUploadModalOpen(false);
       setUploadFiles([]);
-    } catch (_error) {
-      toast.error('Failed to upload files', { id: loadingToast });
+    } catch (error: any) {
+      if (
+        error.response?.status === 403 &&
+        (error.response?.data?.message?.includes('storage limit') ||
+         error.response?.data?.message?.includes('Storage limit'))
+      ) {
+        toast.dismiss(loadingToast);
+        setStorageCleanupModalOpen(true);
+      } else {
+        toast.error('Failed to upload files', { id: loadingToast });
+      }
     } finally {
       setUploading(false);
     }
@@ -236,6 +244,218 @@ export const FilesPage = () => {
       return () => container.removeEventListener('scroll', handleScroll);
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const loadingView =
+    viewMode === 'grid' ? (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <CardSkeleton count={10} />
+      </div>
+    ) : (
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <TableSkeleton rows={10} columns={4} />
+      </div>
+    );
+
+  const content = (() => {
+    if (loading) {
+      return loadingView;
+    }
+
+    if (filteredDocuments.length === 0) {
+      return (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {searchQuery || selectedType !== 'all'
+              ? 'No files found'
+              : 'No files yet'}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {searchQuery || selectedType !== 'all'
+              ? 'Try adjusting your filters or search query'
+              : 'Upload files through the content generation pages'}
+          </p>
+        </div>
+      );
+    }
+
+    if (viewMode === 'grid') {
+      return (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {filteredDocuments.map((doc) => (
+            <div
+              key={doc.id}
+              className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-lg hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200 flex flex-col"
+            >
+              {/* File Icon */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-xl flex items-center justify-center text-2xl sm:text-3xl">
+                  {userDocumentService.getFileIcon(doc.document.mimeType)}
+                </div>
+                <div className="relative -mr-2 -mt-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === doc.id ? null : doc.id);
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                  {openMenuId === doc.id && (
+                    <>
+                      <button
+                        type="button"
+                        className="fixed inset-0 z-10 w-full h-full cursor-default focus:outline-none"
+                        aria-label="Close menu"
+                        onClick={() => setOpenMenuId(null)}
+                      />
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
+                        <button
+                          onClick={() => {
+                            handlePreview(doc);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDownload(doc);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDelete(doc);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* File Info */}
+              <div className="mt-auto">
+                <h3
+                  className="font-semibold text-gray-900 dark:text-white mb-1 truncate text-sm sm:text-base"
+                  title={doc.displayName}
+                >
+                  {doc.displayName}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {userDocumentService.formatFileSize(doc.document.sizeBytes)}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                  <Calendar className="w-3 h-3" />
+                  {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  Size
+                </th>
+                <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  Uploaded
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {filteredDocuments.map((doc) => (
+                <tr
+                  key={doc.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+                        {userDocumentService.getFileIcon(
+                          doc.document.mimeType
+                        )}
+                      </div>
+                      <div className="min-w-0 max-w-[200px] sm:max-w-xs lg:max-w-md">
+                        <p className="font-medium text-gray-900 dark:text-white truncate">
+                          {doc.displayName}
+                        </p>
+                        {/* Show size on mobile in subtitle */}
+                        <p className="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {userDocumentService.formatFileSize(
+                            doc.document.sizeBytes
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    {userDocumentService.formatFileSize(
+                      doc.document.sizeBytes
+                    )}
+                  </td>
+                  <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handlePreview(doc)}
+                        className="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title="Preview"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDownload(doc)}
+                        className="hidden sm:block p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title="Download"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc)}
+                        className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  })();
 
   return (
     <div 
@@ -408,200 +628,7 @@ export const FilesPage = () => {
       </div>
 
       {/* Files Display */}
-      {loading ? (
-        viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            <CardSkeleton count={10} />
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <TableSkeleton rows={10} columns={4} />
-          </div>
-        )
-      ) : filteredDocuments.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-          <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            {searchQuery || selectedType !== 'all'
-              ? 'No files found'
-              : 'No files yet'}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            {searchQuery || selectedType !== 'all'
-              ? 'Try adjusting your filters or search query'
-              : 'Upload files through the content generation pages'}
-          </p>
-        </div>
-      ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filteredDocuments.map((doc) => (
-            <div
-              key={doc.id}
-              className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-lg hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200 flex flex-col"
-            >
-              {/* File Icon */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-xl flex items-center justify-center text-2xl sm:text-3xl">
-                  {userDocumentService.getFileIcon(doc.document.mimeType)}
-                </div>
-                <div className="relative -mr-2 -mt-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenMenuId(openMenuId === doc.id ? null : doc.id);
-                    }}
-                    className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  {openMenuId === doc.id && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setOpenMenuId(null)}
-                      />
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
-                        <button
-                          onClick={() => {
-                            handlePreview(doc);
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Preview
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleDownload(doc);
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleDelete(doc);
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Delete
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* File Info */}
-              <div className="mt-auto">
-                <h3
-                  className="font-semibold text-gray-900 dark:text-white mb-1 truncate text-sm sm:text-base"
-                  title={doc.displayName}
-                >
-                  {doc.displayName}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  {userDocumentService.formatFileSize(doc.document.sizeBytes)}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
-                  <Calendar className="w-3 h-3" />
-                  {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Size
-                  </th>
-                  <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Uploaded
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredDocuments.map((doc) => (
-                  <tr
-                    key={doc.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-                          {userDocumentService.getFileIcon(
-                            doc.document.mimeType
-                          )}
-                        </div>
-                        <div className="min-w-0 max-w-[200px] sm:max-w-xs lg:max-w-md">
-                          <p className="font-medium text-gray-900 dark:text-white truncate">
-                            {doc.displayName}
-                          </p>
-                          {/* Show size on mobile in subtitle */}
-                          <p className="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {userDocumentService.formatFileSize(
-                              doc.document.sizeBytes
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                      {userDocumentService.formatFileSize(
-                        doc.document.sizeBytes
-                      )}
-                    </td>
-                    <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                      {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handlePreview(doc)}
-                          className="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          title="Preview"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDownload(doc)}
-                          className="hidden sm:block p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          title="Download"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(doc)}
-                          className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {content}
 
       {/* Loading More Indicator */}
       {isFetchingNextPage && !loading && (
@@ -621,6 +648,12 @@ export const FilesPage = () => {
         title="Delete File"
         itemName={selectedDocument?.displayName}
         isDeleting={isDeleting}
+      />
+
+      {/* Storage Cleanup Modal */}
+      <StorageCleanupModal
+        isOpen={storageCleanupModalOpen}
+        onClose={() => setStorageCleanupModalOpen(false)}
       />
 
       {/* Preview Modal */}

@@ -14,13 +14,22 @@ import {
   CreditCard,
   Package,
   Database,
+  AlertTriangle,
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from 'recharts';
 import { adminService } from '../../services/adminService';
 import { Toast as toast } from '../../utils/toast';
 import { Link } from 'react-router-dom';
 import { StatCard } from '../../components/StatCard';
-import { StatCardSkeleton } from '../../components/skeletons';
-import { CardSkeleton } from '../../components/skeletons';
+import { StatCardSkeleton, CardSkeleton } from '../../components/skeletons';
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
@@ -36,6 +45,11 @@ export const AdminDashboard = () => {
   const { data: quotaStats } = useQuery({
     queryKey: ['quotaStats'],
     queryFn: adminService.getQuotaStats,
+  });
+
+  const { data: paymentStats } = useQuery({
+    queryKey: ['paymentStats'],
+    queryFn: adminService.getPaymentStats,
   });
 
   const queryClient = useQueryClient();
@@ -124,7 +138,7 @@ export const AdminDashboard = () => {
               <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             </div>
             <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
                   className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
@@ -245,6 +259,76 @@ export const AdminDashboard = () => {
             variant="default"
           />
         ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Revenue Analytics */}
+        <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-6 text-lg font-semibold text-gray-900 dark:text-white">
+            Revenue by Channel
+          </h2>
+          <div className="h-64 w-full">
+            {paymentStats?.channelStats ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={paymentStats.channelStats}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="channel" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number | undefined) =>
+                      `₦${(value || 0 / 100).toLocaleString()}`
+                    }
+                  />
+                  <Bar dataKey="totalAmount" fill="#4F46E5" name="Revenue" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-gray-500">
+                No payment data available
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Failed Payments Quick Link */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex flex-col gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Payment Health
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Monitor transaction status
+              </p>
+            </div>
+            
+             <div className="flex items-center justify-between rounded-lg bg-red-50 p-4 dark:bg-red-900/10">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-red-100 p-2 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Failed Payments
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    View and investigate
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              to="/admin/payments/failures"
+              className="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-white border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
+            >
+              View Failed Payments
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

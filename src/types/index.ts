@@ -473,8 +473,18 @@ export interface QuotaStatus {
 }
 
 // Subscription types
-export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'PENDING';
+export type SubscriptionStatus =
+  | 'ACTIVE'
+  | 'EXPIRED'
+  | 'CANCELLED'
+  | 'PENDING'
+  | 'PENDING_PAYMENT';
 export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
+
+export enum PlanType {
+  Free = 'Free',
+  Premium = 'Premium',
+}
 
 export interface SubscriptionPlan {
   id: string;
@@ -508,6 +518,8 @@ export interface Subscription {
   createdAt: string;
   updatedAt: string;
   plan?: SubscriptionPlan;
+  pendingPlanId?: string;
+  pendingPlan?: SubscriptionPlan;
 }
 
 export interface Payment {
