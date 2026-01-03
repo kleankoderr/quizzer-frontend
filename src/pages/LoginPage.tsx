@@ -103,8 +103,14 @@ export const LoginPage = () => {
       setLoading(true);
 
       try {
-        const user = await authService.login(email, password);
-        await handleLoginSuccess(user);
+        const response = await authService.login(email, password);
+        
+        if ('requiresVerification' in response && response.requiresVerification) {
+          navigate('/verify-email', { state: { email: response.email } });
+          return;
+        }
+
+        await handleLoginSuccess(response as User);
       } catch (err: any) {
         const errorMessage =
           err.response?.data?.message ||

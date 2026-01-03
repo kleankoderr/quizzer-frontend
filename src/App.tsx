@@ -18,6 +18,9 @@ const LoginPage = lazy(() =>
 const SignupPage = lazy(() =>
   import('./pages/SignupPage').then((m) => ({ default: m.SignupPage }))
 );
+const VerifyEmailPage = lazy(() =>
+  import('./pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage }))
+);
 const SummaryPage = lazy(() =>
   import('./pages/SummaryPage').then((m) => ({ default: m.SummaryPage }))
 );
@@ -244,6 +247,7 @@ function AppRoutes() {
         
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         <Route
           path="/onboarding"

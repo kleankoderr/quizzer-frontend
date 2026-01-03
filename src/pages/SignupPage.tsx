@@ -91,8 +91,14 @@ export const SignupPage = () => {
     setLoading(true);
 
     try {
-      const user = await authService.signup(email, password, name);
-      await handleSignupSuccess(user);
+      const response = await authService.signup(email, password, name);
+      
+      if ('requiresVerification' in response && response.requiresVerification) {
+        navigate('/verify-email', { state: { email: response.email } });
+        return;
+      }
+
+      await handleSignupSuccess(response as UserType);
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || 'Failed to create account';

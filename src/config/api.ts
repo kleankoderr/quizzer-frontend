@@ -9,6 +9,8 @@ export const AUTH_ENDPOINTS = {
   LOGOUT: `${API_BASE_URL}/auth/logout`,
   ME: `${API_BASE_URL}/auth/me`,
   GOOGLE_LOGIN: `${API_BASE_URL}/auth/google`,
+  VERIFY_EMAIL: `${API_BASE_URL}/auth/verify-email`,
+  RESEND_OTP: `${API_BASE_URL}/auth/resend-otp`,
 };
 
 // Quiz endpoints
