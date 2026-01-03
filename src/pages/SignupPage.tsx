@@ -36,12 +36,13 @@ export const SignupPage = () => {
       // Small delay to ensure state is updated
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // Admin users bypass onboarding and go straight to admin dashboard
       if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
         navigate('/admin', { replace: true });
         return;
       }
 
-      const from = (location.state as any)?.from;
+      const from = (location.state)?.from;
       if (from) {
         const redirectPath = `${from.pathname}${from.search}${from.hash}`;
         navigate(redirectPath, { replace: true });
@@ -59,20 +60,23 @@ export const SignupPage = () => {
 
   const googleLogin = useGoogleLogin({
     scope: 'email profile openid',
-    onSuccess: async (tokenResponse) => {
+    onSuccess: (tokenResponse) => {
       setError('');
       setGoogleLoading(true);
 
-      try {
-        const user = await authService.googleSignIn(tokenResponse.access_token);
-        await handleSignupSuccess(user);
-      } catch (err: any) {
-        const errorMessage =
-          err.response?.data?.message ||
-          'Google sign-up failed. Please try again.';
-        setError(errorMessage);
-        setGoogleLoading(false);
-      }
+      // Call async function without awaiting to avoid returning a Promise
+      (async () => {
+        try {
+          const user = await authService.googleSignIn(tokenResponse.access_token);
+          await handleSignupSuccess(user);
+        } catch (err: any) {
+          const errorMessage =
+            err.response?.data?.message ||
+            'Google sign-up failed. Please try again.';
+          setError(errorMessage);
+          setGoogleLoading(false);
+        }
+      })();
     },
     onError: () => {
       const errorMessage = 'Google sign-up failed. Please try again.';
@@ -112,48 +116,7 @@ export const SignupPage = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 space-y-6 overflow-hidden">
           <AnimatePresence mode="wait">
-            {!showEmailForm ? (
-              <motion.div
-                key="options"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-4"
-              >
-                {/* Google Sign-Up Button - Primary */}
-                <button
-                  onClick={() => {
-                    setGoogleLoading(true);
-                    googleLogin();
-                  }}
-                  disabled={googleLoading || loading}
-                  className={`w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${googleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <FcGoogle className="w-5 h-5" />
-                  {googleLoading ? (
-                    <>
-                      <span className="sm:hidden">Signing up...</span>
-                      <span className="hidden sm:inline">
-                        Signing up with Google...
-                      </span>
-                    </>
-                  ) : (
-                    'Continue with Google'
-                  )}
-                </button>
-
-                {/* Continue with Email Button */}
-                <button
-                  onClick={() => setShowEmailForm(true)}
-                  disabled={googleLoading || loading}
-                  className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <Mail className="w-5 h-5" />
-                  Sign up with Email
-                </button>
-              </motion.div>
-            ) : (
+            {showEmailForm ? (
               <motion.div
                 key="form"
                 initial={{ opacity: 0, x: 20 }}
@@ -172,7 +135,6 @@ export const SignupPage = () => {
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-4"
-                  onClick={() => error && setError('')}
                 >
                   <div>
                     <label
@@ -287,6 +249,47 @@ export const SignupPage = () => {
                   </button>
                 </form>
               </motion.div>
+            ) : (
+              <motion.div
+                key="options"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                {/* Google Sign-Up Button - Primary */}
+                <button
+                  onClick={() => {
+                    setGoogleLoading(true);
+                    googleLogin();
+                  }}
+                  disabled={googleLoading || loading}
+                  className={`w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${googleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <FcGoogle className="w-5 h-5" />
+                  {googleLoading ? (
+                    <>
+                      <span className="sm:hidden">Signing up...</span>
+                      <span className="hidden sm:inline">
+                        Signing up with Google...
+                      </span>
+                    </>
+                  ) : (
+                    'Continue with Google'
+                  )}
+                </button>
+
+                {/* Continue with Email Button */}
+                <button
+                  onClick={() => setShowEmailForm(true)}
+                  disabled={googleLoading || loading}
+                  className={`w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all flex items-center justify-center gap-3 ${googleLoading || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Mail className="w-5 h-5" />
+                  Sign up with Email
+                </button>
+              </motion.div>
             )}
           </AnimatePresence>
 
@@ -295,7 +298,7 @@ export const SignupPage = () => {
               Already have an account?{' '}
               <Link
                 to="/login"
-                state={{ from: (location.state as any)?.from }}
+                state={{ from: (location.state)?.from }}
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 Sign In

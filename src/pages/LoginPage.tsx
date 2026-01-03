@@ -35,6 +35,7 @@ export const LoginPage = () => {
       // Small delay to ensure state is updated and user sees the success state
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // Admin users bypass onboarding and go straight to admin dashboard
       if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
         navigate('/admin', { replace: true });
         return;
