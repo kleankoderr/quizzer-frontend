@@ -6,9 +6,7 @@ import { quizService } from '../services/quiz.service';
 import type { AnswerValue } from '../types';
 
 import { QuestionRenderer } from '../components/QuestionRenderer';
-import { useQuiz } from '../hooks';
-import { useQuizTimer } from '../hooks/useQuizTimer';
-import { useQuizStorage } from '../hooks/useQuizStorage';
+import { useQuizTimer, useQuizStorage, useQuiz } from '../hooks';
 import { QuizHeader } from '../components/quiz/QuizHeader';
 import { QuizNavigation } from '../components/quiz/QuizNavigation';
 import { QuizAttemptsView } from '../components/quiz/QuizAttemptsView';
@@ -109,6 +107,9 @@ export const QuizTakePage = () => {
 
         clearStorage();
         toast.success(force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!');
+        
+        // Invalidate quiz query to update attempt count/history
+        await queryClient.invalidateQueries({ queryKey: ['quiz', id] });
 
         if (challengeId) {
           await handleChallengeCompletion(submissionResult);
