@@ -17,10 +17,8 @@ import { QuizList } from '../components/QuizList';
 import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
-import { useQuizzes } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useJobPolling } from '../hooks/useJobPolling';
-import { useInvalidateQuota } from '../hooks/useQuota';
+import { useJobPolling, useInvalidateQuota, useQuizzes } from '../hooks';
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
@@ -185,13 +183,21 @@ export const QuizPage = () => {
       const { jobId } = await quizService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
+      let errorMessage = error?.response?.data?.message || 'Failed to generate quiz';
+      
+      // Handle specific backend exception for quota limits
+      if (error?.response?.status === 403 && error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      } else if (error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      }
 
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Generate Quiz"
-            message={error?.response?.message}
+            message={errorMessage}
             progress={0}
             status="error"
           />

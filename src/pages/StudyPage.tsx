@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
-import { useContents, usePopularTopics } from '../hooks';
+import { useContents, usePopularTopics, useJobPolling } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -28,7 +28,6 @@ import { FileSelector } from '../components/FileSelector';
 import { FileUpload } from '../components/FileUpload';
 import { Card } from '../components/Card';
 import { StudyPackSelector } from '../components/StudyPackSelector';
-import { useJobPolling } from '../hooks/useJobPolling';
 import { CardMenu, Pencil } from '../components/CardMenu';
 import { EditTitleModal } from '../components/EditTitleModal';
 import { formatDate } from '../utils/dateFormat';
@@ -290,12 +289,21 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
+      let errorMessage = error?.response?.data?.message || 'Failed to generate content';
+      
+      // Handle specific backend exception for quota limits
+      if (error?.response?.status === 403 && error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      } else if (error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      }
+
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Generate Content"
-            message={error?.response?.message}
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -340,12 +348,21 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
+      let errorMessage = error?.response?.data?.message || 'Failed to generate content';
+      
+      // Handle specific backend exception for quota limits
+      if (error?.response?.status === 403 && error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      } else if (error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      }
+
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Generation Failed"
-            message={error?.response?.message}
+            message={errorMessage}
             progress={0}
             status="error"
           />
@@ -425,12 +442,21 @@ export const StudyPage = () => {
 
       setCurrentJobId(jobId);
     } catch (error: any) {
+      let errorMessage = error?.response?.data?.message || 'Upload failed';
+      
+      // Handle specific backend exception for quota limits
+      if (error?.response?.status === 403 && error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      } else if (error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      }
+
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Upload Failed"
-            message={error?.response?.message}
+            message={errorMessage}
             progress={0}
             status="error"
           />

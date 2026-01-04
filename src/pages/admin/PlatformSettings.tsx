@@ -2,8 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Save } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Toast as toast } from '../../utils/toast';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CardSkeleton } from '../../components/skeletons';
+import { AiConfigForm } from '../../components/admin/AiConfigForm';
 
 export const PlatformSettings = () => {
   const queryClient = useQueryClient();
@@ -11,6 +12,7 @@ export const PlatformSettings = () => {
     allowRegistration: true,
     maintenanceMode: false,
     supportEmail: '',
+    aiProviderConfig: {},
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -24,18 +26,25 @@ export const PlatformSettings = () => {
         allowRegistration: settings.allowRegistration,
         maintenanceMode: settings.maintenanceMode,
         supportEmail: settings.supportEmail || '',
+        aiProviderConfig: settings.aiProviderConfig || {},
       });
     }
   }, [settings]);
 
+  const [isSuccess, setIsSuccess] = useState(false);
+
   const updateMutation = useMutation({
     mutationFn: adminService.updateSettings,
-    onSuccess: async () => {
+    onSuccess: async (settingsFromApi) => {
+      queryClient.setQueryData(['platformSettings'], settingsFromApi);
       await queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+      
       toast.success('Settings updated successfully');
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 2000);
     },
-    onError: () => {
-      toast.error('Failed to update settings');
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to update settings');
     },
   });
 
@@ -139,14 +148,34 @@ export const PlatformSettings = () => {
           </div>
         </div>
 
+        <AiConfigForm
+          config={formData.aiProviderConfig}
+          onChange={(config) =>
+            setFormData({ ...formData, aiProviderConfig: config })
+          }
+        />
+
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all ${
+              isSuccess 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-primary-600 hover:bg-primary-700'
+            } disabled:opacity-50`}
           >
-            <Save className="h-4 w-4" />
-            {updateMutation.isPending ? 'Saving...' : 'Save Settings'}
+            {isSuccess ? (
+              <>
+                <Save className="h-4 w-4" />
+                Saved!
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                {updateMutation.isPending ? 'Saving...' : 'Save Settings'}
+              </>
+            )}
           </button>
         </div>
       </form>

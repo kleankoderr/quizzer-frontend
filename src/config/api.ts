@@ -59,6 +59,7 @@ export const CHALLENGE_ENDPOINTS = {
 // Recommendation endpoints
 export const RECOMMENDATION_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/recommendations`,
+  DISMISS: (id: string) => `${API_BASE_URL}/recommendations/${id}/dismiss`,
 };
 
 // Coaching endpoints

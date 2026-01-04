@@ -1,18 +1,14 @@
-import { Sparkles, Target, BookOpen, Crown, X, ArrowLeft } from 'lucide-react';
+import { Crown, Sparkles, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
-import { recommendationService, userService } from '../services';
+import { useQuery } from '@tanstack/react-query';
+import { userService } from '../services';
+import { useRecommendations } from '../hooks/useRecommendations';
+import { RecommendationCard } from '../components/RecommendationCard';
 
 export const RecommendationsPage = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery({
-    queryKey: ['ai-recommendations'],
-    queryFn: recommendationService.getAll,
-    staleTime: 1000 * 60 * 10,
-  });
+  
+  const { recommendations, isLoading: recommendationsLoading, dismiss } = useRecommendations();
 
   const { data: quotaStatus, isLoading: quotaStatusLoading } = useQuery({
     queryKey: ['user-quota'],
@@ -20,41 +16,12 @@ export const RecommendationsPage = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  const dismissMutation = useMutation({
-    mutationFn: async (recommendationId: string) => {
-      await apiClient.patch(`/recommendations/${recommendationId}/dismiss`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ai-recommendations'] });
-    },
-  });
-
-  const handleDismiss = (id: string | undefined, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (id) {
-      dismissMutation.mutate(id);
-    }
-  };
-
   const handleQuizClick = (topic: string) => {
     navigate('/quiz', { state: { openGenerator: true, topic, cancelRoute: '/recommendations' } });
   };
 
   const handleStudyClick = (topic: string) => {
     navigate('/study', { state: { openCreator: true, topic, activeTab: 'topic', cancelRoute: '/recommendations' } });
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
-      case 'low':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-700';
-    }
   };
 
   // Wait for both queries to complete before determining user tier
@@ -143,54 +110,14 @@ export const RecommendationsPage = () => {
       {!isLoading && displayedRecommendations.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedRecommendations.map((rec) => (
-            <div
+            <RecommendationCard
               key={rec.topic}
-              className="card p-6 dark:bg-gray-800 relative group hover:shadow-lg transition-shadow flex flex-col"
-            >
-              {/* Dismiss Button */}
-              <button
-                onClick={(e) => handleDismiss(rec.id, e)}
-                className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Dismiss recommendation"
-              >
-                <X className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
-              </button>
-
-              {/* Priority Badge */}
-              <span
-                className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold mb-3 border ${getPriorityColor(rec.priority)} w-fit`}
-              >
-                {rec.priority.toUpperCase()} PRIORITY
-              </span>
-
-              {/* Topic */}
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                {rec.topic}
-              </h3>
-
-              {/* Reason */}
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed flex-1">
-                {rec.reason}
-              </p>
-
-              {/* Action Buttons - Always at bottom */}
-              <div className="flex gap-2 mt-auto">
-                <button
-                  onClick={() => handleQuizClick(rec.topic)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <Target className="w-4 h-4" />
-                  Take Quiz
-                </button>
-                <button
-                  onClick={() => handleStudyClick(rec.topic)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  Study
-                </button>
-              </div>
-            </div>
+              recommendation={rec}
+              onDismiss={dismiss}
+              onQuizClick={handleQuizClick}
+              onStudyClick={handleStudyClick}
+              className="card p-6 dark:bg-gray-800"
+            />
           ))}
         </div>
       )}

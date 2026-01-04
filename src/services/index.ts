@@ -61,6 +61,10 @@ export const recommendationService = {
     );
     return response.data;
   },
+
+  dismiss: async (id: string): Promise<void> => {
+    await apiClient.patch(RECOMMENDATION_ENDPOINTS.DISMISS(id));
+  },
 };
 
 export const attemptService = {

@@ -19,8 +19,7 @@ import { useFlashcardSets } from '../hooks';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useJobPolling } from '../hooks/useJobPolling';
-import { useInvalidateQuota } from '../hooks/useQuota';
+import { useJobPolling, useInvalidateQuota } from '../hooks';
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
@@ -163,12 +162,21 @@ export const FlashcardsPage = () => {
       const { jobId } = await flashcardService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
+      let errorMessage = error?.response?.data?.message || 'Failed to create flashcards';
+      
+      // Handle specific backend exception for quota limits
+      if (error?.response?.status === 403 && error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      } else if (error?.response?.data?.exception) {
+        errorMessage = error.response.data.exception;
+      }
+
       toast.custom(
         (t) => (
           <ProgressToast
             t={t}
             title="Unable to Create Flashcards"
-            message={error?.response?.message}
+            message={errorMessage}
             progress={0}
             status="error"
           />
