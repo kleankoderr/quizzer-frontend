@@ -10,6 +10,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { MaintenanceBanner } from './components/MaintenanceOverlay';
 import { AssessmentPopup } from './components/AssessmentPopup';
+import { GlobalEventListener } from './components/GlobalEventListener';
 
 // Lazy load all page components for code splitting
 const LoginPage = lazy(() =>
@@ -224,6 +225,7 @@ function App() {
             <BrowserRouter>
               <MaintenanceBanner />
               <AssessmentPopup />
+              <GlobalEventListener />
               <AppRoutes />
               <Toaster position="top-right" />
             </BrowserRouter>

@@ -99,4 +99,5 @@ export { coachingService } from './coaching.service';
 export { userService } from './user.service';
 export { userDocumentService } from './user-document.service';
 export { summaryService } from './summary.service';
+export { eventsService } from './events.service';
 export * from './task.service';

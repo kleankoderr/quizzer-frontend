@@ -18,7 +18,7 @@ import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useJobPolling, useInvalidateQuota, useQuizzes } from '../hooks';
+import { useInvalidateQuota, useQuizzes, useJobEvents } from '../hooks';
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
@@ -91,11 +91,10 @@ export const QuizPage = () => {
     };
   }, [location.state]);
 
-  // Poll for job status with exponential backoff
-  useJobPolling({
+  useJobEvents({
     jobId: currentJobId,
-    endpoint: 'quiz',
-    onCompleted: async (result) => {
+    type: 'quiz',
+    onCompleted: async (result: any) => {
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
       await invalidateQuota();
 
@@ -123,7 +122,7 @@ export const QuizPage = () => {
           state: {
             breadcrumb: initialValues?.breadcrumb
               ? [
-                  ...initialValues.breadcrumb.slice(0, -1), // Remove "Generate Quiz"
+                  ...initialValues.breadcrumb.slice(0, -1),
                   { label: result.title || 'Quiz', path: null },
                 ]
               : undefined,
@@ -135,7 +134,7 @@ export const QuizPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     },
-    onFailed: (error) => {
+    onFailed: (error: string) => {
       toast.custom(
         (t) => (
           <ProgressToast

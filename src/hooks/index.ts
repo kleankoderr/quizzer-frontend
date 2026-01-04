@@ -3,6 +3,7 @@ export * from './useAttempts';
 export * from './useBodyScrollLock';
 export * from './useBreadcrumbs';
 export * from './useChallenges';
+export * from './useJobEvents';
 export * from './useClickOutside';
 export * from './useContent';
 export * from './useContents';

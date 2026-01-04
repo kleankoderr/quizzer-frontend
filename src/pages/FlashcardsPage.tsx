@@ -19,7 +19,7 @@ import { useFlashcardSets } from '../hooks';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useJobPolling, useInvalidateQuota } from '../hooks';
+import { useJobEvents, useInvalidateQuota } from '../hooks';
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
@@ -80,10 +80,10 @@ export const FlashcardsPage = () => {
   }, [location.state]);
 
   // Poll for job status with exponential backoff
-  useJobPolling({
+  useJobEvents({
     jobId: currentJobId,
-    endpoint: 'flashcards',
-    onCompleted: async (result) => {
+    type: 'flashcard',
+    onCompleted: async (result: any) => {
       await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
       await invalidateQuota();
 
@@ -114,7 +114,7 @@ export const FlashcardsPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     },
-    onFailed: (error) => {
+    onFailed: (error: string) => {
       toast.custom(
         (t) => (
           <ProgressToast

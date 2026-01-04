@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
-import { useContents, usePopularTopics, useJobPolling } from '../hooks';
+import { useContents, usePopularTopics, useJobEvents } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -205,10 +205,10 @@ export const StudyPage = () => {
   };
 
   // Poll for job status with exponential backoff
-  useJobPolling({
+  useJobEvents({
     jobId: currentJobId,
-    endpoint: 'content',
-    onCompleted: async (result) => {
+    type: 'content',
+    onCompleted: async (result: any) => {
       toast.custom(
         (t) => (
           <ProgressToast
@@ -237,7 +237,7 @@ export const StudyPage = () => {
       toastIdRef.current = undefined;
       refetch();
     },
-    onFailed: (error) => {
+    onFailed: (error: string) => {
       toast.custom(
         (t) => (
           <ProgressToast
