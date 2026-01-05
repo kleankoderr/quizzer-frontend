@@ -114,7 +114,7 @@ export const FileSelector = ({
       onSelectionChange(selectedFileIds.filter((id) => id !== docId));
     } else {
       if (selectedFileIds.length >= maxFiles) {
-        toast.error(`You can select up to ${maxFiles} files`);
+        toast.error(`You can select up to ${maxFiles} documents`);
         return;
       }
       onSelectionChange([...selectedFileIds, docId]);
@@ -164,7 +164,7 @@ export const FileSelector = ({
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
           >
             <ExternalLink className="w-4 h-4" />
-            Manage Files
+            Manage Documents
           </button>
         </div>
       </div>
@@ -180,7 +180,7 @@ export const FileSelector = ({
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary-600" />
-            Select Files
+            Select Documents
           </h3>
           <div className="flex items-center gap-2">
             {selectedFileIds.length > 0 && (
@@ -302,7 +302,7 @@ export const FileSelector = ({
       {selectedFileIds.length > 0 && (
         <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {selectedFileIds.length} of {maxFiles} files selected
+            {selectedFileIds.length} of {maxFiles} documents selected
           </p>
         </div>
       )}

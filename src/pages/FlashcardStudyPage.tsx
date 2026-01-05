@@ -37,7 +37,7 @@ const buildBreadcrumbItems = (
       : { label: 'Flashcards', path: '/flashcards' },
     { label: flashcardSet.title, path: null },
     ...(includeResults ? [{ label: 'Results', path: null }] : []),
-    ...(includeHistory ? [{ label: 'History', path: null }] : []),
+    ...(includeHistory ? [{ label: 'Practice History', path: null }] : []),
   ];
 };
 

@@ -91,7 +91,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
         onClick: () => setEditSetId(set.id),
       },
       {
-        label: 'Move to Study Pack',
+        label: 'Move to Study Set',
         icon: <Folder className="w-4 h-4" />,
         onClick: () => setMoveSetId(set.id),
       },

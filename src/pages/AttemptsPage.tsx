@@ -116,7 +116,7 @@ export function AttemptsPage() {
 
   // Handle errors
   if (error) {
-    toast.error('Failed to load attempts');
+    toast.error('Failed to load practice history');
   }
 
   // Sync selected item with URL params
@@ -319,7 +319,7 @@ export function AttemptsPage() {
       navigate(`/quiz/attempt/${attempt.id}/review`, {
         state: {
           breadcrumb: [
-            { label: 'Attempts', path: '/attempts' },
+            { label: 'Practice History', path: '/attempts' },
             {
               label:
                 attempt.quiz?.title || attempt.challenge?.title || 'Unknown',
@@ -338,7 +338,7 @@ export function AttemptsPage() {
       navigate(`/flashcards/${setId}?view=history&attemptId=${attempt.id}`, {
         state: {
           breadcrumb: [
-            { label: 'Attempts', path: '/attempts' },
+            { label: 'Practice History', path: '/attempts' },
             {
               label: (attempt as any).flashcardSet?.title || 'Unknown',
               path: null,
@@ -356,7 +356,7 @@ export function AttemptsPage() {
       <div className="mb-8 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-lg text-white">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-3xl font-bold text-white">Attempt History</h1>
+            <h1 className="text-3xl font-bold text-white">Practice History</h1>
             <p className="text-blue-100 dark:text-blue-200 mt-1 text-lg">
               Track your progress across all quizzes and flashcards
             </p>
@@ -372,7 +372,7 @@ export function AttemptsPage() {
             className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400"
           >
             <ArrowLeft className="w-4 h-4" />
-            All Attempts
+            All Practice History
           </button>
           <ChevronRight className="w-4 h-4" />
           <span className="text-gray-900 dark:text-white font-medium">
@@ -629,10 +629,10 @@ export function AttemptsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Attempts for {selectedItem.title}
+              Practice history for {selectedItem.title}
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {filteredAttempts.length} total attempts
+              {filteredAttempts.length} total sessions
             </p>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -651,7 +651,7 @@ export function AttemptsPage() {
         // Grouped view by quiz/flashcard
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Attempts by Item
+            Practice History by Item
           </h2>
           {Object.values(groupedAttempts).map((item: any) => (
             <button
@@ -750,12 +750,12 @@ export function AttemptsPage() {
         <div className="text-center py-12">
           <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No attempts found
+            No practice history found
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
             {filterType === 'all'
-              ? "You haven't attempted any quizzes or flashcards yet."
-              : `You haven't attempted any ${filterType}es yet.`}
+              ? "You haven't practiced with any quizzes or flashcards yet."
+              : `You haven't completed any ${filterType}es yet.`}
           </p>
         </div>
       )}

@@ -160,7 +160,7 @@ export const QuizAttemptsHistory: React.FC<QuizAttemptsHistoryProps> = ({
       {/* Attempts History */}
       <div className="card dark:bg-gray-800">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Attempt History
+          Practice History
         </h2>
 
         <div className="space-y-3">

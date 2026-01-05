@@ -162,7 +162,7 @@ export const StudyPackDetailsPage: React.FC = () => {
     // Handle fetch errors
     React.useEffect(() => {
         if (isError) {
-            toast.error('Failed to load study pack');
+            toast.error('Failed to load study set');
             navigate('/study-pack');
         }
     }, [isError, navigate]);
@@ -224,11 +224,11 @@ export const StudyPackDetailsPage: React.FC = () => {
             },
             {
                 id: 'files',
-                label: 'Files',
+                label: 'Documents',
                 icon: FileText,
                 count: studyPack?.userDocuments?.length || 0,
                 createRoute: '',
-                emptyMessage: 'Upload documents to your study pack.',
+                emptyMessage: 'Upload documents to your study set.',
                 emptyAction: 'Add File',
             },
         ],
@@ -258,10 +258,10 @@ export const StudyPackDetailsPage: React.FC = () => {
                     };
                 });
 
-                toast.success('Study pack updated successfully');
+                toast.success('Study set updated successfully');
                 setShowEditModal(false);
             } catch (error) {
-                toast.error('Failed to update study pack');
+                toast.error('Failed to update study set');
                 console.error('Failed to update study pack:', error);
             } finally {
                 setIsUpdating(false);
@@ -276,11 +276,11 @@ export const StudyPackDetailsPage: React.FC = () => {
         setIsDeletingPack(true);
         try {
             await studyPackService.delete(studyPack.id);
-            toast.success('Study pack deleted');
+            toast.success('Study set deleted');
             queryClient.invalidateQueries({queryKey: ['studyPacks']});
             navigate('/study-pack');
         } catch (error) {
-            toast.error('Failed to delete study pack');
+            toast.error('Failed to delete study set');
             console.error('Failed to delete study pack:', error);
             setIsDeletingPack(false);
         }
@@ -530,8 +530,8 @@ export const StudyPackDetailsPage: React.FC = () => {
                                 <button
                                     onClick={() => setShowEditModal(true)}
                                     className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex-shrink-0"
-                                    title="Edit Study Pack"
-                                    aria-label="Edit Study Pack"
+                                    title="Edit Study Set"
+                                    aria-label="Edit Study Set"
                                 >
                                     <Edit2 className="w-5 h-5"/>
                                 </button>
@@ -557,10 +557,10 @@ export const StudyPackDetailsPage: React.FC = () => {
                     <button
                         onClick={() => setShowDeleteModal(true)}
                         className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium w-full sm:w-auto"
-                        aria-label="Delete Study Pack"
+                        aria-label="Delete Study Set"
                     >
                         <Trash2 className="w-4 h-4"/>
-                        Delete Pack
+                        Delete Set
                     </button>
                 </div>
             </div>
@@ -611,9 +611,9 @@ export const StudyPackDetailsPage: React.FC = () => {
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDeletePack}
-                title="Delete Study Pack"
-                message="Are you sure you want to delete this study pack? The items inside will NOT be deleted."
-                itemName="Study Pack"
+                title="Delete Study Set"
+                message="Are you sure you want to delete this study set? The items inside will NOT be deleted."
+                itemName="Study Set"
                 isDeleting={isDeletingPack}
             />
 

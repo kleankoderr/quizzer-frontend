@@ -259,7 +259,7 @@ export const ContentManagement = () => {
                     </td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                       {item._count?.attempts || item._count?.completions || 0}{' '}
-                      {activeTab === 'challenges' ? 'participants' : 'attempts'}
+                      {activeTab === 'challenges' ? 'participants' : 'sessions'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button

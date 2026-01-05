@@ -454,7 +454,7 @@ export const ResultsHeroCard = ({
                       className="flex-1 px-6 py-3.5 bg-emerald-500/90 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-emerald-400/30 hover:border-emerald-300/50 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
                     >
                       <Eye className="w-5 h-5" />
-                      <span>View Attempts</span>
+                      <span>Practice History</span>
                     </button>
                   )}
 
@@ -466,7 +466,7 @@ export const ResultsHeroCard = ({
                     >
                       <BookOpen className="w-5 h-5" />
                       <span>
-                        {studyPackTitle ? `Back to ${studyPackTitle}` : 'Back to Study Pack'}
+                        {studyPackTitle ? `Back to ${studyPackTitle}` : 'Back to Study Set'}
                       </span>
                     </button>
                   )}

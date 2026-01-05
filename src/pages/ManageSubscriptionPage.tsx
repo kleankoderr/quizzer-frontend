@@ -13,7 +13,7 @@ import {
   Crown,
   ArrowRight,
 } from 'lucide-react';
-import { useCurrentPlan, useCancelSubscription } from '../hooks/useSubscription';
+import { useCurrentPlan, useCancelSubscription } from '../hooks';
 import { format } from 'date-fns';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { useAuth } from '../contexts/AuthContext';
@@ -254,13 +254,13 @@ export const ManageSubscriptionPage = () => {
               {/* Storage & Files */}
               <div className="space-y-6">
                 <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide border-b pb-2 mb-4">
-                  Storage & Files
+                  Storage & Documents
                 </h3>
                 
                 {/* File Uploads (Count) */}
                 <UsageBar
                   icon={FileText}
-                  label="Files Uploaded (Monthly)"
+                  label="Documents Uploaded (Monthly)"
                   used={currentPlan.fileUpload.used}
                   limit={currentPlan.fileUpload.limit}
                   color="bg-blue-500"

@@ -366,7 +366,7 @@ export const DashboardPage = () => {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          title="Total Attempts"
+          title="Total Practice"
           value={statistics?.totalAttempts || 0}
           icon={BookOpen}
           description={`${statistics?.quizAttempts || 0} quizzes, ${statistics?.flashcardAttempts || 0} flashcards`}
@@ -406,7 +406,7 @@ export const DashboardPage = () => {
             <div className="card p-4 md:p-6 dark:bg-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Recent Attempts
+                  Recent Practice History
                 </h3>
                 <button
                   onClick={() => navigate('/statistics')}
@@ -694,7 +694,7 @@ export const DashboardPage = () => {
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                View Analytics
+                Performance
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Track progress
@@ -714,7 +714,7 @@ export const DashboardPage = () => {
             </div>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                View Attempts
+                Practice History
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Review history

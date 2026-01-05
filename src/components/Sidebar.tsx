@@ -64,29 +64,29 @@ export const Sidebar = ({
     {
       label: 'Learning Tools',
       items: [
-        { path: '/study', icon: BookOpen, label: 'Study' },
+        { path: '/study', icon: BookOpen, label: 'Study Material' },
         ...(user?.plan === 'PREMIUM'
           ? [{ path: '/summaries', icon: Sparkles, label: 'Summaries' }]
           : []),
         { path: '/quiz', icon: Brain, label: 'Quizzes' },
         { path: '/flashcards', icon: Layers, label: 'Flashcards' },
-        { path: '/study-pack', icon: Folder, label: 'Study Pack' },
+        { path: '/study-pack', icon: Folder, label: 'Study Sets' },
       ],
     },
     {
-      label: 'Progress',
+      label: 'My Progress',
       items: [
         { path: '/challenges', icon: Trophy, label: 'Challenges' },
         { path: '/leaderboard', icon: Medal, label: 'Leaderboard' },
-        { path: '/attempts', icon: Calendar, label: 'Attempts' },
-        { path: '/weak-areas', icon: AlertTriangle, label: 'Weak Areas' },
+        { path: '/attempts', icon: Calendar, label: 'Practice History' },
+        { path: '/weak-areas', icon: AlertTriangle, label: 'Focus Areas' },
       ],
     },
     {
-      label: 'Resources',
+      label: 'Library',
       items: [
-        { path: '/files', icon: FileText, label: 'Files' },
-        { path: '/statistics', icon: BarChart3, label: 'Analytics' },
+        { path: '/files', icon: FileText, label: 'Documents' },
+        { path: '/statistics', icon: BarChart3, label: 'Performance' },
       ],
     },
     {
@@ -188,7 +188,7 @@ export const Sidebar = ({
         {/* Navigation */}
         <nav className="flex-1 p-3 sm:p-4 space-y-1 overflow-y-auto">
           {sections.map((section, sectionIndex) => (
-            <div key={sectionIndex}>
+            <div key={section.label || `section-${sectionIndex}`}>
               {/* Section Label */}
               {section.label && !isCollapsed && (
                 <div className="px-3 py-2 mt-4 first:mt-0">

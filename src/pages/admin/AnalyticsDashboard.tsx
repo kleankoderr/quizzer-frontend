@@ -45,7 +45,7 @@ export const AnalyticsDashboard = () => {
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Analytics Dashboard
+            Performance Dashboard
           </h1>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Last 30 days
@@ -81,7 +81,7 @@ export const AnalyticsDashboard = () => {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Analytics Dashboard
+          Performance Dashboard
         </h1>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Last 30 days
@@ -124,7 +124,7 @@ export const AnalyticsDashboard = () => {
         />
 
         <StatCard
-          title="Total Attempts"
+          title="Total Practice Sessions"
           value={analytics?.engagement?.totalAttempts || 0}
           icon={Activity}
           color="orange"
@@ -366,7 +366,7 @@ export const AnalyticsDashboard = () => {
                     {quiz.attempts}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    attempts
+                    sessions
                   </p>
                 </div>
               </div>
@@ -408,7 +408,7 @@ export const AnalyticsDashboard = () => {
                       {flashcard.attempts}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      attempts
+                      sessions
                     </p>
                   </div>
                 </div>

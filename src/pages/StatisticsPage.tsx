@@ -131,11 +131,11 @@ export const StatisticsPage = () => {
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-6 h-6 text-yellow-300" />
             <span className="text-yellow-300 font-semibold text-sm">
-              Analytics
+              Performance
             </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Your Analytics
+            Your Performance
           </h1>
           <p className="text-primary-100 dark:text-primary-200 text-lg">
             Track your learning progress and performance
@@ -146,7 +146,7 @@ export const StatisticsPage = () => {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Attempts"
+          title="Total Practice Sessions"
           value={overview?.totalAttempts || 0}
           icon={BookOpen}
           description={`${overview?.quizAttempts || 0} quizzes • ${overview?.flashcardAttempts || 0} flashcards`}
@@ -411,14 +411,14 @@ export const StatisticsPage = () => {
       <div className="card dark:bg-gray-800">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Recent Attempts
+            Recent Practice History
           </h2>
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/attempts')}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
             >
-              View All Attempts
+              View All History
               <ArrowRight className="w-4 h-4" />
             </button>
             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -430,7 +430,7 @@ export const StatisticsPage = () => {
         {recentAttempts.length === 0 ? (
           <div className="text-center py-8">
             <Layers className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-            <p className="text-gray-600 dark:text-gray-400">No attempts yet</p>
+            <p className="text-gray-600 dark:text-gray-400">No practice history yet</p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
               Start taking quizzes or studying flashcards!
             </p>

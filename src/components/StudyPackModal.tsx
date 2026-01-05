@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Modal } from './Modal';
-import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
+import { useKeyboardNavigation } from '../hooks';
 import type { StudyPack } from '../types';
 
 interface StudyPackModalProps {
@@ -54,7 +54,7 @@ export const StudyPackModal: React.FC<StudyPackModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditMode ? 'Edit Study Pack' : 'Create New Study Pack'}
+      title={isEditMode ? 'Edit Study Set' : 'Create New Study Set'}
     >
       <form onSubmit={onFormSubmit} className="space-y-4">
         <div>
@@ -113,7 +113,7 @@ export const StudyPackModal: React.FC<StudyPackModalProps> = ({
             ) : isEditMode ? (
               'Save Changes'
             ) : (
-              'Create Pack'
+              'Create Set'
             )}
           </button>
         </div>

@@ -503,7 +503,7 @@ export const AdminDashboard = () => {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    Study Packs
+                    Study Sets
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Total collections

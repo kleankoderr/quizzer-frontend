@@ -166,7 +166,7 @@ export const QuizTakePage = () => {
     // Add "Attempts" or "Retake" if applicable
     if (hasAttempts) {
       breadcrumbItems.push(
-        { label: isTaking ? 'Retake' : 'Attempts', path: null }
+        { label: isTaking ? 'Retake' : 'Practice History', path: null }
       );
     }
 

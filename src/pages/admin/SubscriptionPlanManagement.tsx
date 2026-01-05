@@ -561,7 +561,7 @@ const PlanFormModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Files per Month
+                  Documents per Month
                 </label>
                 <input
                   type="number"

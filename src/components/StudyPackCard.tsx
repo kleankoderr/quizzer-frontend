@@ -85,7 +85,7 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
     {
       icon: <FileText className="w-4 h-4" />,
       count: counts.userDocuments,
-      title: 'Files',
+      title: 'Documents',
     },
   ];
 
@@ -104,8 +104,8 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
             <button
               onClick={handleEdit}
               className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-gray-400 hover:text-blue-500 group/edit"
-              title="Edit Study Pack"
-              aria-label="Edit study pack"
+              title="Edit Study Set"
+              aria-label="Edit study set"
             >
               <Pencil className="w-5 h-5 transition-transform group-hover/edit:scale-110" />
             </button>
@@ -114,8 +114,8 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
             <button
               onClick={handleDelete}
               className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors text-gray-400 hover:text-red-500 group/delete"
-              title="Delete Study Pack"
-              aria-label="Delete study pack"
+              title="Delete Study Set"
+              aria-label="Delete study set"
             >
               <Trash2 className="w-5 h-5 transition-transform group-hover/delete:scale-110" />
             </button>

@@ -93,10 +93,10 @@ export const StudyPacksPage: React.FC = () => {
     try {
       if (editingPack) {
         await studyPackService.update(editingPack.id, data);
-        toast.success('Study pack updated');
+        toast.success('Study set updated');
       } else {
         await studyPackService.create(data);
-        toast.success('Study pack created');
+        toast.success('Study set created');
         setPage(1);
       }
       await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
@@ -104,7 +104,7 @@ export const StudyPacksPage: React.FC = () => {
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
-          `Failed to ${editingPack ? 'update' : 'create'} study pack`
+          `Failed to ${editingPack ? 'update' : 'create'} study set`
       );
     } finally {
       setIsSubmitting(false);
@@ -118,10 +118,10 @@ export const StudyPacksPage: React.FC = () => {
     try {
       await studyPackService.delete(deleteId);
       setDeleteId(null);
-      toast.success('Study pack deleted');
+      toast.success('Study set deleted');
       await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
     } catch (_error) {
-      toast.error('Failed to delete study pack');
+      toast.error('Failed to delete study set');
     } finally {
       setIsDeleting(false);
     }
@@ -137,7 +137,7 @@ export const StudyPacksPage: React.FC = () => {
     <Container>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-6">
         <div>
-          <Title>Study Packs</Title>
+          <Title>Study Sets</Title>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Organize your learning resources into collections.
           </p>
@@ -151,7 +151,7 @@ export const StudyPacksPage: React.FC = () => {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search study packs..."
+              placeholder="Search study sets..."
               className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 shadow-sm"
             />
             {search && (
@@ -182,7 +182,7 @@ export const StudyPacksPage: React.FC = () => {
               className="flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-semibold shadow-md whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
-              <span className="hidden sm:inline">Create Study Pack</span>
+              <span className="hidden sm:inline">Create Study Set</span>
               <span className="sm:hidden">Create</span>
             </button>
           </div>
@@ -193,7 +193,7 @@ export const StudyPacksPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
-              key={i}
+              key={`skeleton-${i}`}
               className="h-48 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"
             />
           ))}
@@ -242,7 +242,7 @@ export const StudyPacksPage: React.FC = () => {
             No results found
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-            We couldn't find any study packs matching "{debouncedSearch}".
+            We couldn't find any study sets matching "{debouncedSearch}".
             Try adjusting your search or clear it to see all packs.
           </p>
           <button
@@ -258,7 +258,7 @@ export const StudyPacksPage: React.FC = () => {
             <Plus className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-            Create your first Study Pack
+            Create your first Study Set
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
             Group your quizzes, flashcards, and study materials by topic or
@@ -268,7 +268,7 @@ export const StudyPacksPage: React.FC = () => {
             onClick={handleOpenCreate}
             className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
           >
-            Create Study Pack
+            Create Study Set
           </button>
         </div>
       )}
@@ -285,9 +285,9 @@ export const StudyPacksPage: React.FC = () => {
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
-        title="Delete Study Pack?"
-        message="Are you sure you want to delete this study pack? The items inside will not be deleted, they will just be removed from this pack."
-        itemName="Study Pack"
+        title="Delete Study Set?"
+        message="Are you sure you want to delete this study set? The items inside will not be deleted, they will just be removed from this set."
+        itemName="Study Set"
         isDeleting={isDeleting}
       />
     </Container>

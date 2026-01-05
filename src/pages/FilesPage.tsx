@@ -267,13 +267,13 @@ export const FilesPage = () => {
           <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {searchQuery || selectedType !== 'all'
-              ? 'No files found'
-              : 'No files yet'}
+              ? 'No documents found'
+              : 'No documents yet'}
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
             {searchQuery || selectedType !== 'all'
               ? 'Try adjusting your filters or search query'
-              : 'Upload files through the content generation pages'}
+              : 'Upload documents through the content generation pages'}
           </p>
         </div>
       );
@@ -475,7 +475,7 @@ export const FilesPage = () => {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <FileText className="w-8 h-8 text-primary-600" />
-                My Files
+                My Documents
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
                 Manage and organize your uploaded documents
@@ -488,7 +488,7 @@ export const FilesPage = () => {
             className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
           >
             <Upload className="w-5 h-5" />
-            Upload Files
+            Upload Documents
           </button>
         </div>
 
@@ -498,7 +498,7 @@ export const FilesPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-primary-100 text-sm font-medium">
-                  Total Files
+                  Total Documents
                 </p>
                 <p className="text-3xl font-bold mt-1">{documents.length}</p>
               </div>
@@ -546,7 +546,7 @@ export const FilesPage = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search files..."
+              placeholder="Search documents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
@@ -569,7 +569,7 @@ export const FilesPage = () => {
               onChange={(e) => setSelectedType(e.target.value)}
               className="pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white appearance-none cursor-pointer min-w-[180px]"
             >
-              <option value="all">All Files ({getFileTypeCount('all')})</option>
+              <option value="all">All Documents ({getFileTypeCount('all')})</option>
               <option value="pdf">PDFs ({getFileTypeCount('pdf')})</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -736,7 +736,7 @@ export const FilesPage = () => {
           setUploadModalOpen(false);
           setUploadFiles([]);
         }}
-        title="Upload Files"
+        title="Upload Documents"
       >
         <div className="p-6">
           <FileUpload

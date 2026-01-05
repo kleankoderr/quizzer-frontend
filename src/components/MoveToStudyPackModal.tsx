@@ -35,7 +35,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       setStudyPacks(data.data || []);
     },
     {
-      onError: () => toast.error('Failed to load study packs'),
+      onError: () => toast.error('Failed to load study sets'),
     }
   );
 
@@ -61,12 +61,12 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
         coverImage: '',
       });
       setStudyPacks((prev) => [newPack, ...prev]);
-      toast.success('Study pack created');
+      toast.success('Study set created');
       setIsCreating(false);
       setNewPackTitle('');
     } catch (error: any) {
       toast.error(
-        error.response?.data?.message || 'Failed to create study pack'
+        error.response?.data?.message || 'Failed to create study set'
       );
     } finally {
       setCreatingLoading(false);
@@ -110,7 +110,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Move to Study Pack">
+    <Modal isOpen={isOpen} onClose={onClose} title="Move to Study Set">
       <div className="space-y-4 max-h-[60vh] overflow-y-auto">
         {loading ? (
           <div className="flex justify-center p-8">
@@ -159,13 +159,13 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
                 <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg mr-3 group-hover:bg-primary-100">
                   <Plus className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-primary-600" />
                 </div>
-                <span className="font-medium">Create New Study Pack</span>
+                <span className="font-medium">Create New Study Set</span>
               </button>
             )}
 
             {studyPacks.length === 0 && !isCreating ? (
               <p className="text-center text-gray-500 py-4">
-                No study packs found.
+                No study sets found.
               </p>
             ) : (
               studyPacks.map((pack) => (

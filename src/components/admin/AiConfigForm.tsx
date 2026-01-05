@@ -13,7 +13,7 @@ interface AiConfigFormProps {
 }
 
 const PROVIDER_OPTIONS = [
-  { value: 'gemini', label: 'Gemini (Best for Files)' },
+  { value: 'gemini', label: 'Gemini (Best for Documents)' },
   { value: 'groq', label: 'Groq (Fastest for Text)' },
 ];
 
@@ -54,7 +54,7 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Default for Files
+              Default for Documents
               <span className="ml-2 inline-flex items-center text-xs text-gray-400">
                 <HelpCircle className="h-3 w-3" />
                 <span className="ml-1">Used when files are attached</span>

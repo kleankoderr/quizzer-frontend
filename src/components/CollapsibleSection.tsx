@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, Folder } from 'lucide-react';
 
 interface CollapsibleSectionProps {
-  title: string; // The title of the section (e.g., Study Pack name)
+  title: string; // The title of the section (e.g., Study Set name)
   count: number; // Number of items in the section
   children: React.ReactNode;
   defaultOpen?: boolean;

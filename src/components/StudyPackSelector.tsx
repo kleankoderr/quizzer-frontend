@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStudyPacks } from '../hooks/useStudyPacks';
+import { useStudyPacks } from '../hooks';
 import { Folder } from 'lucide-react';
 
 interface StudyPackSelectorProps {
@@ -19,7 +19,7 @@ export const StudyPackSelector: React.FC<StudyPackSelectorProps> = ({
   return (
     <div className={`space-y-2 ${className}`}>
       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-        Add to Study Pack (Optional)
+        Add to Study Set (Optional)
       </label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -31,7 +31,7 @@ export const StudyPackSelector: React.FC<StudyPackSelectorProps> = ({
           disabled={isLoading}
           className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none"
         >
-          <option value="">No Study Pack</option>
+          <option value="">No Study Set</option>
           {studyPacks.map((pack) => (
             <option key={pack.id} value={pack.id}>
               {pack.title}

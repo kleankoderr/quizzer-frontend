@@ -184,7 +184,7 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
       {/* Stats Cards - Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <StatCard
-          title="Total Attempts"
+          title="Total Practice Sessions"
           value={stats.total}
           icon={Calendar}
           color="blue"

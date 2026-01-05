@@ -90,7 +90,7 @@ export const QuizList: React.FC<QuizListProps> = ({
         onClick: () => setEditQuizId(quiz.id),
       },
       {
-        label: 'Move to Study Pack',
+        label: 'Move to Study Set',
         icon: <Folder className="w-4 h-4" />,
         onClick: () => setMoveQuizId(quiz.id),
       },

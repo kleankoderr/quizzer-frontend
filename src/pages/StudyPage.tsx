@@ -161,7 +161,7 @@ export const StudyPage = () => {
         onClick: () => setEditContentId(content.id),
       },
       {
-        label: 'Move to Study Pack',
+        label: 'Move to Study Set',
         icon: <Folder className="w-4 h-4" />,
         onClick: () => setMoveContentId(content.id),
       },
@@ -181,7 +181,7 @@ export const StudyPage = () => {
         onClick={() => navigate(`/content/${content.id}`, {
           state: {
             breadcrumb: [
-              { label: 'Study', path: '/study' },
+              { label: 'Study Material', path: '/study' },
             ],
           },
         })}
@@ -226,7 +226,7 @@ export const StudyPage = () => {
         navigate(`/content/${result.id}`, {
           state: {
             breadcrumb: [
-              { label: 'Study', path: '/study' },
+              { label: 'Study Material', path: '/study' },
             ],
           },
         });
@@ -387,7 +387,7 @@ export const StudyPage = () => {
       (t) => (
         <ProgressToast
           t={t}
-          title="Processing Files"
+          title="Processing Documents"
           message="Uploading and extracting text..."
           progress={0}
           status="processing"
@@ -412,7 +412,7 @@ export const StudyPage = () => {
               (t) => (
                 <ProgressToast
                   t={t}
-                  title="Uploading Files"
+                  title="Uploading Documents"
                   message={`Uploading... ${progress}%`}
                   progress={progress}
                   status="processing"
@@ -817,7 +817,7 @@ export const StudyPage = () => {
                     <div className="flex items-center gap-2">
                       <Folder className="w-5 h-5 text-primary-600" />
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        Select Existing Files
+                        Select Existing Documents
                       </span>
                       {selectedFileIds.length > 0 && (
                         <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs px-2 py-0.5 rounded-full font-bold">
@@ -857,7 +857,7 @@ export const StudyPage = () => {
                     <div className="flex items-center gap-2">
                       <Upload className="w-5 h-5 text-primary-600" />
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        Upload New Files
+                        Upload New Documents
                       </span>
                       {files.length > 0 && (
                         <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs px-2 py-0.5 rounded-full font-bold">
@@ -900,7 +900,7 @@ export const StudyPage = () => {
                   {contentLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                      Processing Files...
+                      Processing Documents...
                     </>
                   ) : (
                     <>
@@ -908,7 +908,7 @@ export const StudyPage = () => {
                       Process{' '}
                       {files.length + selectedFileIds.length > 0
                         ? `${files.length + selectedFileIds.length} File${files.length + selectedFileIds.length > 1 ? 's' : ''}`
-                        : 'Files'}
+                        : 'Documents'}
                     </>
                   )}
                 </button>

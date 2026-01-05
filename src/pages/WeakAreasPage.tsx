@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { weakAreaService } from '../services/weak-area.service';
 import { WeakAreaCard } from '../components/WeakAreaCard';
-import { AlertTriangle, TrendingDown, BarChart3, Filter } from 'lucide-react';
+import { Target, AlertTriangle, TrendingDown, BarChart3, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { userService } from '../services';
 import {
@@ -62,10 +62,10 @@ export const WeakAreasPage = () => {
     mutationFn: weakAreaService.resolveWeakArea,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weak-areas'] });
-      toast.success('Weak area marked as resolved!');
+      toast.success('Focus area marked as resolved!');
     },
     onError: () => {
-      toast.error('Failed to resolve weak area');
+      toast.error('Failed to resolve focus area');
     },
   });
 
@@ -139,8 +139,8 @@ export const WeakAreasPage = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <AlertTriangle className="w-7 h-7 text-orange-600 dark:text-orange-400" />
-            Weak Areas
+            <Target className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+            Focus Areas
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Identify and improve concepts you're struggling with
@@ -151,10 +151,10 @@ export const WeakAreasPage = () => {
           <div className="flex items-center gap-2 text-sm">
             <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
             <span className="text-gray-600 dark:text-gray-400">
-              <span className="font-bold text-red-600 dark:text-red-400">
+              <span className="font-bold text-blue-600 dark:text-blue-400">
                 {weakAreas.length}
               </span>{' '}
-              active weak {weakAreas.length === 1 ? 'area' : 'areas'}
+              active focus {weakAreas.length === 1 ? 'area' : 'areas'}
             </span>
           </div>
         )}
@@ -247,16 +247,16 @@ export const WeakAreasPage = () => {
                     {(() => {
                       if (activeTab === 'active') {
                         return selectedTopic === 'all'
-                          ? 'No Weak Areas Found'
-                          : `No Weak Areas in ${selectedTopic}`;
+                          ? 'No Focus Areas Found'
+                          : `No Focus Areas in ${selectedTopic}`;
                       }
                       return 'No Resolved Weak Areas';
                     })()}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6">
                     {activeTab === 'active'
-                      ? "Great job! You don't have any weak areas to work on."
-                      : "You haven't resolved any weak areas yet."}
+                      ? "Great job! You don't have any focus areas to work on."
+                      : "You haven't resolved any focus areas yet."}
                   </p>
                   {activeTab === 'active' && (
                     <button
@@ -295,14 +295,14 @@ export const WeakAreasPage = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                            Total Weak Areas
+                            Total Focus Areas
                           </p>
                           <p className="text-3xl font-bold text-gray-900 dark:text-white">
                             {stats.totalWeakAreas}
                           </p>
                         </div>
-                        <div className="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
-                          <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                        <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                          <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                       </div>
                     </div>
@@ -404,7 +404,7 @@ export const WeakAreasPage = () => {
                     No Statistics Available
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Complete some quizzes to generate weak area statistics.
+                    Complete some quizzes to generate focus area statistics.
                   </p>
                 </div>
               )}
