@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
@@ -6,11 +8,9 @@ import { flashcardService } from '../services/flashcard.service';
 import {
   ChevronLeft,
   ChevronRight,
-  RotateCw,
   ArrowLeft,
   Layers,
   Sparkles,
-  BookOpen,
   ThumbsUp,
   ThumbsDown,
   Target,
@@ -41,13 +41,15 @@ const buildBreadcrumbItems = (
   ];
 };
 
+const MarkdownParagraph = ({ node, ...props }: any) => <div {...props} />;
+
 const FlashcardMarkdown = ({ content, className = '' }: { content: string; className?: string }) => (
   <div className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0`}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        p: ({node, ...props}) => <div {...props} />
+        p: MarkdownParagraph
       }}
     >
       {content}
@@ -67,6 +69,7 @@ export const FlashcardStudyPage = () => {
   const { user } = useAuth();
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [direction, setDirection] = useState(0); // -1 for prev, 1 for next
   const [cardResponses, setCardResponses] = useState<
     Array<{ cardIndex: number; response: 'know' | 'dont-know' | 'skipped' }>
   >([]);
@@ -204,6 +207,7 @@ export const FlashcardStudyPage = () => {
 
   const advanceToNextCard = (responses: typeof cardResponses) => {
     if (currentCardIndex < (flashcardSet?.cards.length || 0) - 1) {
+      setDirection(1);
       setCurrentCardIndex(currentCardIndex + 1);
       setIsFlipped(false);
     } else {
@@ -240,6 +244,7 @@ export const FlashcardStudyPage = () => {
 
   const handleNext = () => {
     if (currentCardIndex < (flashcardSet?.cards.length || 0) - 1) {
+      setDirection(1);
       setCurrentCardIndex(currentCardIndex + 1);
       setIsFlipped(false);
     } else if (
@@ -259,6 +264,7 @@ export const FlashcardStudyPage = () => {
 
   const handlePrevious = () => {
     if (currentCardIndex > 0) {
+      setDirection(-1);
       setCurrentCardIndex(currentCardIndex - 1);
       setIsFlipped(false);
     }
@@ -298,6 +304,7 @@ export const FlashcardStudyPage = () => {
   const handleRetake = () => {
     setCurrentCardIndex(0);
     setIsFlipped(false);
+    setDirection(0);
     setCardResponses([]);
     setShowResults(false);
     setIsStudying(true);
@@ -401,10 +408,46 @@ export const FlashcardStudyPage = () => {
     );
   }
 
+  // Animation variants for a more premium "stacked" card feel
+  const cardVariants: Variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      y: 0,
+      opacity: 0,
+      scale: 0.9,
+      rotateZ: direction > 0 ? 10 : -10,
+      zIndex: 0
+    }),
+    center: {
+      x: 0,
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      rotateZ: 0,
+      zIndex: 1,
+      transition: {
+        x: { type: 'spring', stiffness: 260, damping: 30 },
+        opacity: { duration: 0.2 },
+        scale: { duration: 0.4 },
+        rotateZ: { type: 'spring', stiffness: 200, damping: 25 }
+      }
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? '100%' : '-100%',
+      opacity: 0,
+      scale: 0.9,
+      rotateZ: direction < 0 ? 10 : -10,
+      zIndex: 0,
+      transition: {
+        x: { type: 'spring', stiffness: 260, damping: 30 },
+        opacity: { duration: 0.2 }
+      }
+    })
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-8">
+    <div className="max-w-6xl mx-auto flex flex-col min-h-[calc(100vh-120px)] space-y-4 pb-4 overflow-hidden">
       <FlashcardHeader 
-        id={id!} 
         title={flashcardSet.title} 
         topic={flashcardSet.topic} 
         progress={progress}
@@ -413,31 +456,77 @@ export const FlashcardStudyPage = () => {
         attemptsCount={flashcardSet._count?.attempts || 0}
       />
 
-      <FlashcardItem 
-        card={currentCard}
-        isFlipped={isFlipped}
-        onFlip={handleFlip}
-      />
+      <div className="flex-1 flex items-center justify-center gap-4 relative px-2 sm:px-12 min-h-[350px] md:min-h-[420px] mb-4 md:mb-8">
+        {/* Previous Button */}
+        <button
+          onClick={handlePrevious}
+          disabled={currentCardIndex === 0}
+          className="absolute left-4 lg:left-0 z-20 p-4 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 disabled:opacity-20 hover:scale-110 active:scale-95 transition-all hidden md:flex"
+          aria-label="Previous Card"
+        >
+          <ChevronLeft className="w-7 h-7 text-gray-800 dark:text-gray-200" />
+        </button>
 
-      <FlashcardControls
-        submitting={submitting}
-        currentCardIndex={currentCardIndex}
-        totalCards={flashcardSet.cards.length}
-        hasResponse={cardResponses.some((r) => r.cardIndex === currentCardIndex)}
-        onResponse={handleResponse}
-        onFlip={handleFlip}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-      />
+        <div className="relative w-full max-w-2xl mx-auto h-[320px] sm:h-[480px]">
+          {/* Stacked Card Background Effects - Enhanced visual depth */}
+          <div className="absolute inset-x-6 -bottom-6 translate-y-2 scale-[0.92] bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg border border-gray-200/50 dark:border-gray-700/50 z-0 opacity-30 h-full transition-transform"></div>
+          <div className="absolute inset-x-3 -bottom-3 translate-y-1 scale-[0.96] bg-white dark:bg-gray-800 rounded-[2rem] shadow-md border border-gray-200/50 dark:border-gray-700/50 z-[1] opacity-60 h-full transition-transform"></div>
+          
+          {/* Main Card with Animation and Gestures */}
+          <div className="relative z-[2] h-full w-full perspective-[1500px]">
+            <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+              <motion.div
+                key={currentCardIndex}
+                custom={direction}
+                variants={cardVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.7}
+                onDragEnd={(_, info) => {
+                  const swipe = info.offset.x;
+                  if (swipe > 100) handlePrevious();
+                  else if (swipe < -100) handleNext();
+                }}
+                onTap={handleFlip}
+                whileTap={{ cursor: 'grabbing' }}
+                className="absolute inset-0 cursor-grab w-full h-full"
+              >
+                <FlashcardItem 
+                  card={currentCard}
+                  isFlipped={isFlipped}
+                  onFlip={handleFlip}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
 
-      <FlashcardList
-        cards={flashcardSet.cards}
-        currentIndex={currentCardIndex}
-        onSelect={(idx: number) => {
-          setCurrentCardIndex(idx);
-          setIsFlipped(false);
-        }}
-      />
+        {/* Next Button */}
+        <button
+          onClick={handleNext}
+          disabled={currentCardIndex === flashcardSet.cards.length - 1 && !cardResponses.some((r) => r.cardIndex === currentCardIndex)}
+          className="absolute right-4 lg:right-0 z-20 p-4 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 disabled:opacity-20 hover:scale-110 active:scale-95 transition-all hidden md:flex"
+          aria-label="Next Card"
+        >
+          <ChevronRight className="w-7 h-7 text-gray-800 dark:text-gray-200" />
+        </button>
+      </div>
+
+      {/* Mobile Navigation and Selection Controls */}
+      <div className="flex flex-col gap-4 mt-6">
+        <FlashcardControls
+          submitting={submitting}
+          currentCardIndex={currentCardIndex}
+          totalCards={flashcardSet.cards.length}
+          hasResponse={cardResponses.some((r) => r.cardIndex === currentCardIndex)}
+          onResponse={handleResponse}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+        />
+      </div>
     </div>
   );
 };
@@ -446,224 +535,176 @@ export const FlashcardStudyPage = () => {
 const FlashcardHeader = ({ title, topic, progress, currentCardIndex, totalCards }: any) => {
   const navigate = useNavigate();
   return (
-    <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-4 md:p-6 shadow-lg">
+    <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-3 md:p-6 shadow-lg mb-1 md:mb-2">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
       </div>
 
       <div className="relative z-10">
-        <button
-          onClick={() => navigate('/flashcards')}
-          className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm mb-4 transition-all w-fit"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">Back to Flashcards</span>
-        </button>
+        <div className="flex flex-row items-center justify-between mb-4">
+          <button
+            onClick={() => navigate('/flashcards')}
+            className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm transition-all w-fit"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Back</span>
+          </button>
 
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-6 h-6 text-yellow-300" />
-          <span className="text-yellow-300 font-semibold text-sm">Study Session</span>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-yellow-300" />
+            <span className="text-yellow-300 font-semibold text-xs uppercase tracking-wider">Study Session</span>
+          </div>
         </div>
 
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-            <Layers className="w-6 h-6 text-white" />
+          <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg hidden sm:block">
+            <Layers className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white mb-2">{title}</h1>
-                <p className="text-primary-100">{topic}</p>
-              </div>
-            </div>
+            <h1 className="text-xl md:text-2xl font-bold text-white line-clamp-1">{title}</h1>
+            <p className="text-primary-100 text-sm line-clamp-1 opacity-90">{topic}</p>
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-          <div className="flex justify-between text-sm text-white mb-2">
-            <span>Card {currentCardIndex + 1} of {totalCards}</span>
-            <span>{Math.round(progress)}% Complete</span>
-          </div>
-          <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 bg-white/20 rounded-full h-2 overflow-hidden">
             <div
-              className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
+              className="bg-green-400 h-full rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
+          <span className="text-xs font-bold text-white whitespace-nowrap">
+            {currentCardIndex + 1} / {totalCards}
+          </span>
         </div>
       </div>
     </div>
   );
 };
 
-const FlashcardControls = ({ submitting, currentCardIndex, totalCards, hasResponse, onResponse, onFlip, onNext, onPrevious }: any) => (
-  <div className="space-y-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-    <div className="flex items-center justify-center gap-4 pb-4">
-      <button
-        onClick={() => onResponse('dont-know')}
-        disabled={submitting}
-        className="group px-6 py-3 md:px-8 md:py-4 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-2 border-red-300 dark:border-red-700 rounded-2xl transition-all"
-      >
-        <span className="text-2xl md:text-3xl">👎🏼</span>
-      </button>
-
-      <button
-        onClick={() => onResponse('know')}
-        disabled={submitting}
-        className="group px-6 py-3 md:px-8 md:py-4 bg-green-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/30 border-2 border-primary-300 dark:border-primary-700 rounded-2xl transition-all"
-      >
-        <span className="text-2xl md:text-3xl">👍🏼</span>
-      </button>
-    </div>
-
-    <div className="flex items-center justify-between">
+const FlashcardControls = ({ submitting, currentCardIndex, totalCards, hasResponse, onResponse, onNext, onPrevious }: any) => (
+  <div className="flex flex-col gap-4">
+    {/* Combined Controls Row */}
+    <div className="flex items-stretch justify-center gap-2 md:gap-4 px-2">
+      {/* Mobile Prev Button */}
       <button
         onClick={onPrevious}
         disabled={currentCardIndex === 0}
-        className="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg disabled:opacity-50"
+        className="flex md:hidden items-center justify-center px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm disabled:opacity-20 transition-all active:scale-90"
+        aria-label="Previous"
       >
-        <ChevronLeft className="w-5 h-5" />
-        <span className="hidden sm:inline">Previous</span>
+        <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
       </button>
 
-      <button
-        onClick={onFlip}
-        className="flex items-center gap-2 px-4 md:px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-md"
-      >
-        <RotateCw className="w-5 h-5" />
-        <span>Flip Card</span>
-      </button>
+      {/* Main Feedback Buttons */}
+      <div className="flex-1 flex items-center justify-center gap-2 md:gap-4">
+        <button
+          onClick={() => onResponse('dont-know')}
+          disabled={submitting}
+          className="flex-1 flex flex-col items-center justify-center gap-1 group px-2 py-3 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 border-2 border-transparent hover:border-red-200 dark:hover:border-red-900/30 rounded-2xl shadow-sm transition-all"
+        >
+          <span className="text-xl">😟</span>
+          <span className="text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">I don't know</span>
+        </button>
 
+        <button
+          onClick={() => onResponse('know')}
+          disabled={submitting}
+          className="flex-1 flex flex-col items-center justify-center gap-1 group px-2 py-3 bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900/10 border-2 border-transparent hover:border-green-200 dark:hover:border-green-900/30 rounded-2xl shadow-sm transition-all"
+        >
+          <span className="text-xl">😃</span>
+          <span className="text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">I know it!</span>
+        </button>
+      </div>
+
+      {/* Mobile Next Button */}
       <button
         onClick={onNext}
         disabled={currentCardIndex === totalCards - 1 && !hasResponse}
-        className="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg disabled:opacity-50"
+        className="flex md:hidden items-center justify-center px-4 bg-primary-600 rounded-2xl shadow-lg shadow-primary-500/20 disabled:opacity-20 transition-all active:scale-90"
+        aria-label="Next"
       >
-        <span className="hidden sm:inline">{currentCardIndex === totalCards - 1 ? 'Finish' : 'Next'}</span>
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-6 h-6 text-white" />
       </button>
-    </div>
-  </div>
-);
-
-const FlashcardList = ({ cards, currentIndex, onSelect }: any) => (
-  <div className="card dark:bg-gray-800">
-    <div className="flex items-center gap-3 mb-6">
-      <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-        <Layers className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-      </div>
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white">All Cards</h3>
-      <span className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold">{cards.length}</span>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {cards.map((card: any, index: number) => {
-        const cardKey = `card-${index}-${card.front.substring(0, 20)}`;
-        return (
-          <button
-            key={cardKey}
-            onClick={() => onSelect(index)}
-            className={`text-left p-4 rounded-xl border-2 transition-all group ${
-              index === currentIndex ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${index === currentIndex ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
-                {index + 1}
-              </span>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2 flex-1">{card.front}</p>
-            </div>
-          </button>
-        );
-      })}
     </div>
   </div>
 );
 
 const FlashcardItem = ({ card, isFlipped, onFlip }: any) => (
   <div
-    className="card border border-primary-200 dark:border-gray-700 shadow-xl dark:bg-gray-800"
-    style={{ perspective: '1000px' }}
+    className="w-full h-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700"
+    style={{ perspective: '1200px' }}
   >
     <div
-      className="min-h-[350px] sm:min-h-[450px] relative rounded-xl"
+      className="h-full relative transition-transform duration-700"
       style={{
         transformStyle: 'preserve-3d',
-        transition: 'transform 0.6s',
         transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
       }}
     >
+      {/* Front Face */}
       <div
-        className="absolute top-4 right-4 z-10"
-        style={{
-          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-        }}
-      >
-        <button
-          onClick={onFlip}
-          className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-semibold shadow-md border-2 transition-all hover:scale-105 active:scale-95 bg-primary-600 text-white border-white/30 hover:bg-primary-700"
-        >
-          <RotateCw
-            className="w-4 h-4 transition-transform duration-600"
-            style={{
-              transform: isFlipped ? 'rotate(180deg)' : 'rotate(0deg)',
-            }}
-          />
-          <span className="hidden sm:inline">
-            {isFlipped ? 'Show Question' : 'Show Answer'}
-          </span>
-        </button>
-      </div>
-
-      {/* Front of card */}
-      <div
-        className="flex flex-col items-center justify-center min-h-[350px] sm:min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-gray-50 dark:bg-gray-700 rounded-xl"
+        className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-12 text-center"
         style={{
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
-          position: isFlipped ? 'absolute' : 'relative',
-          width: '100%',
+          zIndex: isFlipped ? 0 : 2,
         }}
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
-          <BookOpen className="w-8 h-8 text-white" />
+        <div className="absolute top-4 left-6 text-[10px] font-black text-primary-500 uppercase tracking-[0.2em] opacity-40">
+          Question
         </div>
-        <div className="text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-relaxed w-full">
+        <div className="w-full max-h-[70%] overflow-y-auto custom-scrollbar px-2">
+          <div className="text-xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-tight">
             <FlashcardMarkdown content={card.front} />
+          </div>
         </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onFlip(); }}
+          className="mt-6 md:mt-10 px-6 py-2.5 bg-gray-50 dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900/10 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-300 rounded-full text-xs font-black uppercase tracking-widest transition-all"
+        >
+          Tap to flip
+        </button>
       </div>
 
-      {/* Back of card */}
+      {/* Back Face */}
       <div
-        className="flex flex-col items-center justify-center min-h-[350px] sm:min-h-[450px] text-center px-4 py-8 md:px-8 md:py-12 bg-gray-50 dark:bg-gray-700 rounded-xl"
+        className="absolute inset-0 flex flex-col items-center justify-start p-6 md:p-12 text-center"
         style={{
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           transform: 'rotateY(180deg)',
-          position: isFlipped ? 'relative' : 'absolute',
-          top: 0,
-          width: '100%',
+          zIndex: isFlipped ? 2 : 0,
         }}
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-6 shadow-lg">
-          <Sparkles className="w-8 h-8 text-white" />
+        <div className="absolute top-4 left-6 text-[10px] font-black text-green-500 uppercase tracking-[0.2em] opacity-40">
+          Answer
         </div>
-        <div className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed max-w-2xl w-full">
-          <FlashcardMarkdown content={card.back} />
-        </div>
-        {card.explanation && (
-          <div className="mt-6 pt-6 border-t-2 border-primary-200 dark:border-gray-600 max-w-2xl w-full">
-            <div className="inline-flex items-center gap-2 mb-3">
-              <span className="text-2xl">💡</span>
-              <p className="text-sm font-bold text-primary-900 dark:text-primary-300 uppercase tracking-wide">
-                Explanation
-              </p>
-            </div>
-            <div className="text-base text-gray-700 dark:text-gray-300 leading-relaxed bg-white dark:bg-gray-800 p-4 rounded-lg text-left">
-               <FlashcardMarkdown content={card.explanation} />
-            </div>
+        <div className="w-full overflow-y-auto custom-scrollbar flex-1 px-2 space-y-6 pt-2">
+          <div className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-snug">
+            <FlashcardMarkdown content={card.back} />
           </div>
-        )}
+          
+          {card.explanation && (
+            <div className="pt-6 border-t border-gray-100 dark:border-gray-700 w-full text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 flex items-center justify-center bg-yellow-400 rounded-full text-[10px] text-white">💡</div>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Deep Dive</span>
+              </div>
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/50 p-4 rounded-xl leading-relaxed">
+                <FlashcardMarkdown content={card.explanation} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <button
+           onClick={(e) => { e.stopPropagation(); onFlip(); }}
+           className="mt-6 px-6 py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+        >
+          Back to Question
+        </button>
       </div>
     </div>
   </div>
