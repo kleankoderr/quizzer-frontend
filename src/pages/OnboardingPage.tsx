@@ -86,7 +86,8 @@ export const OnboardingPage = () => {
 
       // Move to completion step (Step 4) which will auto-redirect
       setStep(4);
-    } catch (_error) {
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
       // Even if it fails, try to redirect to dashboard to avoid getting stuck
       navigate('/dashboard');
     } finally {
@@ -94,19 +95,8 @@ export const OnboardingPage = () => {
     }
   };
 
-  const handleSkip = async () => {
-    setLoading(true);
-    try {
-      // Send empty data to trigger default assessment
-      await apiClient.post('/onboarding/finish', {});
-      if (user) {
-        login({ ...user, onboardingCompleted: true });
-      }
-      navigate('/dashboard');
-    } catch (_error) {
-      navigate('/dashboard');
-    }
-  };
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
@@ -180,10 +170,11 @@ export const OnboardingPage = () => {
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label htmlFor="grade-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Select your level
                       </label>
                       <select
+                        id="grade-select"
                         value={formData.grade}
                         onChange={(e) =>
                           setFormData({ ...formData, grade: e.target.value })
@@ -200,14 +191,16 @@ export const OnboardingPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label htmlFor="school-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         School / Institution
                       </label>
                       <SchoolSearch
+                        id="school-search"
                         value={formData.schoolName}
                         onChange={(value) =>
                           setFormData({ ...formData, schoolName: value })
                         }
+                        placeholder="Select or search for your school..."
                       />
                     </div>
                   </div>
@@ -291,19 +284,12 @@ export const OnboardingPage = () => {
             {/* Navigation Buttons */}
             {step < 4 && (
               <div className="mt-8 flex items-center justify-between pt-6 border-t border-gray-100 dark:border-gray-700">
-                {step > 1 ? (
+                {step > 1 && (
                   <button
                     onClick={handleBack}
                     className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium px-4 py-2"
                   >
                     Back
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSkip}
-                    className="text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium px-4 py-2"
-                  >
-                    Skip setup
                   </button>
                 )}
 
