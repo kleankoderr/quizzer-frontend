@@ -7,9 +7,11 @@ export const ProductTour = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const isMobile = window.innerWidth < 1024;
     const hasSeenTour = localStorage.getItem('hasSeenTour');
-    // Only run the tour if the user is on the dashboard and hasn't seen it yet
-    if (!hasSeenTour && location.pathname === '/dashboard') {
+    
+    // Only run the tour if the user is on the dashboard, hasn't seen it yet, and is NOT on mobile
+    if (!hasSeenTour && location.pathname === '/dashboard' && !isMobile) {
       setRun(true);
     }
   }, [location.pathname]);
