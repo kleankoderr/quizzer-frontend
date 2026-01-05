@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Step } from 'react-joyride';
 
 export const quizTour: Step[] = [
