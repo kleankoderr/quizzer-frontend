@@ -67,7 +67,7 @@ export const FlashcardsPage = () => {
           contentText?: string;
           sourceTitle?: string;
           contentId?: string;
-          openGenerator?: boolean; // Added flag
+          openGenerator?: boolean;
           studyPackId?: string;
         };
 

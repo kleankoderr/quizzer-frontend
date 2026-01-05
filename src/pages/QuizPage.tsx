@@ -69,6 +69,7 @@ export const QuizPage = () => {
         sourceTitle,
         contentId,
         openGenerator,
+        studyPackId,
       } = location.state as {
         topic?: string;
         contentText?: string;
@@ -77,7 +78,7 @@ export const QuizPage = () => {
         contentId?: string;
         breadcrumb?: any[];
         openGenerator?: boolean;
-        studyPackId?: string; // Add type definition
+        studyPackId?: string;
       };
 
       if (topic || contentText || openGenerator) {
@@ -90,7 +91,7 @@ export const QuizPage = () => {
           sourceTitle,
           contentId,
           breadcrumb: location.state.breadcrumb,
-          studyPackId: location.state.studyPackId, // Pass studyPackId
+          studyPackId,
         });
         setShowGenerator(true);
       }

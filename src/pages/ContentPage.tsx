@@ -259,6 +259,7 @@ export const ContentPage = () => {
         sourceTitle: content.title,
         sourceId: content.id,
         contentId: content.id,
+        studyPackId: content.studyPack?.id,
         breadcrumb: [...baseBreadcrumb, { label: 'Generate Quiz', path: null }],
       },
     });
@@ -287,6 +288,7 @@ export const ContentPage = () => {
         sourceId: content.id,
         sourceTitle: content.title,
         contentId: content.id,
+        studyPackId: content.studyPack?.id,
         breadcrumb: [...baseBreadcrumb, { label: 'Generate Flashcards', path: null }],
       },
     });
