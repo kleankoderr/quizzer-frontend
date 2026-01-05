@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { quoteService } from '../services/quote.service';
 import {
@@ -7,9 +7,7 @@ import {
   BookOpen,
   Clock,
   TrendingUp,
-  BarChart3,
   Sparkles,
-  Target,
   Brain,
   Award,
   Calendar,
@@ -18,7 +16,7 @@ import { StatCardSkeleton, ChartSkeleton } from '../components/skeletons';
 import { StatCard } from '../components/StatCard';
 import { useQuery } from '@tanstack/react-query';
 import { studyService } from '../services/study.service';
-import { contentService, coachingService, recommendationService } from '../services';
+import { contentService } from '../services';
 import { statisticsService } from '../services/statistics.service';
 import {
   AreaChart,
@@ -85,33 +83,12 @@ export const DashboardPage = () => {
     },
   });
 
-  const { data: coachingTips } = useQuery({
-    queryKey: ['coaching-tips'],
-    queryFn: coachingService.getTips,
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
-
-  // Fetch AI-powered recommendations
-  const { data: recommendations = [], isLoading: recommendationsLoading } = useQuery({
-    queryKey: ['ai-recommendations'],
-    queryFn: recommendationService.getAll,
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  });
-
   // Fetch due reviews count
   const { data: dueReviewsData } = useQuery({
     queryKey: ['due-reviews'],
     queryFn: studyService.getDueForReview,
     refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
   });
-
-  // Get the top recommendation (legacy support)
-  const topRecommendation = useMemo(() => {
-    if (studyInsights?.suggestions && studyInsights.suggestions.length > 0) {
-      return studyInsights.suggestions[0];
-    }
-    return null;
-  }, [studyInsights]);
 
   // Calculate simple stats
   const activeTopics = useMemo(() => {
@@ -159,19 +136,6 @@ export const DashboardPage = () => {
 
     return last7Days;
   }, [activityData]);
-
-  const getActionLabel = (action?: string) => {
-    switch (action) {
-      case 'quiz':
-        return 'Take a Quiz';
-      case 'flashcards':
-        return 'Review Flashcards';
-      case 'challenge':
-        return 'View Challenges';
-      default:
-        return 'View Details';
-    }
-  };
 
   const isLoading = insightsLoading || statsLoading || contentLoading;
 
@@ -246,31 +210,6 @@ export const DashboardPage = () => {
         </div>
       )}
 
-      {/* Smart Recommendations CTA */}
-      {recommendationsLoading ? null : (
-        recommendations.length > 0 && (
-          <button
-            onClick={() => navigate('/recommendations')}
-            className="w-full flex items-center justify-between p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {recommendations.length} Smart Recommendation{recommendations.length === 1 ? '' : 's'} Available
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Click to view personalized study suggestions
-                </p>
-              </div>
-            </div>
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
-          </button>
-        )
-      )}
-
       {/* Review Now Card - Items Due for Review */}
       {dueReviewsData && dueReviewsData.totalDue > 0 && (
         <button
@@ -325,76 +264,6 @@ export const DashboardPage = () => {
             }`}
           />
         </button>
-      )}
-
-      {/* Smart Recommendation - High Priority Action (Legacy - Hidden if new recommendations exist) */}
-      {recommendations.length ? null : (
-        topRecommendation && (
-          <div className="card relative overflow-hidden border-0 shadow-lg group">
-            <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
-
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
-
-            <div className="relative z-10 p-4 md:p-6 text-white">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                  <Sparkles className="w-5 h-5 text-yellow-300" />
-                </div>
-                <h3 className="text-sm font-bold tracking-wider uppercase text-blue-100">
-                  Recommended for You
-                </h3>
-              </div>
-
-              <h4 className="text-xl md:text-2xl font-bold mb-2 text-white">
-                {topRecommendation.topic}
-              </h4>
-              <p className="text-blue-100 mb-6 text-sm leading-relaxed opacity-90">
-                {topRecommendation.reason}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                {topRecommendation.quizId && (
-                  <button
-                    onClick={() => navigate(`/quiz/${topRecommendation.quizId}`)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    <Target className="w-5 h-5" />
-                    Take Quiz
-                  </button>
-                )}
-
-                {topRecommendation.flashcardSetId && (
-                  <button
-                    onClick={() =>
-                      navigate(`/flashcards/${topRecommendation.flashcardSetId}`)
-                    }
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                      topRecommendation.quizId
-                        ? 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
-                        : 'bg-white text-blue-600 hover:bg-blue-50'
-                    }`}
-                  >
-                    <Brain className="w-5 h-5" />
-                    Review Cards
-                  </button>
-                )}
-
-                {!topRecommendation.quizId &&
-                  !topRecommendation.flashcardSetId && (
-                    <button
-                      onClick={() => navigate('/study')}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                      <BookOpen className="w-5 h-5" />
-                      Continue Learning
-                    </button>
-                  )}
-              </div>
-            </div>
-          </div>
-        )
       )}
 
       {/* Quick Stats */}
@@ -654,111 +523,6 @@ export const DashboardPage = () => {
             </AreaChart>
           </ResponsiveContainer>
         )}
-      </div>
-
-      {/* Coaching Tips */}
-      {coachingTips && coachingTips.length > 0 && (
-        <div className="card p-4 md:p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-lg">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-              <Sparkles className="w-6 h-6 text-yellow-300" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold mb-1">Coach's Tip</h3>
-              <div className="space-y-3">
-                {coachingTips.map((tip) => (
-                  <div
-                    key={tip.message}
-                    className="bg-white/10 rounded-lg p-3 backdrop-blur-sm border border-white/10"
-                  >
-                    <p className="text-sm font-medium leading-relaxed">
-                      {tip.message}
-                    </p>
-                    {tip.action && (
-                      <div className="mt-2 flex justify-end">
-                        <button
-                          onClick={() => {
-                            if (tip.action === 'quiz') navigate('/quiz');
-                            else if (tip.action === 'flashcards')
-                              navigate('/study');
-                            else if (tip.action === 'challenge')
-                              navigate('/challenges');
-                          }}
-                          className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-full font-bold hover:bg-indigo-50 transition-colors"
-                        >
-                          {getActionLabel(tip.action)}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link
-          to="/study"
-          className="card p-4 md:p-6 dark:bg-gray-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all group"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-              <BookOpen className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                Create Content
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Start learning
-              </p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
-          </div>
-        </Link>
-
-        <Link
-          to="/statistics"
-          className="card p-4 md:p-6 dark:bg-gray-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all group"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                Performance
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Track progress
-              </p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
-          </div>
-        </Link>
-
-        <Link
-          to="/attempts"
-          className="card p-4 md:p-6 dark:bg-gray-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all group"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-              <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Practice History
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Review history
-              </p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
-          </div>
-        </Link>
       </div>
     </div>
   );
