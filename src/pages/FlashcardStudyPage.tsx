@@ -446,7 +446,7 @@ export const FlashcardStudyPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col min-h-[calc(100vh-120px)] space-y-4 pb-4 overflow-hidden">
+    <div className="max-w-6xl mx-auto flex flex-col min-h-[calc(100vh-120px)] space-y-2 md:space-y-4 pb-4 overflow-hidden">
       <FlashcardHeader 
         title={flashcardSet.title} 
         topic={flashcardSet.topic} 
@@ -456,7 +456,7 @@ export const FlashcardStudyPage = () => {
         attemptsCount={flashcardSet._count?.attempts || 0}
       />
 
-      <div className="flex-1 flex items-center justify-center gap-4 relative px-2 sm:px-12 min-h-[350px] md:min-h-[420px] mb-4 md:mb-8">
+      <div className="flex-1 flex items-center justify-center gap-4 relative px-2 sm:px-12 min-h-[350px] md:min-h-[420px] mb-4 md:mb-8 mt-2 md:mt-0">
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
@@ -468,7 +468,7 @@ export const FlashcardStudyPage = () => {
         </button>
 
         <div className="relative w-full max-w-2xl mx-auto h-[320px] sm:h-[480px]">
-          {/* Stacked Card Background Effects - Enhanced visual depth */}
+          {/* Stacked Card Background Effects - Balanced for mobile */}
           <div className="absolute inset-x-6 -bottom-6 translate-y-2 scale-[0.92] bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg border border-gray-200/50 dark:border-gray-700/50 z-0 opacity-30 h-full transition-transform"></div>
           <div className="absolute inset-x-3 -bottom-3 translate-y-1 scale-[0.96] bg-white dark:bg-gray-800 rounded-[2rem] shadow-md border border-gray-200/50 dark:border-gray-700/50 z-[1] opacity-60 h-full transition-transform"></div>
           
@@ -516,7 +516,7 @@ export const FlashcardStudyPage = () => {
       </div>
 
       {/* Mobile Navigation and Selection Controls */}
-      <div className="flex flex-col gap-4 mt-6">
+      <div className="flex flex-col gap-1 md:gap-4 mt-0 md:mt-6">
         <FlashcardControls
           submitting={submitting}
           currentCardIndex={currentCardIndex}
@@ -535,7 +535,7 @@ export const FlashcardStudyPage = () => {
 const FlashcardHeader = ({ title, topic, progress, currentCardIndex, totalCards }: any) => {
   const navigate = useNavigate();
   return (
-    <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-3 md:p-6 shadow-lg mb-1 md:mb-2">
+    <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-3.5 md:p-6 shadow-lg mb-2 md:mb-2">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full"></div>
