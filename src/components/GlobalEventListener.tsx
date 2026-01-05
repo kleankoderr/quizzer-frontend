@@ -10,16 +10,8 @@ export const GlobalEventListener = () => {
     eventsService.connect();
 
     const handleSummaryCompleted = (event: AppEvent) => {
-      const { contentTitle } = event.metadata || {};
       const contentId = event.resourceId; // The content ID from the event
       
-      toast.success(
-        contentTitle 
-          ? `Summary for "${contentTitle}" is ready!` 
-          : 'Summary is ready!',
-        { duration: 5000 }
-      );
-
       // Invalidate contents list and specific content item
       queryClient.invalidateQueries({ queryKey: ['contents'] });
       if (contentId) {
