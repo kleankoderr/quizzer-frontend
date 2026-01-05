@@ -65,9 +65,7 @@ export const Sidebar = ({
       label: 'Learning Tools',
       items: [
         { path: '/study', icon: BookOpen, label: 'Study Material' },
-        ...(user?.plan === 'PREMIUM'
-          ? [{ path: '/summaries', icon: Sparkles, label: 'Summaries' }]
-          : []),
+        { path: '/summaries', icon: Sparkles, label: 'Summaries' },
         { path: '/quiz', icon: Brain, label: 'Quizzes' },
         { path: '/flashcards', icon: Layers, label: 'Flashcards' },
         { path: '/study-pack', icon: Folder, label: 'Study Sets' },

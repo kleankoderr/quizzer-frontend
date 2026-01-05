@@ -11,6 +11,7 @@ import { Layout } from './components/Layout';
 import { MaintenanceBanner } from './components/MaintenanceOverlay';
 import { AssessmentPopup } from './components/AssessmentPopup';
 import { GlobalEventListener } from './components/GlobalEventListener';
+import { TourProvider } from './contexts/TourProvider';
 
 // Lazy load all page components for code splitting
 const LoginPage = lazy(() =>
@@ -228,13 +229,15 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <BrowserRouter>
-              <MaintenanceBanner />
-              <AssessmentPopup />
-              <GlobalEventListener />
-              <AppRoutes />
-              <Toaster position="top-right" />
-            </BrowserRouter>
+            <TourProvider>
+              <BrowserRouter>
+                <MaintenanceBanner />
+                <AssessmentPopup />
+                <GlobalEventListener />
+                <AppRoutes />
+                <Toaster position="top-right" />
+              </BrowserRouter>
+            </TourProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

@@ -108,7 +108,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         <div className="p-2 bg-primary-100 rounded-lg">
           <Brain className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 id="quiz-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
           Generate New Quiz
         </h2>
       </div>
@@ -132,7 +132,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
       )}
 
       {!initialValues?.sourceTitle && (
-        <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+        <div id="quiz-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={() => setMode('topic')}
@@ -174,8 +174,8 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
           >
             <Upload className="w-5 h-5 md:w-5 md:h-5" />
             <span className="text-xs md:text-base">
-              <span className="md:hidden">Files</span>
-              <span className="hidden md:inline">From Files</span>
+              <span className="md:hidden">Docs</span>
+              <span className="hidden md:inline">From Documents</span>
             </span>
           </button>
         </div>
@@ -191,7 +191,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               Topic
             </label>
             <input
-              id="topic"
+              id="quiz-topic-input"
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
@@ -316,7 +316,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         )}
 
         <div className="space-y-6">
-          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+          <div id="quiz-questions-config" className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <label
                 htmlFor="questions"
@@ -346,7 +346,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
             </div>
           </div>
 
-          <div>
+          <div id="quiz-difficulty-config">
             <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Difficulty Level
             </label>
@@ -403,7 +403,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
             </div>
           </div>
 
-          <div>
+          <div id="quiz-format-config">
             <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Quiz Format
             </label>
@@ -488,7 +488,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
             </div>
           )}
 
-          <div>
+          <div id="quiz-types-config">
             <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Included Question Types
             </label>
@@ -546,13 +546,16 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
             )}
           </div>
 
-          <StudyPackSelector
-            value={selectedStudyPackId}
-            onChange={setSelectedStudyPackId}
-          />
+          <div id="quiz-study-set-config">
+            <StudyPackSelector
+              value={selectedStudyPackId}
+              onChange={setSelectedStudyPackId}
+            />
+          </div>
         </div>
 
         <button
+          id="quiz-generate-btn"
           type="submit"
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 px-6 py-3 sm:py-4 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md text-base sm:text-lg touch-manipulation"

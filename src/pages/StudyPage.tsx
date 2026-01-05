@@ -2,7 +2,8 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
-import { useContents, usePopularTopics, useJobEvents } from '../hooks';
+import { useContents, usePopularTopics, useJobEvents, useTour } from '../hooks';
+import { studyGeneratorTour } from '../tours';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -36,6 +37,8 @@ export const StudyPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
+
+  const { startIfNotCompleted } = useTour();
 
   // Use React Query hooks for data fetching (moved up for useMemo dependency)
   const [page, setPage] = useState(1);
@@ -93,6 +96,12 @@ export const StudyPage = () => {
       setActiveTab('text');
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (showCreator) {
+      startIfNotCompleted('study-generator-onboarding', studyGeneratorTour);
+    }
+  }, [showCreator, startIfNotCompleted]);
 
   const getSummary = (content: any) => {
     if (content.description) {
@@ -552,7 +561,7 @@ export const StudyPage = () => {
               <Sparkles className="w-7 h-7 text-primary-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h2 id="study-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
                 Generate Study Materials
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -562,7 +571,7 @@ export const StudyPage = () => {
           </div>
 
           {/* Tabs */}
-          <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+          <div id="study-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setActiveTab('topic')}
               className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
@@ -601,8 +610,8 @@ export const StudyPage = () => {
             >
               <Upload className="w-5 h-5 md:w-5 md:h-5" />
               <span className="text-xs md:text-base">
-                <span className="md:hidden">File</span>
-                <span className="hidden md:inline">From File</span>
+                <span className="md:hidden">Docs</span>
+                <span className="hidden md:inline">From Documents</span>
               </span>
             </button>
           </div>
@@ -635,6 +644,7 @@ export const StudyPage = () => {
                     What topic do you want to learn about?
                   </label>
                   <input
+                    id="study-topic-input"
                     type="text"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
@@ -667,13 +677,16 @@ export const StudyPage = () => {
                   </div>
                 )}
 
-                <StudyPackSelector
-                  value={selectedStudyPackId}
-                  onChange={setSelectedStudyPackId}
-                  className="mb-6"
-                />
+                <div id="study-generator-study-set">
+                  <StudyPackSelector
+                    value={selectedStudyPackId}
+                    onChange={setSelectedStudyPackId}
+                    className="mb-6"
+                  />
+                </div>
 
                 <button
+                  id="study-generate-btn"
                   onClick={handleGenerateFromTopic}
                   disabled={contentLoading || !topic.trim()}
                   className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:shadow-none text-lg"
@@ -758,11 +771,13 @@ export const StudyPage = () => {
                   />
                 </div>
 
-                <StudyPackSelector
-                  value={selectedStudyPackId}
-                  onChange={setSelectedStudyPackId}
-                  className="mb-6"
-                />
+                <div id="study-generator-study-set">
+                  <StudyPackSelector
+                    value={selectedStudyPackId}
+                    onChange={setSelectedStudyPackId}
+                    className="mb-6"
+                  />
+                </div>
 
                 <button
                   onClick={handleCreateFromText}
@@ -883,11 +898,13 @@ export const StudyPage = () => {
                   )}
                 </div>
 
-                <StudyPackSelector
-                  value={selectedStudyPackId}
-                  onChange={setSelectedStudyPackId}
-                  className="mb-6"
-                />
+                <div id="study-generator-study-set">
+                  <StudyPackSelector
+                    value={selectedStudyPackId}
+                    onChange={setSelectedStudyPackId}
+                    className="mb-6"
+                  />
+                </div>
 
                 <button
                   onClick={handleFileUpload}

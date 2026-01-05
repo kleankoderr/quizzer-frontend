@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { quoteService } from '../services/quote.service';
@@ -30,10 +30,25 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { format, subDays, startOfDay } from 'date-fns';
+import { useTour } from '../hooks';
+import { onboardingTour } from '../tours';
+
+
+const getScoreColor = (score: number, totalQuestions: number) => {
+  const percentage = score / (totalQuestions || 1);
+  if (percentage >= 0.7) return 'text-green-600 dark:text-green-400';
+  if (percentage >= 0.5) return 'text-yellow-600 dark:text-yellow-400';
+  return 'text-red-600 dark:text-red-400';
+};
 
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { startIfNotCompleted } = useTour();
+
+  useEffect(() => {
+    startIfNotCompleted('onboarding', onboardingTour);
+  }, [startIfNotCompleted]);
 
   const { data: dailyQuote } = useQuery({
     queryKey: ['daily-quote'],
@@ -145,6 +160,19 @@ export const DashboardPage = () => {
     return last7Days;
   }, [activityData]);
 
+  const getActionLabel = (action?: string) => {
+    switch (action) {
+      case 'quiz':
+        return 'Take a Quiz';
+      case 'flashcards':
+        return 'Review Flashcards';
+      case 'challenge':
+        return 'View Challenges';
+      default:
+        return 'View Details';
+    }
+  };
+
   const isLoading = insightsLoading || statsLoading || contentLoading;
 
   if (isLoading) {
@@ -231,7 +259,7 @@ export const DashboardPage = () => {
               </div>
               <div className="text-left">
                 <p className="font-semibold text-gray-900 dark:text-white">
-                  {recommendations.length} Smart Recommendation{recommendations.length !== 1 ? 's' : ''} Available
+                  {recommendations.length} Smart Recommendation{recommendations.length === 1 ? '' : 's'} Available
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Click to view personalized study suggestions
@@ -271,7 +299,7 @@ export const DashboardPage = () => {
                     : 'text-orange-900 dark:text-orange-100'
                 }`}
               >
-                {dueReviewsData.totalDue} Item{dueReviewsData.totalDue !== 1 ? 's' : ''} Due for Review
+                {dueReviewsData.totalDue} Item{dueReviewsData.totalDue === 1 ? '' : 's'} Due for Review
                 {dueReviewsData.overdueCount > 0 && (
                   <span className="ml-2 text-sm">• {dueReviewsData.overdueCount} Overdue</span>
                 )}
@@ -475,13 +503,7 @@ export const DashboardPage = () => {
                     {attempt.score !== undefined && attempt.totalQuestions && (
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span
-                          className={`text-sm font-semibold ${
-                            attempt.score / (attempt.totalQuestions || 1) >= 0.7
-                              ? 'text-green-600 dark:text-green-400'
-                              : attempt.score / (attempt.totalQuestions || 1) >= 0.5
-                                ? 'text-yellow-600 dark:text-yellow-400'
-                                : 'text-red-600 dark:text-red-400'
-                          }`}
+                          className={`text-sm font-semibold ${getScoreColor(attempt.score, attempt.totalQuestions)}`}
                         >
                           {Math.round(
                             (attempt.score / (attempt.totalQuestions || 1)) * 100
@@ -664,11 +686,7 @@ export const DashboardPage = () => {
                           }}
                           className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-full font-bold hover:bg-indigo-50 transition-colors"
                         >
-                          {tip.action === 'quiz'
-                            ? 'Take a Quiz'
-                            : tip.action === 'flashcards'
-                              ? 'Review Flashcards'
-                              : 'View Challenges'}
+                          {getActionLabel(tip.action)}
                         </button>
                       </div>
                     )}

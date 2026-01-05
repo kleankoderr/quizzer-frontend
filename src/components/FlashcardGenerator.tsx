@@ -88,7 +88,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div className="p-2 bg-primary-100 rounded-lg">
           <Layers className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 id="flashcard-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
           Generate New Flashcard Set
         </h2>
       </div>
@@ -112,7 +112,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       )}
 
       {!initialValues?.sourceTitle && (
-        <div className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+        <div id="flashcard-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={() => setMode('topic')}
@@ -154,8 +154,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           >
             <Upload className="w-5 h-5 md:w-5 md:h-5" />
             <span className="text-xs md:text-base">
-              <span className="md:hidden">Files</span>
-              <span className="hidden md:inline">From Files</span>
+              <span className="md:hidden">Docs</span>
+              <span className="hidden md:inline">From Documents</span>
             </span>
           </button>
         </div>
@@ -171,7 +171,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               Topic
             </label>
             <input
-              id="topic"
+              id="flashcard-topic-input"
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
@@ -291,7 +291,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         )}
 
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+        <div id="flashcard-count-config" className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <label
               htmlFor="cards"
@@ -319,13 +319,16 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         </div>
 
-        <StudyPackSelector
-          value={selectedStudyPackId}
-          onChange={setSelectedStudyPackId}
-          className="mb-6"
-        />
+        <div id="flashcard-study-set-config">
+          <StudyPackSelector
+            value={selectedStudyPackId}
+            onChange={setSelectedStudyPackId}
+            className="mb-6"
+          />
+        </div>
 
         <button
+          id="flashcard-generate-btn"
           type="submit"
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"

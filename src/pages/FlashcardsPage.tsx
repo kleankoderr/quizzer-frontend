@@ -15,19 +15,31 @@ import {
 import { FlashcardGenerator } from '../components/FlashcardGenerator';
 import { FlashcardSetList } from '../components/FlashcardSetList';
 import { DeleteModal } from '../components/DeleteModal';
-import { useFlashcardSets } from '../hooks';
+import {
+  useFlashcardSets,
+  useJobEvents,
+  useInvalidateQuota,
+  useTour,
+} from '../hooks';
+import { flashcardGeneratorTour } from '../tours';
+import { useQueryClient } from '@tanstack/react-query';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
-import { useQueryClient } from '@tanstack/react-query';
-import { useJobEvents, useInvalidateQuota } from '../hooks';
 
 export const FlashcardsPage = () => {
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
+  const { startIfNotCompleted } = useTour();
   const [showGenerator, setShowGenerator] = useState(false);
   const { data: flashcardSets = [], isLoading } = useFlashcardSets();
+
+  useEffect(() => {
+    if (showGenerator) {
+      startIfNotCompleted('flashcard-generator-onboarding', flashcardGeneratorTour);
+    }
+  }, [showGenerator, startIfNotCompleted]);
   const [loading, setLoading] = useState(false);
   const [deleteSetId, setDeleteSetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -49,7 +61,7 @@ export const FlashcardsPage = () => {
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, sourceTitle, contentId, openGenerator } =
+      const { topic, contentText, sourceTitle, contentId, openGenerator, studyPackId } =
         location.state as {
           topic?: string;
           contentText?: string;
@@ -66,7 +78,7 @@ export const FlashcardsPage = () => {
           mode: contentText ? 'content' : 'topic',
           sourceTitle,
           contentId,
-          studyPackId: (location.state as any).studyPackId,
+          studyPackId,
         });
         setShowGenerator(true);
       }

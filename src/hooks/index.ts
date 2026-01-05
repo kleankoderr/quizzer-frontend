@@ -28,3 +28,4 @@ export * from './useSubscription';
 export * from './useSummaryGeneration';
 export * from './useTaskStatus';
 export * from './useUserDocuments';
+export * from './useTour';

@@ -4,7 +4,6 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Breadcrumb } from './Breadcrumb';
 import { FloatingReviewButton } from './FloatingReviewButton';
-import { ProductTour } from './ProductTour';
 import { useBreadcrumbs } from '../hooks';
 
 export const Layout = () => {
@@ -17,7 +16,6 @@ export const Layout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
-      <ProductTour />
       <Sidebar
         isCollapsed={sidebarCollapsed}
         toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}

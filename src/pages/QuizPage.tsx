@@ -18,14 +18,26 @@ import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useInvalidateQuota, useQuizzes, useJobEvents } from '../hooks';
+import { useInvalidateQuota, useQuizzes, useJobEvents, useTour } from '../hooks';
+import { quizTour, quizGeneratorTour } from '../tours';
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
+  const { startIfNotCompleted } = useTour();
   const [showGenerator, setShowGenerator] = useState(false);
+
+  useEffect(() => {
+    startIfNotCompleted('quiz-onboarding', quizTour);
+  }, [startIfNotCompleted]);
+
+  useEffect(() => {
+    if (showGenerator) {
+      startIfNotCompleted('quiz-generator-onboarding', quizGeneratorTour);
+    }
+  }, [showGenerator, startIfNotCompleted]);
   const { data: quizzes = [], isLoading: loading } = useQuizzes();
   const [generating, setGenerating] = useState(false);
   const [initialValues, setInitialValues] = useState<
@@ -272,6 +284,7 @@ export const QuizPage = () => {
             </div>
             {!showGenerator && (
               <button
+                id="new-quiz-btn"
                 onClick={() => setShowGenerator(true)}
                 className="group flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-xl transition-all hover:scale-105 font-semibold shadow-lg"
               >
@@ -342,6 +355,7 @@ export const QuizPage = () => {
 
           {/* View All Attempts Button */}
           <button
+            id="practice-history-btn"
             onClick={() => navigate('/attempts?type=quiz')}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium"
           >
