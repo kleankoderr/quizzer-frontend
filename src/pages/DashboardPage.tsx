@@ -187,6 +187,7 @@ export const DashboardPage = () => {
 
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <button
+              id="start-studying-btn"
               onClick={() => navigate('/study', { state: { openCreator: true } })}
               className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto"
             >
@@ -194,6 +195,7 @@ export const DashboardPage = () => {
               Start Studying
             </button>
             <button
+              id="create-quiz-btn"
               onClick={() => navigate('/quiz', { state: { openGenerator: true } })}
               className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600/20 text-white hover:bg-blue-600/30 border border-white/20 backdrop-blur-sm rounded-xl font-semibold transition-colors w-full sm:w-auto"
             >
@@ -217,26 +219,28 @@ export const DashboardPage = () => {
       )}
 
       {/* Smart Recommendations CTA */}
-      {!recommendationsLoading && recommendations.length > 0 && (
-        <button
-          onClick={() => navigate('/recommendations')}
-          className="w-full flex items-center justify-between p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all group"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Sparkles className="w-5 h-5 text-white" />
+      {recommendationsLoading ? null : (
+        recommendations.length > 0 && (
+          <button
+            onClick={() => navigate('/recommendations')}
+            className="w-full flex items-center justify-between p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {recommendations.length} Smart Recommendation{recommendations.length !== 1 ? 's' : ''} Available
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Click to view personalized study suggestions
+                </p>
+              </div>
             </div>
-            <div className="text-left">
-              <p className="font-semibold text-gray-900 dark:text-white">
-                {recommendations.length} Smart Recommendation{recommendations.length !== 1 ? 's' : ''} Available
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Click to view personalized study suggestions
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
-        </button>
+            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+          </button>
+        )
       )}
 
       {/* Review Now Card - Items Due for Review */}
@@ -296,72 +300,74 @@ export const DashboardPage = () => {
       )}
 
       {/* Smart Recommendation - High Priority Action (Legacy - Hidden if new recommendations exist) */}
-      {!recommendations.length && topRecommendation ? (
-        <div className="card relative overflow-hidden border-0 shadow-lg group">
-          <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
+      {recommendations.length ? null : (
+        topRecommendation && (
+          <div className="card relative overflow-hidden border-0 shadow-lg group">
+            <div className="absolute inset-0 bg-blue-600 opacity-100 transition-all duration-300 group-hover:scale-105" />
 
-          {/* Background decoration */}
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black/10 rounded-full blur-2xl" />
 
-          <div className="relative z-10 p-4 md:p-6 text-white">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                <Sparkles className="w-5 h-5 text-yellow-300" />
+            <div className="relative z-10 p-4 md:p-6 text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <Sparkles className="w-5 h-5 text-yellow-300" />
+                </div>
+                <h3 className="text-sm font-bold tracking-wider uppercase text-blue-100">
+                  Recommended for You
+                </h3>
               </div>
-              <h3 className="text-sm font-bold tracking-wider uppercase text-blue-100">
-                Recommended for You
-              </h3>
-            </div>
 
-            <h4 className="text-xl md:text-2xl font-bold mb-2 text-white">
-              {topRecommendation.topic}
-            </h4>
-            <p className="text-blue-100 mb-6 text-sm leading-relaxed opacity-90">
-              {topRecommendation.reason}
-            </p>
+              <h4 className="text-xl md:text-2xl font-bold mb-2 text-white">
+                {topRecommendation.topic}
+              </h4>
+              <p className="text-blue-100 mb-6 text-sm leading-relaxed opacity-90">
+                {topRecommendation.reason}
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              {topRecommendation.quizId && (
-                <button
-                  onClick={() => navigate(`/quiz/${topRecommendation.quizId}`)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Target className="w-5 h-5" />
-                  Take Quiz
-                </button>
-              )}
-
-              {topRecommendation.flashcardSetId && (
-                <button
-                  onClick={() =>
-                    navigate(`/flashcards/${topRecommendation.flashcardSetId}`)
-                  }
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                    topRecommendation.quizId
-                      ? 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
-                      : 'bg-white text-blue-600 hover:bg-blue-50'
-                  }`}
-                >
-                  <Brain className="w-5 h-5" />
-                  Review Cards
-                </button>
-              )}
-
-              {!topRecommendation.quizId &&
-                !topRecommendation.flashcardSetId && (
+              <div className="flex flex-col sm:flex-row gap-3">
+                {topRecommendation.quizId && (
                   <button
-                    onClick={() => navigate('/study')}
+                    onClick={() => navigate(`/quiz/${topRecommendation.quizId}`)}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
-                    <BookOpen className="w-5 h-5" />
-                    Continue Learning
+                    <Target className="w-5 h-5" />
+                    Take Quiz
                   </button>
                 )}
+
+                {topRecommendation.flashcardSetId && (
+                  <button
+                    onClick={() =>
+                      navigate(`/flashcards/${topRecommendation.flashcardSetId}`)
+                    }
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
+                      topRecommendation.quizId
+                        ? 'bg-blue-700/50 text-white hover:bg-blue-700/70 backdrop-blur-sm border border-white/20'
+                        : 'bg-white text-blue-600 hover:bg-blue-50'
+                    }`}
+                  >
+                    <Brain className="w-5 h-5" />
+                    Review Cards
+                  </button>
+                )}
+
+                {!topRecommendation.quizId &&
+                  !topRecommendation.flashcardSetId && (
+                    <button
+                      onClick={() => navigate('/study')}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      Continue Learning
+                    </button>
+                  )}
+              </div>
             </div>
           </div>
-        </div>
-      ) : null}
+        )
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -419,7 +425,7 @@ export const DashboardPage = () => {
 
               <div className="space-y-2">
                 {recentAttemptsData.attempts.slice(0, 3).map((attempt) => (
-                  <div
+                  <button
                     key={attempt.id}
                     onClick={() => {
                       if (attempt.type === 'quiz' && attempt.quiz?.id) {
@@ -433,7 +439,21 @@ export const DashboardPage = () => {
                         );
                       }
                     }}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group gap-4"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        if (attempt.type === 'quiz' && attempt.quiz?.id) {
+                          navigate(`/attempts?quizId=${attempt.quiz.id}`);
+                        } else if (
+                          attempt.type === 'flashcard' &&
+                          attempt.flashcardSet?.id
+                        ) {
+                          navigate(
+                            `/attempts?flashcardId=${attempt.flashcardSet.id}`
+                          );
+                        }
+                      }
+                    }}
+                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group gap-4 text-left border-none bg-transparent"
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
@@ -456,22 +476,22 @@ export const DashboardPage = () => {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span
                           className={`text-sm font-semibold ${
-                            attempt.score / attempt.totalQuestions >= 0.7
+                            attempt.score / (attempt.totalQuestions || 1) >= 0.7
                               ? 'text-green-600 dark:text-green-400'
-                              : attempt.score / attempt.totalQuestions >= 0.5
+                              : attempt.score / (attempt.totalQuestions || 1) >= 0.5
                                 ? 'text-yellow-600 dark:text-yellow-400'
                                 : 'text-red-600 dark:text-red-400'
                           }`}
                         >
                           {Math.round(
-                            (attempt.score / attempt.totalQuestions) * 100
+                            (attempt.score / (attempt.totalQuestions || 1)) * 100
                           )}
                           %
                         </span>
                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all" />
                       </div>
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -624,9 +644,9 @@ export const DashboardPage = () => {
             <div className="flex-1">
               <h3 className="text-lg font-bold mb-1">Coach's Tip</h3>
               <div className="space-y-3">
-                {coachingTips.map((tip, index) => (
+                {coachingTips.map((tip) => (
                   <div
-                    key={index}
+                    key={tip.message}
                     className="bg-white/10 rounded-lg p-3 backdrop-blur-sm border border-white/10"
                   >
                     <p className="text-sm font-medium leading-relaxed">
@@ -648,9 +668,7 @@ export const DashboardPage = () => {
                             ? 'Take a Quiz'
                             : tip.action === 'flashcards'
                               ? 'Review Flashcards'
-                              : tip.action === 'challenge'
-                                ? 'View Challenges'
-                                : 'Go'}
+                              : 'View Challenges'}
                         </button>
                       </div>
                     )}

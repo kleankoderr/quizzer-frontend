@@ -173,6 +173,7 @@ export const Sidebar = ({
             </span>
           )}
           <button
+            id="sidebar-collapse-btn"
             onClick={toggleCollapse}
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden lg:block flex-shrink-0"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
