@@ -270,6 +270,14 @@ export const LoginPage = () => {
                         )}
                       </button>
                     </div>
+                    <div className="flex justify-end mt-1">
+                      <Link
+                        to="/forgot-password"
+                        className="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
                   </div>
 
                   {successMessage && (

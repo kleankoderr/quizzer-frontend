@@ -12,6 +12,8 @@ export const AUTH_ENDPOINTS = {
   GOOGLE_LOGIN: `${API_BASE_URL}/auth/google`,
   VERIFY_EMAIL: `${API_BASE_URL}/auth/verify-email`,
   RESEND_OTP: `${API_BASE_URL}/auth/resend-otp`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+  RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
 };
 
 // Quiz endpoints

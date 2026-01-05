@@ -92,6 +92,28 @@ export const authService = {
     await apiClient.post(AUTH_ENDPOINTS.RESEND_OTP, { email });
   },
 
+  // Forgot Password
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>(
+      AUTH_ENDPOINTS.FORGOT_PASSWORD,
+      { email }
+    );
+    return response.data;
+  },
+
+  // Reset Password
+  resetPassword: async (
+    email: string,
+    otp: string,
+    password: string
+  ): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>(
+      AUTH_ENDPOINTS.RESET_PASSWORD,
+      { email, otp, password }
+    );
+    return response.data;
+  },
+
   // Detect if device is mobile
   isMobileDevice: (): boolean => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
