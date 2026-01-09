@@ -80,13 +80,19 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
         await studyPackService.moveItem(packId, { type: itemType, itemId });
         toast.success('Item moved successfully');
         
-        // Invalidate queries to refresh the content with updated studyPackId
+        // Invalidate individual item queries to refresh the content with updated studyPackId
         if (itemType === 'content') {
           await queryClient.invalidateQueries({ queryKey: ['content', itemId] });
+          // Invalidate contents list to update UI grouping
+          await queryClient.invalidateQueries({ queryKey: ['contents'] });
         } else if (itemType === 'quiz') {
           await queryClient.invalidateQueries({ queryKey: ['quiz', itemId] });
+          // Invalidate quizzes list to update UI grouping
+          await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
         } else if (itemType === 'flashcard') {
           await queryClient.invalidateQueries({ queryKey: ['flashcardSet', itemId] });
+          // Invalidate flashcard sets list to update UI grouping
+          await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
         }
         
         const pack = studyPacks.find((p) => p.id === packId);

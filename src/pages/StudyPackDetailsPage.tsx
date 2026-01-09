@@ -361,22 +361,33 @@ export const StudyPackDetailsPage: React.FC = () => {
     }, []);
 
     const handleMoveSuccess = useCallback(
-        (pack: any) => {
-            if (pack?.id !== id) {
-                const config = TAB_CONFIG[getTabConfigId(moveState.itemType)];
-                const dataKey = config.dataKey;
+        (targetPack?: any) => {
+            // If moved to the same pack, just close the modal
+            if (targetPack?.id === id) {
+                closeMoveModal();
+                return;
+            }
 
+            // Optimistically remove item from current view
+            if (moveState.itemId && moveState.itemType) {
                 queryClient.setQueryData(['studyPack', id], (old: StudyPackData | undefined) => {
                     if (!old) return old;
+                    const config = TAB_CONFIG[getTabConfigId(moveState.itemType)];
+                    const dataKey = config.dataKey;
+
                     return {
                         ...old,
                         [dataKey]: old[dataKey]?.filter((item: any) => item.id !== moveState.itemId) || [],
                     };
                 });
             }
+
+            // The modal handles list query invalidation
+            // We just need to refresh this study pack's data
             queryClient.invalidateQueries({queryKey: ['studyPack', id]});
+            closeMoveModal();
         },
-        [id, moveState.itemId, moveState.itemType, queryClient]
+        [id, queryClient, closeMoveModal, moveState]
     );
 
     const handleNavigateToCreate = useCallback(
