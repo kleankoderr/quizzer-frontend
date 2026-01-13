@@ -202,6 +202,12 @@ const SummariesPage = lazy(() =>
   }))
 );
 
+const EmailCampaignsPage = lazy(() =>
+  import('./pages/EmailCampaignsPage').then((m) => ({
+    default: m.default,
+  }))
+);
+
 // Import AdminRoute (keep this as direct import since it's small)
 import { AdminRoute } from './components/AdminRoute';
 
@@ -415,6 +421,14 @@ function AppRoutes() {
             element={
               <AdminRoute>
                 <PaymentFailuresPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/campaigns"
+            element={
+              <AdminRoute>
+                <EmailCampaignsPage />
               </AdminRoute>
             }
           />
