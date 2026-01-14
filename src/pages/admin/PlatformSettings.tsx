@@ -83,16 +83,17 @@ export const PlatformSettings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="allowRegistration" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Allow Registration
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Allow new users to register on the platform
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <div className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  id="allowRegistration"
                   checked={formData.allowRegistration}
                   onChange={(e) =>
                     setFormData({
@@ -103,21 +104,22 @@ export const PlatformSettings = () => {
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-              </label>
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor='inputMaintenanceMode' className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Maintenance Mode
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Put the platform in maintenance mode
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <div className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  id="inputMaintenanceMode"
                   checked={formData.maintenanceMode}
                   onChange={(e) =>
                     setFormData({
@@ -128,15 +130,16 @@ export const PlatformSettings = () => {
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-              </label>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor='inputSupportEmail' className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Support Email
               </label>
               <input
                 type="email"
+                id="inputSupportEmail"
                 value={formData.supportEmail}
                 onChange={(e) =>
                   setFormData({ ...formData, supportEmail: e.target.value })
@@ -144,7 +147,7 @@ export const PlatformSettings = () => {
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 placeholder="support@example.com"
               />
-            </div>
+             </div>
           </div>
         </div>
 
