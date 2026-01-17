@@ -6,18 +6,49 @@ import React, { useState, useEffect } from 'react';
 import { CardSkeleton } from '../../components/skeletons';
 import { AiConfigForm } from '../../components/admin/AiConfigForm';
 
+interface AIModelSettings {
+  provider: 'gemini' | 'groq' | 'openai';
+  modelName: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+interface AIModelStrategy {
+  routing: {
+    defaultModel: string;
+    taskOverrides?: Record<string, string>;
+    complexityOverrides?: Record<string, string>;
+  };
+  models: Record<string, AIModelSettings>;
+}
+
+interface PlatformSettingsState {
+  allowRegistration: boolean;
+  maintenanceMode: boolean;
+  supportEmail: string;
+  aiProviderConfig: AIModelStrategy;
+}
+
 export const PlatformSettings = () => {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PlatformSettingsState>({
     allowRegistration: true,
     maintenanceMode: false,
     supportEmail: '',
-    aiProviderConfig: {},
+    aiProviderConfig: {
+      routing: { defaultModel: '', taskOverrides: {}, complexityOverrides: {} },
+      models: {},
+    },
   });
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading: isSettingsLoading } = useQuery({
     queryKey: ['platformSettings'],
     queryFn: adminService.getSettings,
+  });
+
+  const { data: aiOptions, isLoading: isOptionsLoading } = useQuery({
+    queryKey: ['aiOptions'],
+    queryFn: adminService.getAiOptions,
   });
 
   useEffect(() => {
@@ -26,7 +57,10 @@ export const PlatformSettings = () => {
         allowRegistration: settings.allowRegistration,
         maintenanceMode: settings.maintenanceMode,
         supportEmail: settings.supportEmail || '',
-        aiProviderConfig: settings.aiProviderConfig || {},
+        aiProviderConfig: settings.aiProviderConfig || {
+          routing: { defaultModel: '', taskOverrides: {}, complexityOverrides: {} },
+          models: {},
+        },
       });
     }
   }, [settings]);
@@ -53,7 +87,7 @@ export const PlatformSettings = () => {
     updateMutation.mutate(formData);
   };
 
-  if (isLoading) {
+  if (isSettingsLoading || isOptionsLoading) {
     return (
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex items-center justify-between">
@@ -83,15 +117,16 @@ export const PlatformSettings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="allow-registration" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Allow Registration
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Allow new users to register on the platform
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label htmlFor="allow-registration" className="relative inline-flex items-center cursor-pointer">
                 <input
+                  id="allow-registration"
                   type="checkbox"
                   checked={formData.allowRegistration}
                   onChange={(e) =>
@@ -103,20 +138,22 @@ export const PlatformSettings = () => {
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                <span className="sr-only">Toggle Registration</span>
               </label>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="maintenance-mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Maintenance Mode
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Put the platform in maintenance mode
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label htmlFor="maintenance-mode" className="relative inline-flex items-center cursor-pointer">
                 <input
+                  id="maintenance-mode"
                   type="checkbox"
                   checked={formData.maintenanceMode}
                   onChange={(e) =>
@@ -128,14 +165,16 @@ export const PlatformSettings = () => {
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                <span className="sr-only">Toggle Maintenance Mode</span>
               </label>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="support-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Support Email
               </label>
               <input
+                id="support-email"
                 type="email"
                 value={formData.supportEmail}
                 onChange={(e) =>
@@ -150,10 +189,12 @@ export const PlatformSettings = () => {
 
         <AiConfigForm
           config={formData.aiProviderConfig}
+          options={aiOptions || { providers: [], tasks: [], complexities: [] }}
           onChange={(config) =>
             setFormData({ ...formData, aiProviderConfig: config })
           }
         />
+
 
         <div className="flex justify-end">
           <button

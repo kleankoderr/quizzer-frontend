@@ -55,7 +55,7 @@ export const settingsService = {
 
     inFlightRequest = (async () => {
       try {
-        const response = await apiClient.get('/settings/public');
+        const response = await apiClient.get('/platform-settings/public');
         const data = response.data;
 
         // Cache the response
@@ -80,7 +80,7 @@ export const settingsService = {
   },
 
   getSettings: async () => {
-    const response = await apiClient.get('/settings');
+    const response = await apiClient.get('/platform-settings');
     return response.data;
   },
 
@@ -89,7 +89,7 @@ export const settingsService = {
     maintenanceMode?: boolean;
     supportEmail?: string;
   }) => {
-    const response = await apiClient.patch('/settings', data);
+    const response = await apiClient.patch('/platform-settings', data);
     // Clear cache when settings are updated
     settingsService.clearPublicSettingsCache();
     return response.data;

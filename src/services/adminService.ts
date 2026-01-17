@@ -214,12 +214,17 @@ export const adminService = {
   },
 
   getSettings: async () => {
-    const response = await api.get('/admin/settings');
+    const response = await api.get('/platform-settings');
+    return response.data;
+  },
+
+  getAiOptions: async () => {
+    const response = await api.get('/platform-settings/options');
     return response.data;
   },
 
   updateSettings: async (data: any) => {
-    const response = await api.patch('/admin/settings', data);
+    const response = await api.patch('/platform-settings', data);
     return response.data;
   },
 
