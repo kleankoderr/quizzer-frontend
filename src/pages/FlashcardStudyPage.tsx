@@ -41,7 +41,7 @@ const buildBreadcrumbItems = (
   ];
 };
 
-const MarkdownParagraph = ({ node, ...props }: any) => <div {...props} />;
+const MarkdownParagraph = ({ _node, ...props }: any) => <div {...props} />;
 
 const FlashcardMarkdown = ({ content, className = '' }: { content: string; className?: string }) => (
   <div className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0`}>
@@ -125,7 +125,7 @@ export const FlashcardStudyPage = () => {
       replace: true,
       state: { breadcrumb: breadcrumbItems },
     });
-  }, [flashcardSet, id, loading, location.pathname, location.state?.breadcrumb, navigate, isStudying]);
+  }, [flashcardSet, id, loading, location.pathname, location.search, location.state?.breadcrumb, navigate, isStudying]);
 
   // Initializing isStudying state
   useEffect(() => {
@@ -155,7 +155,7 @@ export const FlashcardStudyPage = () => {
         setShowResults(false);
       }
     }
-  }, [viewHistory, viewStudy, isStudying, showResults]);
+  }, [viewHistory, viewStudy, isStudying, showResults, location.search]);
 
   // Fetch attempts when history view is active
   useEffect(() => {

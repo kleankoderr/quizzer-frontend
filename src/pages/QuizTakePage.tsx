@@ -38,9 +38,31 @@ export const QuizTakePage = () => {
     getStorageKey,
   });
 
+  const navigateToReview = useCallback((attemptId: string, isChallenge = false) => {
+    if (!quiz) return;
+    
+    const breadcrumb = quiz.studyPack
+      ? [
+          { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` },
+          { label: quiz.title, path: null },
+          { label: 'Review', path: null },
+        ]
+      : [
+          { label: 'Quizzes', path: '/quiz' },
+          { label: quiz.title, path: null },
+          { label: 'Review', path: null },
+        ];
+
+    const path = isChallenge 
+      ? `/quiz/attempt/${attemptId}/review?challengeId=${challengeId}`
+      : `/quiz/attempt/${attemptId}/review`;
+
+    navigate(path, { state: { breadcrumb } });
+  }, [quiz, challengeId, navigate]);
+
   // Handle submit
   // Extract challenge completion logic to reduce complexity
-  const handleChallengeCompletion = async (submissionResult: any) => {
+  const handleChallengeCompletion = useCallback(async (submissionResult: any) => {
     if (!challengeId || !id || !quiz) return;
 
     try {
@@ -65,29 +87,7 @@ export const QuizTakePage = () => {
     } catch {
       navigateToReview(submissionResult.attemptId, true);
     }
-  };
-
-  const navigateToReview = (attemptId: string, isChallenge = false) => {
-    if (!quiz) return;
-    
-    const breadcrumb = quiz.studyPack
-      ? [
-          { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` },
-          { label: quiz.title, path: null },
-          { label: 'Review', path: null },
-        ]
-      : [
-          { label: 'Quizzes', path: '/quiz' },
-          { label: quiz.title, path: null },
-          { label: 'Review', path: null },
-        ];
-
-    const path = isChallenge 
-      ? `/quiz/attempt/${attemptId}/review?challengeId=${challengeId}`
-      : `/quiz/attempt/${attemptId}/review`;
-
-    navigate(path, { state: { breadcrumb } });
-  };
+  }, [challengeId, id, quiz, queryClient, navigate, navigateToReview]);
 
   const handleSubmit = useCallback(
     async (force = false) => {
@@ -118,11 +118,9 @@ export const QuizTakePage = () => {
         }
       } catch {
         toast.error('Failed to submit quiz. Please try again.');
-      } finally {
-        setSubmitting(false);
       }
     },
-    [quiz, id, selectedAnswers, challengeId, clearStorage, queryClient, navigate]
+    [quiz, id, selectedAnswers, challengeId, clearStorage, queryClient, handleChallengeCompletion, navigateToReview]
   );
 
   // Auto-submit handler for timer
@@ -225,7 +223,7 @@ export const QuizTakePage = () => {
     }
 
     setInitialized(true);
-  }, [quiz, id, initialized, questions.length, getStorageKey, startTimer]);
+  }, [quiz, id, initialized, questions.length, getStorageKey, startTimer, isTaking]);
 
   // Answer selection handler
   const handleAnswerSelect = useCallback(

@@ -10,7 +10,7 @@ import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 import { LearningGuideSection } from './LearningGuideSection';
 import { SectionNavigator } from './SectionNavigator';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import { useInvalidateQuota } from '../hooks/useQuota';
+import { useInvalidateQuota } from '../hooks';
 
 interface LearningGuideProps {
   guide: NonNullable<Content['learningGuide']>;
@@ -48,7 +48,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   // Initialize refs array
   useEffect(() => {
     sectionRefs.current = guide.sections.map((_, i) => sectionRefs.current[i] || createRef<HTMLDivElement>());
-  }, [guide.sections.length]);
+  }, [guide.sections]);
 
   const [completedSections, setCompletedSections] = useState<Set<number>>(
     () => {

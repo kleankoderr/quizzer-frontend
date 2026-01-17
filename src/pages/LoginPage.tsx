@@ -119,7 +119,7 @@ export const LoginPage = () => {
         setLoading(false);
       }
     },
-    [email, password, handleLoginSuccess]
+    [email, password, handleLoginSuccess, navigate]
   );
 
   return (

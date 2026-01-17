@@ -95,7 +95,7 @@ export const VerifyPaymentPage: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [reference, navigate, queryClient]);
+  }, [reference, navigate, queryClient, refreshUser]);
 
   if (status === 'loading') {
     return (
