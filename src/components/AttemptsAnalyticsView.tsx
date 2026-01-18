@@ -38,14 +38,44 @@ interface AttemptsAnalyticsViewProps {
 }
 
 const PERFORMANCE_RANGES = [
-  { name: 'Excellent (90-100%)', shortLabel: '90-100%', min: 90, max: 100, color: '#10b981', label: 'Excellent' },
-  { name: 'Good (70-89%)', shortLabel: '70-89%', min: 70, max: 89, color: '#3b82f6', label: 'Good' },
-  { name: 'Fair (50-69%)', shortLabel: '50-69%', min: 50, max: 69, color: '#f59e0b', label: 'Fair' },
-  { name: 'Needs Work (<50%)', shortLabel: '<50%', min: 0, max: 49, color: '#ef4444', label: 'Needs Work' },
+  {
+    name: 'Excellent (90-100%)',
+    shortLabel: '90-100%',
+    min: 90,
+    max: 100,
+    color: '#10b981',
+    label: 'Excellent',
+  },
+  {
+    name: 'Good (70-89%)',
+    shortLabel: '70-89%',
+    min: 70,
+    max: 89,
+    color: '#3b82f6',
+    label: 'Good',
+  },
+  {
+    name: 'Fair (50-69%)',
+    shortLabel: '50-69%',
+    min: 50,
+    max: 69,
+    color: '#f59e0b',
+    label: 'Fair',
+  },
+  {
+    name: 'Needs Work (<50%)',
+    shortLabel: '<50%',
+    min: 0,
+    max: 49,
+    color: '#ef4444',
+    label: 'Needs Work',
+  },
 ];
 
 const getScoreColor = (score: number) => {
-  const range = PERFORMANCE_RANGES.find(r => score >= r.min && score <= r.max);
+  const range = PERFORMANCE_RANGES.find(
+    (r) => score >= r.min && score <= r.max
+  );
   return range ? range.color : '#ef4444';
 };
 
@@ -125,13 +155,18 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
 
   const scoreDistributionData = useMemo(() => {
     // Ordering: Low to High for the bar chart X-axis
-    const data = PERFORMANCE_RANGES.map(range => ({ ...range, count: 0 })).reverse();
+    const data = PERFORMANCE_RANGES.map((range) => ({
+      ...range,
+      count: 0,
+    })).reverse();
 
     attempts.forEach((attempt) => {
       const qCount = attempt.totalQuestions || defaultTotalQuestions || 1;
       const scorePercent = Math.round((attempt.score / qCount) * 100);
 
-      const range = data.find((r) => scorePercent >= r.min && scorePercent <= r.max);
+      const range = data.find(
+        (r) => scorePercent >= r.min && scorePercent <= r.max
+      );
       if (range) range.count++;
     });
 
@@ -145,7 +180,9 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 pb-12 px-4 sm:px-6">
       {/* Hero Header */}
-      <header className={`relative overflow-hidden rounded-2xl ${type === 'quiz' ? 'bg-blue-600 dark:bg-blue-700' : 'bg-primary-600 dark:bg-primary-700'} shadow-lg border border-white/10`}>
+      <header
+        className={`relative overflow-hidden rounded-2xl ${type === 'quiz' ? 'bg-blue-600 dark:bg-blue-700' : 'bg-primary-600 dark:bg-primary-700'} shadow-lg border border-white/10`}
+      >
         {onBack && (
           <div className="absolute top-6 left-6 z-20">
             <button
@@ -157,7 +194,9 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
             </button>
           </div>
         )}
-        <div className={`relative z-10 px-6 ${onBack ? 'pt-16 pb-8 sm:pt-20 sm:pb-10' : 'py-8 sm:p-10'} flex flex-col md:flex-row md:items-center justify-between gap-6`}>
+        <div
+          className={`relative z-10 px-6 ${onBack ? 'pt-16 pb-8 sm:pt-20 sm:pb-10' : 'py-8 sm:p-10'} flex flex-col md:flex-row md:items-center justify-between gap-6`}
+        >
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
               <Icon className="w-4 h-4" />
@@ -208,8 +247,12 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-md">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className={`p-2.5 ${type === 'quiz' ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-primary-50 dark:bg-primary-900/30'} rounded-xl`}>
-                  <TrendingUp className={`w-5 h-5 ${type === 'quiz' ? 'text-blue-600 dark:text-blue-400' : 'text-primary-600 dark:text-primary-400'}`} />
+                <div
+                  className={`p-2.5 ${type === 'quiz' ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-primary-50 dark:bg-primary-900/30'} rounded-xl`}
+                >
+                  <TrendingUp
+                    className={`w-5 h-5 ${type === 'quiz' ? 'text-blue-600 dark:text-blue-400' : 'text-primary-600 dark:text-primary-400'}`}
+                  />
                 </div>
                 <h2 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                   Performance Trend
@@ -218,22 +261,40 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium ml-1">
                 Score progression (last {scoreTrendData.length} sessions)
               </p>
-              
+
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                {[...PERFORMANCE_RANGES].reverse().map(range => (
-                  <div key={range.name} className="flex items-center gap-1.5" style={{ color: range.color }}>
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: range.color }} />
+                {[...PERFORMANCE_RANGES].reverse().map((range) => (
+                  <div
+                    key={range.name}
+                    className="flex items-center gap-1.5"
+                    style={{ color: range.color }}
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: range.color }}
+                    />
                     <span>{range.shortLabel}</span>
                   </div>
                 ))}
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={scoreTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart
+                data={scoreTrendData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="scoreColor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={type === 'quiz' ? '#3b82f6' : '#6366f1'} stopOpacity={0.2} />
-                    <stop offset="95%" stopColor={type === 'quiz' ? '#3b82f6' : '#6366f1'} stopOpacity={0} />
+                    <stop
+                      offset="5%"
+                      stopColor={type === 'quiz' ? '#3b82f6' : '#6366f1'}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={type === 'quiz' ? '#3b82f6' : '#6366f1'}
+                      stopOpacity={0}
+                    />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -286,8 +347,12 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-md">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className={`p-2.5 ${type === 'quiz' ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-primary-50 dark:bg-primary-900/30'} rounded-xl`}>
-                  <BarChart3 className={`w-5 h-5 ${type === 'quiz' ? 'text-blue-600 dark:text-blue-400' : 'text-primary-600 dark:text-primary-400'}`} />
+                <div
+                  className={`p-2.5 ${type === 'quiz' ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-primary-50 dark:bg-primary-900/30'} rounded-xl`}
+                >
+                  <BarChart3
+                    className={`w-5 h-5 ${type === 'quiz' ? 'text-blue-600 dark:text-blue-400' : 'text-primary-600 dark:text-primary-400'}`}
+                  />
                 </div>
                 <h2 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                   Score Distribution
@@ -300,14 +365,22 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 {scoreDistributionData.map((range) => (
                   <div key={range.name} className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: range.color }} />
-                    <span>{range.shortLabel} ({range.count})</span>
+                    <div
+                      className="w-2.5 h-2.5 rounded-sm"
+                      style={{ backgroundColor: range.color }}
+                    />
+                    <span>
+                      {range.shortLabel} ({range.count})
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={scoreDistributionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart
+                data={scoreDistributionData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="#f1f5f9"
@@ -340,7 +413,10 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
                   }}
                   itemStyle={{ color: '#fff' }}
                   labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
-                  formatter={(value: number | undefined) => [value || 0, 'Sessions']}
+                  formatter={(value: number | undefined) => [
+                    value || 0,
+                    'Sessions',
+                  ]}
                   labelFormatter={(label) => `Range: ${label}`}
                 />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]}>
@@ -361,7 +437,9 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
             Historical Records
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-bold mt-1 text-sm flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${type === 'quiz' ? 'bg-blue-500' : 'bg-primary-500'}`} />
+            <span
+              className={`w-2 h-2 rounded-full ${type === 'quiz' ? 'bg-blue-500' : 'bg-primary-500'}`}
+            />
             {attempts.length} Total Sessions Found
           </p>
         </div>
@@ -381,8 +459,13 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
                   navigate(`/quiz/attempt/${attempt.id}/review`);
                 } else {
                   // Flashcards don't have a dedicated review page, so we load it in the study page
-                  const setId = attempt.flashcardSetId || attempt.flashcardSet?.id || attempt.quizId;
-                  navigate(`/flashcards/${setId}?view=history&attemptId=${attempt.id}`);
+                  const setId =
+                    attempt.flashcardSetId ||
+                    attempt.flashcardSet?.id ||
+                    attempt.quizId;
+                  navigate(
+                    `/flashcards/${setId}?view=history&attemptId=${attempt.id}`
+                  );
                 }
               }}
             />

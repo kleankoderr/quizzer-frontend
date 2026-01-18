@@ -42,7 +42,7 @@ export const SignupPage = () => {
         return;
       }
 
-      const from = (location.state)?.from;
+      const from = location.state?.from;
       if (from) {
         const redirectPath = `${from.pathname}${from.search}${from.hash}`;
         navigate(redirectPath, { replace: true });
@@ -67,7 +67,9 @@ export const SignupPage = () => {
       // Call async function without awaiting to avoid returning a Promise
       (async () => {
         try {
-          const user = await authService.googleSignIn(tokenResponse.access_token);
+          const user = await authService.googleSignIn(
+            tokenResponse.access_token
+          );
           await handleSignupSuccess(user);
         } catch (err: any) {
           const errorMessage =
@@ -92,7 +94,7 @@ export const SignupPage = () => {
 
     try {
       const response = await authService.signup(email, password, name);
-      
+
       if ('requiresVerification' in response && response.requiresVerification) {
         navigate('/verify-email', { state: { email: response.email } });
         return;
@@ -138,10 +140,7 @@ export const SignupPage = () => {
                 </button>
 
                 {/* Email/Password Form - Secondary */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-4"
-                >
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label
                       htmlFor="name"
@@ -304,7 +303,7 @@ export const SignupPage = () => {
               Already have an account?{' '}
               <Link
                 to="/login"
-                state={{ from: (location.state)?.from }}
+                state={{ from: location.state?.from }}
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 Sign In

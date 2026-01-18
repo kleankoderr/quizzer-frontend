@@ -63,20 +63,20 @@ export const ProgressToast: React.FC<
   // Update message based on progress
   useEffect(() => {
     if (status === 'processing' && autoProgress) {
-        let newMessage: string;
-        if (currentProgress < 20) {
-          newMessage = 'Initializing...';
-        } else if (currentProgress < 40) {
-          newMessage = 'Processing content...';
-        } else if (currentProgress < 70) {
-          newMessage = 'Generating results...';
-        } else if (currentProgress < 90) {
-          newMessage = 'Formatting output...';
-        } else {
-          newMessage = 'Finalizing...';
-        }
-        
-        setCurrentMessage(newMessage);
+      let newMessage: string;
+      if (currentProgress < 20) {
+        newMessage = 'Initializing...';
+      } else if (currentProgress < 40) {
+        newMessage = 'Processing content...';
+      } else if (currentProgress < 70) {
+        newMessage = 'Generating results...';
+      } else if (currentProgress < 90) {
+        newMessage = 'Formatting output...';
+      } else {
+        newMessage = 'Finalizing...';
+      }
+
+      setCurrentMessage(newMessage);
     } else if ((status === 'error' || status === 'success') && message) {
       // For error and success states, use the provided message prop
       setCurrentMessage(message);

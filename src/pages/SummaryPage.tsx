@@ -18,18 +18,49 @@ import {
   ChevronUp,
   ThumbsUp,
 } from 'lucide-react';
-import { FaXTwitter, FaFacebook, FaLinkedin, FaWhatsapp } from 'react-icons/fa6';
-import { summaryService, type Summary, type ReactionType } from '../services/summary.service';
+import {
+  FaXTwitter,
+  FaFacebook,
+  FaLinkedin,
+  FaWhatsapp,
+} from 'react-icons/fa6';
+import {
+  summaryService,
+  type Summary,
+  type ReactionType,
+} from '../services/summary.service';
 import { useAuth } from '../contexts/AuthContext';
 import { Toast } from '../utils/toast';
 
-
-
 const REACTION_BUTTONS = [
-  { type: 'like' as ReactionType, icon: ThumbsUp, label: 'Like', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/10' },
-  { type: 'love' as ReactionType, icon: Heart, label: 'Love', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10' },
-  { type: 'helpful' as ReactionType, icon: Lightbulb, label: 'Helpful', color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/10' },
-  { type: 'bookmark' as ReactionType, icon: Bookmark, label: 'Bookmark', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10' },
+  {
+    type: 'like' as ReactionType,
+    icon: ThumbsUp,
+    label: 'Like',
+    color: 'text-blue-600',
+    bg: 'bg-blue-50 dark:bg-blue-900/10',
+  },
+  {
+    type: 'love' as ReactionType,
+    icon: Heart,
+    label: 'Love',
+    color: 'text-red-500',
+    bg: 'bg-red-50 dark:bg-red-900/10',
+  },
+  {
+    type: 'helpful' as ReactionType,
+    icon: Lightbulb,
+    label: 'Helpful',
+    color: 'text-yellow-500',
+    bg: 'bg-yellow-50 dark:bg-yellow-900/10',
+  },
+  {
+    type: 'bookmark' as ReactionType,
+    icon: Bookmark,
+    label: 'Bookmark',
+    color: 'text-blue-500',
+    bg: 'bg-blue-50 dark:bg-blue-900/10',
+  },
 ];
 
 export function SummaryPage() {
@@ -37,7 +68,7 @@ export function SummaryPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  
+
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +81,7 @@ export function SummaryPage() {
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   useEffect(() => {
@@ -73,7 +104,7 @@ export function SummaryPage() {
         setLoading(true);
         const data = await summaryService.getSummaryByShortCode(shortCode);
         setSummary(data);
-        
+
         if (data.userReactions) {
           setUserReactions(new Set(data.userReactions));
         }
@@ -81,7 +112,9 @@ export function SummaryPage() {
         await summaryService.trackView(shortCode);
       } catch (err) {
         console.error('Error fetching summary:', err);
-        setError('Failed to load summary. It may not exist or is not publicly available.');
+        setError(
+          'Failed to load summary. It may not exist or is not publicly available.'
+        );
       } finally {
         setLoading(false);
       }
@@ -104,7 +137,10 @@ export function SummaryPage() {
 
     if (isActive) {
       newReactions.delete(type);
-      newSummary.reactionCounts[type] = Math.max(0, summary.reactionCounts[type] - 1);
+      newSummary.reactionCounts[type] = Math.max(
+        0,
+        summary.reactionCounts[type] - 1
+      );
     } else {
       newReactions.add(type);
       newSummary.reactionCounts[type] = summary.reactionCounts[type] + 1;
@@ -146,7 +182,7 @@ export function SummaryPage() {
     const url = globalThis.location.href;
     const shareText = `Check out this summary of "${summary.studyMaterial.title}" on Quizzer! 🎯`;
     const text = encodeURIComponent(`${shareText}\n\n${url}`);
-    
+
     const shareUrls: Record<string, string> = {
       x: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -171,7 +207,7 @@ export function SummaryPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           className="mb-4"
         >
           <Loader2 className="w-12 h-12 text-primary-600" />
@@ -194,7 +230,8 @@ export function SummaryPage() {
             Summary Not Found
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-            {error || 'The summary you are looking for does not exist or is no longer publicly available.'}
+            {error ||
+              'The summary you are looking for does not exist or is no longer publicly available.'}
           </p>
           <button
             onClick={() => navigate('/')}
@@ -215,12 +252,18 @@ export function SummaryPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans selection:bg-primary-100 dark:selection:bg-primary-900/30">
       <title>{summary.studyMaterial.title} - Summary | Quizzer</title>
       <meta name="description" content={getExcerpt(summary.content)} />
-      <meta property="og:title" content={`${summary.studyMaterial.title} - Summary | Quizzer`} />
+      <meta
+        property="og:title"
+        content={`${summary.studyMaterial.title} - Summary | Quizzer`}
+      />
       <meta property="og:description" content={getExcerpt(summary.content)} />
       <meta property="og:type" content="article" />
       <meta property="og:url" content={globalThis.location.href} />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={`${summary.studyMaterial.title} - Summary | Quizzer`} />
+      <meta
+        name="twitter:title"
+        content={`${summary.studyMaterial.title} - Summary | Quizzer`}
+      />
       <meta name="twitter:description" content={getExcerpt(summary.content)} />
 
       {/* Reading Progress Bar */}
@@ -247,25 +290,30 @@ export function SummaryPage() {
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
                 <span>Back</span>
               </button>
-              
+
               <div className="flex items-center">
-                <span className="font-bold text-lg hidden md:block tracking-tight text-primary-600">Quizzer</span>
+                <span className="font-bold text-lg hidden md:block tracking-tight text-primary-600">
+                  Quizzer
+                </span>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setShowShareModal(!showShareModal)}
                 className={`
                   flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all
-                  ${showShareModal 
-                    ? 'bg-primary-600 text-white shadow-lg' 
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750'
+                  ${
+                    showShareModal
+                      ? 'bg-primary-600 text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750'
                   }
                 `}
               >
                 <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">{showShareModal ? 'Close' : 'Share'}</span>
+                <span className="hidden xs:inline">
+                  {showShareModal ? 'Close' : 'Share'}
+                </span>
               </button>
 
               {!isAuthenticated && (
@@ -285,7 +333,7 @@ export function SummaryPage() {
       {/* Main Content */}
       <main className="px-4 sm:px-6 lg:px-8 py-12 sm:max-w-4xl sm:mx-auto">
         {/* Article Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
@@ -297,25 +345,37 @@ export function SummaryPage() {
             <span className="text-gray-400 dark:text-gray-500">•</span>
             <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
               <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              <span>{new Date(summary.generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <span>
+                {new Date(summary.generatedAt).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
             </div>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
             {summary.studyMaterial.title.replaceAll('`', '')}
           </h1>
-          
+
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 pt-6 border-t border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-3">
               {creator.avatar ? (
-                <img src={creator.avatar} alt={creator.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-primary-500 shadow-md" />
+                <img
+                  src={creator.avatar}
+                  alt={creator.name}
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-primary-500 shadow-md"
+                />
               ) : (
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-xs sm:text-base font-bold shadow-lg">
                   {initials}
                 </div>
               )}
               <div>
-                <p className="text-sm font-bold text-gray-900 dark:text-white leading-none mb-1.5">Created by {creator.name}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white leading-none mb-1.5">
+                  Created by {creator.name}
+                </p>
                 <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1">
                     <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -323,7 +383,11 @@ export function SummaryPage() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    {Object.values(summary.reactionCounts).reduce((a, b) => a + b, 0)} reactions
+                    {Object.values(summary.reactionCounts).reduce(
+                      (a, b) => a + b,
+                      0
+                    )}{' '}
+                    reactions
                   </span>
                 </div>
               </div>
@@ -332,14 +396,15 @@ export function SummaryPage() {
         </motion.div>
 
         {/* Summary Content */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="sm:bg-white sm:dark:bg-gray-800 sm:rounded-3xl sm:shadow-2xl sm:shadow-gray-200/50 sm:dark:shadow-black/20 sm:border sm:border-gray-100 sm:dark:border-gray-700 overflow-hidden relative"
         >
           <div className="sm:p-12">
-            <div className="prose prose-sm sm:prose-lg prose-gray dark:prose-invert max-w-none 
+            <div
+              className="prose prose-sm sm:prose-lg prose-gray dark:prose-invert max-w-none 
               prose-headings:font-extrabold prose-headings:tracking-tight
               prose-h1:text-2xl sm:prose-h1:text-3xl prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 sm:prose-h2:mt-12 prose-h2:mb-4 sm:prose-h2:mb-6
               prose-p:leading-relaxed prose-p:text-gray-600 dark:prose-p:text-gray-300
@@ -355,38 +420,45 @@ export function SummaryPage() {
 
           <div className="sm:bg-gray-50 sm:dark:bg-gray-800/50 sm:border-t sm:border-gray-100 sm:dark:border-gray-700 px-4 sm:px-12 py-6 sm:py-8 flex items-center justify-center mt-8 sm:mt-0">
             <div className="grid grid-cols-2 xs:flex xs:flex-wrap items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
-              {REACTION_BUTTONS.map(({ type, icon: Icon, label, color, bg }) => {
-                const isActive = userReactions.has(type);
-                const count = summary.reactionCounts[type] || 0;
-                
-                return (
-                  <button
-                    key={type}
-                    onClick={() => handleReaction(type)}
-                    disabled={!isAuthenticated}
-                    className={`
+              {REACTION_BUTTONS.map(
+                ({ type, icon: Icon, label, color, bg }) => {
+                  const isActive = userReactions.has(type);
+                  const count = summary.reactionCounts[type] || 0;
+
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => handleReaction(type)}
+                      disabled={!isAuthenticated}
+                      className={`
                       relative group flex items-center justify-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full border transition-all duration-300
-                      ${isActive 
-                        ? `border-primary-500 ${bg} sm:scale-105 shadow-sm` 
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
+                      ${
+                        isActive
+                          ? `border-primary-500 ${bg} sm:scale-105 shadow-sm`
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
                       }
                       ${isAuthenticated ? 'hover:-translate-y-1 active:scale-95' : 'cursor-not-allowed opacity-60'}
                     `}
-                  >
-                    <Icon className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${isActive ? color : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
-                    <span className={`text-xs sm:text-sm font-bold ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
-                      {count > 0 ? count : label.replaceAll('`', '')}
-                    </span>
-                  </button>
-                );
-              })}
+                    >
+                      <Icon
+                        className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${isActive ? color : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}
+                      />
+                      <span
+                        className={`text-xs sm:text-sm font-bold ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
+                      >
+                        {count > 0 ? count : label.replaceAll('`', '')}
+                      </span>
+                    </button>
+                  );
+                }
+              )}
             </div>
           </div>
         </motion.div>
 
         {/* CTA for Non-Authenticated Users */}
         {!isAuthenticated && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -400,10 +472,13 @@ export function SummaryPage() {
                 <span>Join 10,000+ students on Quizzer</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-black mb-6 leading-tight">
-                Unlock higher grades <br className="hidden sm:block" /> with smarter study tools
+                Unlock higher grades <br className="hidden sm:block" /> with
+                smarter study tools
               </h2>
               <p className="text-lg text-primary-100 mb-10 font-medium leading-relaxed opacity-90">
-                Transform any document into structured notes, interactive quizzes, and flashcards in seconds. It's time to study smarter, not harder.
+                Transform any document into structured notes, interactive
+                quizzes, and flashcards in seconds. It's time to study smarter,
+                not harder.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
@@ -428,10 +503,13 @@ export function SummaryPage() {
       <footer className="mt-20 py-12 border-t border-gray-200 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6 opacity-40">
-            <span className="font-black text-gray-900 dark:text-white tracking-tighter text-xl italic uppercase font-sans">Quizzer</span>
+            <span className="font-black text-gray-900 dark:text-white tracking-tighter text-xl italic uppercase font-sans">
+              Quizzer
+            </span>
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-            © {new Date().getFullYear()} Quizzer. Master your material, save your time.
+            © {new Date().getFullYear()} Quizzer. Master your material, save
+            your time.
           </p>
         </div>
       </footer>
@@ -471,24 +549,38 @@ export function SummaryPage() {
                   <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-primary-500" />
                   Share this summary
                 </h3>
-                
+
                 <div className="flex flex-col gap-6 sm:gap-8">
                   <div className="w-full">
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 sm:mb-4">Social Networks</p>
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 sm:mb-4">
+                      Social Networks
+                    </p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                      <button onClick={() => shareToSocial('x')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-black text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-black/10">
+                      <button
+                        onClick={() => shareToSocial('x')}
+                        className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-black text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-black/10"
+                      >
                         <FaXTwitter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         <span className="text-xs sm:text-sm">X</span>
                       </button>
-                      <button onClick={() => shareToSocial('whatsapp')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#25D366] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-green-500/10">
+                      <button
+                        onClick={() => shareToSocial('whatsapp')}
+                        className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#25D366] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-green-500/10"
+                      >
                         <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-xs sm:text-sm">WA</span>
                       </button>
-                      <button onClick={() => shareToSocial('facebook')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#1877F2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-500/10">
+                      <button
+                        onClick={() => shareToSocial('facebook')}
+                        className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#1877F2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-500/10"
+                      >
                         <FaFacebook className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-xs sm:text-sm">FB</span>
                       </button>
-                      <button onClick={() => shareToSocial('linkedin')} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#0A66C2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-700/10">
+                      <button
+                        onClick={() => shareToSocial('linkedin')}
+                        className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-[#0A66C2] text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-blue-700/10"
+                      >
                         <FaLinkedin className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-xs sm:text-sm">IN</span>
                       </button>
@@ -496,21 +588,27 @@ export function SummaryPage() {
                   </div>
 
                   <div className="w-full">
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 sm:mb-4">Direct Link</p>
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 sm:mb-4">
+                      Direct Link
+                    </p>
                     <div className="flex flex-col gap-2">
                       <div className="relative w-full">
-                        <input 
-                          type="text" 
-                          value={globalThis.location.href} 
-                          readOnly 
-                          className="w-full pl-3 sm:pl-4 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-600 dark:text-gray-400 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-inner font-mono truncate" 
+                        <input
+                          type="text"
+                          value={globalThis.location.href}
+                          readOnly
+                          className="w-full pl-3 sm:pl-4 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-600 dark:text-gray-400 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-inner font-mono truncate"
                         />
                       </div>
-                      <button 
-                        onClick={copyLink} 
+                      <button
+                        onClick={copyLink}
                         className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all font-bold text-xs sm:text-sm"
                       >
-                        {linkCopied ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        {linkCopied ? (
+                          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        )}
                         <span>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
                       </button>
                     </div>

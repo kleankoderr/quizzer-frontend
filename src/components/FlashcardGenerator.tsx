@@ -88,7 +88,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div className="p-2 bg-primary-100 rounded-lg">
           <Layers className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 id="flashcard-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2
+          id="flashcard-generator-title"
+          className="text-2xl font-bold text-gray-900 dark:text-white"
+        >
           Generate New Flashcard Set
         </h2>
       </div>
@@ -112,7 +115,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       )}
 
       {!initialValues?.sourceTitle && (
-        <div id="flashcard-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+        <div
+          id="flashcard-mode-tabs"
+          className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700"
+        >
           <button
             type="button"
             onClick={() => setMode('topic')}
@@ -175,7 +181,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder={initialValues?.sourceTitle ? "Topic from study material" : "e.g., French Vocabulary, Chemistry Formulas"}
+              placeholder={
+                initialValues?.sourceTitle
+                  ? 'Topic from study material'
+                  : 'e.g., French Vocabulary, Chemistry Formulas'
+              }
               className="input-field"
               required
               readOnly={!!initialValues?.sourceTitle}
@@ -291,7 +301,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         )}
 
-        <div id="flashcard-count-config" className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+        <div
+          id="flashcard-count-config"
+          className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700"
+        >
           <div className="flex items-center justify-between mb-4">
             <label
               htmlFor="cards"

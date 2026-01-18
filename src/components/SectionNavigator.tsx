@@ -37,7 +37,8 @@ export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
                 Learning Path
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {completedSections.size} of {sections.length} chapters • {Math.round((completedSections.size / sections.length) * 100)}%
+                {completedSections.size} of {sections.length} chapters •{' '}
+                {Math.round((completedSections.size / sections.length) * 100)}%
               </p>
             </div>
           </div>
@@ -69,8 +70,8 @@ export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
                     isActive
                       ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 shadow-sm'
                       : isCompleted
-                      ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
+                        ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
                   }`}
                 >
                   {/* Icon */}
@@ -93,8 +94,8 @@ export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
                         isActive
                           ? 'text-primary-700 dark:text-primary-300 font-semibold'
                           : isCompleted
-                          ? 'text-gray-500 dark:text-gray-400'
-                          : 'text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white'
+                            ? 'text-gray-500 dark:text-gray-400'
+                            : 'text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white'
                       }`}
                       style={{ fontFamily: 'Lexend' }}
                     >

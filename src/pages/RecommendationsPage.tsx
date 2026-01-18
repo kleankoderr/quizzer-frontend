@@ -7,8 +7,12 @@ import { RecommendationCard } from '../components/RecommendationCard';
 
 export const RecommendationsPage = () => {
   const navigate = useNavigate();
-  
-  const { recommendations, isLoading: recommendationsLoading, dismiss } = useRecommendations();
+
+  const {
+    recommendations,
+    isLoading: recommendationsLoading,
+    dismiss,
+  } = useRecommendations();
 
   const { data: quotaStatus, isLoading: quotaStatusLoading } = useQuery({
     queryKey: ['user-quota'],
@@ -17,11 +21,20 @@ export const RecommendationsPage = () => {
   });
 
   const handleQuizClick = (topic: string) => {
-    navigate('/quiz', { state: { openGenerator: true, topic, cancelRoute: '/recommendations' } });
+    navigate('/quiz', {
+      state: { openGenerator: true, topic, cancelRoute: '/recommendations' },
+    });
   };
 
   const handleStudyClick = (topic: string) => {
-    navigate('/study', { state: { openCreator: true, topic, activeTab: 'topic', cancelRoute: '/recommendations' } });
+    navigate('/study', {
+      state: {
+        openCreator: true,
+        topic,
+        activeTab: 'topic',
+        cancelRoute: '/recommendations',
+      },
+    });
   };
 
   // Wait for both queries to complete before determining user tier
@@ -57,7 +70,9 @@ export const RecommendationsPage = () => {
           <div className="flex items-center gap-3">
             <Crown className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
             <p className="text-sm text-gray-700 dark:text-gray-300 flex-1">
-              <span className="font-semibold">Unlock more recommendations!</span>{' '}
+              <span className="font-semibold">
+                Unlock more recommendations!
+              </span>{' '}
               Upgrade to premium to get up to 3 personalized recommendations.
             </p>
             <button
@@ -95,7 +110,8 @@ export const RecommendationsPage = () => {
             No Recommendations Yet
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Complete some quizzes to get personalized study recommendations based on your performance.
+            Complete some quizzes to get personalized study recommendations
+            based on your performance.
           </p>
           <button
             onClick={() => navigate('/quiz')}

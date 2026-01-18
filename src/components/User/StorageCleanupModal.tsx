@@ -85,7 +85,8 @@ export const StorageCleanupModal: React.FC<StorageCleanupModalProps> = ({
                   Selected for deletion
                 </span>
                 <span className="text-gray-600 dark:text-gray-400">
-                  {selectedSizeMB.toFixed(2)} MB / {needed.toFixed(2)} MB required
+                  {selectedSizeMB.toFixed(2)} MB / {needed.toFixed(2)} MB
+                  required
                 </span>
               </div>
               <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -93,7 +94,9 @@ export const StorageCleanupModal: React.FC<StorageCleanupModalProps> = ({
                   className={`h-full transition-all duration-300 ${
                     remainingNeeded <= 0 ? 'bg-emerald-500' : 'bg-primary-500'
                   }`}
-                  style={{ width: `${Math.min(100, (selectedSizeMB / needed) * 100)}%` }}
+                  style={{
+                    width: `${Math.min(100, (selectedSizeMB / needed) * 100)}%`,
+                  }}
                 />
               </div>
               {remainingNeeded <= 0 && (
@@ -132,7 +135,9 @@ export const StorageCleanupModal: React.FC<StorageCleanupModalProps> = ({
                           }}
                         />
                       </th>
-                      <th className="px-4 py-3 font-medium text-gray-500">File</th>
+                      <th className="px-4 py-3 font-medium text-gray-500">
+                        File
+                      </th>
                       <th className="px-4 py-3 font-medium text-gray-500 text-right">
                         Size
                       </th>

@@ -45,7 +45,9 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [mode, setMode] = useState<'topic' | 'content' | 'files'>(
     initialValues?.mode || 'topic'
   );
-  const [topic, setTopic] = useState(initialValues?.sourceTitle || initialValues?.topic || '');
+  const [topic, setTopic] = useState(
+    initialValues?.sourceTitle || initialValues?.topic || ''
+  );
   const [content, setContent] = useState(initialValues?.content || '');
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
@@ -108,7 +110,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         <div className="p-2 bg-primary-100 rounded-lg">
           <Brain className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 id="quiz-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2
+          id="quiz-generator-title"
+          className="text-2xl font-bold text-gray-900 dark:text-white"
+        >
           Generate New Quiz
         </h2>
       </div>
@@ -132,7 +137,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
       )}
 
       {!initialValues?.sourceTitle && (
-        <div id="quiz-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+        <div
+          id="quiz-mode-tabs"
+          className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700"
+        >
           <button
             type="button"
             onClick={() => setMode('topic')}
@@ -195,7 +203,11 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder={initialValues?.sourceTitle ? "Topic from study material" : "e.g., World War II, Photosynthesis, Python Programming"}
+              placeholder={
+                initialValues?.sourceTitle
+                  ? 'Topic from study material'
+                  : 'e.g., World War II, Photosynthesis, Python Programming'
+              }
               className="input-field"
               required
               readOnly={!!initialValues?.sourceTitle}
@@ -316,7 +328,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         )}
 
         <div className="space-y-6">
-          <div id="quiz-questions-config" className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+          <div
+            id="quiz-questions-config"
+            className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700"
+          >
             <div className="flex items-center justify-between mb-4">
               <label
                 htmlFor="questions"

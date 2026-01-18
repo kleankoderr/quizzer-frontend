@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const queryClient = useQueryClient();
-  
+
   const state = useSyncExternalStore(
     authStore.subscribe,
     authStore.getSnapshot,
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           authStore.setState({ user: freshUser });
           authService.saveAuthData(freshUser);
         } catch (_error) {
-         console.error('Failed to refresh user', _error);
+          console.error('Failed to refresh user', _error);
         }
       }
     };

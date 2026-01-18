@@ -24,7 +24,7 @@ export const EditTitleModal: React.FC<EditTitleModalProps> = ({
 
   const handleSave = async () => {
     const trimmedTitle = title.trim();
-    
+
     if (!trimmedTitle) {
       setError('Title cannot be empty');
       return;
@@ -65,7 +65,7 @@ export const EditTitleModal: React.FC<EditTitleModalProps> = ({
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Edit Title
         </h3>
-        
+
         <input
           type="text"
           value={title}
@@ -76,7 +76,7 @@ export const EditTitleModal: React.FC<EditTitleModalProps> = ({
           placeholder="Enter title..."
           autoFocus
         />
-        
+
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400 mt-2">{error}</p>
         )}

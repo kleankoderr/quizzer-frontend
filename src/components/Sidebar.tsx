@@ -57,9 +57,7 @@ export const Sidebar = ({
   const navSections: NavSection[] = [
     {
       // Core - Most frequently accessed
-      items: [
-        { path: '/dashboard', icon: Home, label: 'Dashboard' },
-      ],
+      items: [{ path: '/dashboard', icon: Home, label: 'Dashboard' }],
     },
     {
       label: 'Learning Tools',
@@ -99,9 +97,7 @@ export const Sidebar = ({
   // Admin navigation sections
   const adminNavSections: NavSection[] = [
     {
-      items: [
-        { path: '/admin', icon: Home, label: 'Dashboard' },
-      ],
+      items: [{ path: '/admin', icon: Home, label: 'Dashboard' }],
     },
     {
       label: 'Management',
@@ -256,10 +252,14 @@ export const Sidebar = ({
               title="Subscription"
             >
               <CreditCard className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && <span className="font-medium whitespace-nowrap">Subscription</span>}
+              {!isCollapsed && (
+                <span className="font-medium whitespace-nowrap">
+                  Subscription
+                </span>
+              )}
             </Link>
           )}
-          
+
           {/* Logout Button */}
           <button
             onClick={async () => {

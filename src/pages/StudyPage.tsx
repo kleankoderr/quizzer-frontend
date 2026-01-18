@@ -74,7 +74,9 @@ export const StudyPage = () => {
   const [showExistingFiles, setShowExistingFiles] = useState(false);
 
   // Job polling state
-  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(
+    undefined
+  );
   const toastIdRef = useRef<string | undefined>(undefined);
 
   // Delete state
@@ -115,7 +117,10 @@ export const StudyPage = () => {
 
   // Group contents by study pack
   const groupedContents = useMemo(() => {
-    const groups: Record<string, { id: string; title: string; contents: (typeof contents)[0][] }> = {};
+    const groups: Record<
+      string,
+      { id: string; title: string; contents: (typeof contents)[0][] }
+    > = {};
     const noPack: (typeof contents)[0][] = [];
 
     for (const content of contents) {
@@ -140,7 +145,7 @@ export const StudyPage = () => {
   const handleTitleUpdate = async (contentId: string, newTitle: string) => {
     try {
       await contentService.updateTitle(contentId, newTitle);
-      
+
       // Optimistically update the cache
       queryClient.setQueryData(['contents'], (old: any) => {
         if (!old?.data) return old;
@@ -154,7 +159,7 @@ export const StudyPage = () => {
 
       // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
-      
+
       toast.success('Content title updated successfully!');
     } catch (error) {
       toast.error('Failed to update content title');
@@ -187,13 +192,13 @@ export const StudyPage = () => {
         key={content.id}
         title={content.title}
         subtitle={content.topic}
-        onClick={() => navigate(`/content/${content.id}`, {
-          state: {
-            breadcrumb: [
-              { label: 'Study Material', path: '/study' },
-            ],
-          },
-        })}
+        onClick={() =>
+          navigate(`/content/${content.id}`, {
+            state: {
+              breadcrumb: [{ label: 'Study Material', path: '/study' }],
+            },
+          })
+        }
         actions={<CardMenu items={menuItems} />}
       >
         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
@@ -234,9 +239,7 @@ export const StudyPage = () => {
       setTimeout(() => {
         navigate(`/content/${result.id}`, {
           state: {
-            breadcrumb: [
-              { label: 'Study Material', path: '/study' },
-            ],
+            breadcrumb: [{ label: 'Study Material', path: '/study' }],
           },
         });
       }, 500);
@@ -298,8 +301,9 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to generate content';
-      
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to generate content';
+
       // Handle specific backend exception for quota limits
       if (error?.response?.status === 403 && error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
@@ -357,8 +361,9 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to generate content';
-      
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to generate content';
+
       // Handle specific backend exception for quota limits
       if (error?.response?.status === 403 && error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
@@ -452,7 +457,7 @@ export const StudyPage = () => {
       setCurrentJobId(jobId);
     } catch (error: any) {
       let errorMessage = error?.response?.data?.message || 'Upload failed';
-      
+
       // Handle specific backend exception for quota limits
       if (error?.response?.status === 403 && error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
@@ -561,7 +566,10 @@ export const StudyPage = () => {
               <Sparkles className="w-7 h-7 text-primary-600" />
             </div>
             <div>
-              <h2 id="study-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h2
+                id="study-generator-title"
+                className="text-2xl font-bold text-gray-900 dark:text-white"
+              >
                 Generate Study Materials
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -571,7 +579,10 @@ export const StudyPage = () => {
           </div>
 
           {/* Tabs */}
-          <div id="study-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+          <div
+            id="study-mode-tabs"
+            className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700"
+          >
             <button
               onClick={() => setActiveTab('topic')}
               className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
@@ -950,22 +961,23 @@ export const StudyPage = () => {
             <>
               <>
                 {Object.values(groupedContents.groups).map((pack) => (
-                    <CollapsibleSection
-                      key={pack.id}
-                      title={pack.title}
-                      count={pack.contents.length}
-                      defaultOpen={false}
-                      onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=materials`)}
-                      className="mb-8 last:mb-0"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {pack.contents.map((content) =>
-                          renderContentCard(content)
-                        )}
-                      </div>
-                    </CollapsibleSection>
-                  )
-                )}
+                  <CollapsibleSection
+                    key={pack.id}
+                    title={pack.title}
+                    count={pack.contents.length}
+                    defaultOpen={false}
+                    onTitleClick={() =>
+                      navigate(`/study-pack/${pack.id}?tab=materials`)
+                    }
+                    className="mb-8 last:mb-0"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {pack.contents.map((content) =>
+                        renderContentCard(content)
+                      )}
+                    </div>
+                  </CollapsibleSection>
+                ))}
 
                 {/* Uncategorized Contents */}
                 {groupedContents.noPack.length > 0 && (
@@ -1013,7 +1025,9 @@ export const StudyPage = () => {
                 isOpen={!!editContentId}
                 currentTitle={editingContent?.title || ''}
                 onClose={() => setEditContentId(null)}
-                onSave={(newTitle) => handleTitleUpdate(editContentId || '', newTitle)}
+                onSave={(newTitle) =>
+                  handleTitleUpdate(editContentId || '', newTitle)
+                }
               />
 
               <DeleteModal

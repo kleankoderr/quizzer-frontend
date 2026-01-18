@@ -37,7 +37,10 @@ export const FlashcardsPage = () => {
 
   useEffect(() => {
     if (showGenerator) {
-      startIfNotCompleted('flashcard-generator-onboarding', flashcardGeneratorTour);
+      startIfNotCompleted(
+        'flashcard-generator-onboarding',
+        flashcardGeneratorTour
+      );
     }
   }, [showGenerator, startIfNotCompleted]);
   const [loading, setLoading] = useState(false);
@@ -56,20 +59,28 @@ export const FlashcardsPage = () => {
   >(undefined);
 
   // Job polling state
-  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(
+    undefined
+  );
   const toastIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, sourceTitle, contentId, openGenerator, studyPackId } =
-        location.state as {
-          topic?: string;
-          contentText?: string;
-          sourceTitle?: string;
-          contentId?: string;
-          openGenerator?: boolean;
-          studyPackId?: string;
-        };
+      const {
+        topic,
+        contentText,
+        sourceTitle,
+        contentId,
+        openGenerator,
+        studyPackId,
+      } = location.state as {
+        topic?: string;
+        contentText?: string;
+        sourceTitle?: string;
+        contentId?: string;
+        openGenerator?: boolean;
+        studyPackId?: string;
+      };
 
       if (topic || contentText || openGenerator) {
         setInitialValues({
@@ -174,8 +185,9 @@ export const FlashcardsPage = () => {
       const { jobId } = await flashcardService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to create flashcards';
-      
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to create flashcards';
+
       // Handle specific backend exception for quota limits
       if (error?.response?.status === 403 && error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
@@ -350,7 +362,9 @@ export const FlashcardsPage = () => {
               if (location.state?.cancelRoute) {
                 navigate(location.state.cancelRoute);
               } else if (initialValues?.studyPackId) {
-                navigate(`/study-pack/${initialValues.studyPackId}?tab=flashcards`);
+                navigate(
+                  `/study-pack/${initialValues.studyPackId}?tab=flashcards`
+                );
               } else {
                 setShowGenerator(false);
                 setInitialValues(undefined);

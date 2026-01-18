@@ -18,7 +18,12 @@ import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useInvalidateQuota, useQuizzes, useJobEvents, useTour } from '../hooks';
+import {
+  useInvalidateQuota,
+  useQuizzes,
+  useJobEvents,
+  useTour,
+} from '../hooks';
 import { quizTour, quizGeneratorTour } from '../tours';
 
 export const QuizPage = () => {
@@ -57,7 +62,9 @@ export const QuizPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Job polling state
-  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(
+    undefined
+  );
   const toastIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -195,8 +202,9 @@ export const QuizPage = () => {
       const { jobId } = await quizService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to generate quiz';
-      
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to generate quiz';
+
       // Handle specific backend exception for quota limits
       if (error?.response?.status === 403 && error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
@@ -373,7 +381,9 @@ export const QuizPage = () => {
               if (location.state?.cancelRoute) {
                 navigate(location.state.cancelRoute);
               } else if (initialValues?.studyPackId) {
-                navigate(`/study-pack/${initialValues.studyPackId}?tab=quizzes`);
+                navigate(
+                  `/study-pack/${initialValues.studyPackId}?tab=quizzes`
+                );
               } else {
                 setShowGenerator(false);
                 setInitialValues(undefined);

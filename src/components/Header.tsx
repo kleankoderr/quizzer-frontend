@@ -19,9 +19,9 @@ const getTotalRemaining = (quota: QuotaStatus): number => {
     quota.conceptExplanation.remaining;
 
   if (quota.fileStorage) {
-     if (quota.fileStorage) {
-       total += quota.fileStorage.remaining;
-     }
+    if (quota.fileStorage) {
+      total += quota.fileStorage.remaining;
+    }
   }
   return total;
 };
@@ -29,35 +29,35 @@ const getTotalRemaining = (quota: QuotaStatus): number => {
 // Helper function to format reset time
 const getResetTimeText = (resetAt?: string): string => {
   if (!resetAt) return '';
-  
+
   const now = new Date();
   const resetDate = new Date(resetAt);
-  
+
   // If reset date is in the past, it means it resets next month relative to now
   if (resetDate < now) {
     const nextMonth = new Date(now);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     nextMonth.setDate(1);
     nextMonth.setHours(0, 0, 0, 0);
-    
+
     const diffMs = nextMonth.getTime() - now.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays > 0) {
       return `in ${diffDays} days`;
     }
-    
+
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     return `in ${diffHours} hours`;
   }
 
   const diffMs = resetDate.getTime() - now.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays > 0) {
     return `in ${diffDays} days`;
   }
-  
+
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -121,7 +121,8 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
   const { setTheme, resolvedTheme } = useTheme();
   const { data: quota, isLoading: quotaLoading } = useQuota();
 
-  const isStudent = !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN');
+  const isStudent =
+    !user?.role || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN');
 
   let quotaIconColor = 'text-gray-500 dark:text-gray-400';
   if (quota) {
@@ -218,19 +219,18 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
               <Skeleton height={36} borderRadius={8} />
             </div>
           )}
-          
-          {!quotaLoading &&
-            quota &&
-            !quota.isPremium &&
-            isStudent && (
-              <Link
-                to="/pricing"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 lg:px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all group flex-shrink-0"
-              >
-                <Crown className="w-4 h-4 text-amber-100 group-hover:text-white transition-colors flex-shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Pricing</span>
-              </Link>
-            )}
+
+          {!quotaLoading && quota && !quota.isPremium && isStudent && (
+            <Link
+              to="/pricing"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 lg:px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all group flex-shrink-0"
+            >
+              <Crown className="w-4 h-4 text-amber-100 group-hover:text-white transition-colors flex-shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">
+                Pricing
+              </span>
+            </Link>
+          )}
 
           {/* Quota Display (non-admin only) */}
           {/* Quota Display (non-admin only) */}
@@ -239,128 +239,129 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
               <Skeleton height={36} borderRadius={8} />
             </div>
           )}
-          
-          {!quotaLoading &&
-            quota &&
-            isStudent && (
-              <div className="relative" ref={quotaDropdownRef}>
-                <button
-                  onClick={() => setIsQuotaDropdownOpen(!isQuotaDropdownOpen)}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border transition-all flex-shrink-0 ${
-                    getTotalRemaining(quota) <= 2
-                      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600'
-                      : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                  aria-label="Quota status"
-                >
-                  <Zap
-                    className={`w-4 h-4 flex-shrink-0 ${quotaIconColor}`}
-                  />
-                  <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                    {getTotalRemaining(quota)} left
-                  </span>
-                  <ChevronDown className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                </button>
 
-                {/* Quota Dropdown */}
-                {isQuotaDropdownOpen && (
-                  <div className="fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-[4.5rem] sm:top-full sm:mt-2 w-auto sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-[100] max-h-[calc(100vh-6rem)] overflow-y-auto">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        Monthly Quota
-                      </h3>
-                      {quota.isPremium && (
-                        <SubscriptionBadge isPremium={true} status={quota.status} size="sm" />
-                      )}
-                    </div>
+          {!quotaLoading && quota && isStudent && (
+            <div className="relative" ref={quotaDropdownRef}>
+              <button
+                onClick={() => setIsQuotaDropdownOpen(!isQuotaDropdownOpen)}
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border transition-all flex-shrink-0 ${
+                  getTotalRemaining(quota) <= 2
+                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600'
+                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+                aria-label="Quota status"
+              >
+                <Zap className={`w-4 h-4 flex-shrink-0 ${quotaIconColor}`} />
+                <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                  {getTotalRemaining(quota)} left
+                </span>
+                <ChevronDown className="w-3 h-3 text-gray-400 flex-shrink-0" />
+              </button>
 
-                    <div className="space-y-3">
-                      {/* Show warning if payment is pending */}
-                      {quota.status === 'PENDING_PAYMENT' && (
-                        <div className="p-2 mb-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-sm text-yellow-700 dark:text-yellow-400">
-                          Your payment is currently being processed. Premium features will be available shortly.
-                        </div>
-                      )}
-
-                      {/* Quiz Quota */}
-                      <QuotaItem
-                        label="Quizzes"
-                        used={quota.quiz.used}
-                        limit={quota.quiz.limit}
-                        remaining={quota.quiz.remaining}
-                      />
-
-                      {/* Flashcard Quota */}
-                      <QuotaItem
-                        label="Flashcards"
-                        used={quota.flashcard.used}
-                        limit={quota.flashcard.limit}
-                        remaining={quota.flashcard.remaining}
-                      />
-
-                      {/* Study Material Quota */}
-                      <QuotaItem
-                        label="Study Material"
-                        used={quota.studyMaterial.used}
-                        limit={quota.studyMaterial.limit}
-                        remaining={quota.studyMaterial.remaining}
-                      />
-
-                      {/* Concept Explanation Quota */}
-                      <QuotaItem
-                        label="Explanations"
-                        used={quota.conceptExplanation.used}
-                        limit={quota.conceptExplanation.limit}
-                        remaining={quota.conceptExplanation.remaining}
-                      />
-
-                      {/* File Storage Quota (Premium only) */}
-                      {quota.fileStorage && (
-                        <QuotaItem
-                          label="Storage"
-                          used={quota.fileStorage.used}
-                          limit={quota.fileStorage.limit}
-                          remaining={quota.fileStorage.remaining}
-                        />
-                      )}
-                    </div>
-
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Resets {getResetTimeText(quota.monthlyResetAt)}
-                      </p>
-                    </div>
-
-                    {!quota.isPremium && getTotalRemaining(quota) <= 3 && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                          Running low on quota? Upgrade for more!
-                        </p>
-                        <Link
-                          to="/pricing"
-                          onClick={() => setIsQuotaDropdownOpen(false)}
-                          className="block w-full text-center px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-medium rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all"
-                        >
-                          Upgrade to Premium
-                        </Link>
-                      </div>
-                    )}
-
+              {/* Quota Dropdown */}
+              {isQuotaDropdownOpen && (
+                <div className="fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-[4.5rem] sm:top-full sm:mt-2 w-auto sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-[100] max-h-[calc(100vh-6rem)] overflow-y-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Monthly Quota
+                    </h3>
                     {quota.isPremium && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <Link
-                          to="/subscription/manage"
-                          onClick={() => setIsQuotaDropdownOpen(false)}
-                          className="block w-full text-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
-                        >
-                          Manage Subscription
-                        </Link>
-                      </div>
+                      <SubscriptionBadge
+                        isPremium={true}
+                        status={quota.status}
+                        size="sm"
+                      />
                     )}
                   </div>
-                )}
-              </div>
-            )}
+
+                  <div className="space-y-3">
+                    {/* Show warning if payment is pending */}
+                    {quota.status === 'PENDING_PAYMENT' && (
+                      <div className="p-2 mb-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-sm text-yellow-700 dark:text-yellow-400">
+                        Your payment is currently being processed. Premium
+                        features will be available shortly.
+                      </div>
+                    )}
+
+                    {/* Quiz Quota */}
+                    <QuotaItem
+                      label="Quizzes"
+                      used={quota.quiz.used}
+                      limit={quota.quiz.limit}
+                      remaining={quota.quiz.remaining}
+                    />
+
+                    {/* Flashcard Quota */}
+                    <QuotaItem
+                      label="Flashcards"
+                      used={quota.flashcard.used}
+                      limit={quota.flashcard.limit}
+                      remaining={quota.flashcard.remaining}
+                    />
+
+                    {/* Study Material Quota */}
+                    <QuotaItem
+                      label="Study Material"
+                      used={quota.studyMaterial.used}
+                      limit={quota.studyMaterial.limit}
+                      remaining={quota.studyMaterial.remaining}
+                    />
+
+                    {/* Concept Explanation Quota */}
+                    <QuotaItem
+                      label="Explanations"
+                      used={quota.conceptExplanation.used}
+                      limit={quota.conceptExplanation.limit}
+                      remaining={quota.conceptExplanation.remaining}
+                    />
+
+                    {/* File Storage Quota (Premium only) */}
+                    {quota.fileStorage && (
+                      <QuotaItem
+                        label="Storage"
+                        used={quota.fileStorage.used}
+                        limit={quota.fileStorage.limit}
+                        remaining={quota.fileStorage.remaining}
+                      />
+                    )}
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Resets {getResetTimeText(quota.monthlyResetAt)}
+                    </p>
+                  </div>
+
+                  {!quota.isPremium && getTotalRemaining(quota) <= 3 && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        Running low on quota? Upgrade for more!
+                      </p>
+                      <Link
+                        to="/pricing"
+                        onClick={() => setIsQuotaDropdownOpen(false)}
+                        className="block w-full text-center px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-medium rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all"
+                      >
+                        Upgrade to Premium
+                      </Link>
+                    </div>
+                  )}
+
+                  {quota.isPremium && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <Link
+                        to="/subscription/manage"
+                        onClick={() => setIsQuotaDropdownOpen(false)}
+                        className="block w-full text-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                      >
+                        Manage Subscription
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             onClick={() =>

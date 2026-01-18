@@ -1,6 +1,10 @@
 import React, { useRef } from 'react';
 import { X } from 'lucide-react';
-import { useKeyboardNavigation, useFocusTrap, useBodyScrollLock } from '../hooks';
+import {
+  useKeyboardNavigation,
+  useFocusTrap,
+  useBodyScrollLock,
+} from '../hooks';
 
 interface ModalProps {
   isOpen: boolean;

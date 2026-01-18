@@ -8,8 +8,9 @@ interface TourState {
   key: string;
 }
 
-
-export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const TourProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [tour, setTour] = useState<TourState>({
     run: false,
     steps: [],
@@ -22,7 +23,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const stopTour = useCallback(() => {
-    setTour(prev => ({ ...prev, run: false }));
+    setTour((prev) => ({ ...prev, run: false }));
   }, []);
 
   const handleCallback = (data: CallBackProps) => {
@@ -30,7 +31,7 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status as any)) {
       localStorage.setItem(`tour_${tour.key}`, 'completed');
-      setTour(prev => ({ ...prev, run: false }));
+      setTour((prev) => ({ ...prev, run: false }));
     }
   };
 
@@ -59,7 +60,8 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           tooltip: {
             borderRadius: '16px',
             padding: '20px',
-            boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+            boxShadow:
+              '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
           },
           tooltipContainer: {
             textAlign: 'left',

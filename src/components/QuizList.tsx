@@ -25,7 +25,7 @@ export const QuizList: React.FC<QuizListProps> = ({
   onCreateNew,
   onItemMoved,
 }) => {
-  const navigate = useNavigate ();
+  const navigate = useNavigate();
   const [moveQuizId, setMoveQuizId] = React.useState<string | null>(null);
   const [editQuizId, setEditQuizId] = React.useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -35,7 +35,7 @@ export const QuizList: React.FC<QuizListProps> = ({
   const handleTitleUpdate = async (quizId: string, newTitle: string) => {
     try {
       await quizService.updateTitle(quizId, newTitle);
-      
+
       // Optimistically update the cache
       queryClient.setQueryData(['quizzes'], (old: any) => {
         if (!old?.data) return old;
@@ -49,7 +49,7 @@ export const QuizList: React.FC<QuizListProps> = ({
 
       // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-      
+
       toast.success('Quiz title updated successfully!');
     } catch (error) {
       toast.error('Failed to update quiz title');
@@ -58,7 +58,9 @@ export const QuizList: React.FC<QuizListProps> = ({
   };
 
   const groupedQuizzes = React.useMemo(() => {
-    const groups: { [key: string]: { id: string; title: string; quizzes: Quiz[] } } = {};
+    const groups: {
+      [key: string]: { id: string; title: string; quizzes: Quiz[] };
+    } = {};
     const noPack: Quiz[] = [];
 
     quizzes.forEach((quiz) => {

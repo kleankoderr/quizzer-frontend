@@ -284,11 +284,13 @@ export default function UserDetailsPage() {
                 >
                   {user.role.replace('_', ' ')}
                 </span>
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  user.plan === 'PREMIUM'
-                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
-                }`}>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    user.plan === 'PREMIUM'
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                  }`}
+                >
                   {user.plan === 'PREMIUM' ? 'Premium Plan' : 'Free Plan'}
                 </span>
               </div>
@@ -469,7 +471,12 @@ export default function UserDetailsPage() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                        {Math.round(((userQuota.quiz.used || 0) / (userQuota.quiz.limit || 1)) * 100)}%
+                        {Math.round(
+                          ((userQuota.quiz.used || 0) /
+                            (userQuota.quiz.limit || 1)) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
                   </div>
@@ -517,7 +524,12 @@ export default function UserDetailsPage() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-green-600 dark:text-green-400">
-                        {Math.round(((userQuota.flashcard.used || 0) / (userQuota.flashcard.limit || 1)) * 100)}%
+                        {Math.round(
+                          ((userQuota.flashcard.used || 0) /
+                            (userQuota.flashcard.limit || 1)) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
                   </div>
@@ -565,7 +577,12 @@ export default function UserDetailsPage() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                        {Math.round(((userQuota.learningGuide.used || 0) / (userQuota.learningGuide.limit || 1)) * 100)}%
+                        {Math.round(
+                          ((userQuota.learningGuide.used || 0) /
+                            (userQuota.learningGuide.limit || 1)) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
                   </div>
@@ -613,7 +630,12 @@ export default function UserDetailsPage() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                        {Math.round(((userQuota.explanation.used || 0) / (userQuota.explanation.limit || 1)) * 100)}%
+                        {Math.round(
+                          ((userQuota.explanation.used || 0) /
+                            (userQuota.explanation.limit || 1)) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
                   </div>
@@ -638,7 +660,14 @@ export default function UserDetailsPage() {
                     <div className="mt-3 w-full">
                       <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
                         <span>Used</span>
-                        <span>{Math.round(((userQuota.fileStorage.used || 0) / (userQuota.fileStorage.limit || 1)) * 100)}% capacity</span>
+                        <span>
+                          {Math.round(
+                            ((userQuota.fileStorage.used || 0) /
+                              (userQuota.fileStorage.limit || 1)) *
+                              100
+                          )}
+                          % capacity
+                        </span>
                       </div>
                       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                         <div
@@ -675,7 +704,12 @@ export default function UserDetailsPage() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-                        {Math.round(((userQuota.fileStorage.used || 0) / (userQuota.fileStorage.limit || 1)) * 100)}%
+                        {Math.round(
+                          ((userQuota.fileStorage.used || 0) /
+                            (userQuota.fileStorage.limit || 1)) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
                   </div>

@@ -6,20 +6,28 @@ import React, { useState, useEffect } from 'react';
 import { CardSkeleton } from '../../components/skeletons';
 import { AiConfigForm } from '../../components/admin/AiConfigForm';
 
+type AIProvider = 'gemini' | 'groq' | 'openai';
+type ModelComplexity = 'simple' | 'medium' | 'complex';
+
 interface AIModelSettings {
-  provider: 'gemini' | 'groq' | 'openai';
   modelName: string;
-  temperature?: number;
+  temperature: number;
   maxTokens?: number;
 }
 
-interface AIModelStrategy {
-  routing: {
-    defaultModel: string;
-    taskOverrides?: Record<string, string>;
-    complexityOverrides?: Record<string, string>;
-  };
+interface AIProviderConfig {
+  defaultModel: string;
   models: Record<string, AIModelSettings>;
+}
+
+interface AIModelStrategy {
+  providers: Record<AIProvider, AIProviderConfig>;
+  routing: {
+    defaultProvider: AIProvider;
+    taskRouting?: Record<string, AIProvider>;
+    complexityRouting?: Partial<Record<ModelComplexity, AIProvider>>;
+    multimodalProvider?: AIProvider;
+  };
 }
 
 interface PlatformSettingsState {
@@ -36,8 +44,16 @@ export const PlatformSettings = () => {
     maintenanceMode: false,
     supportEmail: '',
     aiProviderConfig: {
-      routing: { defaultModel: '', taskOverrides: {}, complexityOverrides: {} },
-      models: {},
+      providers: {
+        gemini: { defaultModel: '', models: {} },
+        groq: { defaultModel: '', models: {} },
+        openai: { defaultModel: '', models: {} },
+      },
+      routing: {
+        defaultProvider: 'gemini',
+        taskRouting: {},
+        complexityRouting: {},
+      },
     },
   });
 
@@ -58,8 +74,16 @@ export const PlatformSettings = () => {
         maintenanceMode: settings.maintenanceMode,
         supportEmail: settings.supportEmail || '',
         aiProviderConfig: settings.aiProviderConfig || {
-          routing: { defaultModel: '', taskOverrides: {}, complexityOverrides: {} },
-          models: {},
+          providers: {
+            gemini: { defaultModel: '', models: {} },
+            groq: { defaultModel: '', models: {} },
+            openai: { defaultModel: '', models: {} },
+          },
+          routing: {
+            defaultProvider: 'gemini',
+            taskRouting: {},
+            complexityRouting: {},
+          },
         },
       });
     }
@@ -72,13 +96,15 @@ export const PlatformSettings = () => {
     onSuccess: async (settingsFromApi) => {
       queryClient.setQueryData(['platformSettings'], settingsFromApi);
       await queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
-      
+
       toast.success('Settings updated successfully');
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 2000);
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update settings');
+      toast.error(
+        error?.response?.data?.message || 'Failed to update settings'
+      );
     },
   });
 
@@ -117,14 +143,20 @@ export const PlatformSettings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <label htmlFor="allow-registration" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label
+                  htmlFor="allow-registration"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Allow Registration
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Allow new users to register on the platform
                 </p>
               </div>
-              <label htmlFor="allow-registration" className="relative inline-flex items-center cursor-pointer">
+              <label
+                htmlFor="allow-registration"
+                className="relative inline-flex items-center cursor-pointer"
+              >
                 <input
                   id="allow-registration"
                   type="checkbox"
@@ -144,14 +176,20 @@ export const PlatformSettings = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <label htmlFor="maintenance-mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label
+                  htmlFor="maintenance-mode"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Maintenance Mode
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Put the platform in maintenance mode
                 </p>
               </div>
-              <label htmlFor="maintenance-mode" className="relative inline-flex items-center cursor-pointer">
+              <label
+                htmlFor="maintenance-mode"
+                className="relative inline-flex items-center cursor-pointer"
+              >
                 <input
                   id="maintenance-mode"
                   type="checkbox"
@@ -170,7 +208,10 @@ export const PlatformSettings = () => {
             </div>
 
             <div>
-              <label htmlFor="support-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="support-email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Support Email
               </label>
               <input
@@ -195,14 +236,13 @@ export const PlatformSettings = () => {
           }
         />
 
-
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={updateMutation.isPending}
             className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all ${
-              isSuccess 
-                ? 'bg-green-600 hover:bg-green-700' 
+              isSuccess
+                ? 'bg-green-600 hover:bg-green-700'
                 : 'bg-primary-600 hover:bg-primary-700'
             } disabled:opacity-50`}
           >

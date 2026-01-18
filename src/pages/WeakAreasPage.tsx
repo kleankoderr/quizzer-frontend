@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { weakAreaService } from '../services/weak-area.service';
 import { WeakAreaCard } from '../components/WeakAreaCard';
-import { Target, AlertTriangle, TrendingDown, BarChart3, Filter } from 'lucide-react';
+import {
+  Target,
+  AlertTriangle,
+  TrendingDown,
+  BarChart3,
+  Filter,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { userService } from '../services';
 import {
@@ -44,11 +50,13 @@ export const WeakAreasPage = () => {
   });
 
   // Fetch resolved weak areas
-  const { data: resolvedWeakAreas = [], isLoading: resolvedLoading } = useQuery({
-    queryKey: ['weak-areas', 'resolved'],
-    queryFn: weakAreaService.getResolvedWeakAreas,
-    enabled: activeTab === 'resolved',
-  });
+  const { data: resolvedWeakAreas = [], isLoading: resolvedLoading } = useQuery(
+    {
+      queryKey: ['weak-areas', 'resolved'],
+      queryFn: weakAreaService.getResolvedWeakAreas,
+      enabled: activeTab === 'resolved',
+    }
+  );
 
   // Fetch statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -77,7 +85,8 @@ export const WeakAreasPage = () => {
       navigate(`/quiz/${quiz.id}`);
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Failed to generate practice quiz';
+      const message =
+        error?.response?.data?.message || 'Failed to generate practice quiz';
       toast.error(message);
     },
   });
@@ -112,7 +121,10 @@ export const WeakAreasPage = () => {
   const chartData = useMemo(() => {
     if (!stats) return [];
     return stats.byTopic.slice(0, 10).map((item) => ({
-      topic: item.topic.length > 20 ? item.topic.substring(0, 20) + '...' : item.topic,
+      topic:
+        item.topic.length > 20
+          ? item.topic.substring(0, 20) + '...'
+          : item.topic,
       errors: item.totalErrors,
       count: item.count,
     }));
@@ -131,7 +143,10 @@ export const WeakAreasPage = () => {
     practiceMutation.mutate(id);
   };
 
-  const isLoading = weakAreasLoading || (activeTab === 'resolved' && resolvedLoading) || (activeTab === 'statistics' && statsLoading);
+  const isLoading =
+    weakAreasLoading ||
+    (activeTab === 'resolved' && resolvedLoading) ||
+    (activeTab === 'statistics' && statsLoading);
 
   return (
     <div className="space-y-6 pb-8">
@@ -196,39 +211,42 @@ export const WeakAreasPage = () => {
       </div>
 
       {/* Filters (Active & Resolved tabs only) */}
-      {(activeTab === 'active' || activeTab === 'resolved') && topics.length > 0 && (
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Topic Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-500" />
-            <select
-              value={selectedTopic}
-              onChange={(e) => setSelectedTopic(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-            >
-              <option value="all">All Topics</option>
-              {topics.map((topic) => (
-                <option key={topic} value={topic}>
-                  {topic}
-                </option>
-              ))}
-            </select>
-          </div>
+      {(activeTab === 'active' || activeTab === 'resolved') &&
+        topics.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Topic Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <select
+                value={selectedTopic}
+                onChange={(e) => setSelectedTopic(e.target.value)}
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+              >
+                <option value="all">All Topics</option>
+                {topics.map((topic) => (
+                  <option key={topic} value={topic}>
+                    {topic}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Sort By */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortBy)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-            >
-              <option value="errors">Error Count</option>
-              <option value="recent">Most Recent</option>
-            </select>
+            {/* Sort By */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Sort by:
+              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortBy)}
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+              >
+                <option value="errors">Error Count</option>
+                <option value="recent">Most Recent</option>
+              </select>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Content */}
       {isLoading ? (
@@ -382,7 +400,8 @@ export const WeakAreasPage = () => {
                                 {topic.topic}
                               </p>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {topic.count} {topic.count === 1 ? 'concept' : 'concepts'}
+                                {topic.count}{' '}
+                                {topic.count === 1 ? 'concept' : 'concepts'}
                               </p>
                             </div>
                           </div>

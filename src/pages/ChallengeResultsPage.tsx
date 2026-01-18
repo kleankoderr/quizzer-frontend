@@ -15,7 +15,10 @@ import { Toast as toast } from '../utils/toast';
 import { QuizReview } from '../components/quiz/QuizReview';
 import { quizService } from '../services/quiz.service';
 import { useAuth } from '../contexts/AuthContext';
-import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
+import {
+  ResultsHeroCard,
+  type ResultsStat,
+} from '../components/quiz/ResultsHeroCard';
 
 // Constants
 const CONFETTI_DURATION = 5000;

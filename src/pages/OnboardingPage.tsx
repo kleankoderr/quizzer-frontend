@@ -95,9 +95,6 @@ export const OnboardingPage = () => {
     }
   };
 
-
-
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="w-full max-w-2xl">
@@ -170,7 +167,10 @@ export const OnboardingPage = () => {
 
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="grade-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label
+                        htmlFor="grade-select"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
                         Select your level
                       </label>
                       <select
@@ -191,7 +191,10 @@ export const OnboardingPage = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="school-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label
+                        htmlFor="school-search"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
                         School / Institution
                       </label>
                       <SchoolSearch

@@ -16,7 +16,8 @@ export const FloatingReviewButton = () => {
   const dueCount = dueReviews?.totalDue || 0;
 
   // Only show on dashboard page
-  const isDashboard = location.pathname === '/' || location.pathname === '/dashboard';
+  const isDashboard =
+    location.pathname === '/' || location.pathname === '/dashboard';
 
   // Don't show button if not on dashboard or no reviews are due
   if (!isDashboard || dueCount === 0) return null;

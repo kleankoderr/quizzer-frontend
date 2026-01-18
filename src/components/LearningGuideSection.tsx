@@ -20,14 +20,20 @@ interface LearningGuideSectionProps {
   generatedContent: Record<string, string>;
   visibleContent: Record<string, boolean>;
   loadingAction: { section: number; type: 'explain' | 'example' } | null;
-  onToggleContentVisibility: (index: number, type: 'explain' | 'example') => void;
+  onToggleContentVisibility: (
+    index: number,
+    type: 'explain' | 'example'
+  ) => void;
   HeadingRenderer: React.FC<{ level: number; children?: any }>;
   onToggleSection: (index: number) => void;
   onMarkComplete: (index: number, e: React.MouseEvent) => void;
   onAskQuestion: (index: number, type: 'explain' | 'example') => void;
 }
 
-export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGuideSectionProps>(
+export const LearningGuideSection = React.forwardRef<
+  HTMLDivElement,
+  LearningGuideSectionProps
+>(
   (
     {
       section,
@@ -54,8 +60,8 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
           isActive
             ? 'sm:border-primary-500 sm:shadow-md sm:ring-2 ring-primary-500/20'
             : isCompleted
-            ? 'border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-100'
-            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+              ? 'border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-100'
+              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
         }`}
       >
         <div
@@ -239,7 +245,9 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
                             </button>
                           </div>
                           <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
-                            <MarkdownRenderer content={generatedContent[`${index}-explain`]} />
+                            <MarkdownRenderer
+                              content={generatedContent[`${index}-explain`]}
+                            />
                           </div>
                         </div>
                       </div>
@@ -274,7 +282,9 @@ export const LearningGuideSection = React.forwardRef<HTMLDivElement, LearningGui
                             </button>
                           </div>
                           <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
-                            <MarkdownRenderer content={generatedContent[`${index}-example`]} />
+                            <MarkdownRenderer
+                              content={generatedContent[`${index}-example`]}
+                            />
                           </div>
                         </div>
                       </div>

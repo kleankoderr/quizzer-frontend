@@ -242,8 +242,8 @@ export const StudyPacksPage: React.FC = () => {
             No results found
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-            We couldn't find any study sets matching "{debouncedSearch}".
-            Try adjusting your search or clear it to see all packs.
+            We couldn't find any study sets matching "{debouncedSearch}". Try
+            adjusting your search or clear it to see all packs.
           </p>
           <button
             onClick={() => setSearch('')}

@@ -34,7 +34,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   const handleTitleUpdate = async (setId: string, newTitle: string) => {
     try {
       await flashcardService.updateTitle(setId, newTitle);
-      
+
       // Optimistically update the cache
       queryClient.setQueryData(['flashcardSets'], (old: any) => {
         if (!old?.data) return old;
@@ -48,7 +48,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
 
       // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
-      
+
       toast.success('Flashcard set title updated successfully!');
     } catch (error) {
       toast.error('Failed to update flashcard set title');
@@ -57,7 +57,9 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   };
 
   const groupedSets = React.useMemo(() => {
-    const groups: { [key: string]: { id: string; title: string; sets: FlashcardSet[] } } = {};
+    const groups: {
+      [key: string]: { id: string; title: string; sets: FlashcardSet[] };
+    } = {};
     const noPack: FlashcardSet[] = [];
 
     sets.forEach((set) => {
@@ -80,7 +82,8 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   }, [sets]);
 
   const renderSetCard = (set: FlashcardSet) => {
-    const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
+    const cardCount =
+      set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
     const attemptCount = set.attemptCount || set._count?.attempts || 0;
     const hasStudied = attemptCount > 0;
 

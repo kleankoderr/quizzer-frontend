@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation , Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   BookOpen,
   Brain,
@@ -19,8 +19,7 @@ import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
-import "highlight.js/styles/github.css";
-
+import 'highlight.js/styles/github.css';
 
 import { contentService, type Content } from '../services/content.service';
 import { summaryService } from '../services';
@@ -33,7 +32,6 @@ import './ContentPage.css';
 import { useContent, useSummaryGeneration } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 
-
 // Custom heading renderer to add IDs
 const HeadingRenderer = ({ level, children }: any) => {
   const text = children?.[0]?.toString() || '';
@@ -42,7 +40,7 @@ const HeadingRenderer = ({ level, children }: any) => {
   return <Tag id={id}>{children}</Tag>;
 };
 
-const  MARKDOWN_COMPONENTS = {
+const MARKDOWN_COMPONENTS = {
   h1: (props: any) => <HeadingRenderer level={1} {...props} />,
   h2: (props: any) => <HeadingRenderer level={2} {...props} />,
   h3: (props: any) => <HeadingRenderer level={3} {...props} />,
@@ -59,7 +57,6 @@ const MarkdownContent = ({
   onProgressUpdate: (progress: number) => void;
 }) => {
   const [restored, setRestored] = useState(false);
-
 
   // Restore scroll position
   useEffect(() => {
@@ -166,10 +163,7 @@ export const ContentPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const {
-    data: content,
-    isLoading: loading,
-  } = useContent(id);
+  const { data: content, isLoading: loading } = useContent(id);
   const contentRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -188,20 +182,20 @@ export const ContentPage = () => {
 
   const handleTitleUpdate = async () => {
     if (!content || !editedTitle.trim() || editedTitle === content.title) {
-        setIsEditingTitle(false);
-        return;
+      setIsEditingTitle(false);
+      return;
     }
 
     try {
-        await contentService.update(content.id, { title: editedTitle });
-        queryClient.setQueryData(['content', id], (old: Content | undefined) => {
-            if (!old) return old;
-            return { ...old, title: editedTitle };
-        });
-        toast.success('Title updated');
-        setIsEditingTitle(false);
+      await contentService.update(content.id, { title: editedTitle });
+      queryClient.setQueryData(['content', id], (old: Content | undefined) => {
+        if (!old) return old;
+        return { ...old, title: editedTitle };
+      });
+      toast.success('Title updated');
+      setIsEditingTitle(false);
     } catch (_error) {
-        toast.error('Failed to update title');
+      toast.error('Failed to update title');
     }
   };
 
@@ -210,17 +204,17 @@ export const ContentPage = () => {
     if (!content || !id || loading || location.state?.breadcrumb) return;
 
     const breadcrumbItems = [];
-    
+
     // Item 1: Study Pack or Study
     if (content.studyPack) {
       breadcrumbItems.push({
         label: content.studyPack.title,
-        path: `/study-pack/${content.studyPack.id}`
+        path: `/study-pack/${content.studyPack.id}`,
       });
     } else {
       breadcrumbItems.push({ label: 'Study', path: '/study' });
     }
-    
+
     // Item 2: Content Title (Plain Text, No Link)
     breadcrumbItems.push({ label: content.title, path: null });
 
@@ -230,18 +224,15 @@ export const ContentPage = () => {
     });
   }, [content, id, loading, location, navigate]);
 
-
-
-
-
-
-
   const handleGenerateQuiz = () => {
     if (!content) return;
 
     const baseBreadcrumb = [
       content.studyPack
-        ? { label: content.studyPack.title, path: `/study-pack/${content.studyPack.id}` }
+        ? {
+            label: content.studyPack.title,
+            path: `/study-pack/${content.studyPack.id}`,
+          }
         : { label: 'Study', path: '/study' },
       { label: content.title, path: `/content/${content.id}` },
     ];
@@ -270,7 +261,10 @@ export const ContentPage = () => {
 
     const baseBreadcrumb = [
       content.studyPack
-        ? { label: content.studyPack.title, path: `/study-pack/${content.studyPack.id}` }
+        ? {
+            label: content.studyPack.title,
+            path: `/study-pack/${content.studyPack.id}`,
+          }
         : { label: 'Study', path: '/study' },
       { label: content.title, path: `/content/${content.id}` },
     ];
@@ -289,7 +283,10 @@ export const ContentPage = () => {
         sourceTitle: content.title,
         contentId: content.id,
         studyPackId: content.studyPack?.id,
-        breadcrumb: [...baseBreadcrumb, { label: 'Generate Flashcards', path: null }],
+        breadcrumb: [
+          ...baseBreadcrumb,
+          { label: 'Generate Flashcards', path: null },
+        ],
       },
     });
   };
@@ -307,18 +304,20 @@ export const ContentPage = () => {
 
     try {
       const { jobId } = await summaryService.generateSummary(content.id);
-      
-      toast.success('Summary generation started! It will be ready in a moment.');
-      
+
+      toast.success(
+        'Summary generation started! It will be ready in a moment.'
+      );
+
       // Start polling
       startPolling(jobId, () => {
         // Optional: Update local cache or UI if needed
         // The hook already shows a success toast
         queryClient.invalidateQueries({ queryKey: ['content', id] });
       });
-
     } catch (_error: any) {
-      const message = _error.response?.data?.message || 'Failed to generate summary';
+      const message =
+        _error.response?.data?.message || 'Failed to generate summary';
       toast.error(message || 'Failed to generate summary');
     }
   };
@@ -346,12 +345,6 @@ export const ContentPage = () => {
     }
   };
 
-
-
-
-
-
-
   if (loading) {
     return <ContentPageSkeleton />;
   }
@@ -376,42 +369,42 @@ export const ContentPage = () => {
     <div className="max-w-[1600px] mx-auto pb-20 px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
-         {/* Breadcrumbs - placed outside sticky header */}
+        {/* Breadcrumbs - placed outside sticky header */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 overflow-hidden mb-4">
-            <Link
+          <Link
             to="/"
             className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center p-1 -ml-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             title="Home"
-            >
+          >
             <Home className="w-4 h-4" />
-            </Link>
-            <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
-            
-            {content.studyPack ? (
+          </Link>
+          <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+
+          {content.studyPack ? (
             <>
-                <Link
+              <Link
                 to={`/study-pack/${content.studyPack.id}?tab=materials`}
                 className="hover:text-gray-900 dark:hover:text-white transition-colors truncate max-w-[150px] sm:max-w-[200px] font-medium"
-                >
+              >
                 {content.studyPack.title}
-                </Link>
-                <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+              </Link>
+              <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
             </>
-            ) : (
+          ) : (
             <>
-                <Link
+              <Link
                 to="/study"
                 className="hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
-                >
+              >
                 Study
-                </Link>
-                <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+              </Link>
+              <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
             </>
-            )}
-            
-            <span className="font-semibold text-gray-900 dark:text-white truncate">
+          )}
+
+          <span className="font-semibold text-gray-900 dark:text-white truncate">
             {content.title}
-            </span>
+          </span>
         </nav>
       </div>
 
@@ -420,136 +413,133 @@ export const ContentPage = () => {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             <div className="flex flex-row items-center justify-between gap-4">
-              
               {/* Title Row */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 {isEditingTitle ? (
-                    <div className="flex items-center gap-2 w-full max-w-2xl">
-                        <input
-                            type="text"
-                            value={editedTitle}
-                            onChange={(e) => setEditedTitle(e.target.value)}
-                            className="flex-1 px-3 py-1.5 text-xl font-bold bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                            autoFocus
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleTitleUpdate();
-                                if (e.key === 'Escape') {
-                                    setEditedTitle(content.title);
-                                    setIsEditingTitle(false);
-                                }
-                            }}
-                        />
-                        <button
-                            onClick={handleTitleUpdate}
-                            className="p-1 sm:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors flex-shrink-0"
-                        >
-                            <Check className="w-5 h-5"/>
-                        </button>
-                         <button
-                            onClick={() => {
-                                setEditedTitle(content.title);
-                                setIsEditingTitle(false);
-                            }}
-                            className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                        >
-                            <X className="w-5 h-5"/>
-                        </button>
-                    </div>
+                  <div className="flex items-center gap-2 w-full max-w-2xl">
+                    <input
+                      type="text"
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="flex-1 px-3 py-1.5 text-xl font-bold bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleTitleUpdate();
+                        if (e.key === 'Escape') {
+                          setEditedTitle(content.title);
+                          setIsEditingTitle(false);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleTitleUpdate}
+                      className="p-1 sm:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors flex-shrink-0"
+                    >
+                      <Check className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditedTitle(content.title);
+                        setIsEditingTitle(false);
+                      }}
+                      className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 ) : (
-                    <>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white truncate">
-                        {content.title}
-                        </h1>
-                        <button
-                            onClick={() => setIsEditingTitle(true)}
-                            className="hidden sm:block p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-                            title="Edit Title"
-                        >
-                            <Edit2 className="w-4 h-4" />
-                        </button>
-                    </>
+                  <>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white truncate">
+                      {content.title}
+                    </h1>
+                    <button
+                      onClick={() => setIsEditingTitle(true)}
+                      className="hidden sm:block p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                      title="Edit Title"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
-               
-
               </div>
 
-               {/* Desktop Actions - Reversed Order */}
-                <div className="hidden sm:flex items-center gap-2">
-                  {/* Quiz Button */}
-                  {content.quizId ? (
-                    <button
-                      onClick={() => navigate(`/quiz/${content.quizId}`)}
-                      className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all shadow-sm"
-                      title="View Quiz"
-                    >
-                      <Brain className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleGenerateQuiz}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
-                      title="Generate Quiz"
-                    >
-                      <Brain className="w-3.5 h-3.5" />
-                      <span>Quiz</span>
-                    </button>
-                  )}
-
-                  {/* Flashcards Button */}
-                  {content.flashcardSetId ? (
-                    <button
-                      onClick={() =>
-                        navigate(`/flashcards/${content.flashcardSetId}`)
-                      }
-                      className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all shadow-sm"
-                      title="View Flashcards"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleGenerateFlashcards}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
-                      title="Generate Flashcards"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>Cards</span>
-                    </button>
-                  )}
-
-                  {/* Summary Button */}
-                  {content.summary ? (
-                    <button
-                      onClick={() => navigate(`/s/${content.summary?.shortCode}`)}
-                      className="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all shadow-sm"
-                      title="View Summary"
-                    >
-                      <LayoutTemplate className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleGenerateSummary}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
-                      title="Generate Summary"
-                    >
-                      <LayoutTemplate className="w-3.5 h-3.5" />
-                      <span>Summary</span>
-                    </button>
-                  )}
-
-                  <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
-
+              {/* Desktop Actions - Reversed Order */}
+              <div className="hidden sm:flex items-center gap-2">
+                {/* Quiz Button */}
+                {content.quizId ? (
                   <button
-                    onClick={handleDelete}
-                    className="p-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                    title="Delete Content"
+                    onClick={() => navigate(`/quiz/${content.quizId}`)}
+                    className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all shadow-sm"
+                    title="View Quiz"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Brain className="w-4 h-4" />
                   </button>
-                </div>
+                ) : (
+                  <button
+                    onClick={handleGenerateQuiz}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
+                    title="Generate Quiz"
+                  >
+                    <Brain className="w-3.5 h-3.5" />
+                    <span>Quiz</span>
+                  </button>
+                )}
 
-                {/* Mobile Menu Button */}
-                {!isEditingTitle && (
+                {/* Flashcards Button */}
+                {content.flashcardSetId ? (
+                  <button
+                    onClick={() =>
+                      navigate(`/flashcards/${content.flashcardSetId}`)
+                    }
+                    className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all shadow-sm"
+                    title="View Flashcards"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleGenerateFlashcards}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
+                    title="Generate Flashcards"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Cards</span>
+                  </button>
+                )}
+
+                {/* Summary Button */}
+                {content.summary ? (
+                  <button
+                    onClick={() => navigate(`/s/${content.summary?.shortCode}`)}
+                    className="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all shadow-sm"
+                    title="View Summary"
+                  >
+                    <LayoutTemplate className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleGenerateSummary}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
+                    title="Generate Summary"
+                  >
+                    <LayoutTemplate className="w-3.5 h-3.5" />
+                    <span>Summary</span>
+                  </button>
+                )}
+
+                <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                <button
+                  onClick={handleDelete}
+                  className="p-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                  title="Delete Content"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Mobile Menu Button */}
+              {!isEditingTitle && (
                 <div className="sm:hidden relative group">
                   <button className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <MoreVertical className="w-5 h-5" />
@@ -557,12 +547,12 @@ export const ContentPage = () => {
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 hidden group-hover:block group-focus-within:block z-50">
                     {/* Mobile Actions in Dropdown */}
                     <button
-                        onClick={() => setIsEditingTitle(true)}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      onClick={() => setIsEditingTitle(true)}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                     >
-                        <Edit2 className="w-4 h-4" /> Edit Title
+                      <Edit2 className="w-4 h-4" /> Edit Title
                     </button>
-                    
+
                     {/* Quiz */}
                     {content.quizId ? (
                       <button
@@ -602,7 +592,9 @@ export const ContentPage = () => {
                     {/* Summary Mobile */}
                     {content.summary ? (
                       <button
-                        onClick={() => navigate(`/s/${content.summary?.shortCode}`)}
+                        onClick={() =>
+                          navigate(`/s/${content.summary?.shortCode}`)
+                        }
                         className="w-full text-left px-4 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-2"
                       >
                         <LayoutTemplate className="w-4 h-4" /> View Summary
@@ -615,7 +607,7 @@ export const ContentPage = () => {
                         <LayoutTemplate className="w-4 h-4" /> Generate Summary
                       </button>
                     )}
-                    
+
                     <div className="my-1 border-t border-gray-100 dark:border-gray-700"></div>
                     <button
                       onClick={handleDelete}
@@ -625,7 +617,7 @@ export const ContentPage = () => {
                     </button>
                   </div>
                 </div>
-                )}
+              )}
             </div>
           </div>
         </div>
@@ -654,14 +646,12 @@ export const ContentPage = () => {
                 onSectionUpdate={async (index, updates) => {
                   if (!content?.learningGuide) return;
 
-                  const updatedGuide = structuredClone(
-                    content.learningGuide
-                  );
-                  
+                  const updatedGuide = structuredClone(content.learningGuide);
+
                   if (updatedGuide.sections[index]) {
                     updatedGuide.sections[index] = {
                       ...updatedGuide.sections[index],
-                      ...updates
+                      ...updates,
                     };
                   }
 
@@ -697,10 +687,11 @@ export const ContentPage = () => {
                     });
                   } catch (_error) {
                     toast.error('Failed to save progress');
-                    await queryClient.invalidateQueries({ queryKey: ['content', id] });
+                    await queryClient.invalidateQueries({
+                      queryKey: ['content', id],
+                    });
                   }
                 }}
-
               />
             ) : (
               <MarkdownContent
@@ -719,11 +710,7 @@ export const ContentPage = () => {
             )}
           </div>
         </div>
-
-
       </div>
-
-
 
       {/* Modals */}
       <DeleteModal

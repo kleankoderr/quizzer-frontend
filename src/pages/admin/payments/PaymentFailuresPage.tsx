@@ -169,8 +169,8 @@ export const PaymentFailuresPage = () => {
         {data?.meta && (
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-800">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing <span className="font-medium">{(page - 1) * LIMIT + 1}</span>{' '}
-              to{' '}
+              Showing{' '}
+              <span className="font-medium">{(page - 1) * LIMIT + 1}</span> to{' '}
               <span className="font-medium">
                 {Math.min(page * LIMIT, data.meta.total)}
               </span>{' '}

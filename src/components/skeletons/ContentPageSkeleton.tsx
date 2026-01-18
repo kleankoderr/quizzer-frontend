@@ -26,8 +26,18 @@ export const ContentPageSkeleton = () => {
             <Skeleton width={120} height={40} borderRadius={8} />
             <Skeleton width={140} height={40} borderRadius={8} />
             <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
-            <Skeleton width={40} height={40} borderRadius={8} className="hidden sm:block" />
-            <Skeleton width={40} height={40} borderRadius={8} className="hidden sm:block" />
+            <Skeleton
+              width={40}
+              height={40}
+              borderRadius={8}
+              className="hidden sm:block"
+            />
+            <Skeleton
+              width={40}
+              height={40}
+              borderRadius={8}
+              className="hidden sm:block"
+            />
           </div>
         </div>
       </div>
@@ -38,7 +48,7 @@ export const ContentPageSkeleton = () => {
           <div className="bg-white dark:bg-gray-800 sm:rounded-2xl sm:shadow-sm sm:border border-gray-200 dark:border-gray-700 p-4 sm:p-8 md:p-12 min-h-[500px]">
             {/* Title */}
             <Skeleton width="60%" height={48} className="mb-8" />
-            
+
             {/* Section 1 */}
             <div className="mb-12">
               <Skeleton width="40%" height={32} className="mb-4" />
@@ -50,7 +60,7 @@ export const ContentPageSkeleton = () => {
               <Skeleton width="40%" height={32} className="mb-4" />
               <Skeleton count={5} className="mb-2" />
             </div>
-            
+
             {/* Section 3 */}
             <div className="mb-12">
               <Skeleton width="40%" height={32} className="mb-4" />

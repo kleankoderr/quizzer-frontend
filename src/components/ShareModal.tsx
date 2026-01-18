@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Modal } from './Modal';
-import { FaXTwitter, FaFacebook, FaLinkedin, FaWhatsapp } from 'react-icons/fa6';
+import {
+  FaXTwitter,
+  FaFacebook,
+  FaLinkedin,
+  FaWhatsapp,
+} from 'react-icons/fa6';
 import { FiLink, FiCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -23,7 +28,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   // Generate share URL
   const shareUrl = `${globalThis.location.origin}/s/${shortCode}`;
-  
+
   // Full share text with topic if provided
   const shareText = topic ? `${title} - ${topic}` : title;
 
@@ -36,7 +41,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         duration: 3000,
         icon: '🔗',
       });
-      
+
       // Reset copied state after 3 seconds
       setTimeout(() => setCopied(false), 3000);
     } catch (error) {
@@ -82,7 +87,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
         {/* Copy Link Section */}
         <div>
-          <label htmlFor="share-url-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label
+            htmlFor="share-url-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Share Link
           </label>
           <div className="flex gap-2">

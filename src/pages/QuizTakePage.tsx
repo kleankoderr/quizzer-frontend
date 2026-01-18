@@ -1,5 +1,10 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import {
+  useParams,
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Toast as toast } from '../utils/toast';
 import { quizService } from '../services/quiz.service';
@@ -38,56 +43,62 @@ export const QuizTakePage = () => {
     getStorageKey,
   });
 
-  const navigateToReview = useCallback((attemptId: string, isChallenge = false) => {
-    if (!quiz) return;
-    
-    const breadcrumb = quiz.studyPack
-      ? [
-          { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` },
-          { label: quiz.title, path: null },
-          { label: 'Review', path: null },
-        ]
-      : [
-          { label: 'Quizzes', path: '/quiz' },
-          { label: quiz.title, path: null },
-          { label: 'Review', path: null },
-        ];
+  const navigateToReview = useCallback(
+    (attemptId: string, isChallenge = false) => {
+      if (!quiz) return;
 
-    const path = isChallenge 
-      ? `/quiz/attempt/${attemptId}/review?challengeId=${challengeId}`
-      : `/quiz/attempt/${attemptId}/review`;
+      const breadcrumb = quiz.studyPack
+        ? [
+            {
+              label: quiz.studyPack.title,
+              path: `/study-pack/${quiz.studyPack.id}`,
+            },
+            { label: quiz.title, path: null },
+            { label: 'Review', path: null },
+          ]
+        : [
+            { label: 'Quizzes', path: '/quiz' },
+            { label: quiz.title, path: null },
+            { label: 'Review', path: null },
+          ];
 
-    navigate(path, { state: { breadcrumb } });
-  }, [quiz, challengeId, navigate]);
+      const path = isChallenge
+        ? `/quiz/attempt/${attemptId}/review?challengeId=${challengeId}`
+        : `/quiz/attempt/${attemptId}/review`;
+
+      navigate(path, { state: { breadcrumb } });
+    },
+    [quiz, challengeId, navigate]
+  );
 
   // Handle submit
   // Extract challenge completion logic to reduce complexity
-  const handleChallengeCompletion = useCallback(async (submissionResult: any) => {
-    if (!challengeId || !id || !quiz) return;
+  const handleChallengeCompletion = useCallback(
+    async (submissionResult: any) => {
+      if (!challengeId || !id || !quiz) return;
 
-    try {
-      const { challengeService } = await import('../services');
-      const challengeCompletionResult = await challengeService.completeQuizInChallenge(
-        challengeId,
-        id,
-        {
-          score: submissionResult.score,
-          totalQuestions: submissionResult.totalQuestions,
-          attemptId: submissionResult.attemptId,
+      try {
+        const { challengeService } = await import('../services');
+        const challengeCompletionResult =
+          await challengeService.completeQuizInChallenge(challengeId, id, {
+            score: submissionResult.score,
+            totalQuestions: submissionResult.totalQuestions,
+            attemptId: submissionResult.attemptId,
+          });
+
+        await queryClient.invalidateQueries({ queryKey: ['challenges'] });
+
+        if (challengeCompletionResult.completed) {
+          navigate(`/challenges/${challengeId}/results`);
+        } else {
+          navigateToReview(submissionResult.attemptId, true);
         }
-      );
-
-      await queryClient.invalidateQueries({ queryKey: ['challenges'] });
-
-      if (challengeCompletionResult.completed) {
-        navigate(`/challenges/${challengeId}/results`);
-      } else {
+      } catch {
         navigateToReview(submissionResult.attemptId, true);
       }
-    } catch {
-      navigateToReview(submissionResult.attemptId, true);
-    }
-  }, [challengeId, id, quiz, queryClient, navigate, navigateToReview]);
+    },
+    [challengeId, id, quiz, queryClient, navigate, navigateToReview]
+  );
 
   const handleSubmit = useCallback(
     async (force = false) => {
@@ -106,8 +117,10 @@ export const QuizTakePage = () => {
         });
 
         clearStorage();
-        toast.success(force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!');
-        
+        toast.success(
+          force ? 'Time is up! Quiz submitted.' : 'Quiz submitted successfully!'
+        );
+
         // Invalidate quiz query to update attempt count/history
         await queryClient.invalidateQueries({ queryKey: ['quiz', id] });
 
@@ -120,7 +133,16 @@ export const QuizTakePage = () => {
         toast.error('Failed to submit quiz. Please try again.');
       }
     },
-    [quiz, id, selectedAnswers, challengeId, clearStorage, queryClient, handleChallengeCompletion, navigateToReview]
+    [
+      quiz,
+      id,
+      selectedAnswers,
+      challengeId,
+      clearStorage,
+      queryClient,
+      handleChallengeCompletion,
+      navigateToReview,
+    ]
   );
 
   // Auto-submit handler for timer
@@ -140,32 +162,31 @@ export const QuizTakePage = () => {
   useEffect(() => {
     if (!quiz || !id || loading || location.state?.breadcrumb) return;
 
-    const hasAttempts = (quiz.attemptCount && quiz.attemptCount > 0) || 
-                        (quiz.attempts && quiz.attempts.length > 0);
+    const hasAttempts =
+      (quiz.attemptCount && quiz.attemptCount > 0) ||
+      (quiz.attempts && quiz.attempts.length > 0);
 
     const breadcrumbItems = [];
 
     // Add study pack if it exists
     if (quiz.studyPack) {
-      breadcrumbItems.push(
-        { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` }
-      );
+      breadcrumbItems.push({
+        label: quiz.studyPack.title,
+        path: `/study-pack/${quiz.studyPack.id}`,
+      });
     } else {
-      breadcrumbItems.push(
-        { label: 'Quizzes', path: '/quiz' }
-      );
+      breadcrumbItems.push({ label: 'Quizzes', path: '/quiz' });
     }
 
     // Add quiz title (non-clickable)
-    breadcrumbItems.push(
-      { label: quiz.title, path: null }
-    );
+    breadcrumbItems.push({ label: quiz.title, path: null });
 
     // Add "Attempts" or "Retake" if applicable
     if (hasAttempts) {
-      breadcrumbItems.push(
-        { label: isTaking ? 'Retake' : 'Practice History', path: null }
-      );
+      breadcrumbItems.push({
+        label: isTaking ? 'Retake' : 'Practice History',
+        path: null,
+      });
     }
 
     navigate(location.pathname + location.search, {
@@ -179,12 +200,15 @@ export const QuizTakePage = () => {
   // Initialize answers
   useEffect(() => {
     if (!quiz || !id || initialized) return;
-    
+
     const savedAnswers = localStorage.getItem(getStorageKey('answers'));
     if (savedAnswers) {
       try {
         const parsedAnswers = JSON.parse(savedAnswers);
-        if (Array.isArray(parsedAnswers) && parsedAnswers.length === questions.length) {
+        if (
+          Array.isArray(parsedAnswers) &&
+          parsedAnswers.length === questions.length
+        ) {
           setSelectedAnswers(parsedAnswers);
         } else {
           setSelectedAnswers(new Array(questions.length).fill(null));
@@ -201,8 +225,12 @@ export const QuizTakePage = () => {
   useEffect(() => {
     if (!quiz || !id || initialized) return;
 
-    const savedQuestionIndex = localStorage.getItem(getStorageKey('questionIndex'));
-    const savedTimeRemaining = localStorage.getItem(getStorageKey('timeRemaining'));
+    const savedQuestionIndex = localStorage.getItem(
+      getStorageKey('questionIndex')
+    );
+    const savedTimeRemaining = localStorage.getItem(
+      getStorageKey('timeRemaining')
+    );
     const savedTimestamp = localStorage.getItem(getStorageKey('timestamp'));
 
     if (savedQuestionIndex) {
@@ -217,13 +245,22 @@ export const QuizTakePage = () => {
     }
 
     if (isTaking === null) {
-      const hasAttempts = (quiz.attemptCount && quiz.attemptCount > 0) ||
-                          (quiz.attempts && quiz.attempts.length > 0);
+      const hasAttempts =
+        (quiz.attemptCount && quiz.attemptCount > 0) ||
+        (quiz.attempts && quiz.attempts.length > 0);
       setIsTaking(!hasAttempts);
     }
 
     setInitialized(true);
-  }, [quiz, id, initialized, questions.length, getStorageKey, startTimer, isTaking]);
+  }, [
+    quiz,
+    id,
+    initialized,
+    questions.length,
+    getStorageKey,
+    startTimer,
+    isTaking,
+  ]);
 
   // Answer selection handler
   const handleAnswerSelect = useCallback(

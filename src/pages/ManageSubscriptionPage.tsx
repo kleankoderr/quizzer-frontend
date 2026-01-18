@@ -22,7 +22,8 @@ export const ManageSubscriptionPage = () => {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   const { data: currentPlan, isLoading, refetch } = useCurrentPlan();
-  const { mutate: cancelSubscription, isPending: isCancelling } = useCancelSubscription();
+  const { mutate: cancelSubscription, isPending: isCancelling } =
+    useCancelSubscription();
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
@@ -91,21 +92,27 @@ export const ManageSubscriptionPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Current Plan Card */}
         <div className="lg:col-span-1">
-          <div className={`card p-6 h-full ${isPremium ? 'border-t-4 border-t-amber-500' : 'border-t-4 border-t-gray-300'}`}>
+          <div
+            className={`card p-6 h-full ${isPremium ? 'border-t-4 border-t-amber-500' : 'border-t-4 border-t-gray-300'}`}
+          >
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                   Current Plan
                 </h2>
-                <p className={`font-bold text-2xl ${isPremium ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>
+                <p
+                  className={`font-bold text-2xl ${isPremium ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}
+                >
                   {isPremium ? 'Premium' : 'Free Plan'}
                 </p>
               </div>
-              <div className={`px-3 py-1.5 rounded-full text-xs font-bold ${
-                isPremium 
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' 
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-              }`}>
+              <div
+                className={`px-3 py-1.5 rounded-full text-xs font-bold ${
+                  isPremium
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                }`}
+              >
                 {isPremium ? 'PREMIUM' : 'FREE'}
               </div>
             </div>
@@ -116,27 +123,37 @@ export const ManageSubscriptionPage = () => {
                   <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <Calendar className="w-4 h-4" />
-                      <span className="text-sm">{currentPlan.cancelAtPeriodEnd ? 'Expires On' : 'Renews On'}</span>
+                      <span className="text-sm">
+                        {currentPlan.cancelAtPeriodEnd
+                          ? 'Expires On'
+                          : 'Renews On'}
+                      </span>
                     </div>
                     <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}
+                      {format(
+                        new Date(currentPlan.currentPeriodEnd),
+                        'MMM dd, yyyy'
+                      )}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <Shield className="w-4 h-4" />
                       <span className="text-sm">Status</span>
                     </div>
-                    <span className={`font-semibold text-sm ${
-                      currentPlan.status === 'ACTIVE' 
-                        ? currentPlan.cancelAtPeriodEnd 
-                          ? 'text-yellow-600' 
-                          : 'text-green-600'
-                        : 'text-red-600'
-                    }`}>
-                      {currentPlan.status === 'ACTIVE' && currentPlan.cancelAtPeriodEnd 
-                        ? 'Cancelling' 
+                    <span
+                      className={`font-semibold text-sm ${
+                        currentPlan.status === 'ACTIVE'
+                          ? currentPlan.cancelAtPeriodEnd
+                            ? 'text-yellow-600'
+                            : 'text-green-600'
+                          : 'text-red-600'
+                      }`}
+                    >
+                      {currentPlan.status === 'ACTIVE' &&
+                      currentPlan.cancelAtPeriodEnd
+                        ? 'Cancelling'
                         : currentPlan.status}
                     </span>
                   </div>
@@ -145,26 +162,35 @@ export const ManageSubscriptionPage = () => {
             </div>
 
             {/* Actions */}
-            {isPremium && currentPlan.status === 'ACTIVE' && !currentPlan.cancelAtPeriodEnd && (
-              <div className="pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
-                <button 
-                  onClick={handleCancelClick}
-                  className="w-full py-2.5 px-4 border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
-                >
-                  Cancel Subscription
-                </button>
-                <p className="text-xs text-center text-gray-400 mt-2">
-                  You'll keep access until {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd')}
-                </p>
-              </div>
-            )}
-            
+            {isPremium &&
+              currentPlan.status === 'ACTIVE' &&
+              !currentPlan.cancelAtPeriodEnd && (
+                <div className="pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
+                  <button
+                    onClick={handleCancelClick}
+                    className="w-full py-2.5 px-4 border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
+                  >
+                    Cancel Subscription
+                  </button>
+                  <p className="text-xs text-center text-gray-400 mt-2">
+                    You'll keep access until{' '}
+                    {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd')}
+                  </p>
+                </div>
+              )}
+
             {isPremium && currentPlan.cancelAtPeriodEnd && (
               <div className="pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
-                 <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Subscription ends on {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}</span>
-                 </div>
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    Subscription ends on{' '}
+                    {format(
+                      new Date(currentPlan.currentPeriodEnd),
+                      'MMM dd, yyyy'
+                    )}
+                  </span>
+                </div>
               </div>
             )}
 
@@ -209,15 +235,21 @@ export const ManageSubscriptionPage = () => {
                 <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide border-b pb-2 mb-4">
                   AI Features
                 </h3>
-                
+
                 {/* Quiz Usage */}
                 <UsageBar
                   icon={Brain}
                   label="Quizzes Generated"
                   used={currentPlan.quiz.used}
                   limit={currentPlan.quiz.limit}
-                  color={getUsageColor(currentPlan.quiz.used, currentPlan.quiz.limit)}
-                  percentage={getPercentage(currentPlan.quiz.used, currentPlan.quiz.limit)}
+                  color={getUsageColor(
+                    currentPlan.quiz.used,
+                    currentPlan.quiz.limit
+                  )}
+                  percentage={getPercentage(
+                    currentPlan.quiz.used,
+                    currentPlan.quiz.limit
+                  )}
                 />
 
                 {/* Flashcard Usage */}
@@ -226,8 +258,14 @@ export const ManageSubscriptionPage = () => {
                   label="Flashcard Sets"
                   used={currentPlan.flashcard.used}
                   limit={currentPlan.flashcard.limit}
-                  color={getUsageColor(currentPlan.flashcard.used, currentPlan.flashcard.limit)}
-                  percentage={getPercentage(currentPlan.flashcard.used, currentPlan.flashcard.limit)}
+                  color={getUsageColor(
+                    currentPlan.flashcard.used,
+                    currentPlan.flashcard.limit
+                  )}
+                  percentage={getPercentage(
+                    currentPlan.flashcard.used,
+                    currentPlan.flashcard.limit
+                  )}
                 />
 
                 {/* Concept Explanations Usage */}
@@ -236,18 +274,30 @@ export const ManageSubscriptionPage = () => {
                   label="AI Explanations"
                   used={currentPlan.conceptExplanation.used}
                   limit={currentPlan.conceptExplanation.limit}
-                  color={getUsageColor(currentPlan.conceptExplanation.used, currentPlan.conceptExplanation.limit)}
-                  percentage={getPercentage(currentPlan.conceptExplanation.used, currentPlan.conceptExplanation.limit)}
+                  color={getUsageColor(
+                    currentPlan.conceptExplanation.used,
+                    currentPlan.conceptExplanation.limit
+                  )}
+                  percentage={getPercentage(
+                    currentPlan.conceptExplanation.used,
+                    currentPlan.conceptExplanation.limit
+                  )}
                 />
-                 
+
                 {/* Study Materials Usage */}
                 <UsageBar
                   icon={BookOpen}
                   label="Study Materials"
                   used={currentPlan.studyMaterial.used}
                   limit={currentPlan.studyMaterial.limit}
-                  color={getUsageColor(currentPlan.studyMaterial.used, currentPlan.studyMaterial.limit)}
-                  percentage={getPercentage(currentPlan.studyMaterial.used, currentPlan.studyMaterial.limit)}
+                  color={getUsageColor(
+                    currentPlan.studyMaterial.used,
+                    currentPlan.studyMaterial.limit
+                  )}
+                  percentage={getPercentage(
+                    currentPlan.studyMaterial.used,
+                    currentPlan.studyMaterial.limit
+                  )}
                 />
               </div>
 
@@ -256,7 +306,7 @@ export const ManageSubscriptionPage = () => {
                 <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide border-b pb-2 mb-4">
                   Storage & Documents
                 </h3>
-                
+
                 {/* File Uploads (Count) */}
                 <UsageBar
                   icon={FileText}
@@ -264,7 +314,10 @@ export const ManageSubscriptionPage = () => {
                   used={currentPlan.fileUpload.used}
                   limit={currentPlan.fileUpload.limit}
                   color="bg-blue-500"
-                  percentage={getPercentage(currentPlan.fileUpload.used, currentPlan.fileUpload.limit)}
+                  percentage={getPercentage(
+                    currentPlan.fileUpload.used,
+                    currentPlan.fileUpload.limit
+                  )}
                 />
 
                 {/* Storage Space */}
@@ -274,16 +327,20 @@ export const ManageSubscriptionPage = () => {
                   used={currentPlan.fileStorage.used}
                   limit={currentPlan.fileStorage.limit}
                   color="bg-purple-500"
-                  percentage={getPercentage(currentPlan.fileStorage.used, currentPlan.fileStorage.limit)}
+                  percentage={getPercentage(
+                    currentPlan.fileStorage.used,
+                    currentPlan.fileStorage.limit
+                  )}
                   unit="MB"
                 />
               </div>
             </div>
-            
+
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
               <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Monthly quotas reset on {format(new Date(currentPlan.monthlyResetAt), 'MMM dd, yyyy')}
+                Monthly quotas reset on{' '}
+                {format(new Date(currentPlan.monthlyResetAt), 'MMM dd, yyyy')}
               </p>
             </div>
           </div>
@@ -298,13 +355,18 @@ export const ManageSubscriptionPage = () => {
               <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Cancel Subscription?</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Cancel Subscription?
+              </h3>
             </div>
-            
+
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              Are you sure you want to cancel your Premium subscription? 
-              <br /><br />
-              You will lose access to premium features at the end of your current billing period ({format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}).
+              Are you sure you want to cancel your Premium subscription?
+              <br />
+              <br />
+              You will lose access to premium features at the end of your
+              current billing period (
+              {format(new Date(currentPlan.currentPeriodEnd), 'MMM dd, yyyy')}).
             </p>
 
             <div className="grid grid-cols-2 gap-3 mt-6">
@@ -340,7 +402,15 @@ interface UsageBarProps {
   unit?: string;
 }
 
-const UsageBar: React.FC<UsageBarProps> = ({ icon: Icon, label, used, limit, color, percentage, unit = '' }) => (
+const UsageBar: React.FC<UsageBarProps> = ({
+  icon: Icon,
+  label,
+  used,
+  limit,
+  color,
+  percentage,
+  unit = '',
+}) => (
   <div className="space-y-2">
     <div className="flex justify-between text-sm">
       <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
@@ -348,11 +418,12 @@ const UsageBar: React.FC<UsageBarProps> = ({ icon: Icon, label, used, limit, col
         {label}
       </span>
       <span className="font-medium text-gray-900 dark:text-white">
-        {used}{unit} / {limit === -1 ? '∞' : `${limit}${unit}`}
+        {used}
+        {unit} / {limit === -1 ? '∞' : `${limit}${unit}`}
       </span>
     </div>
     <div className="h-2.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-      <div 
+      <div
         className={`h-full rounded-full transition-all duration-500 ${limit === -1 ? 'bg-primary-600' : color}`}
         style={{ width: limit === -1 ? '100%' : `${percentage}%` }}
       ></div>

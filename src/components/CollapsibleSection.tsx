@@ -50,7 +50,9 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
             )}
           </div>
           <div className="flex flex-col items-start">
-            <h3 className={`text-lg font-bold text-gray-900 dark:text-gray-100 ${onTitleClick ? 'group-hover:text-primary-600 dark:group-hover:text-primary-400' : ''}`}>
+            <h3
+              className={`text-lg font-bold text-gray-900 dark:text-gray-100 ${onTitleClick ? 'group-hover:text-primary-600 dark:group-hover:text-primary-400' : ''}`}
+            >
               {title}
             </h3>
             <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
