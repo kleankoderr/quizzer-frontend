@@ -28,6 +28,7 @@
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.25",
+    "highlight.js": "^11.11.1",
     "html-to-image": "^1.11.13",
     "katex": "^0.16.27",
     "lexical": "^0.38.2",
