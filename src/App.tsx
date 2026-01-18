@@ -13,6 +13,9 @@ import { AssessmentPopup } from './components/AssessmentPopup';
 import { GlobalEventListener } from './components/GlobalEventListener';
 import { TourProvider } from './contexts/TourProvider';
 
+import { AdminRoute } from './components/AdminRoute';
+import { LoadingScreen } from './components/LoadingScreen';
+
 // Lazy load all page components for code splitting
 const LoginPage = lazy(() =>
   import('./pages/LoginPage').then((m) => ({ default: m.LoginPage }))
@@ -210,10 +213,11 @@ const SummariesPage = lazy(() =>
   }))
 );
 
-// Import AdminRoute (keep this as direct import since it's small)
-import { AdminRoute } from './components/AdminRoute';
-
-import { LoadingScreen } from './components/LoadingScreen';
+const EmailCampaignsPage = lazy(() =>
+  import('./pages/EmailCampaignsPage').then((m) => ({
+    default: m.default,
+  }))
+);
 
 // Loading component for Suspense fallback
 const PageLoader = () => (
@@ -421,6 +425,22 @@ function AppRoutes() {
             element={
               <AdminRoute>
                 <PaymentFailuresPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/campaigns"
+            element={
+              <AdminRoute>
+                <EmailCampaignsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="admin/campaigns"
+            element={
+              <AdminRoute>
+                <EmailCampaignsPage />
               </AdminRoute>
             }
           />
