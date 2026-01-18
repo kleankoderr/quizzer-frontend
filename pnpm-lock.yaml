@@ -50,6 +50,9 @@ importers:
       html-to-image:
         specifier: ^1.11.13
         version: 1.11.13
+      katex:
+        specifier: ^0.16.27
+        version: 0.16.27
       lexical:
         specifier: ^0.38.2
         version: 0.38.2

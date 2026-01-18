@@ -29,6 +29,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.25",
     "html-to-image": "^1.11.13",
+    "katex": "^0.16.27",
     "lexical": "^0.38.2",
     "lucide-react": "^0.553.0",
     "react": "^19.2.0",
