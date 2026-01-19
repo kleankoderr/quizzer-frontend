@@ -4,8 +4,8 @@ import { studyPackService } from '../services/studyPackService';
 import type { StudyPack } from '../types';
 import { Folder, Plus } from 'lucide-react';
 import { Toast as toast } from '../utils/toast';
-import { useAsync } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAsync } from '../hooks';
 
 interface MoveToStudyPackModalProps {
   isOpen: boolean;
@@ -47,7 +47,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       setNewPackTitle('');
       setMoving(null);
     }
-  }, [isOpen, fetchStudyPacks]);
+  }, [isOpen]);
 
   const handleCreatePack = useCallback(async () => {
     const trimmedTitle = newPackTitle.trim();
@@ -80,18 +80,28 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
         await studyPackService.moveItem(packId, { type: itemType, itemId });
         toast.success('Item moved successfully');
 
-        // Invalidate queries to refresh the content with updated studyPackId
+        // Invalidate individual item query
         if (itemType === 'content') {
           await queryClient.invalidateQueries({
             queryKey: ['content', itemId],
           });
+          // Invalidate content list
+          await queryClient.invalidateQueries({ queryKey: ['contents'] });
         } else if (itemType === 'quiz') {
           await queryClient.invalidateQueries({ queryKey: ['quiz', itemId] });
+          // Invalidate quiz list
+          await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
         } else if (itemType === 'flashcard') {
           await queryClient.invalidateQueries({
             queryKey: ['flashcardSet', itemId],
           });
+          // Invalidate flashcard list
+          await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
         }
+
+        // Invalidate study packs to refresh the study pack lists
+        await queryClient.invalidateQueries({ queryKey: ['studyPack'] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
 
         const pack = studyPacks.find((p) => p.id === packId);
         onMoveSuccess?.(pack);

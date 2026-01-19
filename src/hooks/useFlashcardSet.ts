@@ -6,6 +6,5 @@ export const useFlashcardSet = (id: string | undefined) => {
     queryKey: ['flashcardSet', id],
     queryFn: () => flashcardService.getById(id!),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
