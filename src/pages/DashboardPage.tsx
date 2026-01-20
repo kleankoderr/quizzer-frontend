@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { quoteService } from '../services/quote.service';
@@ -28,8 +28,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { format, subDays, startOfDay } from 'date-fns';
-import { useTour } from '../hooks';
-import { onboardingTour } from '../tours';
 
 const getScoreColor = (score: number, totalQuestions: number) => {
   const percentage = score / (totalQuestions || 1);
@@ -41,11 +39,6 @@ const getScoreColor = (score: number, totalQuestions: number) => {
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { startIfNotCompleted } = useTour();
-
-  useEffect(() => {
-    startIfNotCompleted('onboarding', onboardingTour);
-  }, [startIfNotCompleted]);
 
   const { data: dailyQuote } = useQuery({
     queryKey: ['daily-quote'],

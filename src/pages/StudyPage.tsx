@@ -2,8 +2,7 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService } from '../services';
-import { useContents, usePopularTopics, useJobEvents, useTour } from '../hooks';
-import { studyGeneratorTour } from '../tours';
+import { useContents, usePopularTopics, useJobEvents } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -37,8 +36,6 @@ export const StudyPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
-
-  const { startIfNotCompleted } = useTour();
 
   // Use React Query hooks for data fetching (moved up for useMemo dependency)
   const [page, setPage] = useState(1);
@@ -98,12 +95,6 @@ export const StudyPage = () => {
       setActiveTab('text');
     }
   }, [location.state]);
-
-  useEffect(() => {
-    if (showCreator) {
-      startIfNotCompleted('study-generator-onboarding', studyGeneratorTour);
-    }
-  }, [showCreator, startIfNotCompleted]);
 
   const getSummary = (content: any) => {
     if (content.description) {
@@ -500,7 +491,6 @@ export const StudyPage = () => {
       setIsDeleting(false);
     }
   }, [deleteContentId, refetch]);
-
 
   return (
     <div className="space-y-6 pb-8 px-4 sm:px-0">

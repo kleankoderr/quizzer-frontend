@@ -1,5 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Mail, CheckCircle, XCircle, SkipForward, RefreshCw } from 'lucide-react';
+import {
+  Mail,
+  CheckCircle,
+  XCircle,
+  SkipForward,
+  RefreshCw,
+} from 'lucide-react';
 import { apiClient } from '../services/api';
 import { format } from 'date-fns';
 
@@ -17,7 +23,12 @@ interface CampaignData {
 }
 
 const EmailCampaignsPage = () => {
-  const { data: campaigns, isLoading, error, refetch } = useQuery<CampaignData[]>({
+  const {
+    data: campaigns,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<CampaignData[]>({
     queryKey: ['email-campaigns'],
     queryFn: async () => {
       const response = await apiClient.get('/email/campaigns/stats');
@@ -32,7 +43,7 @@ const EmailCampaignsPage = () => {
   const formatCampaignId = (id: string) => {
     return id
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
@@ -86,7 +97,9 @@ const EmailCampaignsPage = () => {
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <p className="text-red-800 dark:text-red-200">
-            {error instanceof Error ? error.message : 'Failed to fetch campaign statistics'}
+            {error instanceof Error
+              ? error.message
+              : 'Failed to fetch campaign statistics'}
           </p>
         </div>
       )}
@@ -110,7 +123,8 @@ const EmailCampaignsPage = () => {
                   {formatCampaignId(campaign.campaignId)}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Last updated: {format(new Date(campaign.stats.lastUpdated), 'PPpp')}
+                  Last updated:{' '}
+                  {format(new Date(campaign.stats.lastUpdated), 'PPpp')}
                 </p>
               </div>
             </div>
@@ -148,7 +162,11 @@ const EmailCampaignsPage = () => {
                   {campaign.stats.emailsSent.toLocaleString()}
                 </p>
                 <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                  {calculateSuccessRate(campaign.stats.emailsSent, campaign.stats.totalUsers)}% success rate
+                  {calculateSuccessRate(
+                    campaign.stats.emailsSent,
+                    campaign.stats.totalUsers
+                  )}
+                  % success rate
                 </p>
               </div>
 
@@ -184,9 +202,14 @@ const EmailCampaignsPage = () => {
                   {campaign.stats.emailsFailed.toLocaleString()}
                 </p>
                 <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-                  {campaign.stats.totalUsers > 0 
-                    ? ((campaign.stats.emailsFailed / campaign.stats.totalUsers) * 100).toFixed(1)
-                    : 0}% failure rate
+                  {campaign.stats.totalUsers > 0
+                    ? (
+                        (campaign.stats.emailsFailed /
+                          campaign.stats.totalUsers) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  % failure rate
                 </p>
               </div>
             </div>

@@ -15,13 +15,7 @@ import {
 import { FlashcardGenerator } from '../components/FlashcardGenerator';
 import { FlashcardSetList } from '../components/FlashcardSetList';
 import { DeleteModal } from '../components/DeleteModal';
-import {
-  useFlashcardSets,
-  useJobEvents,
-  useInvalidateQuota,
-  useTour,
-} from '../hooks';
-import { flashcardGeneratorTour } from '../tours';
+import { useFlashcardSets, useJobEvents, useInvalidateQuota } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
@@ -31,18 +25,8 @@ export const FlashcardsPage = () => {
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
-  const { startIfNotCompleted } = useTour();
   const [showGenerator, setShowGenerator] = useState(false);
   const { data: flashcardSets = [], isLoading } = useFlashcardSets();
-
-  useEffect(() => {
-    if (showGenerator) {
-      startIfNotCompleted(
-        'flashcard-generator-onboarding',
-        flashcardGeneratorTour
-      );
-    }
-  }, [showGenerator, startIfNotCompleted]);
   const [loading, setLoading] = useState(false);
   const [deleteSetId, setDeleteSetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);

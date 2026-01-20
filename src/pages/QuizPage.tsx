@@ -18,31 +18,14 @@ import { DeleteModal } from '../components/DeleteModal';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  useInvalidateQuota,
-  useQuizzes,
-  useJobEvents,
-  useTour,
-} from '../hooks';
-import { quizTour, quizGeneratorTour } from '../tours';
+import { useInvalidateQuota, useQuizzes, useJobEvents } from '../hooks';
 
 export const QuizPage = () => {
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
-  const { startIfNotCompleted } = useTour();
   const [showGenerator, setShowGenerator] = useState(false);
-
-  useEffect(() => {
-    startIfNotCompleted('quiz-onboarding', quizTour);
-  }, [startIfNotCompleted]);
-
-  useEffect(() => {
-    if (showGenerator) {
-      startIfNotCompleted('quiz-generator-onboarding', quizGeneratorTour);
-    }
-  }, [showGenerator, startIfNotCompleted]);
   const { data: quizzes = [], isLoading: loading } = useQuizzes();
   const [generating, setGenerating] = useState(false);
   const [initialValues, setInitialValues] = useState<
