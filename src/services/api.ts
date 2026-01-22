@@ -4,7 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, AUTH_ENDPOINTS } from '../config/api';
 import type { ApiResponse, PaginationMeta } from '../types/api-response';
 
 // Token management utilities
@@ -46,7 +46,7 @@ export const apiClient: AxiosInstance = axios.create({
   withCredentials: true, // Include cookies
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -136,8 +136,13 @@ function transformResponse<T = any>(response: AxiosResponse): AxiosResponse {
 
 // Check if current route is public
 function isPublicRoute(pathname: string): boolean {
-  const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
-  return publicRoutes.some(route => pathname.startsWith(route));
+  const publicRoutes = [
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+  ];
+  return publicRoutes.some((route) => pathname.startsWith(route));
 }
 
 // Handle authentication errors
@@ -181,22 +186,122 @@ function extractErrorDetails(error: AxiosError): {
   };
 }
 
+// Token refresh state
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (error?: any) => void;
+}> = [];
+
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
+// Refresh access token using refresh token
+async function refreshAccessToken(): Promise<string> {
+  const refreshToken = TokenService.getRefreshToken();
+
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+
+  try {
+    const response = await axios.post<{ accessToken: string }>(
+      AUTH_ENDPOINTS.REFRESH_TOKEN,
+      { refreshToken },
+      {
+        baseURL: API_BASE_URL,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    const { accessToken } = response.data;
+    TokenService.setAccessToken(accessToken);
+    return accessToken;
+  } catch (error) {
+    TokenService.clearTokens();
+    throw error;
+  }
+}
+
 // Response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => transformResponse(response),
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
     const { message, details } = extractErrorDetails(error);
 
     // Enhance error object with API error details
     error.message = message;
     (error as any).errorDetails = details;
 
+    // Handle 401 Unauthorized - attempt token refresh
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
+      // Skip refresh for auth endpoints (except refresh endpoint itself)
+      const isAuthEndpoint =
+        originalRequest.url?.includes('/auth/') &&
+        !originalRequest.url?.includes('/auth/refresh');
+
+      if (isAuthEndpoint) {
+        handleAuthError();
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => {
+            // Retry with new token
+            const token = TokenService.getAccessToken();
+            if (token && originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const newToken = await refreshAccessToken();
+        processQueue(null, newToken);
+
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        }
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(new Error('Token refresh failed'), null);
+        handleAuthError();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     // Handle specific HTTP status codes
     switch (error.response?.status) {
-      case 401:
-        handleAuthError();
-        break;
-
       case 403:
         console.error('Access forbidden:', message);
         break;
@@ -226,7 +331,10 @@ apiClient.interceptors.response.use(
 export { TokenService };
 
 // Helper function for setting auth tokens after login
-export function setAuthTokens(accessToken: string, refreshToken?: string): void {
+export function setAuthTokens(
+  accessToken: string,
+  refreshToken?: string
+): void {
   TokenService.setAccessToken(accessToken);
   if (refreshToken) {
     TokenService.setRefreshToken(refreshToken);
@@ -240,7 +348,9 @@ export function logout(): void {
 }
 
 // Helper to check if error is an API error
-export function isApiError(error: unknown): error is AxiosError & { errorDetails?: unknown } {
+export function isApiError(
+  error: unknown
+): error is AxiosError & { errorDetails?: unknown } {
   return axios.isAxiosError(error) && 'errorDetails' in error;
 }
 

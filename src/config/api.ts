@@ -14,6 +14,7 @@ export const AUTH_ENDPOINTS = {
   RESEND_OTP: `${API_BASE_URL}/auth/resend-otp`,
   FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
   RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
 };
 
 // Quiz endpoints

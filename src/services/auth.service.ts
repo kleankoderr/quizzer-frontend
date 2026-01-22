@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient, TokenService } from './api';
 import { AUTH_ENDPOINTS } from '../config/api';
 import type { User } from '../types';
 export interface VerificationResponse {
@@ -9,7 +9,6 @@ export interface VerificationResponse {
 
 export const authService = {
   // Email/password login
-  // Email/password login
   login: async (
     email: string,
     password: string
@@ -17,6 +16,7 @@ export const authService = {
     const response = await apiClient.post<{
       user?: User;
       accessToken?: string;
+      refreshToken?: string;
       requiresVerification?: boolean;
       email?: string;
       message?: string;
@@ -33,15 +33,18 @@ export const authService = {
       };
     }
 
-    // Save user data to localStorage (token stored in HttpOnly cookie)
-    const { user } = response.data;
-    if (!user) throw new Error('Invalid response');
+    // Save tokens and user data to localStorage
+    const { user, accessToken, refreshToken } = response.data;
+    if (!user || !accessToken || !refreshToken)
+      throw new Error('Invalid response');
+
+    TokenService.setAccessToken(accessToken);
+    TokenService.setRefreshToken(refreshToken);
     authService.saveAuthData(user);
 
     return user;
   },
 
-  // Email/password signup
   // Email/password signup
   signup: async (
     email: string,
@@ -51,6 +54,7 @@ export const authService = {
     const response = await apiClient.post<{
       user?: User;
       accessToken?: string;
+      refreshToken?: string;
       requiresVerification?: boolean;
       email?: string;
       message?: string;
@@ -68,9 +72,13 @@ export const authService = {
       };
     }
 
-    // Save user data to localStorage (token stored in HttpOnly cookie)
-    const { user } = response.data;
-    if (!user) throw new Error('Invalid response');
+    // Save tokens and user data to localStorage
+    const { user, accessToken, refreshToken } = response.data;
+    if (!user || !accessToken || !refreshToken)
+      throw new Error('Invalid response');
+
+    TokenService.setAccessToken(accessToken);
+    TokenService.setRefreshToken(refreshToken);
     authService.saveAuthData(user);
 
     return user;
@@ -78,12 +86,17 @@ export const authService = {
 
   // Verify Email
   verifyEmail: async (email: string, otp: string): Promise<User> => {
-    const response = await apiClient.post<{ user: User; accessToken: string }>(
-      AUTH_ENDPOINTS.VERIFY_EMAIL,
-      { email, otp }
-    );
-    const { user } = response.data;
+    const response = await apiClient.post<{
+      user: User;
+      accessToken: string;
+      refreshToken: string;
+    }>(AUTH_ENDPOINTS.VERIFY_EMAIL, { email, otp });
+    const { user, accessToken, refreshToken } = response.data;
+
+    TokenService.setAccessToken(accessToken);
+    TokenService.setRefreshToken(refreshToken);
     authService.saveAuthData(user);
+
     return user;
   },
 
@@ -123,13 +136,17 @@ export const authService = {
 
   // Google Sign-In - Accepts ID token from frontend component
   googleSignIn: async (idToken: string): Promise<User> => {
-    const response = await apiClient.post<{ user: User; accessToken: string }>(
-      AUTH_ENDPOINTS.GOOGLE_LOGIN,
-      { idToken }
-    );
+    const response = await apiClient.post<{
+      user: User;
+      accessToken: string;
+      refreshToken: string;
+    }>(AUTH_ENDPOINTS.GOOGLE_LOGIN, { idToken });
 
-    // Save user data to localStorage (token stored in HttpOnly cookie)
-    const { user } = response.data;
+    // Save tokens and user data to localStorage
+    const { user, accessToken, refreshToken } = response.data;
+
+    TokenService.setAccessToken(accessToken);
+    TokenService.setRefreshToken(refreshToken);
     authService.saveAuthData(user);
 
     return user;
@@ -144,7 +161,7 @@ export const authService = {
   // Logout
   logout: async (): Promise<void> => {
     await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
-    localStorage.removeItem('user');
+    TokenService.clearTokens();
   },
 
   // Save auth data (user info only, token in HttpOnly cookie)
