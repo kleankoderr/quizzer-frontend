@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../config/api';
+import { TokenService } from './api';
 
 export type EventType =
   | 'quiz.progress'
@@ -30,9 +31,18 @@ class EventsService {
     if (this.eventSource || this.isConnecting) return;
 
     this.isConnecting = true;
-    const url = `${API_BASE_URL}/events/sse`;
 
-    this.eventSource = new EventSource(url, { withCredentials: true });
+    // Get access token and append as query parameter (EventSource can't send headers)
+    const token = TokenService.getAccessToken();
+    if (!token) {
+      console.warn('No access token available for SSE connection');
+      this.isConnecting = false;
+      return;
+    }
+
+    const url = `${API_BASE_URL}/events/sse?token=${encodeURIComponent(token)}`;
+
+    this.eventSource = new EventSource(url);
 
     this.eventSource.onopen = () => {
       console.log('SSE Connected');
