@@ -5,20 +5,17 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect all requests to index.html for SPA routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
-  conditions = {Role = []}
-
-# Don't redirect asset files
+# Don't redirect asset files - this must come BEFORE the catch-all
 [[redirects]]
   from = "/assets/*"
   to = "/assets/:splat"
   status = 200
-  force = true
+
+# Redirect all other requests to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # Set correct MIME types for JavaScript files
 [[headers]]
