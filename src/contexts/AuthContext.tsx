@@ -38,7 +38,9 @@ const authStore = {
   },
   setState(newState: Partial<typeof authState>) {
     authState = { ...authState, ...newState };
-    listeners.forEach((listener) => listener());
+    for (const listener of listeners) {
+      listener();
+    }
   },
 };
 
