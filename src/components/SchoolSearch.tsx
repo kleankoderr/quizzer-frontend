@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { School as SchoolIcon, Search, Plus, ChevronDown } from 'lucide-react';
 import { schoolService, type School } from '../services/school.service';
-import { useDebounce } from '../hooks/useDebounce';
-import { useClickOutside } from '../hooks/useClickOutside';
+import { useDebounce, useClickOutside } from '../hooks';
 
 interface SchoolSearchProps {
   id?: string;
@@ -94,6 +93,7 @@ export const SchoolSearch = ({
           onFocus={() => setIsOpen(true)}
           className="w-full pl-10 pr-10 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-text"
           placeholder={placeholder}
+          maxLength={100}
         />
         {loading ? (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
