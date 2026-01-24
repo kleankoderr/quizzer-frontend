@@ -105,6 +105,11 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Scroll to top when the component mounts
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const stats = useMemo(() => {
     if (!attempts || attempts.length === 0) {
       return { total: 0, averageScore: 0 };
@@ -181,42 +186,54 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
     <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 pb-12 px-4 sm:px-6">
       {/* Hero Header */}
       <header
-        className={`relative overflow-hidden rounded-2xl ${type === 'quiz' ? 'bg-blue-600 dark:bg-blue-700' : 'bg-primary-600 dark:bg-primary-700'} shadow-lg border border-white/10`}
+        className={`relative overflow-hidden rounded-3xl ${type === 'quiz' ? 'bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-900' : 'bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-950'} shadow-2xl border border-white/20`}
       >
-        {onBack && (
-          <div className="absolute top-6 left-6 z-20">
+        {/* Background Decorative Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/3" />
+        </div>
+
+        <div className="relative z-10 px-6 py-8 md:p-10">
+          {onBack && (
+            <div className="mb-6">
+              <button
+                onClick={onBack}
+                className="group flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl backdrop-blur-md transition-all border border-white/10 shadow-sm"
+              >
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span className="text-sm font-semibold">Back</span>
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-blue-100/90 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] drop-shadow-sm">
+                <Icon className="w-4 h-4" />
+                {reportLabel}
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-none mb-3">
+                  {title}
+                </h1>
+                <p className="text-white/80 text-sm sm:text-lg font-medium max-w-xl leading-relaxed">
+                  {description}
+                </p>
+              </div>
+            </div>
+
             <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm transition-all shadow-sm"
+              onClick={onRetake}
+              className="group flex items-center justify-center gap-3 px-8 py-4 bg-white hover:bg-white/95 text-blue-600 dark:text-blue-700 font-black rounded-2xl transition-all hover:scale-[1.03] active:scale-95 shadow-xl hover:shadow-2xl whitespace-nowrap w-full md:w-auto overflow-hidden relative"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-medium">Back</span>
+              <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative flex items-center gap-3">
+                <RotateCcw className="w-5 h-5 transition-transform group-hover:rotate-180 duration-500" />
+                <span>{buttonLabel}</span>
+              </div>
             </button>
           </div>
-        )}
-        <div
-          className={`relative z-10 px-6 ${onBack ? 'pt-16 pb-8 sm:pt-20 sm:pb-10' : 'py-8 sm:p-10'} flex flex-col md:flex-row md:items-center justify-between gap-6`}
-        >
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
-              <Icon className="w-4 h-4" />
-              {reportLabel}
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-              {title}
-            </h1>
-            <p className="text-white/80 text-sm sm:text-base font-medium max-w-xl">
-              {description}
-            </p>
-          </div>
-
-          <button
-            onClick={onRetake}
-            className={`flex items-center justify-center gap-3 px-8 py-4 bg-white ${type === 'quiz' ? 'text-blue-600' : 'text-primary-600'} font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-md whitespace-nowrap w-full md:w-auto`}
-          >
-            <RotateCcw className="w-5 h-5 transition-transform group-hover:rotate-180" />
-            <span>{buttonLabel}</span>
-          </button>
         </div>
       </header>
 
