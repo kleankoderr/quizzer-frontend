@@ -90,13 +90,13 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({
         styles={{
           options: {
             zIndex: 10000,
-            overlayColor: 'rgba(0, 0, 0, 0.7)',
+            overlayColor: 'rgba(0, 0, 0, 0.3)',
             primaryColor: '#2563eb', // Application Blue
             arrowColor: '#ffffff', // Tooltip bg color
           },
           spotlight: {
             borderRadius: '16px',
-            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7)', // Ensure dark overlay
+            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.3)', // Ensure dark overlay
           },
           beacon: {
             display: 'flex',

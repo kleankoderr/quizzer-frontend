@@ -42,6 +42,7 @@ export const TOURS: Record<string, TourConfig> = {
         content:
           'No worries! You can always find your pending onboarding assessment here in the Quizzes section whenever you are ready.',
         placement: 'right',
+        disableBeacon: true,
       },
     ],
   },
