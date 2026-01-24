@@ -111,6 +111,7 @@ export const FlashcardsPage = () => {
             message="Opening your flashcards..."
             progress={100}
             status="success"
+            onClose={() => setLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 2000 }
@@ -133,6 +134,7 @@ export const FlashcardsPage = () => {
             message={error}
             progress={0}
             status="error"
+            onClose={() => setLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 5000 }
@@ -161,6 +163,7 @@ export const FlashcardsPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -175,10 +178,7 @@ export const FlashcardsPage = () => {
       let errorMessage =
         error?.response?.data?.message || 'Failed to create flashcards';
 
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -190,6 +190,7 @@ export const FlashcardsPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }

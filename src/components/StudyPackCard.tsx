@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from './Card';
+import { useNavigate } from 'react-router-dom';
 import type { StudyPack } from '../types';
 import {
   Folder,
@@ -33,6 +34,9 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
   onDelete,
   onEdit,
 }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const navigate = useNavigate();
+
   const counts = studyPack._count || {
     quizzes: 0,
     flashcardSets: 0,
@@ -89,6 +93,18 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
     },
   ];
 
+  const navigateToPack = () => {
+    navigate(`/study-pack/${studyPack.id}`);
+  };
+
+  const toggleExpand = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <Card
       title={studyPack.title}
@@ -96,7 +112,9 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
       icon={
         <Folder className="w-6 h-6 text-primary-600 dark:text-primary-400" />
       }
-      to={`/study-pack/${studyPack.id}`}
+      onClick={toggleExpand}
+      onTitleClick={navigateToPack}
+      onIconClick={navigateToPack}
       gradientColor="bg-blue-500"
       actions={
         <div className="flex items-center gap-1">
@@ -123,18 +141,37 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
         </div>
       }
     >
-      <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
-        {stats.map((stat) => (
-          <StatItem key={stat.title} {...stat} />
-        ))}
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+          <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+            {stats.map((stat) => (
+              <StatItem key={stat.title} {...stat} />
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span className="font-medium whitespace-nowrap">
+              {totalItems} item{totalItems === 1 ? '' : 's'}
+            </span>
+            <span>Created {formattedDate}</span>
+          </div>
+
+          <button 
+            onClick={(e) => { e.stopPropagation(); navigateToPack(); }}
+            className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+          >
+            Open Study Set
+            <Folder className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500">
-        <span className="font-medium">
-          {totalItems} item{totalItems === 1 ? '' : 's'}
-        </span>
-        <span>{formattedDate}</span>
-      </div>
+      {!isExpanded && (
+        <div className="mt-2 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <span>{totalItems} item{totalItems === 1 ? '' : 's'}</span>
+          <span>Click to expand</span>
+        </div>
+      )}
     </Card>
   );
 };

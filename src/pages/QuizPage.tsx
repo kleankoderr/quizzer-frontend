@@ -118,6 +118,7 @@ export const QuizPage = () => {
             message="Opening your quiz..."
             progress={100}
             status="success"
+            onClose={() => setGenerating(false)}
           />
         ),
         { id: toastIdRef.current, duration: 2000 }
@@ -149,6 +150,7 @@ export const QuizPage = () => {
             message={error}
             progress={0}
             status="error"
+            onClose={() => setGenerating(false)}
           />
         ),
         { id: toastIdRef.current, duration: 5000 }
@@ -177,6 +179,7 @@ export const QuizPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setGenerating(false)}
         />
       ),
       { duration: Infinity }
@@ -191,10 +194,7 @@ export const QuizPage = () => {
       let errorMessage =
         error?.response?.data?.message || 'Failed to generate quiz';
 
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -206,6 +206,7 @@ export const QuizPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setGenerating(false)}
           />
         ),
         { id: toastId, duration: 5000 }

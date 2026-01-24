@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './Card';
 import type { Quiz, StudyPack } from '../types';
-import { Brain, Plus } from 'lucide-react';
+import { Brain, Plus, Pencil, Folder, Trash2 } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
-import { CardMenu, Pencil, Folder, Trash2 } from './CardMenu';
+import { CardMenu } from './CardMenu';
 import { EditTitleModal } from './EditTitleModal';
 import { quizService } from '../services/quiz.service';
 import { Toast as toast } from '../utils/toast';
@@ -18,6 +18,131 @@ interface QuizListProps {
   onCreateNew?: () => void;
   onItemMoved?: (itemId: string, pack?: StudyPack) => void;
 }
+
+interface QuizCardProps {
+  quiz: Quiz;
+  onDelete?: (id: string) => void;
+  onEdit: (id: string) => void;
+  onMove: (id: string) => void;
+}
+
+const QuizCard: React.FC<QuizCardProps> = ({ quiz, onDelete, onEdit, onMove }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const navigate = useNavigate();
+  const latestAttempt = quiz.attempts?.[0] ?? null;
+
+  const navigateToQuiz = () => {
+    navigate(
+      `/quiz/${quiz.id}${quiz.attemptCount && quiz.attemptCount > 0 ? '?view=history' : ''}`
+    );
+  };
+
+  const toggleExpand = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
+  const menuItems = [
+    {
+      label: 'Edit Title',
+      icon: <Pencil className="w-4 h-4" />,
+      onClick: () => onEdit(quiz.id),
+    },
+    {
+      label: 'Move to Study Set',
+      icon: <Folder className="w-4 h-4" />,
+      onClick: () => onMove(quiz.id),
+    },
+    ...(onDelete
+      ? [
+          {
+            label: 'Delete',
+            icon: <Trash2 className="w-4 h-4" />,
+            onClick: () => onDelete(quiz.id),
+            variant: 'danger' as const,
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <Card
+      key={quiz.id}
+      title={quiz.title}
+      subtitle={quiz.topic}
+      icon={<Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+      onClick={toggleExpand}
+      onTitleClick={navigateToQuiz}
+      onIconClick={navigateToQuiz}
+      actions={<CardMenu items={menuItems} />}
+    >
+      <div
+        className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-60 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+          {/* Tags */}
+          {quiz.tags && quiz.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {quiz.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-[10px] font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Stats */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-1.5">
+                <Brain className="w-4 h-4" />
+                <span>
+                  {quiz.questionCount || quiz.questions?.length || 0} questions
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs">
+                  {quiz.createdAt ? formatDate(quiz.createdAt) : 'Unknown date'}
+                </span>
+              </div>
+            </div>
+
+            {latestAttempt && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
+                Last attempt: {formatDate(latestAttempt.completedAt)} •{' '}
+                {latestAttempt.score}/
+                {quiz.questionCount || quiz.questions?.length} correct
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateToQuiz();
+            }}
+            className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 mt-2"
+          >
+            Start Quiz
+            <Brain className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {!isExpanded && (
+        <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <span>
+            {quiz.questionCount || quiz.questions?.length || 0} Questions
+          </span>
+          <span>Click to expand</span>
+        </div>
+      )}
+    </Card>
+  );
+};
 
 export const QuizList: React.FC<QuizListProps> = ({
   quizzes,
@@ -82,91 +207,6 @@ export const QuizList: React.FC<QuizListProps> = ({
     return { groups, noPack };
   }, [quizzes]);
 
-  const renderQuizCard = (quiz: Quiz) => {
-    const latestAttempt = quiz.attempts?.[0] ?? null;
-
-    const menuItems = [
-      {
-        label: 'Edit Title',
-        icon: <Pencil className="w-4 h-4" />,
-        onClick: () => setEditQuizId(quiz.id),
-      },
-      {
-        label: 'Move to Study Set',
-        icon: <Folder className="w-4 h-4" />,
-        onClick: () => setMoveQuizId(quiz.id),
-      },
-      ...(onDelete
-        ? [
-            {
-              label: 'Delete',
-              icon: <Trash2 className="w-4 h-4" />,
-              onClick: () => handleDelete(new Event('click') as any, quiz.id),
-              variant: 'danger' as const,
-            },
-          ]
-        : []),
-    ];
-
-    return (
-      <Card
-        key={quiz.id}
-        to={`/quiz/${quiz.id}${quiz.attemptCount && quiz.attemptCount > 0 ? '?view=history' : ''}`}
-        title={quiz.title}
-        subtitle={quiz.topic}
-        actions={<CardMenu items={menuItems} />}
-      >
-        {/* Tags */}
-        {quiz.tags && quiz.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {quiz.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-[10px] font-medium"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <Brain className="w-4 h-4" />
-              <span>
-                {quiz.questionCount || quiz.questions?.length || 0} questions
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs">
-                {quiz.createdAt ? formatDate(quiz.createdAt) : 'Unknown date'}
-              </span>
-            </div>
-          </div>
-
-          {/* Footer */}
-          {latestAttempt && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
-              Last attempt: {formatDate(latestAttempt.completedAt)} •{' '}
-              {latestAttempt.score}/
-              {quiz.questionCount || quiz.questions?.length} correct
-            </div>
-          )}
-        </div>
-      </Card>
-    );
-  };
-
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation();
-    if (onDelete) {
-      onDelete(id);
-    }
-  };
-
   if (quizzes.length === 0) {
     return (
       <div className="card text-center py-16">
@@ -210,7 +250,15 @@ export const QuizList: React.FC<QuizListProps> = ({
             onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=quizzes`)}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {pack.quizzes.map((quiz) => renderQuizCard(quiz))}
+              {pack.quizzes.map((quiz) => (
+                <QuizCard
+                  key={quiz.id}
+                  quiz={quiz}
+                  onEdit={(id) => setEditQuizId(id)}
+                  onMove={(id) => setMoveQuizId(id)}
+                  onDelete={onDelete}
+                />
+              ))}
             </div>
           </CollapsibleSection>
         ))}
@@ -218,7 +266,15 @@ export const QuizList: React.FC<QuizListProps> = ({
         {/* Uncategorized Quizzes */}
         {groupedQuizzes.noPack.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-            {groupedQuizzes.noPack.map((quiz) => renderQuizCard(quiz))}
+            {groupedQuizzes.noPack.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                onEdit={(id) => setEditQuizId(id)}
+                onMove={(id) => setMoveQuizId(id)}
+                onDelete={onDelete}
+              />
+            ))}
           </div>
         )}
       </div>

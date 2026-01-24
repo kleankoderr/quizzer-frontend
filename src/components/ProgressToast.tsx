@@ -8,11 +8,20 @@ interface ProgressToastProps {
   message?: string;
   progress: number;
   status: 'processing' | 'success' | 'error';
+  onClose?: () => void;
 }
 
 export const ProgressToast: React.FC<
   ProgressToastProps & { autoProgress?: boolean }
-> = ({ t, title, message, progress, status, autoProgress = false }) => {
+> = ({
+  t,
+  title,
+  message,
+  progress,
+  status,
+  autoProgress = false,
+  onClose,
+}) => {
   const [currentProgress, setCurrentProgress] = useState(progress);
   const [currentMessage, setCurrentMessage] = useState(message);
 
@@ -89,10 +98,11 @@ export const ProgressToast: React.FC<
       const delay = status === 'error' ? 6000 : 3000; // 6s for errors, 3s for success
       const timer = setTimeout(() => {
         toast.dismiss(t.id);
+        onClose?.();
       }, delay);
       return () => clearTimeout(timer);
     }
-  }, [status, t.id]);
+  }, [status, t.id, onClose]);
 
   const getBorderColor = () => {
     if (status === 'processing') return 'border-l-blue-500';
@@ -123,7 +133,7 @@ export const ProgressToast: React.FC<
               <div className="relative flex items-center justify-center w-10 h-10">
                 <Loader2 className="absolute w-10 h-10 text-blue-600 dark:text-blue-400 animate-spin" />
                 <span className="relative text-[10px] font-bold text-blue-700 dark:text-blue-300">
-                  {Math.round(currentProgress)}%
+                   {Math.round(currentProgress)}%
                 </span>
               </div>
             )}
@@ -158,7 +168,10 @@ export const ProgressToast: React.FC<
           {/* Close Button */}
           {status === 'processing' && (
             <button
-              onClick={() => toast.dismiss(t.id)}
+              onClick={() => {
+                toast.dismiss(t.id);
+                onClose?.();
+              }}
               className="flex-shrink-0 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               aria-label="Close notification"
             >

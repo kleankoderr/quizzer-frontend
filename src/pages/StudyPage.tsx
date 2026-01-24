@@ -34,6 +34,117 @@ import { formatDate } from '../utils/dateFormat';
 import { useAutoTour } from '../hooks/useAutoTour';
 import { InputError } from '../components/InputError';
 
+const getSummary = (content: any) => {
+  if (content.description) {
+    return content.description;
+  }
+  if (content.generatedContent?.summary) {
+    return content.generatedContent.summary;
+  }
+  return 'No description available';
+};
+
+interface ContentCardProps {
+  content: any;
+  onEdit: (id: string) => void;
+  onMove: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
+const ContentCard: React.FC<ContentCardProps> = ({
+  content,
+  onEdit,
+  onMove,
+  onDelete,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
+
+  const navigateToContent = () => {
+    navigate(`/content/${content.id}`, {
+      state: {
+        breadcrumb: [{ label: 'Study Material', path: '/study' }],
+      },
+    });
+  };
+
+  const toggleExpand = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
+  const menuItems = [
+    {
+      label: 'Edit Title',
+      icon: <Pencil className="w-4 h-4" />,
+      onClick: () => onEdit(content.id),
+    },
+    {
+      label: 'Move to Study Set',
+      icon: <Folder className="w-4 h-4" />,
+      onClick: () => onMove(content.id),
+    },
+    {
+      label: 'Delete',
+      icon: <Trash2 className="w-4 h-4" />,
+      onClick: () => onDelete(content.id),
+      variant: 'danger' as const,
+    },
+  ];
+
+  return (
+    <Card
+      key={content.id}
+      title={content.title}
+      subtitle={content.topic}
+      icon={<BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+      onClick={toggleExpand}
+      onTitleClick={navigateToContent}
+      onIconClick={navigateToContent}
+      actions={<CardMenu items={menuItems} />}
+    >
+      <div
+        className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-80 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-4">
+            {getSummary(content)}
+          </p>
+
+          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1">
+              {formatDate(content.createdAt)}
+            </div>
+            {content.generatedContent && (
+              <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                Generated
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateToContent();
+            }}
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+          >
+            Read Material
+            <BookOpen className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {!isExpanded && (
+        <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <span>{content.generatedContent ? 'AI Generated' : 'Material'}</span>
+          <span>Click to expand</span>
+        </div>
+      )}
+    </Card>
+  );
+};
+
 export const StudyPage = () => {
   // Trigger study material tour
   useAutoTour('study-generator');
@@ -102,15 +213,12 @@ export const StudyPage = () => {
     }
   }, [location.state]);
 
-  const getSummary = (content: any) => {
-    if (content.description) {
-      return content.description;
-    }
-    if (content.generatedContent?.summary) {
-      return content.generatedContent.summary;
-    }
-    return 'No description available';
-  };
+  const uploadButtonLabel = useMemo(() => {
+    const totalSelected = files.length + selectedFileIds.length;
+    if (totalSelected === 0) return 'Documents';
+    return `${totalSelected} File${totalSelected === 1 ? '' : 's'}`;
+  }, [files.length, selectedFileIds.length]);
+
 
   // Group contents by study pack
   const groupedContents = useMemo(() => {
@@ -164,56 +272,6 @@ export const StudyPage = () => {
     }
   };
 
-  const renderContentCard = (content: any) => {
-    const menuItems = [
-      {
-        label: 'Edit Title',
-        icon: <Pencil className="w-4 h-4" />,
-        onClick: () => setEditContentId(content.id),
-      },
-      {
-        label: 'Move to Study Set',
-        icon: <Folder className="w-4 h-4" />,
-        onClick: () => setMoveContentId(content.id),
-      },
-      {
-        label: 'Delete',
-        icon: <Trash2 className="w-4 h-4" />,
-        onClick: () => setDeleteContentId(content.id),
-        variant: 'danger' as const,
-      },
-    ];
-
-    return (
-      <Card
-        key={content.id}
-        title={content.title}
-        subtitle={content.topic}
-        onClick={() =>
-          navigate(`/content/${content.id}`, {
-            state: {
-              breadcrumb: [{ label: 'Study Material', path: '/study' }],
-            },
-          })
-        }
-        actions={<CardMenu items={menuItems} />}
-      >
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
-          {getSummary(content)}
-        </p>
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            {formatDate(content.createdAt)}
-          </div>
-          {content.generatedContent && (
-            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-              Generated
-            </div>
-          )}
-        </div>
-      </Card>
-    );
-  };
 
   // Poll for job status with exponential backoff
   useJobEvents({
@@ -228,6 +286,7 @@ export const StudyPage = () => {
             message="Opening your study material..."
             progress={100}
             status="success"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 2000 }
@@ -255,6 +314,7 @@ export const StudyPage = () => {
             message={error}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 5000 }
@@ -289,6 +349,7 @@ export const StudyPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setContentLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -306,10 +367,7 @@ export const StudyPage = () => {
       let errorMessage =
         error?.response?.data?.message || 'Failed to generate content';
 
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -321,6 +379,7 @@ export const StudyPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -352,6 +411,7 @@ export const StudyPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setContentLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -371,10 +431,7 @@ export const StudyPage = () => {
       let errorMessage =
         error?.response?.data?.message || 'Failed to generate content';
 
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -386,6 +443,7 @@ export const StudyPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -417,6 +475,7 @@ export const StudyPage = () => {
           message="Uploading and extracting text..."
           progress={0}
           status="processing"
+          onClose={() => setContentLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -442,6 +501,7 @@ export const StudyPage = () => {
                   message={`Uploading... ${progress}%`}
                   progress={progress}
                   status="processing"
+                  onClose={() => setContentLoading(false)}
                 />
               ),
               { id: toastId }
@@ -461,6 +521,7 @@ export const StudyPage = () => {
             progress={0}
             status="processing"
             autoProgress={true}
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId }
@@ -470,10 +531,7 @@ export const StudyPage = () => {
     } catch (error: any) {
       let errorMessage = error?.response?.data?.message || 'Upload failed';
 
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -485,6 +543,7 @@ export const StudyPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -512,6 +571,157 @@ export const StudyPage = () => {
       setIsDeleting(false);
     }
   }, [deleteContentId, refetch]);
+
+  const renderStudyMaterials = () => {
+    if (isLoadingContents) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <CardSkeleton count={6} />
+        </div>
+      );
+    }
+
+    if (contents.length === 0) {
+      return (
+        <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+            <BookOpen className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            No study materials yet
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
+            Get started by generating content from a topic, your own text, or by
+            uploading files.
+          </p>
+          <button
+            onClick={() => setShowCreator(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Create Content
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {Object.values(groupedContents.groups).map((pack) => (
+          <CollapsibleSection
+            key={pack.id}
+            title={pack.title}
+            count={pack.contents.length}
+            defaultOpen={false}
+            onTitleClick={() =>
+              navigate(`/study-pack/${pack.id}?tab=materials`)
+            }
+            className="mb-8 last:mb-0"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pack.contents.map((content: any) => (
+                <ContentCard
+                  key={content.id}
+                  content={content}
+                  onEdit={(id) => setEditContentId(id)}
+                  onMove={(id) => setMoveContentId(id)}
+                  onDelete={(id) => setDeleteContentId(id)}
+                />
+              ))}
+            </div>
+          </CollapsibleSection>
+        ))}
+
+        {/* Uncategorized Contents */}
+        {groupedContents.noPack.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+            {groupedContents.noPack.map((content: any) => (
+              <ContentCard
+                key={content.id}
+                content={content}
+                onEdit={(id) => setEditContentId(id)}
+                onMove={(id) => setMoveContentId(id)}
+                onDelete={(id) => setDeleteContentId(id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Move Modal */}
+        <MoveToStudyPackModal
+          isOpen={!!moveContentId}
+          onClose={() => setMoveContentId(null)}
+          itemId={moveContentId || ''}
+          itemType="content"
+          onMoveSuccess={(pack) => {
+            queryClient.setQueryData(
+              ['contents', undefined, page, 6],
+              (old: any) => {
+                if (!old || !old.data) return old;
+                return {
+                  ...old,
+                  data: old.data.map((c: any) => {
+                    if (c.id === moveContentId) {
+                      return {
+                        ...c,
+                        studyPackId: pack?.id,
+                        studyPack: pack
+                          ? { id: pack.id, title: pack.title }
+                          : undefined,
+                      };
+                    }
+                    return c;
+                  }),
+                };
+              }
+            );
+            refetch();
+          }}
+        />
+
+        <EditTitleModal
+          isOpen={!!editContentId}
+          currentTitle={editingContent?.title || ''}
+          onClose={() => setEditContentId(null)}
+          onSave={(newTitle) =>
+            handleTitleUpdate(editContentId || '', newTitle)
+          }
+        />
+
+        <DeleteModal
+          isOpen={!!deleteContentId}
+          onClose={() => setDeleteContentId(null)}
+          onConfirm={confirmDeleteContent}
+          title="Delete Study Material"
+          message="Are you sure you want to delete this study material? This action cannot be undone."
+          isDeleting={isDeleting}
+        />
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2 font-medium text-gray-600 dark:text-gray-300 flex items-center text-center">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="space-y-6 pb-8 px-4 sm:px-0">
@@ -991,10 +1201,7 @@ export const StudyPage = () => {
                   ) : (
                     <>
                       <Upload className="w-6 h-6" />
-                      Process{' '}
-                      {files.length + selectedFileIds.length > 0
-                        ? `${files.length + selectedFileIds.length} File${files.length + selectedFileIds.length > 1 ? 's' : ''}`
-                        : 'Documents'}
+                      Process {uploadButtonLabel}
                     </>
                   )}
                 </button>
@@ -1011,136 +1218,7 @@ export const StudyPage = () => {
             Your Study Materials
           </h2>
 
-          {isLoadingContents ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <CardSkeleton count={6} />
-            </div>
-          ) : contents.length > 0 ? (
-            <>
-              <>
-                {Object.values(groupedContents.groups).map((pack) => (
-                  <CollapsibleSection
-                    key={pack.id}
-                    title={pack.title}
-                    count={pack.contents.length}
-                    defaultOpen={false}
-                    onTitleClick={() =>
-                      navigate(`/study-pack/${pack.id}?tab=materials`)
-                    }
-                    className="mb-8 last:mb-0"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {pack.contents.map((content) =>
-                        renderContentCard(content)
-                      )}
-                    </div>
-                  </CollapsibleSection>
-                ))}
-
-                {/* Uncategorized Contents */}
-                {groupedContents.noPack.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                    {groupedContents.noPack.map((content) =>
-                      renderContentCard(content)
-                    )}
-                  </div>
-                )}
-              </>
-
-              {/* Move Modal */}
-              <MoveToStudyPackModal
-                isOpen={!!moveContentId}
-                onClose={() => setMoveContentId(null)}
-                itemId={moveContentId || ''}
-                itemType="content"
-                onMoveSuccess={(pack) => {
-                  queryClient.setQueryData(
-                    ['contents', undefined, page, 6],
-                    (old: any) => {
-                      if (!old || !old.data) return old;
-                      return {
-                        ...old,
-                        data: old.data.map((c: any) => {
-                          if (c.id === moveContentId) {
-                            return {
-                              ...c,
-                              studyPackId: pack?.id,
-                              studyPack: pack
-                                ? { id: pack.id, title: pack.title }
-                                : undefined,
-                            };
-                          }
-                          return c;
-                        }),
-                      };
-                    }
-                  );
-                  refetch();
-                }}
-              />
-
-              <EditTitleModal
-                isOpen={!!editContentId}
-                currentTitle={editingContent?.title || ''}
-                onClose={() => setEditContentId(null)}
-                onSave={(newTitle) =>
-                  handleTitleUpdate(editContentId || '', newTitle)
-                }
-              />
-
-              <DeleteModal
-                isOpen={!!deleteContentId}
-                onClose={() => setDeleteContentId(null)}
-                onConfirm={confirmDeleteContent}
-                title="Delete Study Material"
-                message="Are you sure you want to delete this study material? This action cannot be undone."
-                isDeleting={isDeleting}
-              />
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-4 py-2 font-medium text-gray-600 dark:text-gray-300 flex items-center text-center">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
-                <BookOpen className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                No study materials yet
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-                Get started by generating content from a topic, your own text,
-                or by uploading files.
-              </p>
-              <button
-                onClick={() => setShowCreator(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-              >
-                <Plus className="w-5 h-5" />
-                Create Content
-              </button>
-            </div>
-          )}
+          {renderStudyMaterials()}
         </div>
       )}
     </div>
