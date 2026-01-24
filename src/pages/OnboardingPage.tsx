@@ -166,6 +166,25 @@ export const OnboardingPage = () => {
   });
 
   const handleNext = () => {
+    if (step === 1) {
+      const { schoolName, grade } = formData;
+      if (!grade) {
+        alert('Please select your level');
+        return;
+      }
+      if (!schoolName) {
+        alert('Please enter your school or institution');
+        return;
+      }
+      if (schoolName.length < 3) {
+        alert('School name must be at least 3 characters');
+        return;
+      }
+      if (!/^[a-zA-Z0-9\s.,&'()-]+$/.test(schoolName)) {
+        alert('School name contains invalid characters');
+        return;
+      }
+    }
     setStep((prev) => prev + 1);
   };
 

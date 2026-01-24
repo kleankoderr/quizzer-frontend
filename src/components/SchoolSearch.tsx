@@ -77,6 +77,67 @@ export const SchoolSearch = ({
     setIsOpen(false);
   };
 
+  const renderDropdownContent = () => {
+    if (results.length > 0) {
+      return (
+        <ul className="py-1">
+          {results.map((school) => (
+            <li key={school.id}>
+              <button
+                type="button"
+                onClick={() => handleSelect(school.name)}
+                className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-200 text-left transition-colors"
+              >
+                <Search className="w-4 h-4 text-gray-400" />
+                <span>{school.name}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (!loading && query.length > 0) {
+      if (query.length < 3) {
+        return (
+          <div className="p-4 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Keep typing to add your school (min 3 characters)
+            </p>
+          </div>
+        );
+      }
+
+      if (!/^[a-zA-Z0-9\s.,&'()-]+$/.test(query)) {
+        return (
+          <div className="p-4 text-center">
+            <p className="text-sm text-red-500 dark:text-red-400 font-medium">
+              School name contains invalid characters
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="p-4 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Not in our list?
+          </p>
+          <button
+            type="button"
+            onClick={() => handleSelect(query)}
+            className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center justify-center gap-1 mx-auto bg-primary-50 dark:bg-primary-900/20 px-3 py-1.5 rounded-full transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add "{query}"
+          </button>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
       <div className="relative">
@@ -87,7 +148,7 @@ export const SchoolSearch = ({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            onChange(e.target.value); // Allow typing new values
+            onChange(e.target.value);
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
@@ -115,40 +176,9 @@ export const SchoolSearch = ({
         )}
       </div>
 
-      {isOpen && results.length > 0 && (
+      {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-80 overflow-y-auto">
-          <ul className="py-1">
-            {results.map((school) => (
-              <li key={school.id}>
-                <button
-                  type="button"
-                  onClick={() => handleSelect(school.name)}
-                  className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-200 text-left transition-colors"
-                >
-                  <Search className="w-4 h-4 text-gray-400" />
-                  <span>{school.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {isOpen && query.length >= 2 && results.length === 0 && !loading && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <div className="p-4 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              No schools found
-            </p>
-            <button
-              type="button"
-              onClick={() => handleSelect(query)}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center justify-center gap-1 mx-auto"
-            >
-              <Plus className="w-4 h-4" />
-              Use "{query}"
-            </button>
-          </div>
+          {renderDropdownContent()}
         </div>
       )}
     </div>
