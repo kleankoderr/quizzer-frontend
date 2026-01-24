@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from './Card';
 
 import { Trash2, Folder, XCircle, MoreVertical, HelpCircle, Layers, BookOpen, FileText } from 'lucide-react';
+import { formatDate } from '../utils/dateFormat';
 
 interface StudyPackItemCardProps {
   item: any;
@@ -33,13 +34,7 @@ const getItemSubtitle = (type: string, item: any) => {
   return item.topic || '';
 };
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
+
 
 export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
   item,
@@ -52,12 +47,9 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isExpanded, setIsExpanded] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   const stats = getItemStats(type, item);
-  const dateStr = item.createdAt || item.uploadedAt;
-  const formattedDate = dateStr ? formatDate(dateStr) : '';
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -84,11 +76,6 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
     }
   };
 
-  const toggleExpand = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setIsExpanded(!isExpanded);
-  };
-
   const getIcon = () => {
     switch (type) {
       case 'quiz':
@@ -111,7 +98,7 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
         title={item.title || item.displayName || 'Untitled'}
         subtitle={getItemSubtitle(type, item)}
         icon={getIcon()}
-        onClick={toggleExpand}
+        onClick={onClick}
         onTitleClick={onClick}
         onIconClick={onClick}
         actions={
@@ -169,45 +156,16 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
           </div>
         }
       >
-        <div 
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
-        >
-          <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
-             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <span className="font-semibold uppercase tracking-wider">Details</span>
-              {formattedDate && <div>{formattedDate}</div>}
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              {stats && (
-                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <div className="w-2 h-2 rounded-full bg-primary-500"></div>
-                  <span className="font-medium">{stats.count}</span>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {stats.label}{stats.count === 1 ? '' : 's'}
-                  </span>
-                </div>
-              )}
-              
-              {item.description && (
-                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg italic">
-                  "{item.description}"
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Action Hint when not expanded */}
-        {!isExpanded && (
-          <div className="mt-4 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-             <div className="flex items-center gap-1.5">
-               <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-               {stats ? `${stats.count} ${stats.label}${stats.count === 1 ? '' : 's'}` : type}
-             </div>
-             <span>Click to expand</span>
-          </div>
-        )}
+        <div className="mt-4 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+           <div className="flex items-center gap-1.5">
+             <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+             {stats ? `${stats.count} ${stats.label}${stats.count === 1 ? '' : 's'}` : type}
+           </div>
+           {(item.createdAt || item.uploadedAt) && (
+             <span>{formatDate(item.createdAt || item.uploadedAt)}</span>
+           )}
+        </div>
       </Card>
     </div>
   );

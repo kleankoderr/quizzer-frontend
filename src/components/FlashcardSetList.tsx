@@ -32,7 +32,6 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
   onEdit,
   onMove,
 }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
   const navigate = useNavigate();
   const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
   const attemptCount = set.attemptCount || set._count?.attempts || 0;
@@ -40,11 +39,6 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
 
   const navigateToSet = () => {
     navigate(`/flashcards/${set.id}${hasStudied ? '?view=history' : ''}`);
-  };
-
-  const toggleExpand = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setIsExpanded(!isExpanded);
   };
 
   const menuItems = [
@@ -76,51 +70,17 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
       title={set.title}
       subtitle={set.topic}
       icon={<Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
-      onClick={toggleExpand}
+      onClick={navigateToSet}
       onTitleClick={navigateToSet}
       onIconClick={navigateToSet}
       actions={<CardMenu items={menuItems} />}
     >
-      <div
-        className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-60 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
-      >
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-              <Layers className="w-4 h-4" />
-              {cardCount} card{cardCount === 1 ? '' : 's'}
-            </span>
-            <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
-              Active
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span className="flex items-center gap-1">{formatDate(set.createdAt)}</span>
-            {hasStudied && (
-              <span className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
-                Last studied
-              </span>
-            )}
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateToSet();
-            }}
-            className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 mt-2"
-          >
-            Study Flashcards
-            <Layers className="w-4 h-4" />
-          </button>
-        </div>
+      <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+        <span>{cardCount} Cards</span>
+        {set.createdAt && (
+          <span>{formatDate(set.createdAt)}</span>
+        )}
       </div>
-
-      {!isExpanded && (
-        <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-          <span>{cardCount} Cards</span>
-          <span>Click to expand</span>
-        </div>
-      )}
     </Card>
   );
 };

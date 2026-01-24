@@ -27,19 +27,12 @@ interface QuizCardProps {
 }
 
 const QuizCard: React.FC<QuizCardProps> = ({ quiz, onDelete, onEdit, onMove }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
   const navigate = useNavigate();
-  const latestAttempt = quiz.attempts?.[0] ?? null;
 
   const navigateToQuiz = () => {
     navigate(
       `/quiz/${quiz.id}${quiz.attemptCount && quiz.attemptCount > 0 ? '?view=history' : ''}`
     );
-  };
-
-  const toggleExpand = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setIsExpanded(!isExpanded);
   };
 
   const menuItems = [
@@ -71,75 +64,19 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onDelete, onEdit, onMove }) =
       title={quiz.title}
       subtitle={quiz.topic}
       icon={<Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
-      onClick={toggleExpand}
+      onClick={navigateToQuiz}
       onTitleClick={navigateToQuiz}
       onIconClick={navigateToQuiz}
       actions={<CardMenu items={menuItems} />}
     >
-      <div
-        className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-60 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
-      >
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
-          {/* Tags */}
-          {quiz.tags && quiz.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {quiz.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-[10px] font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Stats */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-1.5">
-                <Brain className="w-4 h-4" />
-                <span>
-                  {quiz.questionCount || quiz.questions?.length || 0} questions
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs">
-                  {quiz.createdAt ? formatDate(quiz.createdAt) : 'Unknown date'}
-                </span>
-              </div>
-            </div>
-
-            {latestAttempt && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
-                Last attempt: {formatDate(latestAttempt.completedAt)} •{' '}
-                {latestAttempt.score}/
-                {quiz.questionCount || quiz.questions?.length} correct
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateToQuiz();
-            }}
-            className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 mt-2"
-          >
-            Start Quiz
-            <Brain className="w-4 h-4" />
-          </button>
-        </div>
+      <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+        <span>
+          {quiz.questionCount || quiz.questions?.length || 0} Questions
+        </span>
+        {quiz.createdAt && (
+          <span>{formatDate(quiz.createdAt)}</span>
+        )}
       </div>
-
-      {!isExpanded && (
-        <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-          <span>
-            {quiz.questionCount || quiz.questions?.length || 0} Questions
-          </span>
-          <span>Click to expand</span>
-        </div>
-      )}
     </Card>
   );
 };
