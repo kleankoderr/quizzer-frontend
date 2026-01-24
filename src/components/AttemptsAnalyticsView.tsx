@@ -105,10 +105,7 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Scroll to top when the component mounts
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+
 
   const stats = useMemo(() => {
     if (!attempts || attempts.length === 0) {

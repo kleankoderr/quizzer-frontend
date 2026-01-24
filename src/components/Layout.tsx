@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Breadcrumb } from './Breadcrumb';
 import { FloatingReviewButton } from './FloatingReviewButton';
+import { ScrollToTop } from './ScrollToTop';
 import { useBreadcrumbs } from '../hooks';
 
 export const Layout = () => {
@@ -28,7 +29,10 @@ export const Layout = () => {
           toggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         />
 
+        <ScrollToTop />
+
         <main
+          id="main-content-area"
           className={`flex-1 overflow-y-auto overflow-x-hidden ${isContentPage ? '' : 'p-3 sm:p-4 md:p-6'}`}
         >
           <div
