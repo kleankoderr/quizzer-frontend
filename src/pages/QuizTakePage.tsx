@@ -22,6 +22,7 @@ export const QuizTakePage = () => {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const challengeId = searchParams.get('challengeId');
+  const mode = searchParams.get('mode');
   const location = useLocation();
 
   const { data: quiz, isLoading: loading, error } = useQuiz(id);
@@ -248,7 +249,7 @@ export const QuizTakePage = () => {
       const hasAttempts =
         (quiz.attemptCount && quiz.attemptCount > 0) ||
         (quiz.attempts && quiz.attempts.length > 0);
-      setIsTaking(!hasAttempts);
+      setIsTaking(mode === 'retake' || !hasAttempts);
     }
 
     setInitialized(true);

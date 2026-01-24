@@ -145,9 +145,9 @@ export const QuizReviewPage = () => {
     if (!quiz?.id) return;
 
     if (challengeId) {
-      navigate(`/quiz/${quiz.id}?challengeId=${challengeId}`);
+      navigate(`/quiz/${quiz.id}?challengeId=${challengeId}&mode=retake`);
     } else {
-      navigate(`/quiz/${quiz.id}`);
+      navigate(`/quiz/${quiz.id}?mode=retake`);
     }
   };
 
