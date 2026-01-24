@@ -31,8 +31,11 @@ import { StudyPackSelector } from '../components/StudyPackSelector';
 import { CardMenu, Pencil } from '../components/CardMenu';
 import { EditTitleModal } from '../components/EditTitleModal';
 import { formatDate } from '../utils/dateFormat';
+import { useAutoTour } from '../hooks/useAutoTour';
 
 export const StudyPage = () => {
+  // Trigger study material tour
+  useAutoTour('study-generator');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();

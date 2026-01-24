@@ -19,8 +19,11 @@ import { useFlashcardSets, useJobEvents, useInvalidateQuota } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
+import { useAutoTour } from '../hooks/useAutoTour';
 
 export const FlashcardsPage = () => {
+  // Trigger flashcard tour
+  useAutoTour('flashcard-generator');
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();

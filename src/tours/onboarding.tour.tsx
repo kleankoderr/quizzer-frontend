@@ -4,77 +4,50 @@ export const onboardingTour: Step[] = [
   {
     target: 'body',
     placement: 'center',
+    title: 'Welcome to Quizzer! 👋',
     content: (
-      <div className="text-left space-y-2">
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          Welcome to Quizzer! 👋
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-          Let's take a quick 1-minute tour to show you how to supercharge your
-          learning experience.
+      <div className="space-y-3">
+        <p className="text-gray-600 dark:text-gray-400">
+          Let's take a quick tour to show you how to get the most out of your
+          learning journey.
         </p>
       </div>
     ),
     disableBeacon: true,
   },
   {
-    target: '[href="/study"]',
-    content: (
-      <span>
-        The <strong>powerhouse</strong>. Upload your materials here to generate
-        comprehensive learning guides and summaries.
-      </span>
-    ),
-    placement: 'right',
-  },
-  {
-    target: '[href="/quiz"]',
-    content: (
-      <span>
-        <strong>Test your knowledge</strong>. Generate quizzes from your
-        documents or any topic to reinforce what you've learned.
-      </span>
-    ),
-    placement: 'right',
-  },
-  {
-    target: '[href="/flashcards"]',
-    content: (
-      <span>
-        Master complex concepts using our{' '}
-        <strong>spaced-repetition flashcard system</strong>.
-      </span>
-    ),
-    placement: 'right',
-  },
-  {
-    target: '[href="/study-pack"]',
-    content: (
-      <span>
-        Keep everything <strong>organized</strong>. Group your documents,
-        quizzes, and flashcards into custom study sets.
-      </span>
-    ),
-    placement: 'right',
-  },
-  {
     target: '#start-studying-btn',
-    content: (
-      <span>
-        <strong>Begin your journey here!</strong> Click this to start creating
-        your first study set or learning guide.
-      </span>
-    ),
-    placement: 'top',
+    title: 'Start Learning',
+    content:
+      'Begin your journey here! Click this to generate your first study material from topics, text, or documents.',
+    placement: 'bottom',
   },
   {
     target: '#create-quiz-btn',
-    content: (
-      <span>
-        Ready for a <strong>challenge</strong>? Jump straight into creating a
-        quiz to test your mastery.
-      </span>
-    ),
+    title: 'Practice & Test',
+    content:
+      'Ready to challenge yourself? Jump straight into creating an intelligent quiz to test your mastery.',
+    placement: 'bottom',
+  },
+  {
+    target: '.recharts-responsive-container',
+    title: 'Track Your Growth',
+    content:
+      'Monitor your study activity and performance over the last 7 days to see your progress in real-time.',
     placement: 'top',
+  },
+  {
+    target: '#sidebar-collapse-btn',
+    title: 'Maximize Your View',
+    content:
+      'Collapse the sidebar to focus on your content, or expand it for quick navigation across the platform.',
+    placement: 'right',
+  },
+  {
+    target: '#sidebar-study-btn',
+    title: 'Your Study Hub',
+    content:
+      'Access all your generated study materials, lecture notes, and summaries in one centralized place.',
+    placement: 'right',
   },
 ];

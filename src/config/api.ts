@@ -94,4 +94,10 @@ export const USER_ENDPOINTS = {
   CHANGE_PASSWORD: `${API_BASE_URL}/user/password`,
   DELETE_ACCOUNT: `${API_BASE_URL}/user/account`,
   GET_QUOTA: `${API_BASE_URL}/user/quota`,
+  MARK_ASSESSMENT_SHOWN: `${API_BASE_URL}/user/assessment-popup-shown`,
+};
+
+// Onboarding endpoints
+export const ONBOARDING_ENDPOINTS = {
+  GET_STATUS: `${API_BASE_URL}/onboarding/status`,
 };

@@ -4,6 +4,7 @@ import {
   LEADERBOARD_ENDPOINTS,
   RECOMMENDATION_ENDPOINTS,
   ATTEMPTS_ENDPOINTS,
+  ONBOARDING_ENDPOINTS,
 } from '../config/api';
 import type {
   Streak,
@@ -89,6 +90,16 @@ export const attemptService = {
     const response = await apiClient.get<Attempt[]>(
       `/attempts/flashcard/${flashcardId}`
     );
+    return response.data;
+  },
+};
+
+export const onboardingService = {
+  getStatus: async (): Promise<{
+    status: 'NOT_STARTED' | 'PENDING' | 'COMPLETED';
+    quizId?: string;
+  }> => {
+    const response = await apiClient.get(ONBOARDING_ENDPOINTS.GET_STATUS);
     return response.data;
   },
 };

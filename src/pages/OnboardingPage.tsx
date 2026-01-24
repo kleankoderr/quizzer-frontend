@@ -152,9 +152,6 @@ const SUBJECT_MAP: Record<string, string[]> = {
   'Lifelong Learner': SUBJECTS,
 };
 
-
-
-
 export const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -229,8 +226,6 @@ export const OnboardingPage = () => {
 
           <div className="p-8">
             <AnimatePresence mode="wait">
-
-
               {/* Step 1: Grade & School */}
               {step === 1 && (
                 <motion.div
@@ -312,21 +307,22 @@ export const OnboardingPage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
                     {(SUBJECT_MAP[formData.grade] || SUBJECTS).map(
                       (subject) => (
-                      <button
-                        key={subject}
-                        onClick={() => toggleSubject(subject)}
-                        className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
-                          formData.subjects.includes(subject)
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        <span className="text-sm font-medium">{subject}</span>
-                        {formData.subjects.includes(subject) && (
-                          <Check className="w-4 h-4" />
-                        )}
-                      </button>
-                    ))}
+                        <button
+                          key={subject}
+                          onClick={() => toggleSubject(subject)}
+                          className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
+                            formData.subjects.includes(subject)
+                              ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <span className="text-sm font-medium">{subject}</span>
+                          {formData.subjects.includes(subject) && (
+                            <Check className="w-4 h-4" />
+                          )}
+                        </button>
+                      )
+                    )}
                   </div>
                 </motion.div>
               )}

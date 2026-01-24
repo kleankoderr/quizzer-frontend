@@ -197,11 +197,17 @@ export const Sidebar = ({
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
+                const linkIdMap: Record<string, string> = {
+                  '/study': 'sidebar-study-btn',
+                  '/quiz': 'sidebar-quiz-btn',
+                };
+                const linkId = linkIdMap[item.path];
 
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
+                    id={linkId}
                     onClick={() => isOpen && closeMobile()} // Close mobile sidebar on navigation
                     className={`
                       flex items-center gap-3 px-3 py-3 sm:py-2.5 rounded-lg transition-all relative touch-manipulation

@@ -1,8 +1,8 @@
 import { createContext } from 'react';
-import { type Step } from 'react-joyride';
+import { type TourConfig } from '../types/tour';
 
 export interface TourContextType {
-  startTour: (key: string, steps: Step[]) => void;
+  startTour: (idOrConfig: string | TourConfig) => void;
   stopTour: () => void;
 }
 

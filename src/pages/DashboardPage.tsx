@@ -28,6 +28,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { format, subDays, startOfDay } from 'date-fns';
+import { useAutoTour } from '../hooks/useAutoTour';
 
 const getScoreColor = (score: number, totalQuestions: number) => {
   const percentage = score / (totalQuestions || 1);
@@ -39,6 +40,9 @@ const getScoreColor = (score: number, totalQuestions: number) => {
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Trigger primary onboarding tour for new users
+  useAutoTour('onboarding');
 
   const { data: dailyQuote } = useQuery({
     queryKey: ['daily-quote'],

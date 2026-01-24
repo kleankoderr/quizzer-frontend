@@ -19,8 +19,11 @@ import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useInvalidateQuota, useQuizzes, useJobEvents } from '../hooks';
+import { useAutoTour } from '../hooks/useAutoTour';
 
 export const QuizPage = () => {
+  // Trigger quiz tour
+  useAutoTour('quiz');
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
