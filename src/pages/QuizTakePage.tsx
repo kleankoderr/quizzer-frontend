@@ -54,12 +54,12 @@ export const QuizTakePage = () => {
               label: quiz.studyPack.title,
               path: `/study-pack/${quiz.studyPack.id}`,
             },
-            { label: quiz.title, path: null },
+            { label: quiz.title, path: `/quiz/${quiz.id}` },
             { label: 'Review', path: null },
           ]
         : [
             { label: 'Quizzes', path: '/quiz' },
-            { label: quiz.title, path: null },
+            { label: quiz.title, path: `/quiz/${quiz.id}` },
             { label: 'Review', path: null },
           ];
 
@@ -179,16 +179,11 @@ export const QuizTakePage = () => {
       breadcrumbItems.push({ label: 'Quizzes', path: '/quiz' });
     }
 
-    // Add quiz title (non-clickable)
-    breadcrumbItems.push({ label: quiz.title, path: null });
-
-    // Add "Attempts" or "Retake" if applicable
-    if (hasAttempts) {
-      breadcrumbItems.push({
-        label: isTaking ? 'Retake' : 'Practice History',
-        path: null,
-      });
-    }
+    // Add quiz title (clickable if there are attempts)
+    breadcrumbItems.push({
+      label: quiz.title,
+      path: hasAttempts ? `/quiz/${id}` : null,
+    });
 
     navigate(location.pathname + location.search, {
       replace: true,

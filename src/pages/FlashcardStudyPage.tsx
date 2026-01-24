@@ -46,7 +46,10 @@ const buildBreadcrumbItems = (
           path: `/study-pack/${flashcardSet.studyPack.id}?tab=flashcards`,
         }
       : { label: 'Flashcards', path: '/flashcards' },
-    { label: flashcardSet.title, path: null },
+    {
+      label: flashcardSet.title,
+      path: includeResults || includeHistory ? `/flashcards/${flashcardSet.id}` : null,
+    },
     ...(includeResults ? [{ label: 'Results', path: null }] : []),
     ...(includeHistory ? [{ label: 'Practice History', path: null }] : []),
   ];

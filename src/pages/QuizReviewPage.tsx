@@ -105,7 +105,7 @@ export const QuizReviewPage = () => {
               path: `/study-pack/${quiz.studyPack.id}`,
             }
           : { label: 'Quizzes', path: '/quiz' },
-        { label: quiz.title, path: null },
+        { label: quiz.title, path: `/quiz/${quiz.id}` },
         { label: 'Review', path: null },
       ];
 

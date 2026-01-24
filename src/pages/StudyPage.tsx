@@ -655,6 +655,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTopic(e.target.value)}
                     placeholder="e.g., Photosynthesis, World War II, Python Programming"
                     className="w-full px-5 py-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg transition-all"
+                    maxLength={200}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !contentLoading) {
                         handleGenerateFromTopic();
@@ -742,6 +743,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTextTitle(e.target.value)}
                     placeholder="Enter content title (auto-generated if empty)"
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    maxLength={200}
                   />
                 </div>
 
@@ -758,6 +760,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTextTopic(e.target.value)}
                     placeholder="e.g., Science, History"
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    maxLength={200}
                   />
                 </div>
 
@@ -773,6 +776,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTextContent(e.target.value)}
                     placeholder="Paste your study material here..."
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all h-40 md:h-64"
+                    maxLength={1500}
                   />
                 </div>
 

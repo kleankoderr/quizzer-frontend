@@ -210,6 +210,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               }
               className="input-field"
               required
+              maxLength={200}
               readOnly={!!initialValues?.sourceTitle}
               disabled={!!initialValues?.sourceTitle}
             />
@@ -236,6 +237,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               placeholder="Paste your study notes, article, or any text content here..."
               className="input-field min-h-[200px] resize-y"
               required
+              maxLength={1500}
             />
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               The system will analyze your content and generate relevant
