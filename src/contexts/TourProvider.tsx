@@ -5,6 +5,7 @@ import Joyride, {
   ACTIONS,
   EVENTS,
 } from 'react-joyride';
+import { useQueryClient } from '@tanstack/react-query';
 import { TourContext } from './TourContext';
 import { TourTooltip } from '../components/TourTooltip';
 import { getTour } from '../config/tours.config';
@@ -13,6 +14,7 @@ import { type TourState, type TourConfig } from '../types/tour';
 export const TourProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const queryClient = useQueryClient();
   const [state, setState] = useState<TourState>({
     run: false,
     activeTourId: null,
@@ -52,6 +54,10 @@ export const TourProvider: React.FC<{ children: ReactNode }> = ({
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status as any)) {
       if (state.activeTourId) {
         localStorage.setItem(`tour_completed_${state.activeTourId}`, 'true');
+        // Invalidate onboarding status to trigger assessment popup checks
+        if (state.activeTourId === 'onboarding') {
+          queryClient.invalidateQueries({ queryKey: ['onboardingStatus'] });
+        }
       }
       setState((prev) => ({ ...prev, run: false, activeTourId: null }));
       setActiveConfig(null);

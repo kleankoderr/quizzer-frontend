@@ -32,12 +32,30 @@ export const useAssessmentStatus = () => {
         const isOnboardingTourDone = localStorage.getItem(
           'tour_completed_onboarding'
         );
-        return isOnboardingTourDone ? false : 3000;
+        // If assessment is ready but tour isn't done, keep polling to check when tour finishes
+        return isOnboardingTourDone ? false : 2000;
       }
       if (data.status === 'PENDING') return 5000;
       return false;
     },
   });
+
+  // Track tour completion state reactively
+  const [tourDone, setTourDone] = useState(
+    !!localStorage.getItem('tour_completed_onboarding')
+  );
+
+  useEffect(() => {
+    const checkTour = () => {
+      const done = !!localStorage.getItem('tour_completed_onboarding');
+      if (done !== tourDone) {
+        setTourDone(done);
+      }
+    };
+
+    const interval = setInterval(checkTour, 2000);
+    return () => clearInterval(interval);
+  }, [tourDone]);
 
   // Mark as shown mutation
   const markAsShownMutation = useMutation({
@@ -64,16 +82,15 @@ export const useAssessmentStatus = () => {
       if (location.pathname !== '/onboarding' && !isAuthPage) {
         navigate('/onboarding');
       }
-    } else if (onboardingData.status === 'COMPLETED' && onboardingData.quizId) {
-      const isOnboardingTourDone = localStorage.getItem(
-        'tour_completed_onboarding'
-      );
-      if (isOnboardingTourDone) {
-        setQuizId(onboardingData.quizId);
-        setIsVisible(true);
-      }
+    } else if (
+      onboardingData.status === 'COMPLETED' &&
+      onboardingData.quizId &&
+      tourDone
+    ) {
+      setIsVisible(true);
+      setQuizId(onboardingData.quizId);
     }
-  }, [onboardingData, location.pathname, navigate, user]);
+  }, [onboardingData, location.pathname, navigate, user, tourDone]);
 
   return {
     isVisible,
