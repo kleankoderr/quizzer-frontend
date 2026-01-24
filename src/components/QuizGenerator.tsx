@@ -21,6 +21,7 @@ import {
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
 import { StudyPackSelector } from './StudyPackSelector';
+import { InputError } from './InputError';
 import { Toast as toast } from '../utils/toast';
 
 interface QuizGeneratorProps {
@@ -65,6 +66,8 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [selectedStudyPackId, setSelectedStudyPackId] = useState(
     initialValues?.studyPackId || ''
   );
+  const [isCreatingStudyPack, setIsCreatingStudyPack] = useState(false);
+  const [showStudyPackError, setShowStudyPackError] = useState(false);
 
   const toggleQuestionType = (type: QuestionType) => {
     setSelectedQuestionTypes((prev) => {
@@ -79,6 +82,12 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
 
     const request: QuizGenerateRequest = {
       numberOfQuestions,
@@ -565,10 +574,24 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
 
           <div id="quiz-study-set-config">
             <StudyPackSelector
-              value={selectedStudyPackId}
-              onChange={setSelectedStudyPackId}
-            />
-          </div>
+            value={selectedStudyPackId}
+            onChange={(val) => {
+              setSelectedStudyPackId(val);
+              setShowStudyPackError(false);
+            }}
+            onCreationModeChange={(isCreating) => {
+              setIsCreatingStudyPack(isCreating);
+              if (!isCreating) setShowStudyPackError(false);
+            }}
+          />
+          <InputError
+            message={
+              showStudyPackError
+                ? 'Please create or cancel the study set before generating the quiz'
+                : null
+            }
+          />
+        </div>
         </div>
 
         <button

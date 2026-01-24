@@ -9,6 +9,7 @@ interface StudyPackSelectorProps {
   value?: string;
   onChange: (value: string) => void;
   className?: string;
+  onCreationModeChange?: (isCreating: boolean) => void;
 }
 
 const CREATE_NEW_VALUE = '__CREATE_NEW__';
@@ -17,6 +18,7 @@ export const StudyPackSelector: React.FC<StudyPackSelectorProps> = ({
   value,
   onChange,
   className = '',
+  onCreationModeChange,
 }) => {
   const queryClient = useQueryClient();
   const { data, isLoading } = useStudyPacks(1, 100);
@@ -29,6 +31,7 @@ export const StudyPackSelector: React.FC<StudyPackSelectorProps> = ({
   const handleSelectChange = (selectedValue: string) => {
     if (selectedValue === CREATE_NEW_VALUE) {
       setIsCreating(true);
+      onCreationModeChange?.(true);
     } else {
       onChange(selectedValue);
     }
@@ -37,6 +40,7 @@ export const StudyPackSelector: React.FC<StudyPackSelectorProps> = ({
   const cancelCreation = () => {
     setIsCreating(false);
     setNewPackTitle('');
+    onCreationModeChange?.(false);
   };
 
   const handleCreatePack = useCallback(async () => {
@@ -60,6 +64,7 @@ export const StudyPackSelector: React.FC<StudyPackSelectorProps> = ({
       toast.success('Study set created');
       setIsCreating(false);
       setNewPackTitle('');
+      onCreationModeChange?.(false);
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || 'Failed to create study set'

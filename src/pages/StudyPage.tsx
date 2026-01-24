@@ -32,6 +32,7 @@ import { CardMenu, Pencil } from '../components/CardMenu';
 import { EditTitleModal } from '../components/EditTitleModal';
 import { formatDate } from '../utils/dateFormat';
 import { useAutoTour } from '../hooks/useAutoTour';
+import { InputError } from '../components/InputError';
 
 export const StudyPage = () => {
   // Trigger study material tour
@@ -68,6 +69,8 @@ export const StudyPage = () => {
   const [selectedStudyPackId, setSelectedStudyPackId] = useState<string>(
     location.state?.studyPackId || ''
   );
+  const [isCreatingStudyPack, setIsCreatingStudyPack] = useState(false);
+  const [showStudyPackError, setShowStudyPackError] = useState(false);
 
   const [contentLoading, setContentLoading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
@@ -265,6 +268,11 @@ export const StudyPage = () => {
   });
 
   const handleGenerateFromTopic = useCallback(async () => {
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     if (!topic.trim()) {
       toast.error('Please enter a topic');
       return;
@@ -321,9 +329,14 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [topic, selectedStudyPackId]);
+  }, [topic, selectedStudyPackId, isCreatingStudyPack]);
 
   const handleCreateFromText = useCallback(async () => {
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     if (!textContent.trim()) {
       toast.error('Please enter some content');
       return;
@@ -381,9 +394,14 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [textTitle, textContent, textTopic, selectedStudyPackId]);
+  }, [textTitle, textContent, textTopic, selectedStudyPackId, isCreatingStudyPack]);
 
   const handleFileUpload = useCallback(async () => {
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     if (files.length === 0 && selectedFileIds.length === 0) {
       toast.error('Please select or upload at least one file');
       return;
@@ -475,7 +493,7 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [files, selectedFileIds, selectedStudyPackId]);
+  }, [files, selectedFileIds, selectedStudyPackId, isCreatingStudyPack]);
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
@@ -686,8 +704,22 @@ export const StudyPage = () => {
                 <div id="study-generator-study-set">
                   <StudyPackSelector
                     value={selectedStudyPackId}
-                    onChange={setSelectedStudyPackId}
+                    onChange={(val) => {
+                      setSelectedStudyPackId(val);
+                      setShowStudyPackError(false);
+                    }}
+                    onCreationModeChange={(isCreating) => {
+                      setIsCreatingStudyPack(isCreating);
+                      if (!isCreating) setShowStudyPackError(false);
+                    }}
                     className="mb-6"
+                  />
+                  <InputError
+                    message={
+                      showStudyPackError
+                        ? 'Please create or cancel the study set before generating content'
+                        : null
+                    }
                   />
                 </div>
 
@@ -783,8 +815,22 @@ export const StudyPage = () => {
                 <div id="study-generator-study-set">
                   <StudyPackSelector
                     value={selectedStudyPackId}
-                    onChange={setSelectedStudyPackId}
+                    onChange={(val) => {
+                      setSelectedStudyPackId(val);
+                      setShowStudyPackError(false);
+                    }}
+                    onCreationModeChange={(isCreating) => {
+                      setIsCreatingStudyPack(isCreating);
+                      if (!isCreating) setShowStudyPackError(false);
+                    }}
                     className="mb-6"
+                  />
+                  <InputError
+                    message={
+                      showStudyPackError
+                        ? 'Please create or cancel the study set before generating content'
+                        : null
+                    }
                   />
                 </div>
 
@@ -910,8 +956,22 @@ export const StudyPage = () => {
                 <div id="study-generator-study-set">
                   <StudyPackSelector
                     value={selectedStudyPackId}
-                    onChange={setSelectedStudyPackId}
+                    onChange={(val) => {
+                      setSelectedStudyPackId(val);
+                      setShowStudyPackError(false);
+                    }}
+                    onCreationModeChange={(isCreating) => {
+                      setIsCreatingStudyPack(isCreating);
+                      if (!isCreating) setShowStudyPackError(false);
+                    }}
                     className="mb-6"
+                  />
+                  <InputError
+                    message={
+                      showStudyPackError
+                        ? 'Please create or cancel the study set before processing documents'
+                        : null
+                    }
                   />
                 </div>
 

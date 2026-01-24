@@ -14,6 +14,7 @@ import {
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
 import { StudyPackSelector } from './StudyPackSelector';
+import { InputError } from './InputError';
 import { Toast as toast } from '../utils/toast';
 
 interface FlashcardGeneratorProps {
@@ -46,6 +47,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [selectedStudyPackId, setSelectedStudyPackId] = useState(
     initialValues?.studyPackId || ''
   );
+  const [isCreatingStudyPack, setIsCreatingStudyPack] = useState(false);
+  const [showStudyPackError, setShowStudyPackError] = useState(false);
 
   useEffect(() => {
     if (initialValues) {
@@ -62,6 +65,12 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     const contentId = initialValues?.contentId;
     const commonParams = {
       numberOfCards,
@@ -337,8 +346,22 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div id="flashcard-study-set-config">
           <StudyPackSelector
             value={selectedStudyPackId}
-            onChange={setSelectedStudyPackId}
+            onChange={(val) => {
+              setSelectedStudyPackId(val);
+              setShowStudyPackError(false);
+            }}
+            onCreationModeChange={(isCreating) => {
+              setIsCreatingStudyPack(isCreating);
+              if (!isCreating) setShowStudyPackError(false);
+            }}
             className="mb-6"
+          />
+          <InputError
+            message={
+              showStudyPackError
+                ? 'Please create or cancel the study set before generating flashcards'
+                : null
+            }
           />
         </div>
 
