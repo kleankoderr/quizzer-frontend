@@ -63,8 +63,9 @@ export const studyPackService = {
     await apiClient.delete(`/study-pack/${id}`);
   },
 
-  moveItem: async (id: string, data: MoveItemRequest): Promise<void> => {
-    await apiClient.post(`/study-pack/${id}/move`, data);
+  moveItem: async (id: string, data: MoveItemRequest): Promise<any> => {
+    const response = await apiClient.post(`/study-pack/${id}/move`, data);
+    return response.data;
   },
 
   removeItem: async (id: string, data: MoveItemRequest): Promise<void> => {

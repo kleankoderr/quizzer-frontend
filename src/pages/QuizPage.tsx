@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { quizService } from '../services/quiz.service';
@@ -21,6 +21,27 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useInvalidateQuota, useQuizzes, useJobEvents } from '../hooks';
 import { useAutoTour } from '../hooks/useAutoTour';
 
+
+const updateQuizListCache = (old: any, itemId: string, pack: any) => {
+  if (!old?.pages) return old;
+  return {
+    ...old,
+    pages: old.pages.map((page: any) => ({
+      ...page,
+      data: page.data.map((q: any) => {
+        if (q.id === itemId) {
+          return {
+            ...q,
+            studyPackId: pack?.id,
+            studyPack: pack ? { id: pack.id, title: pack.title } : undefined,
+          };
+        }
+        return q;
+      }),
+    })),
+  };
+};
+
 export const QuizPage = () => {
   // Trigger quiz tour
   useAutoTour('quiz');
@@ -29,7 +50,18 @@ export const QuizPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
-  const { data: quizzes = [], isLoading: loading } = useQuizzes();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const {
+    data: quizzesData,
+    isLoading: loading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useQuizzes();
+  const quizzes = useMemo(
+    () => quizzesData?.pages.flatMap((page) => page.data) ?? [],
+    [quizzesData]
+  );
   const [generating, setGenerating] = useState(false);
   const [initialValues, setInitialValues] = useState<
     | {
@@ -96,6 +128,21 @@ export const QuizPage = () => {
       setShowGenerator(false);
     };
   }, [location.state]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      if (scrollHeight - scrollTop <= clientHeight + 300 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useJobEvents({
     jobId: currentJobId,
@@ -234,13 +281,22 @@ export const QuizPage = () => {
 
       toast.success('Quiz deleted successfully!', { id: loadingToast });
       setDeleteQuizId(null);
-    } catch (_error) {
-      toast.error('Failed to delete quiz. Please try again.', {
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Failed to delete quiz. Please try again.';
+      console.error('Error deleting quiz:', error);
+      toast.error(errorMessage, {
         id: loadingToast,
       });
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleItemMoved = (itemId: string, pack: any) => {
+    queryClient.setQueryData(['quizzes'], (old: any) =>
+      updateQuizListCache(old, itemId, pack)
+    );
+    queryClient.invalidateQueries({ queryKey: ['quizzes'] });
   };
 
   // Calculate stats
@@ -254,7 +310,10 @@ export const QuizPage = () => {
   ).length;
 
   return (
-    <div className="space-y-6 pb-8">
+    <div
+      ref={scrollContainerRef}
+      className="h-screen overflow-y-auto space-y-6 pb-8 px-4 sm:px-0 scrollbar-hide"
+    >
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
@@ -399,38 +458,24 @@ export const QuizPage = () => {
             quizzes={quizzes}
             onDelete={handleDelete}
             onCreateNew={() => setShowGenerator(true)}
-            onItemMoved={(itemId, pack) => {
-              queryClient.setQueryData(
-                ['quizzes'],
-                (old: any[] | undefined) => {
-                  if (!old) return old;
-                  return old.map((q) => {
-                    if (q.id === itemId) {
-                      return {
-                        ...q,
-                        studyPackId: pack?.id,
-                        studyPack: pack
-                          ? { id: pack.id, title: pack.title }
-                          : undefined,
-                      };
-                    }
-                    return q;
-                  });
-                }
-              );
-              queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-            }}
+            onItemMoved={handleItemMoved}
           />
         ))}
 
-      <DeleteModal
-        isOpen={!!deleteQuizId}
-        onClose={() => setDeleteQuizId(null)}
-        onConfirm={confirmDeleteQuiz}
-        title="Delete Quiz"
-        message="Are you sure you want to delete this quiz? This action cannot be undone."
-        isDeleting={isDeleting}
-      />
-    </div>
-  );
-};
+        {isFetchingNextPage && (
+          <div className="flex justify-center p-4">
+            <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        <DeleteModal
+          isOpen={!!deleteQuizId}
+          onClose={() => setDeleteQuizId(null)}
+          onConfirm={confirmDeleteQuiz}
+          title="Delete Quiz"
+          message="Are you sure you want to delete this quiz? This action cannot be undone."
+          isDeleting={isDeleting}
+        />
+      </div>
+    );
+  };

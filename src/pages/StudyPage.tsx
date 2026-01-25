@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { contentService } from '../services';
+import { contentService, studyPackService } from '../services';
 import { useContents, usePopularTopics, useJobEvents } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -48,6 +48,7 @@ interface ContentCardProps {
   content: any;
   onEdit: (id: string) => void;
   onMove: (id: string) => void;
+  onRemove: (id: string, packId: string) => void;
   onDelete: (id: string) => void;
 }
 
@@ -55,9 +56,9 @@ const ContentCard: React.FC<ContentCardProps> = ({
   content,
   onEdit,
   onMove,
+  onRemove,
   onDelete,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
 
   const navigateToContent = () => {
@@ -66,11 +67,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
         breadcrumb: [{ label: 'Study Material', path: '/study' }],
       },
     });
-  };
-
-  const toggleExpand = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setIsExpanded(!isExpanded);
   };
 
   const menuItems = [
@@ -84,6 +80,19 @@ const ContentCard: React.FC<ContentCardProps> = ({
       icon: <Folder className="w-4 h-4" />,
       onClick: () => onMove(content.id),
     },
+    ...(content.studyPack || content.studyPackId
+      ? [
+          {
+            label: 'Remove from Study Set',
+            icon: <X className="w-4 h-4" />,
+            onClick: () =>
+              onRemove(
+                content.id,
+                content.studyPack?.id || content.studyPackId
+              ),
+          },
+        ]
+      : []),
     {
       label: 'Delete',
       icon: <Trash2 className="w-4 h-4" />,
@@ -98,49 +107,37 @@ const ContentCard: React.FC<ContentCardProps> = ({
       title={content.title}
       subtitle={content.topic}
       icon={<BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
-      onClick={toggleExpand}
       onTitleClick={navigateToContent}
       onIconClick={navigateToContent}
       actions={<CardMenu items={menuItems} />}
     >
-      <div
-        className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-80 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
-      >
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-4">
-            {getSummary(content)}
-          </p>
+      <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-4">
+          {getSummary(content)}
+        </p>
 
-          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-            <div className="flex items-center gap-1">
-              {formatDate(content.createdAt)}
-            </div>
-            {content.generatedContent && (
-              <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                Generated
-              </div>
-            )}
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-1">
+            {formatDate(content.createdAt)}
           </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateToContent();
-            }}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-          >
-            Read Material
-            <BookOpen className="w-4 h-4" />
-          </button>
+          {content.generatedContent && (
+            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              Generated
+            </div>
+          )}
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigateToContent();
+          }}
+          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+        >
+          Read Material
+          <BookOpen className="w-4 h-4" />
+        </button>
       </div>
-
-      {!isExpanded && (
-        <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-          <span>{content.generatedContent ? 'AI Generated' : 'Material'}</span>
-          <span>Click to expand</span>
-        </div>
-      )}
     </Card>
   );
 };
@@ -152,17 +149,21 @@ export const StudyPage = () => {
   const queryClient = useQueryClient();
   const location = useLocation();
 
-  // Use React Query hooks for data fetching (moved up for useMemo dependency)
-  const [page, setPage] = useState(1);
+  // Use React Query hooks for data fetching
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const {
     data: contentsData,
     isLoading: isLoadingContents,
-    refetch,
-  } = useContents(undefined, page, 6);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useContents();
   const { data: popularTopics = [] } = usePopularTopics();
 
-  const contents = useMemo(() => contentsData?.data ?? [], [contentsData]);
-  const totalPages = contentsData?.meta?.totalPages ?? 1;
+  const contents = useMemo(
+    () => contentsData?.pages.flatMap((page) => page.data) ?? [],
+    [contentsData]
+  );
 
   // Content creation states
   const [showCreator, setShowCreator] = useState(
@@ -219,6 +220,21 @@ export const StudyPage = () => {
     return `${totalSelected} File${totalSelected === 1 ? '' : 's'}`;
   }, [files.length, selectedFileIds.length]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      if (scrollHeight - scrollTop <= clientHeight + 300 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
 
   // Group contents by study pack
   const groupedContents = useMemo(() => {
@@ -250,21 +266,7 @@ export const StudyPage = () => {
   const handleTitleUpdate = async (contentId: string, newTitle: string) => {
     try {
       await contentService.updateTitle(contentId, newTitle);
-
-      // Optimistically update the cache
-      queryClient.setQueryData(['contents'], (old: any) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: old.data.map((c: any) =>
-            c.id === contentId ? { ...c, title: newTitle } : c
-          ),
-        };
-      });
-
-      // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
-
       toast.success('Content title updated successfully!');
     } catch (error) {
       toast.error('Failed to update content title');
@@ -303,7 +305,10 @@ export const StudyPage = () => {
       setContentLoading(false);
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
-      refetch();
+      await queryClient.invalidateQueries({ queryKey: ['contents'] });
+      if (selectedStudyPackId) {
+        await queryClient.invalidateQueries({ queryKey: ['studyPack', selectedStudyPackId] });
+      }
     },
     onFailed: (error: string) => {
       toast.custom(
@@ -492,21 +497,21 @@ export const StudyPage = () => {
         files,
         (progress) => {
           // Show upload progress
-          if (progress < 100) {
-            toast.custom(
-              (t) => (
-                <ProgressToast
-                  t={t}
-                  title="Uploading Documents"
-                  message={`Uploading... ${progress}%`}
-                  progress={progress}
-                  status="processing"
-                  onClose={() => setContentLoading(false)}
-                />
-              ),
-              { id: toastId }
-            );
-          }
+          if (progress >= 100) return;
+          
+          toast.custom(
+            (t) => (
+              <ProgressToast
+                t={t}
+                title="Uploading Documents"
+                message={`Uploading... ${progress}%`}
+                progress={progress}
+                status="processing"
+                onClose={() => setContentLoading(false)}
+              />
+            ),
+            { id: toastId }
+          );
         }
       );
 
@@ -554,60 +559,73 @@ export const StudyPage = () => {
     }
   }, [files, selectedFileIds, selectedStudyPackId, isCreatingStudyPack]);
 
+  const handleRemoveFromPack = useCallback(
+    async (itemId: string, packId: string) => {
+      const loadingToast = toast.loading('Removing from study set...');
+      try {
+        await studyPackService.removeItem(packId, { type: 'content', itemId });
+        await queryClient.invalidateQueries({ queryKey: ['contents'] });
+        await queryClient.invalidateQueries({ queryKey: ['content', itemId] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+        toast.success('Removed from study set', { id: loadingToast });
+      } catch (_error) {
+        toast.error('Failed to remove from study set', { id: loadingToast });
+      }
+    },
+    [queryClient]
+  );
+
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
-
     setIsDeleting(true);
     const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
-      // Refetch the contents list to update the UI
-      refetch();
+      await queryClient.invalidateQueries({ queryKey: ['contents'] });
       setDeleteContentId(null);
     } catch (_error) {
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteContentId, refetch]);
+  }, [deleteContentId, queryClient]);
 
-  const renderStudyMaterials = () => {
-    if (isLoadingContents) {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <CardSkeleton count={6} />
+  let studyContent;
+
+  if (isLoadingContents) {
+    studyContent = (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <CardSkeleton count={6} />
+      </div>
+    );
+  } else if (contents.length === 0) {
+    studyContent = (
+      <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+          <BookOpen className="w-8 h-8 text-primary-600 dark:text-primary-400" />
         </div>
-      );
-    }
-
-    if (contents.length === 0) {
-      return (
-        <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
-            <BookOpen className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            No study materials yet
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-            Get started by generating content from a topic, your own text, or by
-            uploading files.
-          </p>
-          <button
-            onClick={() => setShowCreator(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-          >
-            <Plus className="w-5 h-5" />
-            Create Content
-          </button>
-        </div>
-      );
-    }
-
-    return (
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          No study materials yet
+        </h3>
+        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
+          Get started by generating content from a topic, your own text, or by
+          uploading files.
+        </p>
+        <button
+          onClick={() => setShowCreator(true)}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+        >
+          <Plus className="w-5 h-5" />
+          Create Content
+        </button>
+      </div>
+    );
+  } else {
+    studyContent = (
       <>
-        {Object.values(groupedContents.groups).map((pack) => (
+        {Object.values(groupedContents.groups).map((pack: any) => (
           <CollapsibleSection
             key={pack.id}
             title={pack.title}
@@ -623,9 +641,10 @@ export const StudyPage = () => {
                 <ContentCard
                   key={content.id}
                   content={content}
-                  onEdit={(id) => setEditContentId(id)}
-                  onMove={(id) => setMoveContentId(id)}
-                  onDelete={(id) => setDeleteContentId(id)}
+                  onEdit={setEditContentId}
+                  onMove={setMoveContentId}
+                  onRemove={handleRemoveFromPack}
+                  onDelete={setDeleteContentId}
                 />
               ))}
             </div>
@@ -639,92 +658,53 @@ export const StudyPage = () => {
               <ContentCard
                 key={content.id}
                 content={content}
-                onEdit={(id) => setEditContentId(id)}
-                onMove={(id) => setMoveContentId(id)}
-                onDelete={(id) => setDeleteContentId(id)}
+                onEdit={setEditContentId}
+                onMove={setMoveContentId}
+                onRemove={handleRemoveFromPack}
+                onDelete={setDeleteContentId}
               />
             ))}
           </div>
         )}
-
-        {/* Move Modal */}
-        <MoveToStudyPackModal
-          isOpen={!!moveContentId}
-          onClose={() => setMoveContentId(null)}
-          itemId={moveContentId || ''}
-          itemType="content"
-          onMoveSuccess={(pack) => {
-            queryClient.setQueryData(
-              ['contents', undefined, page, 6],
-              (old: any) => {
-                if (!old || !old.data) return old;
-                return {
-                  ...old,
-                  data: old.data.map((c: any) => {
-                    if (c.id === moveContentId) {
-                      return {
-                        ...c,
-                        studyPackId: pack?.id,
-                        studyPack: pack
-                          ? { id: pack.id, title: pack.title }
-                          : undefined,
-                      };
-                    }
-                    return c;
-                  }),
-                };
-              }
-            );
-            refetch();
-          }}
-        />
-
-        <EditTitleModal
-          isOpen={!!editContentId}
-          currentTitle={editingContent?.title || ''}
-          onClose={() => setEditContentId(null)}
-          onSave={(newTitle) =>
-            handleTitleUpdate(editContentId || '', newTitle)
-          }
-        />
-
-        <DeleteModal
-          isOpen={!!deleteContentId}
-          onClose={() => setDeleteContentId(null)}
-          onConfirm={confirmDeleteContent}
-          title="Delete Study Material"
-          message="Are you sure you want to delete this study material? This action cannot be undone."
-          isDeleting={isDeleting}
-        />
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 font-medium text-gray-600 dark:text-gray-300 flex items-center text-center">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        )}
       </>
     );
-  };
+  }
 
   return (
-    <div className="space-y-6 pb-8 px-4 sm:px-0">
+    <div
+      ref={scrollContainerRef}
+      className="h-screen overflow-y-auto space-y-6 pb-8 px-4 sm:px-0 scrollbar-hide"
+    >
+      <MoveToStudyPackModal
+        isOpen={!!moveContentId}
+        onClose={() => setMoveContentId(null)}
+        itemId={moveContentId || ''}
+        itemType="content"
+        onMoveSuccess={async (pack) => {
+          await queryClient.invalidateQueries({ queryKey: ['contents'] });
+          if (pack) {
+            await queryClient.invalidateQueries({
+              queryKey: ['studyPack', pack.id],
+            });
+          }
+        }}
+      />
+
+      <EditTitleModal
+        isOpen={!!editContentId}
+        currentTitle={editingContent?.title || ''}
+        onClose={() => setEditContentId(null)}
+        onSave={(newTitle) => handleTitleUpdate(editContentId || '', newTitle)}
+      />
+
+      <DeleteModal
+        isOpen={!!deleteContentId}
+        onClose={() => setDeleteContentId(null)}
+        onConfirm={confirmDeleteContent}
+        title="Delete Study Material"
+        message="Are you sure you want to delete this study material? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-700 to-blue-700 dark:from-primary-800 dark:via-primary-900 dark:to-blue-900 p-4 sm:p-6 md:p-10 shadow-xl">
         <div className="absolute inset-0 opacity-10">
@@ -1218,7 +1198,14 @@ export const StudyPage = () => {
             Your Study Materials
           </h2>
 
-          {renderStudyMaterials()}
+          {/* Study Materials Content */}
+          {studyContent}
+        </div>
+      )}
+
+      {isFetchingNextPage && (
+        <div className="flex justify-center p-4">
+          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>

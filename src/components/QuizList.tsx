@@ -2,12 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './Card';
 import type { Quiz, StudyPack } from '../types';
-import { Brain, Plus, Pencil, Folder, Trash2 } from 'lucide-react';
+import { Brain, Plus, Pencil, Folder, Trash2, X } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
 import { CardMenu } from './CardMenu';
 import { EditTitleModal } from './EditTitleModal';
 import { quizService } from '../services/quiz.service';
+import { studyPackService } from '../services';
 import { Toast as toast } from '../utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '../utils/dateFormat';
@@ -24,9 +25,16 @@ interface QuizCardProps {
   onDelete?: (id: string) => void;
   onEdit: (id: string) => void;
   onMove: (id: string) => void;
+  onRemove: (id: string, packId: string) => void;
 }
 
-const QuizCard: React.FC<QuizCardProps> = ({ quiz, onDelete, onEdit, onMove }) => {
+const QuizCard: React.FC<QuizCardProps> = ({
+  quiz,
+  onDelete,
+  onEdit,
+  onMove,
+  onRemove,
+}) => {
   const navigate = useNavigate();
 
   const navigateToQuiz = () => {
@@ -46,6 +54,19 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onDelete, onEdit, onMove }) =
       icon: <Folder className="w-4 h-4" />,
       onClick: () => onMove(quiz.id),
     },
+    ...(quiz.studyPack || quiz.studyPackId
+      ? [
+          {
+            label: 'Remove from Study Set',
+            icon: <X className="w-4 h-4" />,
+            onClick: () =>
+              onRemove(
+                quiz.id,
+                (quiz.studyPack?.id || quiz.studyPackId) as string
+              ),
+          },
+        ]
+      : []),
     ...(onDelete
       ? [
           {
@@ -116,6 +137,22 @@ export const QuizList: React.FC<QuizListProps> = ({
     } catch (error) {
       toast.error('Failed to update quiz title');
       throw error;
+    }
+  };
+
+  const handleRemoveFromPack = async (itemId: string, packId: string) => {
+    const loadingToast = toast.loading('Removing from study set...');
+    try {
+      await studyPackService.removeItem(packId, { type: 'quiz', itemId });
+
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await queryClient.invalidateQueries({ queryKey: ['quiz', itemId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      toast.success('Removed from study set', { id: loadingToast });
+    } catch (_error) {
+      toast.error('Failed to remove from study set', { id: loadingToast });
     }
   };
 
@@ -193,6 +230,7 @@ export const QuizList: React.FC<QuizListProps> = ({
                   quiz={quiz}
                   onEdit={(id) => setEditQuizId(id)}
                   onMove={(id) => setMoveQuizId(id)}
+                  onRemove={handleRemoveFromPack}
                   onDelete={onDelete}
                 />
               ))}
@@ -209,6 +247,7 @@ export const QuizList: React.FC<QuizListProps> = ({
                 quiz={quiz}
                 onEdit={(id) => setEditQuizId(id)}
                 onMove={(id) => setMoveQuizId(id)}
+                onRemove={handleRemoveFromPack}
                 onDelete={onDelete}
               />
             ))}

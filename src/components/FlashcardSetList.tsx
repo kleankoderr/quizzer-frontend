@@ -2,12 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FlashcardSet, StudyPack } from '../types';
 import { Card } from './Card';
-import { Layers, Plus, Pencil, Folder, Trash2 } from 'lucide-react';
+import { Layers, Plus, Pencil, Folder, Trash2, X } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
 import { CardMenu } from './CardMenu';
 import { EditTitleModal } from './EditTitleModal';
 import { flashcardService } from '../services/flashcard.service';
+import { studyPackService } from '../services';
 import { Toast as toast } from '../utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '../utils/dateFormat';
@@ -24,6 +25,7 @@ interface FlashcardSetCardProps {
   onDelete?: (id: string) => void;
   onEdit: (id: string) => void;
   onMove: (id: string) => void;
+  onRemove: (id: string, packId: string) => void;
 }
 
 const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
@@ -31,6 +33,7 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
   onDelete,
   onEdit,
   onMove,
+  onRemove,
 }) => {
   const navigate = useNavigate();
   const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
@@ -52,6 +55,16 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
       icon: <Folder className="w-4 h-4" />,
       onClick: () => onMove(set.id),
     },
+    ...(set.studyPack || set.studyPackId
+      ? [
+          {
+            label: 'Remove from Study Set',
+            icon: <X className="w-4 h-4" />,
+            onClick: () =>
+              onRemove(set.id, (set.studyPack?.id || set.studyPackId) as string),
+          },
+        ]
+      : []),
     ...(onDelete
       ? [
           {
@@ -123,13 +136,29 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
     }
   };
 
+  const handleRemoveFromPack = async (itemId: string, packId: string) => {
+    const loadingToast = toast.loading('Removing from study set...');
+    try {
+      await studyPackService.removeItem(packId, { type: 'flashcard', itemId });
+
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      await queryClient.invalidateQueries({ queryKey: ['flashcardSet', itemId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      toast.success('Removed from study set', { id: loadingToast });
+    } catch (_error) {
+      toast.error('Failed to remove from study set', { id: loadingToast });
+    }
+  };
+
   const groupedSets = React.useMemo(() => {
     const groups: {
       [key: string]: { id: string; title: string; sets: FlashcardSet[] };
     } = {};
     const noPack: FlashcardSet[] = [];
 
-    sets.forEach((set) => {
+    for (const set of sets) {
       if (set.studyPack) {
         const packId = set.studyPack.id;
         if (!groups[packId]) {
@@ -143,7 +172,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
       } else {
         noPack.push(set);
       }
-    });
+    }
 
     return { groups, noPack };
   }, [sets]);
@@ -191,6 +220,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
                 set={set}
                 onEdit={(id) => setEditSetId(id)}
                 onMove={(id) => setMoveSetId(id)}
+                onRemove={handleRemoveFromPack}
                 onDelete={onDelete}
               />
             ))}
@@ -207,6 +237,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
               set={set}
               onEdit={(id) => setEditSetId(id)}
               onMove={(id) => setMoveSetId(id)}
+              onRemove={handleRemoveFromPack}
               onDelete={onDelete}
             />
           ))}

@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { studyPackService } from '../services/studyPackService';
+import { studyPackService } from '../services';
 import { quizService } from '../services/quiz.service';
 import { flashcardService } from '../services/flashcard.service';
 import { contentService, userDocumentService } from '../services';
@@ -21,6 +21,7 @@ import {
   Plus,
   Edit2,
 } from 'lucide-react';
+import { useQuizzes, useFlashcardSets, useContents } from '../hooks';
 
 type TabId = 'quizzes' | 'flashcards' | 'materials' | 'files';
 type ItemType = 'quiz' | 'flashcard' | 'content' | 'userDocument';
@@ -55,6 +56,12 @@ interface StudyPackData {
   contents?: any[];
   userDocuments?: any[];
   userId: string;
+  _count?: {
+    quizzes: number;
+    flashcardSets: number;
+    contents: number;
+    userDocuments: number;
+  };
 }
 
 const TAB_CONFIG = {
@@ -137,9 +144,11 @@ const LoadingSkeleton: React.FC = () => (
 
 // Helper to determine TabId from ItemType
 const getTabConfigId = (type: string): TabId => {
-  if (type === 'userDocument') return 'files';
+  if (type === 'quiz') return 'quizzes';
+  if (type === 'flashcard') return 'flashcards';
   if (type === 'content') return 'materials';
-  return type as 'quizzes' | 'flashcards';
+  if (type === 'userDocument' || type === 'file') return 'files';
+  return type as TabId;
 };
 
 export const StudyPackDetailsPage: React.FC = () => {
@@ -180,6 +189,67 @@ export const StudyPackDetailsPage: React.FC = () => {
     newParams.set('tab', tabId);
     navigate(`?${newParams.toString()}`, { replace: true });
   };
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Independent queries for each tab to support infinite scroll
+  const {
+    data: quizzesData,
+    fetchNextPage: fetchNextQuizzes,
+    hasNextPage: hasNextQuizzes,
+    isFetchingNextPage: isFetchingQuizzes,
+  } = useQuizzes(id);
+
+  const {
+    data: setsData,
+    fetchNextPage: fetchNextSets,
+    hasNextPage: hasNextSets,
+    isFetchingNextPage: isFetchingSets,
+  } = useFlashcardSets(id);
+
+  const {
+    data: contentsData,
+    fetchNextPage: fetchNextContents,
+    hasNextPage: hasNextContents,
+    isFetchingNextPage: isFetchingContents,
+  } = useContents(undefined, id);
+
+  const quizzes = useMemo(
+    () => quizzesData?.pages.flatMap((p) => p.data) ?? [],
+    [quizzesData]
+  );
+  const flashcardSets = useMemo(
+    () => setsData?.pages.flatMap((p) => p.data) ?? [],
+    [setsData]
+  );
+  const contents = useMemo(
+    () => contentsData?.pages.flatMap((p) => p.data) ?? [],
+    [contentsData]
+  );
+
+  const counts = useMemo(() => ({
+    quizzes: quizzesData?.pages[0]?.meta?.total ?? studyPack?._count?.quizzes ?? 0,
+    flashcards: setsData?.pages[0]?.meta?.total ?? studyPack?._count?.flashcardSets ?? 0,
+    materials: contentsData?.pages[0]?.meta?.total ?? studyPack?._count?.contents ?? 0,
+    files: studyPack?.userDocuments?.length ?? 0
+  }), [quizzesData, setsData, contentsData, studyPack]);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      if (scrollHeight - scrollTop <= clientHeight + 300) {
+        if (activeTab === 'quizzes' && hasNextQuizzes && !isFetchingQuizzes) fetchNextQuizzes();
+        if (activeTab === 'flashcards' && hasNextSets && !isFetchingSets) fetchNextSets();
+        if (activeTab === 'materials' && hasNextContents && !isFetchingContents) fetchNextContents();
+      }
+    };
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [activeTab, hasNextQuizzes, isFetchingQuizzes, fetchNextQuizzes, hasNextSets, isFetchingSets, fetchNextSets, hasNextContents, isFetchingContents, fetchNextContents]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteItemModal, setShowDeleteItemModal] = useState(false);
@@ -201,7 +271,7 @@ export const StudyPackDetailsPage: React.FC = () => {
         id: 'quizzes',
         label: 'Quizzes',
         icon: HelpCircle,
-        count: studyPack?.quizzes?.length || 0,
+        count: counts.quizzes,
         createRoute: '/quiz',
         emptyMessage: 'Create a quiz to test your knowledge on this topic.',
         emptyAction: 'Add Quiz',
@@ -210,7 +280,7 @@ export const StudyPackDetailsPage: React.FC = () => {
         id: 'flashcards',
         label: 'Flashcards',
         icon: Layers,
-        count: studyPack?.flashcardSets?.length || 0,
+        count: counts.flashcards,
         createRoute: '/flashcards',
         emptyMessage: 'Create flashcards to memorize key concepts efficiently.',
         emptyAction: 'Add Flashcards',
@@ -219,7 +289,7 @@ export const StudyPackDetailsPage: React.FC = () => {
         id: 'materials',
         label: 'Study Materials',
         icon: BookOpen,
-        count: studyPack?.contents?.length || 0,
+        count: counts.materials,
         createRoute: '/content',
         emptyMessage: 'Add content to read and learn from.',
         emptyAction: 'Add Content',
@@ -228,13 +298,13 @@ export const StudyPackDetailsPage: React.FC = () => {
         id: 'files',
         label: 'Documents',
         icon: FileText,
-        count: studyPack?.userDocuments?.length || 0,
+        count: counts.files,
         createRoute: '',
         emptyMessage: 'Upload documents to your study set.',
         emptyAction: 'Add File',
       },
     ],
-    [studyPack]
+    [counts, studyPack]
   );
 
   const currentTab = useMemo(
@@ -317,6 +387,13 @@ export const StudyPackDetailsPage: React.FC = () => {
           itemId,
         });
         toast.success('Item removed from pack');
+
+        // Invalidate all relevant queries
+        await queryClient.invalidateQueries({ queryKey: ['contents'] });
+        await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+        await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPack', studyPack.id] });
       } catch (error) {
         toast.error('Failed to remove item');
         console.error('Failed to remove item:', error);
@@ -389,6 +466,10 @@ export const StudyPackDetailsPage: React.FC = () => {
           }
         );
       }
+      queryClient.invalidateQueries({ queryKey: ['contents'] });
+      queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
       queryClient.invalidateQueries({ queryKey: ['studyPack', id] });
     },
     [id, moveState.itemId, moveState.itemType, queryClient]
@@ -462,7 +543,22 @@ export const StudyPackDetailsPage: React.FC = () => {
     if (!studyPack) return null;
 
     const config = TAB_CONFIG[activeTab];
-    const items = studyPack[config.dataKey] || [];
+    let items: any[] = [];
+    let isFetchingNext = false;
+
+    if (activeTab === 'quizzes') {
+      items = quizzes;
+      isFetchingNext = isFetchingQuizzes;
+    } else if (activeTab === 'flashcards') {
+      items = flashcardSets;
+      isFetchingNext = isFetchingSets;
+    } else if (activeTab === 'materials') {
+      items = contents;
+      isFetchingNext = isFetchingContents;
+    } else if (activeTab === 'files') {
+      items = studyPack.userDocuments || [];
+    }
+
     const hasItems = items.length > 0;
 
     return (
@@ -502,6 +598,12 @@ export const StudyPackDetailsPage: React.FC = () => {
         ) : (
           currentTab && renderEmptyState(currentTab)
         )}
+
+        {isFetchingNext && (
+          <div className="flex justify-center p-4">
+            <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
       </div>
     );
   }, [
@@ -514,6 +616,12 @@ export const StudyPackDetailsPage: React.FC = () => {
     handleRemoveItem,
     handleDeleteItem,
     renderEmptyState,
+    quizzes,
+    flashcardSets,
+    contents,
+    isFetchingQuizzes,
+    isFetchingSets,
+    isFetchingContents,
   ]);
 
   if (isLoading) {
@@ -526,6 +634,10 @@ export const StudyPackDetailsPage: React.FC = () => {
 
   return (
     <Container>
+      <div
+        ref={scrollContainerRef}
+        className="h-screen overflow-y-auto scrollbar-hide pb-8"
+      >
       {/* Header Section */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -602,7 +714,7 @@ export const StudyPackDetailsPage: React.FC = () => {
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
               }`}
             >
-              {tab.count}
+              {counts[tab.id as keyof typeof counts]}
             </span>
           </button>
         ))}
@@ -647,6 +759,7 @@ export const StudyPackDetailsPage: React.FC = () => {
         itemType={moveState.itemType}
         onMoveSuccess={handleMoveSuccess}
       />
+      </div>
     </Container>
   );
 };

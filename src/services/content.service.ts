@@ -132,28 +132,22 @@ export const contentService = {
   async getAll(
     topic?: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    studyPackId?: string
   ): Promise<{
     data: Content[];
     meta: { total: number; page: number; limit: number; totalPages: number };
   }> {
-    const cacheKey = `content-${topic || 'all'}-${page}-${limit}`;
+    const cacheKey = `content-${topic || 'all'}-${studyPackId || 'none'}-${page}-${limit}`;
     const cached = cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return cached.data as {
-        data: Content[];
-        meta: {
-          total: number;
-          page: number;
-          limit: number;
-          totalPages: number;
-        };
-      };
+      return cached.data as any;
     }
 
     const params = {
       ...(topic ? { topic } : {}),
+      ...(studyPackId ? { studyPackId } : {}),
       page,
       limit,
     };

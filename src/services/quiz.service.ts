@@ -96,11 +96,18 @@ export const quizService = {
   /**
    * Get all quizzes for the current user
    */
-  getAll: async (page: number = 1, limit: number = 20): Promise<Quiz[]> => {
-    const response = await apiClient.get<{ data: Quiz[]; meta: any }>(
-      `/quiz?page=${page}&limit=${limit}`
-    );
-    return response.data.data; // Extract data array from paginated response
+  getAll: async (
+    page: number = 1,
+    limit: number = 20,
+    studyPackId?: string
+  ): Promise<{ data: Quiz[]; meta: any }> => {
+    const params: any = { page, limit };
+    if (studyPackId) params.studyPackId = studyPackId;
+
+    const response = await apiClient.get<{ data: Quiz[]; meta: any }>(`/quiz`, {
+      params,
+    });
+    return response.data;
   },
 
   // Get quiz by ID

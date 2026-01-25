@@ -4,8 +4,8 @@ import { eventsService, type AppEvent } from '../services/events.service';
 export interface UseJobEventsOptions {
   jobId?: string;
   type: 'quiz' | 'flashcard' | 'content' | 'summary';
-  onCompleted?: (result: any) => void;
-  onFailed?: (error: string) => void;
+  onCompleted?: (result: any) => void | Promise<void>;
+  onFailed?: (error: string) => void | Promise<void>;
   enabled?: boolean;
 }
 

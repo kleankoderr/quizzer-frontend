@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
@@ -29,7 +29,18 @@ export const FlashcardsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
-  const { data: flashcardSets = [], isLoading } = useFlashcardSets();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const {
+    data: setsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFlashcardSets();
+  const flashcardSets = useMemo(
+    () => setsData?.pages.flatMap((page) => page.data) ?? [],
+    [setsData]
+  );
   const [loading, setLoading] = useState(false);
   const [deleteSetId, setDeleteSetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -88,6 +99,21 @@ export const FlashcardsPage = () => {
       setShowGenerator(false);
     };
   }, [location.state]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      if (scrollHeight - scrollTop <= clientHeight + 300 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Poll for job status with exponential backoff
   useJobEvents({
@@ -238,7 +264,10 @@ export const FlashcardsPage = () => {
   const studiedSets = flashcardSets.filter((set) => set.lastStudiedAt).length;
 
   return (
-    <div className="space-y-6 pb-8">
+    <div
+      ref={scrollContainerRef}
+      className="h-screen overflow-y-auto space-y-6 pb-8 px-4 sm:px-0 scrollbar-hide"
+    >
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
@@ -405,14 +434,20 @@ export const FlashcardsPage = () => {
           />
         ))}
 
-      <DeleteModal
-        isOpen={!!deleteSetId}
-        onClose={() => setDeleteSetId(null)}
-        onConfirm={confirmDeleteSet}
-        title="Delete Flashcard Set"
-        message="Are you sure you want to delete this flashcard set? This action cannot be undone."
-        isDeleting={isDeleting}
-      />
-    </div>
-  );
-};
+        {isFetchingNextPage && (
+          <div className="flex justify-center p-4">
+            <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        <DeleteModal
+          isOpen={!!deleteSetId}
+          onClose={() => setDeleteSetId(null)}
+          onConfirm={confirmDeleteSet}
+          title="Delete Flashcard Set"
+          message="Are you sure you want to delete this flashcard set? This action cannot be undone."
+          isDeleting={isDeleting}
+        />
+      </div>
+    );
+  };
