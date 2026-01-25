@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { weakAreaService } from '../services/weak-area.service';
+import { weakAreaService } from '../services';
 import { WeakAreaCard } from '../components/WeakAreaCard';
 import {
   Target,
@@ -119,7 +119,7 @@ export const WeakAreasPage = () => {
 
   // Prepare chart data for statistics
   const chartData = useMemo(() => {
-    if (!stats) return [];
+    if (!stats?.byTopic) return [];
     return stats.byTopic.slice(0, 10).map((item) => ({
       topic:
         item.topic.length > 20
@@ -305,7 +305,7 @@ export const WeakAreasPage = () => {
           {/* Statistics Tab Content */}
           {activeTab === 'statistics' && (
             <div className="space-y-6">
-              {stats && stats.byTopic.length > 0 ? (
+              {stats?.byTopic && stats.byTopic.length > 0 ? (
                 <>
                   {/* Overview Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,10 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { studyPackService } from '../services';
-import { quizService } from '../services/quiz.service';
-import { flashcardService } from '../services/flashcard.service';
-import { contentService, userDocumentService } from '../services';
+import { contentService, userDocumentService, flashcardService, quizService, studyPackService } from '../services';
 import { StudyPackItemCard } from '../components/StudyPackItemCard';
 import { DeleteModal } from '../components/DeleteModal';
 import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
@@ -447,9 +444,17 @@ export const StudyPackDetailsPage: React.FC = () => {
       await deleteService(itemId);
 
       toast.success('Item deleted permanently');
+      
+      // Invalidate all relevant queries to ensure UI refresh
+      queryClient.invalidateQueries({ queryKey: ['contents'] });
+      queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      queryClient.invalidateQueries({ queryKey: ['userDocuments'] });
+      queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
       queryClient.invalidateQueries({
         queryKey: ['studyPack', studyPack.id],
       });
+
       setShowDeleteItemModal(false);
       setDeleteState({ itemId: null, itemType: 'content' });
     } catch (error) {
@@ -684,9 +689,11 @@ export const StudyPackDetailsPage: React.FC = () => {
                     <Edit2 className="w-5 h-5" />
                   </button>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 max-w-2xl text-sm sm:text-base">
-                  {studyPack.description || 'No description provided.'}
-                </p>
+                {studyPack.description && (
+                  <p className="text-gray-600 dark:text-gray-400 max-w-2xl text-sm sm:text-base">
+                    {studyPack.description}
+                  </p>
+                )}
                 <div className="flex items-center gap-4 mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />

@@ -31,6 +31,26 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
     0
   );
 
+  const renderCountBreakdown = () => {
+    const parts = [];
+    if (counts.quizzes > 0)
+      parts.push(`${counts.quizzes} ${counts.quizzes === 1 ? 'Quiz' : 'Quizzes'}`);
+    if (counts.flashcardSets > 0)
+      parts.push(
+        `${counts.flashcardSets} ${
+          counts.flashcardSets === 1 ? 'Flashcard' : 'Flashcards'
+        }`
+      );
+    if (counts.contents > 0)
+      parts.push(`${counts.contents} ${counts.contents === 1 ? 'Material' : 'Materials'}`);
+    if (counts.userDocuments > 0)
+      parts.push(`${counts.userDocuments} ${counts.userDocuments === 1 ? 'File' : 'Files'}`);
+
+    if (parts.length === 0) return 'Empty Set';
+    if (parts.length > 2) return `${totalItems} Items`;
+    return parts.join(', ');
+  };
+
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -50,7 +70,7 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
   return (
     <Card
       title={studyPack.title}
-      subtitle={studyPack.description || 'No description'}
+      subtitle={studyPack.description}
       icon={
         <Folder className="w-6 h-6 text-primary-600 dark:text-primary-400" />
       }
@@ -84,9 +104,7 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
       }
     >
       <div className="mt-2 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-        <span>
-          {totalItems} item{totalItems === 1 ? '' : 's'}
-        </span>
+        <span>{renderCountBreakdown()}</span>
         {studyPack.createdAt && <span>{formatDate(studyPack.createdAt)}</span>}
       </div>
     </Card>

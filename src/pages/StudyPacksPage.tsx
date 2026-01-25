@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { StudyPackCard } from '../components/StudyPackCard';
-import { studyPackService } from '../services/studyPackService';
+import { studyPackService } from '../services';
 import { Plus, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { StudyPackModal } from '../components/StudyPackModal';
 import { DeleteModal } from '../components/DeleteModal';
@@ -51,7 +51,7 @@ export const StudyPacksPage: React.FC = () => {
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [limit] = useState(9); // 3x3 grid
+  const [limit] = useState(20); // 20 items per page
 
   const { data, isLoading } = useQuery({
     queryKey: ['studyPacks', page, limit, debouncedSearch],

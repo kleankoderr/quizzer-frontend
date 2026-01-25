@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { quizService } from '../services/quiz.service';
+import { quizService } from '../services';
 import type { QuizGenerateRequest } from '../types';
 import {
   Brain,
@@ -275,6 +275,10 @@ export const QuizPage = () => {
   const confirmDeleteQuiz = async () => {
     if (!deleteQuizId) return;
 
+    const quizToDelete = quizzes.find(q => q.id === deleteQuizId);
+    const studyPackId = quizToDelete?.studyPackId || quizToDelete?.studyPack?.id;
+
+
     setIsDeleting(true);
     const loadingToast = toast.loading('Deleting quiz...');
     try {
@@ -282,6 +286,12 @@ export const QuizPage = () => {
 
       // Refresh the quiz list
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+
+      // Invalidate the study pack if this quiz belonged to one
+      if (studyPackId) {
+        await queryClient.invalidateQueries({ queryKey: ['studyPack', studyPackId] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      }
 
       toast.success('Quiz deleted successfully!', { id: loadingToast });
       setDeleteQuizId(null);

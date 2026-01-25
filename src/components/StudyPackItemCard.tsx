@@ -26,11 +26,13 @@ interface StudyPackItemCardProps {
 const getItemStats = (type: string, item: any) => {
   switch (type) {
     case 'quiz': {
-      const count = item._count?.questions ?? item.questions?.length ?? 0;
+      const count =
+        item.questionCount ?? item._count?.questions ?? item.questions?.length ?? 0;
       return { count, label: 'question' };
     }
     case 'flashcard': {
-      const count = item._count?.cards ?? item.cards?.length ?? 0;
+      const count =
+        item.cardCount ?? item._count?.cards ?? item.cards?.length ?? 0;
       return { count, label: 'card' };
     }
     default:

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService, studyPackService } from '../services';
@@ -568,19 +568,31 @@ export const StudyPage = () => {
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
+    
+    // Find the content to check if it belongs to a study pack
+    const contentToDelete = contents.find(c => c.id === deleteContentId);
+    const studyPackId = contentToDelete?.studyPack?.id;
+
     setIsDeleting(true);
     const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
+      
+      // Invalidate the study pack if this content belonged to one
+      if (studyPackId) {
+        await queryClient.invalidateQueries({ queryKey: ['studyPack', studyPackId] });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      }
+
       setDeleteContentId(null);
     } catch (_error) {
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteContentId, queryClient]);
+  }, [deleteContentId, queryClient, contents]);
 
   let studyContent;
 

@@ -8,10 +8,12 @@ export interface BreadcrumbItem {
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
-  study: 'Study',
+  study: 'Study Material',
+  summaries: 'Summaries',
   discover: 'Discover',
   quiz: 'Quizzes',
   flashcards: 'Flashcards',
+  'study-pack': 'Study Sets',
   leaderboard: 'Leaderboard',
   challenges: 'Challenges',
   statistics: 'Statistics',
@@ -37,7 +39,7 @@ export const useBreadcrumbs = () => {
     }
 
     // 2. Generate default hierarchy based on URL
-    const pathnames = location.pathname.split('/').filter((x) => x);
+    const pathnames = location.pathname.split('/').filter(Boolean);
     const items: BreadcrumbItem[] = [];
 
     // Always start with Home/Dashboard if not already there
