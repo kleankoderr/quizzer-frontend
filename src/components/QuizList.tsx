@@ -84,7 +84,9 @@ const QuizCard: React.FC<QuizCardProps> = ({
       key={quiz.id}
       title={quiz.title}
       subtitle={quiz.topic}
-      icon={<Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+      icon={
+        <Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
       onClick={navigateToQuiz}
       onTitleClick={navigateToQuiz}
       onIconClick={navigateToQuiz}
@@ -94,9 +96,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
         <span>
           {quiz.questionCount || quiz.questions?.length || 0} Questions
         </span>
-        {quiz.createdAt && (
-          <span>{formatDate(quiz.createdAt)}</span>
-        )}
+        {quiz.createdAt && <span>{formatDate(quiz.createdAt)}</span>}
       </div>
     </Card>
   );

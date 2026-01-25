@@ -133,7 +133,7 @@ export const ProgressToast: React.FC<
               <div className="relative flex items-center justify-center w-10 h-10">
                 <Loader2 className="absolute w-10 h-10 text-blue-600 dark:text-blue-400 animate-spin" />
                 <span className="relative text-[10px] font-bold text-blue-700 dark:text-blue-300">
-                   {Math.round(currentProgress)}%
+                  {Math.round(currentProgress)}%
                 </span>
               </div>
             )}

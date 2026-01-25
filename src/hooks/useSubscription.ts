@@ -44,11 +44,7 @@ export const useCheckout = () => {
   return useMutation({
     mutationFn: (planId: string) => subscriptionService.checkout(planId),
     onSuccess: (data) => {
-      // Redirect to Paystack authorization URL
-      window.location.href = data.authorizationUrl;
-    },
-    onError: (error: any) => {
-      console.error('Checkout failed:', error);
+      globalThis.location.href = data.authorizationUrl;
     },
   });
 };
@@ -66,9 +62,6 @@ export const useCancelSubscription = () => {
       // Invalidate and refetch subscription and current plan data
       queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY });
-    },
-    onError: (error: any) => {
-      console.error('Failed to cancel subscription:', error);
     },
   });
 };
@@ -88,9 +81,6 @@ export const useVerifyPayment = () => {
       queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: CURRENT_PLAN_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['quota'] }); // Also invalidate quota to update UI
-    },
-    onError: (error: any) => {
-      console.error('Payment verification failed:', error);
     },
   });
 };

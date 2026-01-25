@@ -21,7 +21,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useInvalidateQuota, useQuizzes, useJobEvents } from '../hooks';
 import { useAutoTour } from '../hooks/useAutoTour';
 
-
 const updateQuizListCache = (old: any, itemId: string, pack: any) => {
   if (!old?.pages) return old;
   return {
@@ -132,8 +131,13 @@ export const QuizPage = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 300 && hasNextPage && !isFetchingNextPage) {
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollContainerRef.current;
+      if (
+        scrollHeight - scrollTop <= clientHeight + 300 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
         fetchNextPage();
       }
     };
@@ -282,7 +286,9 @@ export const QuizPage = () => {
       toast.success('Quiz deleted successfully!', { id: loadingToast });
       setDeleteQuizId(null);
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 'Failed to delete quiz. Please try again.';
+      const errorMessage =
+        error?.response?.data?.message ||
+        'Failed to delete quiz. Please try again.';
       console.error('Error deleting quiz:', error);
       toast.error(errorMessage, {
         id: loadingToast,
@@ -462,20 +468,20 @@ export const QuizPage = () => {
           />
         ))}
 
-        {isFetchingNextPage && (
-          <div className="flex justify-center p-4">
-            <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
+      {isFetchingNextPage && (
+        <div className="flex justify-center p-4">
+          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
-        <DeleteModal
-          isOpen={!!deleteQuizId}
-          onClose={() => setDeleteQuizId(null)}
-          onConfirm={confirmDeleteQuiz}
-          title="Delete Quiz"
-          message="Are you sure you want to delete this quiz? This action cannot be undone."
-          isDeleting={isDeleting}
-        />
-      </div>
-    );
-  };
+      <DeleteModal
+        isOpen={!!deleteQuizId}
+        onClose={() => setDeleteQuizId(null)}
+        onConfirm={confirmDeleteQuiz}
+        title="Delete Quiz"
+        message="Are you sure you want to delete this quiz? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
+    </div>
+  );
+};

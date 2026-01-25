@@ -227,21 +227,33 @@ export const StudyPackDetailsPage: React.FC = () => {
     [contentsData]
   );
 
-  const counts = useMemo(() => ({
-    quizzes: quizzesData?.pages[0]?.meta?.total ?? studyPack?._count?.quizzes ?? 0,
-    flashcards: setsData?.pages[0]?.meta?.total ?? studyPack?._count?.flashcardSets ?? 0,
-    materials: contentsData?.pages[0]?.meta?.total ?? studyPack?._count?.contents ?? 0,
-    files: studyPack?.userDocuments?.length ?? 0
-  }), [quizzesData, setsData, contentsData, studyPack]);
+  const counts = useMemo(
+    () => ({
+      quizzes:
+        quizzesData?.pages[0]?.meta?.total ?? studyPack?._count?.quizzes ?? 0,
+      flashcards:
+        setsData?.pages[0]?.meta?.total ??
+        studyPack?._count?.flashcardSets ??
+        0,
+      materials:
+        contentsData?.pages[0]?.meta?.total ?? studyPack?._count?.contents ?? 0,
+      files: studyPack?.userDocuments?.length ?? 0,
+    }),
+    [quizzesData, setsData, contentsData, studyPack]
+  );
 
   React.useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollContainerRef.current;
       if (scrollHeight - scrollTop <= clientHeight + 300) {
-        if (activeTab === 'quizzes' && hasNextQuizzes && !isFetchingQuizzes) fetchNextQuizzes();
-        if (activeTab === 'flashcards' && hasNextSets && !isFetchingSets) fetchNextSets();
-        if (activeTab === 'materials' && hasNextContents && !isFetchingContents) fetchNextContents();
+        if (activeTab === 'quizzes' && hasNextQuizzes && !isFetchingQuizzes)
+          fetchNextQuizzes();
+        if (activeTab === 'flashcards' && hasNextSets && !isFetchingSets)
+          fetchNextSets();
+        if (activeTab === 'materials' && hasNextContents && !isFetchingContents)
+          fetchNextContents();
       }
     };
     const container = scrollContainerRef.current;
@@ -249,7 +261,18 @@ export const StudyPackDetailsPage: React.FC = () => {
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, [activeTab, hasNextQuizzes, isFetchingQuizzes, fetchNextQuizzes, hasNextSets, isFetchingSets, fetchNextSets, hasNextContents, isFetchingContents, fetchNextContents]);
+  }, [
+    activeTab,
+    hasNextQuizzes,
+    isFetchingQuizzes,
+    fetchNextQuizzes,
+    hasNextSets,
+    isFetchingSets,
+    fetchNextSets,
+    hasNextContents,
+    isFetchingContents,
+    fetchNextContents,
+  ]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteItemModal, setShowDeleteItemModal] = useState(false);
@@ -393,7 +416,9 @@ export const StudyPackDetailsPage: React.FC = () => {
         await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
         await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
         await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
-        await queryClient.invalidateQueries({ queryKey: ['studyPack', studyPack.id] });
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', studyPack.id],
+        });
       } catch (error) {
         toast.error('Failed to remove item');
         console.error('Failed to remove item:', error);
@@ -638,127 +663,127 @@ export const StudyPackDetailsPage: React.FC = () => {
         ref={scrollContainerRef}
         className="h-screen overflow-y-auto scrollbar-hide pb-8"
       >
-      {/* Header Section */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex-shrink-0">
-              <Folder className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">
-                  {studyPack.title}
-                </h1>
-                <button
-                  onClick={() => setShowEditModal(true)}
-                  className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex-shrink-0"
-                  title="Edit Study Set"
-                  aria-label="Edit Study Set"
-                >
-                  <Edit2 className="w-5 h-5" />
-                </button>
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex-shrink-0">
+                <Folder className="w-8 h-8 text-primary-600 dark:text-primary-400" />
               </div>
-              <p className="text-gray-600 dark:text-gray-400 max-w-2xl text-sm sm:text-base">
-                {studyPack.description || 'No description provided.'}
-              </p>
-              <div className="flex items-center gap-4 mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Created{' '}
-                  {new Date(studyPack.createdAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">
+                    {studyPack.title}
+                  </h1>
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex-shrink-0"
+                    title="Edit Study Set"
+                    aria-label="Edit Study Set"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl text-sm sm:text-base">
+                  {studyPack.description || 'No description provided.'}
+                </p>
+                <div className="flex items-center gap-4 mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    Created{' '}
+                    {new Date(studyPack.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium w-full sm:w-auto"
-            aria-label="Delete Study Set"
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete Set
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs Navigation */}
-      <div
-        role="tablist"
-        className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 mb-8 scrollbar-none"
-      >
-        {tabs.map((tab) => (
-          <button
-            role="tab"
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium whitespace-nowrap transition-colors ${
-              activeTab === tab.id
-                ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
-            aria-label={`${tab.label} tab`}
-            aria-selected={activeTab === tab.id}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-            <span
-              className={`ml-1.5 px-2 py-0.5 rounded-full text-xs ${
-                activeTab === tab.id
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium w-full sm:w-auto"
+              aria-label="Delete Study Set"
             >
-              {counts[tab.id as keyof typeof counts]}
-            </span>
-          </button>
-        ))}
-      </div>
+              <Trash2 className="w-4 h-4" />
+              Delete Set
+            </button>
+          </div>
+        </div>
 
-      {/* Tab Content */}
-      {renderTabContent()}
+        {/* Tabs Navigation */}
+        <div
+          role="tablist"
+          className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 mb-8 scrollbar-none"
+        >
+          {tabs.map((tab) => (
+            <button
+              role="tab"
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium whitespace-nowrap transition-colors ${
+                activeTab === tab.id
+                  ? 'border-primary-600 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+              aria-label={`${tab.label} tab`}
+              aria-selected={activeTab === tab.id}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+              <span
+                className={`ml-1.5 px-2 py-0.5 rounded-full text-xs ${
+                  activeTab === tab.id
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {counts[tab.id as keyof typeof counts]}
+              </span>
+            </button>
+          ))}
+        </div>
 
-      {/* Modals */}
-      <StudyPackModal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        initialData={studyPack}
-        onSubmit={handleEditSubmit}
-        isLoading={isUpdating}
-      />
+        {/* Tab Content */}
+        {renderTabContent()}
 
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeletePack}
-        title="Delete Study Set"
-        message="Are you sure you want to delete this study set? The items inside will NOT be deleted."
-        itemName="Study Set"
-        isDeleting={isDeletingPack}
-      />
+        {/* Modals */}
+        <StudyPackModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          initialData={studyPack}
+          onSubmit={handleEditSubmit}
+          isLoading={isUpdating}
+        />
 
-      <DeleteModal
-        isOpen={showDeleteItemModal}
-        onClose={() => setShowDeleteItemModal(false)}
-        onConfirm={executeDeleteItem}
-        title="Delete Item"
-        message="Are you sure you want to delete this item? This action handles permanent deletion and cannot be undone."
-        itemName="Item"
-        isDeleting={isDeletingItem}
-      />
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeletePack}
+          title="Delete Study Set"
+          message="Are you sure you want to delete this study set? The items inside will NOT be deleted."
+          itemName="Study Set"
+          isDeleting={isDeletingPack}
+        />
 
-      <MoveToStudyPackModal
-        isOpen={!!moveState.itemId}
-        onClose={closeMoveModal}
-        itemId={moveState.itemId || ''}
-        itemType={moveState.itemType}
-        onMoveSuccess={handleMoveSuccess}
-      />
+        <DeleteModal
+          isOpen={showDeleteItemModal}
+          onClose={() => setShowDeleteItemModal(false)}
+          onConfirm={executeDeleteItem}
+          title="Delete Item"
+          message="Are you sure you want to delete this item? This action handles permanent deletion and cannot be undone."
+          itemName="Item"
+          isDeleting={isDeletingItem}
+        />
+
+        <MoveToStudyPackModal
+          isOpen={!!moveState.itemId}
+          onClose={closeMoveModal}
+          itemId={moveState.itemId || ''}
+          itemType={moveState.itemType}
+          onMoveSuccess={handleMoveSuccess}
+        />
       </div>
     </Container>
   );

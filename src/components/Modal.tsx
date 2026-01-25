@@ -61,7 +61,9 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
         )}
 
-        <div className={`px-4 md:px-6 pb-4 md:pb-6 text-gray-700 dark:text-gray-300 ${title ? '' : 'pt-6'}`}>
+        <div
+          className={`px-4 md:px-6 pb-4 md:pb-6 text-gray-700 dark:text-gray-300 ${title ? '' : 'pt-6'}`}
+        >
           {children}
         </div>
 

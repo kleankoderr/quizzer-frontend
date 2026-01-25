@@ -48,7 +48,10 @@ const buildBreadcrumbItems = (
       : { label: 'Flashcards', path: '/flashcards' },
     {
       label: flashcardSet.title,
-      path: includeResults || includeHistory ? `/flashcards/${flashcardSet.id}` : null,
+      path:
+        includeResults || includeHistory
+          ? `/flashcards/${flashcardSet.id}`
+          : null,
     },
     ...(includeResults ? [{ label: 'Results', path: null }] : []),
     ...(includeHistory ? [{ label: 'Practice History', path: null }] : []),

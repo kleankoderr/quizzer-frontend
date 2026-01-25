@@ -1,7 +1,16 @@
 import React from 'react';
 import { Card } from './Card';
 
-import { Trash2, Folder, XCircle, MoreVertical, HelpCircle, Layers, BookOpen, FileText } from 'lucide-react';
+import {
+  Trash2,
+  Folder,
+  XCircle,
+  MoreVertical,
+  HelpCircle,
+  Layers,
+  BookOpen,
+  FileText,
+} from 'lucide-react';
 import { formatDate } from '../utils/dateFormat';
 
 interface StudyPackItemCardProps {
@@ -33,8 +42,6 @@ const getItemSubtitle = (type: string, item: any) => {
   if (type === 'userDocument') return 'Uploaded File';
   return item.topic || '';
 };
-
-
 
 export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
   item,
@@ -79,13 +86,21 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
   const getIcon = () => {
     switch (type) {
       case 'quiz':
-        return <HelpCircle className="w-6 h-6 text-primary-600 dark:text-primary-400" />;
+        return (
+          <HelpCircle className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
       case 'flashcard':
-        return <Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />;
+        return (
+          <Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
       case 'content':
-        return <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />;
+        return (
+          <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
       case 'userDocument':
-        return <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />;
+        return (
+          <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
       default:
         return null;
     }
@@ -158,13 +173,15 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
       >
         {/* Action Hint when not expanded */}
         <div className="mt-4 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-           <div className="flex items-center gap-1.5">
-             <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-             {stats ? `${stats.count} ${stats.label}${stats.count === 1 ? '' : 's'}` : type}
-           </div>
-           {(item.createdAt || item.uploadedAt) && (
-             <span>{formatDate(item.createdAt || item.uploadedAt)}</span>
-           )}
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+            {stats
+              ? `${stats.count} ${stats.label}${stats.count === 1 ? '' : 's'}`
+              : type}
+          </div>
+          {(item.createdAt || item.uploadedAt) && (
+            <span>{formatDate(item.createdAt || item.uploadedAt)}</span>
+          )}
         </div>
       </Card>
     </div>

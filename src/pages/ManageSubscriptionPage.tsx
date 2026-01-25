@@ -299,6 +299,24 @@ export const ManageSubscriptionPage = () => {
                     currentPlan.studyMaterial.limit
                   )}
                 />
+
+                {/* Summaries Usage */}
+                {currentPlan.summary && (
+                  <UsageBar
+                    icon={FileText}
+                    label="Summaries Generated"
+                    used={currentPlan.summary.used}
+                    limit={currentPlan.summary.limit}
+                    color={getUsageColor(
+                      currentPlan.summary.used,
+                      currentPlan.summary.limit
+                    )}
+                    percentage={getPercentage(
+                      currentPlan.summary.used,
+                      currentPlan.summary.limit
+                    )}
+                  />
+                )}
               </div>
 
               {/* Storage & Files */}

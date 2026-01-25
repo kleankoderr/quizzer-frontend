@@ -468,6 +468,7 @@ export interface QuotaStatus {
   conceptExplanation: QuotaFeatureStatus;
   smartRecommendation: QuotaFeatureStatus;
   smartCompanion: QuotaFeatureStatus;
+  summary: QuotaFeatureStatus;
   fileUpload?: FileUploadQuota;
   fileStorage?: FileStorageQuota;
 }
@@ -500,6 +501,7 @@ export interface SubscriptionPlan {
     conceptExplanations: number;
     smartRecommendations: number;
     smartCompanions: number;
+    summaries: number;
     filesPerMonth: number;
     storageLimitMB: number;
   };
@@ -572,6 +574,7 @@ export interface CurrentPlan {
   conceptExplanation: QuotaFeatureStatus;
   smartRecommendation: QuotaFeatureStatus;
   smartCompanion: QuotaFeatureStatus;
+  summary: QuotaFeatureStatus;
   fileUpload: FileUploadQuota;
   fileStorage: FileStorageQuota;
   monthlyResetAt: string;

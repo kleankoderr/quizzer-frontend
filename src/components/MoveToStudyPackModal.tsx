@@ -63,10 +63,7 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       studyPackService.moveItem(packId, { type: itemType, itemId }),
     onSuccess: (_, packId) => {
       // Invalidate relevant queries based on item type
-      const invalidations = [
-        ['studyPack'],
-        ['studyPacks'],
-      ];
+      const invalidations = [['studyPack'], ['studyPacks']];
 
       switch (itemType) {
         case 'content':
@@ -84,7 +81,9 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
       }
 
       Promise.all(
-        invalidations.map((key) => queryClient.invalidateQueries({ queryKey: key }))
+        invalidations.map((key) =>
+          queryClient.invalidateQueries({ queryKey: key })
+        )
       );
 
       toast.success('Item moved successfully');
@@ -133,7 +132,9 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
                 />
                 <button
                   onClick={handleCreatePack}
-                  disabled={!newPackTitle.trim() || createPackMutation.isPending}
+                  disabled={
+                    !newPackTitle.trim() || createPackMutation.isPending
+                  }
                   className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {createPackMutation.isPending ? (
@@ -171,15 +172,17 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
                 <button
                   key={pack.id}
                   onClick={() => moveItemMutation.mutate(pack.id)}
-                  disabled={moveItemMutation.isPending && moveItemMutation.variables === pack.id}
+                  disabled={moveItemMutation.isPending}
                   className={`w-full flex items-center p-3 rounded-lg border transition-all text-left group ${
-                    moveItemMutation.isPending && moveItemMutation.variables === pack.id
+                    moveItemMutation.isPending &&
+                    moveItemMutation.variables === pack.id
                       ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500 ring-1 ring-primary-500'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700'
                   }`}
                 >
                   <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg mr-3">
-                    {moveItemMutation.isPending && moveItemMutation.variables === pack.id ? (
+                    {moveItemMutation.isPending &&
+                    moveItemMutation.variables === pack.id ? (
                       <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <Folder className="w-5 h-5 text-primary-600 dark:text-primary-400" />
@@ -195,11 +198,12 @@ export const MoveToStudyPackModal: React.FC<MoveToStudyPackModalProps> = ({
                       </p>
                     )}
                   </div>
-                  {moveItemMutation.isPending && moveItemMutation.variables === pack.id && (
-                    <span className="text-xs font-medium text-primary-600 dark:text-primary-400 animate-pulse ml-2">
-                      Moving...
-                    </span>
-                  )}
+                  {moveItemMutation.isPending &&
+                    moveItemMutation.variables === pack.id && (
+                      <span className="text-xs font-medium text-primary-600 dark:text-primary-400 animate-pulse ml-2">
+                        Moving...
+                      </span>
+                    )}
                 </button>
               ))
             )}

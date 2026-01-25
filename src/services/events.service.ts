@@ -10,7 +10,11 @@ export type EventType =
   | 'flashcard.failed'
   | 'content.progress'
   | 'content.completed'
-  | 'content.failed';
+  | 'content.failed'
+  | 'summary.progress'
+  | 'summary.chunk'
+  | 'summary.completed'
+  | 'summary.failed';
 
 export interface AppEvent {
   eventType: EventType;

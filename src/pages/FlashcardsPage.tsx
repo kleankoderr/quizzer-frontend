@@ -103,8 +103,13 @@ export const FlashcardsPage = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 300 && hasNextPage && !isFetchingNextPage) {
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollContainerRef.current;
+      if (
+        scrollHeight - scrollTop <= clientHeight + 300 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
         fetchNextPage();
       }
     };
@@ -434,20 +439,20 @@ export const FlashcardsPage = () => {
           />
         ))}
 
-        {isFetchingNextPage && (
-          <div className="flex justify-center p-4">
-            <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
+      {isFetchingNextPage && (
+        <div className="flex justify-center p-4">
+          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
-        <DeleteModal
-          isOpen={!!deleteSetId}
-          onClose={() => setDeleteSetId(null)}
-          onConfirm={confirmDeleteSet}
-          title="Delete Flashcard Set"
-          message="Are you sure you want to delete this flashcard set? This action cannot be undone."
-          isDeleting={isDeleting}
-        />
-      </div>
-    );
-  };
+      <DeleteModal
+        isOpen={!!deleteSetId}
+        onClose={() => setDeleteSetId(null)}
+        onConfirm={confirmDeleteSet}
+        title="Delete Flashcard Set"
+        message="Are you sure you want to delete this flashcard set? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
+    </div>
+  );
+};

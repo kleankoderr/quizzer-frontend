@@ -34,16 +34,6 @@ import { formatDate } from '../utils/dateFormat';
 import { useAutoTour } from '../hooks/useAutoTour';
 import { InputError } from '../components/InputError';
 
-const getSummary = (content: any) => {
-  if (content.description) {
-    return content.description;
-  }
-  if (content.generatedContent?.summary) {
-    return content.generatedContent.summary;
-  }
-  return 'No description available';
-};
-
 interface ContentCardProps {
   content: any;
   onEdit: (id: string) => void;
@@ -106,16 +96,14 @@ const ContentCard: React.FC<ContentCardProps> = ({
       key={content.id}
       title={content.title}
       subtitle={content.topic}
-      icon={<BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+      icon={
+        <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
       onTitleClick={navigateToContent}
       onIconClick={navigateToContent}
       actions={<CardMenu items={menuItems} />}
     >
       <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-4">
-          {getSummary(content)}
-        </p>
-
         <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-1">
             {formatDate(content.createdAt)}
@@ -126,17 +114,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
             </div>
           )}
         </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigateToContent();
-          }}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-        >
-          Read Material
-          <BookOpen className="w-4 h-4" />
-        </button>
       </div>
     </Card>
   );
@@ -223,8 +200,13 @@ export const StudyPage = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 300 && hasNextPage && !isFetchingNextPage) {
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollContainerRef.current;
+      if (
+        scrollHeight - scrollTop <= clientHeight + 300 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
         fetchNextPage();
       }
     };
@@ -234,7 +216,6 @@ export const StudyPage = () => {
       return () => container.removeEventListener('scroll', handleScroll);
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
 
   // Group contents by study pack
   const groupedContents = useMemo(() => {
@@ -274,7 +255,6 @@ export const StudyPage = () => {
     }
   };
 
-
   // Poll for job status with exponential backoff
   useJobEvents({
     jobId: currentJobId,
@@ -307,7 +287,9 @@ export const StudyPage = () => {
       toastIdRef.current = undefined;
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
       if (selectedStudyPackId) {
-        await queryClient.invalidateQueries({ queryKey: ['studyPack', selectedStudyPackId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', selectedStudyPackId],
+        });
       }
     },
     onFailed: (error: string) => {
@@ -457,7 +439,13 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [textTitle, textContent, textTopic, selectedStudyPackId, isCreatingStudyPack]);
+  }, [
+    textTitle,
+    textContent,
+    textTopic,
+    selectedStudyPackId,
+    isCreatingStudyPack,
+  ]);
 
   const handleFileUpload = useCallback(async () => {
     if (isCreatingStudyPack) {
@@ -498,7 +486,7 @@ export const StudyPage = () => {
         (progress) => {
           // Show upload progress
           if (progress >= 100) return;
-          
+
           toast.custom(
             (t) => (
               <ProgressToast
@@ -566,7 +554,9 @@ export const StudyPage = () => {
         await studyPackService.removeItem(packId, { type: 'content', itemId });
         await queryClient.invalidateQueries({ queryKey: ['contents'] });
         await queryClient.invalidateQueries({ queryKey: ['content', itemId] });
-        await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', packId],
+        });
         await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
         toast.success('Removed from study set', { id: loadingToast });
       } catch (_error) {

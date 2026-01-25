@@ -54,6 +54,11 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         icon: Zap,
       },
       {
+        label: 'Summaries per month',
+        value: q.summaries === -1 ? 'Unlimited' : (q.summaries ?? 0),
+        icon: Zap,
+      },
+      {
         label: 'AI Explanations per month',
         value:
           q.conceptExplanations === -1

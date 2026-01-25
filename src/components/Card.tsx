@@ -60,7 +60,7 @@ export const Card: React.FC<CardProps> = ({
 
       {/* Icon */}
       {icon && (
-        <div 
+        <div
           className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors"
           onClick={(e) => {
             if (onIconClick) {

@@ -36,7 +36,8 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
   onRemove,
 }) => {
   const navigate = useNavigate();
-  const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
+  const cardCount =
+    set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
   const attemptCount = set.attemptCount || set._count?.attempts || 0;
   const hasStudied = attemptCount > 0;
 
@@ -61,7 +62,10 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
             label: 'Remove from Study Set',
             icon: <X className="w-4 h-4" />,
             onClick: () =>
-              onRemove(set.id, (set.studyPack?.id || set.studyPackId) as string),
+              onRemove(
+                set.id,
+                (set.studyPack?.id || set.studyPackId) as string
+              ),
           },
         ]
       : []),
@@ -82,7 +86,9 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
       key={set.id}
       title={set.title}
       subtitle={set.topic}
-      icon={<Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+      icon={
+        <Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
       onClick={navigateToSet}
       onTitleClick={navigateToSet}
       onIconClick={navigateToSet}
@@ -90,9 +96,7 @@ const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
     >
       <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
         <span>{cardCount} Cards</span>
-        {set.createdAt && (
-          <span>{formatDate(set.createdAt)}</span>
-        )}
+        {set.createdAt && <span>{formatDate(set.createdAt)}</span>}
       </div>
     </Card>
   );
@@ -143,7 +147,9 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
 
       // Invalidate all relevant queries
       await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
-      await queryClient.invalidateQueries({ queryKey: ['flashcardSet', itemId] });
+      await queryClient.invalidateQueries({
+        queryKey: ['flashcardSet', itemId],
+      });
       await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
       await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
       toast.success('Removed from study set', { id: loadingToast });
@@ -183,8 +189,12 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
         <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
           <Layers className="w-10 h-10 text-primary-600 dark:text-primary-400" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">No flashcard sets yet</h3>
-        <p className="text-gray-500 mb-6">Generate your first flashcard set to get started!</p>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+          No flashcard sets yet
+        </h3>
+        <p className="text-gray-500 mb-6">
+          Generate your first flashcard set to get started!
+        </p>
         <button
           onClick={onCreateNew}
           className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
@@ -199,7 +209,9 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   return (
     <div className="card dark:bg-gray-800 p-4 md:p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Flashcard Sets</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Your Flashcard Sets
+        </h2>
         <span className="text-sm text-gray-500 dark:text-gray-400">
           {sets.length} set{sets.length === 1 ? '' : 's'}
         </span>

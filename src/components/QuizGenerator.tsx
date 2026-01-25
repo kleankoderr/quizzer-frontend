@@ -574,24 +574,24 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
 
           <div id="quiz-study-set-config">
             <StudyPackSelector
-            value={selectedStudyPackId}
-            onChange={(val) => {
-              setSelectedStudyPackId(val);
-              setShowStudyPackError(false);
-            }}
-            onCreationModeChange={(isCreating) => {
-              setIsCreatingStudyPack(isCreating);
-              if (!isCreating) setShowStudyPackError(false);
-            }}
-          />
-          <InputError
-            message={
-              showStudyPackError
-                ? 'Please create or cancel the study set before generating the quiz'
-                : null
-            }
-          />
-        </div>
+              value={selectedStudyPackId}
+              onChange={(val) => {
+                setSelectedStudyPackId(val);
+                setShowStudyPackError(false);
+              }}
+              onCreationModeChange={(isCreating) => {
+                setIsCreatingStudyPack(isCreating);
+                if (!isCreating) setShowStudyPackError(false);
+              }}
+            />
+            <InputError
+              message={
+                showStudyPackError
+                  ? 'Please create or cancel the study set before generating the quiz'
+                  : null
+              }
+            />
+          </div>
         </div>
 
         <button

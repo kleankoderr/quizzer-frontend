@@ -11,6 +11,7 @@ import {
   Check,
   X,
   LayoutTemplate,
+  Loader2,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -30,6 +31,8 @@ import { LearningGuide } from '../components/LearningGuide';
 import { ContentPageSkeleton } from '../components/skeletons';
 import './ContentPage.css';
 import { useContent, useSummaryGeneration } from '../hooks';
+import { Modal } from '../components/Modal';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Custom heading renderer to add IDs
@@ -292,7 +295,12 @@ export const ContentPage = () => {
   };
 
   /* New Hook Integration */
-  const { startPolling } = useSummaryGeneration();
+  const { startGeneration, isGenerating, streamingContent } =
+    useSummaryGeneration();
+  const [showStreamingModal, setShowStreamingModal] = useState(false);
+  const [generatedShortCode, setGeneratedShortCode] = useState<string | null>(
+    null
+  );
 
   const handleGenerateSummary = async () => {
     if (!content) return;
@@ -305,14 +313,12 @@ export const ContentPage = () => {
     try {
       const { jobId } = await summaryService.generateSummary(content.id);
 
-      toast.success(
-        'Summary generation started! It will be ready in a moment.'
-      );
+      setShowStreamingModal(true);
+      setGeneratedShortCode(null);
 
-      // Start polling
-      startPolling(jobId, () => {
-        // Optional: Update local cache or UI if needed
-        // The hook already shows a success toast
+      // Start generation listeners
+      startGeneration(jobId, (shortCode) => {
+        setGeneratedShortCode(shortCode);
         queryClient.invalidateQueries({ queryKey: ['content', id] });
       });
     } catch (_error: any) {
@@ -721,6 +727,46 @@ export const ContentPage = () => {
         message="Are you sure you want to delete this content? This action cannot be undone."
         isDeleting={isDeletingContent}
       />
+
+      {/* Streaming Summary Modal */}
+      <Modal
+        isOpen={showStreamingModal}
+        onClose={() => {
+          if (!isGenerating) {
+            setShowStreamingModal(false);
+          }
+        }}
+        title="Generating Summary"
+        className="max-w-2xl"
+        footer={
+          !isGenerating && generatedShortCode ? (
+            <button
+              onClick={() => navigate(`/s/${generatedShortCode}`)}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-bold"
+            >
+              View Full Summary
+            </button>
+          ) : isGenerating ? (
+            <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              AI is writing your summary...
+            </div>
+          ) : null
+        }
+      >
+        <div className="max-h-[60vh] overflow-y-auto pr-2">
+          {streamingContent ? (
+            <div className="prose prose-sm dark:prose-invert">
+              <MarkdownRenderer content={streamingContent} />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500">
+              <Brain className="w-12 h-12 text-primary-200 mb-4 animate-pulse" />
+              <p>Analyzing content and drafting summary chunks...</p>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

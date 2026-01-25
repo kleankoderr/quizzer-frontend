@@ -105,8 +105,6 @@ export const AttemptsAnalyticsView: React.FC<AttemptsAnalyticsViewProps> = ({
 }) => {
   const navigate = useNavigate();
 
-
-
   const stats = useMemo(() => {
     if (!attempts || attempts.length === 0) {
       return { total: 0, averageScore: 0 };

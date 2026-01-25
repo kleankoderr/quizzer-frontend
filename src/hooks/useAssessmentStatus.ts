@@ -66,9 +66,6 @@ export const useAssessmentStatus = () => {
       }
       queryClient.invalidateQueries({ queryKey: ['onboardingStatus'] });
     },
-    onError: (error) => {
-      console.error('Failed to mark assessment popup as shown', error);
-    },
   });
 
   // Handle side effects (redirection and initial visibility)

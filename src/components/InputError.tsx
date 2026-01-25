@@ -7,7 +7,10 @@ interface InputErrorProps {
   className?: string;
 }
 
-export const InputError: React.FC<InputErrorProps> = ({ message, className = '' }) => {
+export const InputError: React.FC<InputErrorProps> = ({
+  message,
+  className = '',
+}) => {
   return (
     <AnimatePresence>
       {message && (

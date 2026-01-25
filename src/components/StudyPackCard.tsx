@@ -1,8 +1,4 @@
-import {
-  Folder,
-  Pencil,
-  Trash2,
-} from 'lucide-react';
+import { Folder, Pencil, Trash2 } from 'lucide-react';
 
 interface StudyPackCardProps {
   studyPack: StudyPack;
@@ -34,7 +30,6 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
     (sum, count) => sum + count,
     0
   );
-
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -89,10 +84,10 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
       }
     >
       <div className="mt-2 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-        <span>{totalItems} item{totalItems === 1 ? '' : 's'}</span>
-        {studyPack.createdAt && (
-          <span>{formatDate(studyPack.createdAt)}</span>
-        )}
+        <span>
+          {totalItems} item{totalItems === 1 ? '' : 's'}
+        </span>
+        {studyPack.createdAt && <span>{formatDate(studyPack.createdAt)}</span>}
       </div>
     </Card>
   );
