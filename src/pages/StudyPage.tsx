@@ -127,7 +127,6 @@ export const StudyPage = () => {
   const location = useLocation();
 
   // Use React Query hooks for data fetching
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const {
     data: contentsData,
     isLoading: isLoadingContents,
@@ -198,23 +197,29 @@ export const StudyPage = () => {
   }, [files.length, selectedFileIds.length]);
 
   useEffect(() => {
+    const mainContent = document.getElementById('main-content-area');
+    if (!mainContent) return;
+
+    let lastScrollTime = 0;
+    const throttleDelay = 200;
+
     const handleScroll = () => {
-      if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } =
-        scrollContainerRef.current;
+      const now = Date.now();
+      if (now - lastScrollTime < throttleDelay) return;
+      lastScrollTime = now;
+
+      const { scrollTop, scrollHeight, clientHeight } = mainContent;
       if (
-        scrollHeight - scrollTop <= clientHeight + 300 &&
+        scrollHeight - scrollTop <= clientHeight + 500 &&
         hasNextPage &&
         !isFetchingNextPage
       ) {
         fetchNextPage();
       }
     };
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
+
+    mainContent.addEventListener('scroll', handleScroll);
+    return () => mainContent.removeEventListener('scroll', handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Group contents by study pack
@@ -673,10 +678,7 @@ export const StudyPage = () => {
   }
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="h-screen overflow-y-auto space-y-6 pb-8 px-4 sm:px-0 scrollbar-hide"
-    >
+    <div className="space-y-6 pb-8 px-4 sm:px-0">
       <MoveToStudyPackModal
         isOpen={!!moveContentId}
         onClose={() => setMoveContentId(null)}

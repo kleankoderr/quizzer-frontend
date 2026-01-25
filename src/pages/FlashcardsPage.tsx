@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { flashcardService } from '../services/flashcard.service';
+import { flashcardService } from '../services';
 import type { FlashcardGenerateRequest } from '../types';
 import {
   CreditCard,
@@ -29,7 +29,6 @@ export const FlashcardsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showGenerator, setShowGenerator] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const {
     data: setsData,
     isLoading,
@@ -101,23 +100,29 @@ export const FlashcardsPage = () => {
   }, [location.state]);
 
   useEffect(() => {
+    const mainContent = document.getElementById('main-content-area');
+    if (!mainContent) return;
+
+    let lastScrollTime = 0;
+    const throttleDelay = 200;
+
     const handleScroll = () => {
-      if (!scrollContainerRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } =
-        scrollContainerRef.current;
+      const now = Date.now();
+      if (now - lastScrollTime < throttleDelay) return;
+      lastScrollTime = now;
+
+      const { scrollTop, scrollHeight, clientHeight } = mainContent;
       if (
-        scrollHeight - scrollTop <= clientHeight + 300 &&
+        scrollHeight - scrollTop <= clientHeight + 500 &&
         hasNextPage &&
         !isFetchingNextPage
       ) {
         fetchNextPage();
       }
     };
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
+
+    mainContent.addEventListener('scroll', handleScroll);
+    return () => mainContent.removeEventListener('scroll', handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Poll for job status with exponential backoff
@@ -269,10 +274,7 @@ export const FlashcardsPage = () => {
   const studiedSets = flashcardSets.filter((set) => set.lastStudiedAt).length;
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="h-screen overflow-y-auto space-y-6 pb-8 px-4 sm:px-0 scrollbar-hide"
-    >
+    <div className="space-y-6 pb-8 px-4 sm:px-0">
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">

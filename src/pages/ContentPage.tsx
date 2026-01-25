@@ -63,25 +63,27 @@ const MarkdownContent = ({
 
   // Restore scroll position
   useEffect(() => {
-    if (!restored && initialProgress > 0) {
-      const scrollHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
+    const mainContent = document.getElementById('main-content-area');
+    if (!restored && initialProgress > 0 && mainContent) {
+      const scrollHeight = mainContent.scrollHeight - mainContent.clientHeight;
       const targetScroll = (initialProgress / 100) * scrollHeight;
-      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      mainContent.scrollTo({ top: targetScroll, behavior: 'smooth' });
       setRestored(true);
     }
   }, [initialProgress, restored]);
 
   // Track scroll progress
   useEffect(() => {
+    const mainContent = document.getElementById('main-content-area');
+    if (!mainContent) return;
+
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const handleScroll = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        const scrollTop = window.scrollY;
-        const scrollHeight =
-          document.documentElement.scrollHeight - window.innerHeight;
+        const scrollTop = mainContent.scrollTop;
+        const scrollHeight = mainContent.scrollHeight - mainContent.clientHeight;
         if (scrollHeight <= 0) return;
 
         const progress = Math.min(
@@ -92,9 +94,9 @@ const MarkdownContent = ({
       }, 500); // Debounce by 500ms
     };
 
-    window.addEventListener('scroll', handleScroll);
+    mainContent.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      mainContent.removeEventListener('scroll', handleScroll);
       clearTimeout(timeoutId);
     };
   }, [onProgressUpdate]);
@@ -631,7 +633,7 @@ export const ContentPage = () => {
 
       <div className="flex gap-8 max-w-[1600px] mx-auto">
         {/* Main Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 min-h-screen">
           <div
             ref={contentRef}
             className="bg-white dark:bg-gray-800 sm:rounded-2xl sm:shadow-sm sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-8 md:p-12 min-h-[500px]"
