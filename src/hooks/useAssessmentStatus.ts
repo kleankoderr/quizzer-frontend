@@ -16,10 +16,11 @@ export const useAssessmentStatus = () => {
   const { data: onboardingData } = useQuery({
     queryKey: ['onboardingStatus'],
     queryFn: () => onboardingService.getStatus(),
-    enabled: !!user && !user.assessmentPopupShown,
+    enabled: !!user && user.role === 'USER' && !user.assessmentPopupShown,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (!user || user.assessmentPopupShown) return false;
+      if (user?.role !== 'USER' || user.assessmentPopupShown)
+        return false;
 
       const isInternalPage =
         location.pathname.includes('/quiz/') ||
@@ -70,7 +71,13 @@ export const useAssessmentStatus = () => {
 
   // Handle side effects (redirection and initial visibility)
   useEffect(() => {
-    if (!onboardingData || !user || user.assessmentPopupShown) return;
+    if (
+      !onboardingData ||
+      !user ||
+      user.role !== 'USER' ||
+      user.assessmentPopupShown
+    )
+      return;
 
     if (onboardingData.status === 'NOT_STARTED') {
       const isAuthPage = ['/login', '/signup', '/admin'].includes(

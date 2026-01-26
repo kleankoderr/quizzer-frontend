@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { contentService, studyPackService } from '../services';
@@ -573,9 +579,9 @@ export const StudyPage = () => {
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
-    
+
     // Find the content to check if it belongs to a study pack
-    const contentToDelete = contents.find(c => c.id === deleteContentId);
+    const contentToDelete = contents.find((c) => c.id === deleteContentId);
     const studyPackId = contentToDelete?.studyPack?.id;
 
     setIsDeleting(true);
@@ -584,10 +590,12 @@ export const StudyPage = () => {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
-      
+
       // Invalidate the study pack if this content belonged to one
       if (studyPackId) {
-        await queryClient.invalidateQueries({ queryKey: ['studyPack', studyPackId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', studyPackId],
+        });
         await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
       }
 

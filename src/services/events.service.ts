@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '../config/api';
-import apiClient from './api';
+import { apiClient } from './api';
 
 export type EventType =
   | 'quiz.progress'
@@ -25,7 +25,7 @@ export interface AppEvent {
 
 type EventHandler<T = AppEvent> = (event: T) => void;
 
-class EventsService {
+export class EventsService {
   private eventSource?: EventSource;
   private readonly listeners = new Map<EventType, Set<EventHandler>>();
   private reconnectTimer?: ReturnType<typeof setTimeout>;
@@ -97,9 +97,7 @@ class EventsService {
   }
 
   private openEventSource(token: string): void {
-    const url = `${API_BASE_URL}/events/sse?token=${encodeURIComponent(
-      token
-    )}`;
+    const url = `${API_BASE_URL}/events/sse?token=${encodeURIComponent(token)}`;
 
     this.eventSource = new EventSource(url);
 

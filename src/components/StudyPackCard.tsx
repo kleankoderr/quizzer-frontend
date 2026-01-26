@@ -34,7 +34,9 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
   const renderCountBreakdown = () => {
     const parts = [];
     if (counts.quizzes > 0)
-      parts.push(`${counts.quizzes} ${counts.quizzes === 1 ? 'Quiz' : 'Quizzes'}`);
+      parts.push(
+        `${counts.quizzes} ${counts.quizzes === 1 ? 'Quiz' : 'Quizzes'}`
+      );
     if (counts.flashcardSets > 0)
       parts.push(
         `${counts.flashcardSets} ${
@@ -42,9 +44,13 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
         }`
       );
     if (counts.contents > 0)
-      parts.push(`${counts.contents} ${counts.contents === 1 ? 'Material' : 'Materials'}`);
+      parts.push(
+        `${counts.contents} ${counts.contents === 1 ? 'Material' : 'Materials'}`
+      );
     if (counts.userDocuments > 0)
-      parts.push(`${counts.userDocuments} ${counts.userDocuments === 1 ? 'File' : 'Files'}`);
+      parts.push(
+        `${counts.userDocuments} ${counts.userDocuments === 1 ? 'File' : 'Files'}`
+      );
 
     if (parts.length === 0) return 'Empty Set';
     if (parts.length > 2) return `${totalItems} Items`;

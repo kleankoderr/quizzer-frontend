@@ -27,7 +27,10 @@ const getItemStats = (type: string, item: any) => {
   switch (type) {
     case 'quiz': {
       const count =
-        item.questionCount ?? item._count?.questions ?? item.questions?.length ?? 0;
+        item.questionCount ??
+        item._count?.questions ??
+        item.questions?.length ??
+        0;
       return { count, label: 'question' };
     }
     case 'flashcard': {

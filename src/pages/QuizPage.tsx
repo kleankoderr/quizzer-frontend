@@ -280,9 +280,9 @@ export const QuizPage = () => {
   const confirmDeleteQuiz = async () => {
     if (!deleteQuizId) return;
 
-    const quizToDelete = quizzes.find(q => q.id === deleteQuizId);
-    const studyPackId = quizToDelete?.studyPackId || quizToDelete?.studyPack?.id;
-
+    const quizToDelete = quizzes.find((q) => q.id === deleteQuizId);
+    const studyPackId =
+      quizToDelete?.studyPackId || quizToDelete?.studyPack?.id;
 
     setIsDeleting(true);
     const loadingToast = toast.loading('Deleting quiz...');
@@ -294,7 +294,9 @@ export const QuizPage = () => {
 
       // Invalidate the study pack if this quiz belonged to one
       if (studyPackId) {
-        await queryClient.invalidateQueries({ queryKey: ['studyPack', studyPackId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', studyPackId],
+        });
         await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
       }
 

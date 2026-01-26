@@ -83,7 +83,8 @@ const MarkdownContent = ({
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         const scrollTop = mainContent.scrollTop;
-        const scrollHeight = mainContent.scrollHeight - mainContent.clientHeight;
+        const scrollHeight =
+          mainContent.scrollHeight - mainContent.clientHeight;
         if (scrollHeight <= 0) return;
 
         const progress = Math.min(

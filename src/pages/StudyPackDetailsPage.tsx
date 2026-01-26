@@ -1,7 +1,13 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { contentService, userDocumentService, flashcardService, quizService, studyPackService } from '../services';
+import {
+  contentService,
+  userDocumentService,
+  flashcardService,
+  quizService,
+  studyPackService,
+} from '../services';
 import { StudyPackItemCard } from '../components/StudyPackItemCard';
 import { DeleteModal } from '../components/DeleteModal';
 import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
@@ -444,7 +450,7 @@ export const StudyPackDetailsPage: React.FC = () => {
       await deleteService(itemId);
 
       toast.success('Item deleted permanently');
-      
+
       // Invalidate all relevant queries to ensure UI refresh
       queryClient.invalidateQueries({ queryKey: ['contents'] });
       queryClient.invalidateQueries({ queryKey: ['quizzes'] });
