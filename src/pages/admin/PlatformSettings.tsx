@@ -1,40 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Save } from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { adminService } from '../../services';
 import { Toast as toast } from '../../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { CardSkeleton } from '../../components/skeletons';
-import { AiConfigForm } from '../../components/admin/AiConfigForm';
-
-type AIProvider = 'gemini' | 'groq' | 'openai';
-type ModelComplexity = 'simple' | 'medium' | 'complex';
-
-interface AIModelSettings {
-  modelName: string;
-  temperature: number;
-  maxTokens?: number;
-}
-
-interface AIProviderConfig {
-  defaultModel: string;
-  models: Record<string, AIModelSettings>;
-}
-
-interface AIModelStrategy {
-  providers: Record<AIProvider, AIProviderConfig>;
-  routing: {
-    defaultProvider: AIProvider;
-    taskRouting?: Record<string, AIProvider>;
-    complexityRouting?: Partial<Record<ModelComplexity, AIProvider>>;
-    multimodalProvider?: AIProvider;
-  };
-}
 
 interface PlatformSettingsState {
   allowRegistration: boolean;
   maintenanceMode: boolean;
   supportEmail: string;
-  aiProviderConfig: AIModelStrategy;
 }
 
 export const PlatformSettings = () => {
@@ -43,28 +17,11 @@ export const PlatformSettings = () => {
     allowRegistration: true,
     maintenanceMode: false,
     supportEmail: '',
-    aiProviderConfig: {
-      providers: {
-        gemini: { defaultModel: '', models: {} },
-        groq: { defaultModel: '', models: {} },
-        openai: { defaultModel: '', models: {} },
-      },
-      routing: {
-        defaultProvider: 'gemini',
-        taskRouting: {},
-        complexityRouting: {},
-      },
-    },
   });
 
   const { data: settings, isLoading: isSettingsLoading } = useQuery({
     queryKey: ['platformSettings'],
     queryFn: adminService.getSettings,
-  });
-
-  const { data: aiOptions, isLoading: isOptionsLoading } = useQuery({
-    queryKey: ['aiOptions'],
-    queryFn: adminService.getAiOptions,
   });
 
   useEffect(() => {
@@ -73,18 +30,6 @@ export const PlatformSettings = () => {
         allowRegistration: settings.allowRegistration,
         maintenanceMode: settings.maintenanceMode,
         supportEmail: settings.supportEmail || '',
-        aiProviderConfig: settings.aiProviderConfig || {
-          providers: {
-            gemini: { defaultModel: '', models: {} },
-            groq: { defaultModel: '', models: {} },
-            openai: { defaultModel: '', models: {} },
-          },
-          routing: {
-            defaultProvider: 'gemini',
-            taskRouting: {},
-            complexityRouting: {},
-          },
-        },
       });
     }
   }, [settings]);
@@ -113,7 +58,7 @@ export const PlatformSettings = () => {
     updateMutation.mutate(formData);
   };
 
-  if (isSettingsLoading || isOptionsLoading) {
+  if (isSettingsLoading) {
     return (
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex items-center justify-between">
@@ -227,14 +172,6 @@ export const PlatformSettings = () => {
             </div>
           </div>
         </div>
-
-        <AiConfigForm
-          config={formData.aiProviderConfig}
-          options={aiOptions || { providers: [], tasks: [], complexities: [] }}
-          onChange={(config) =>
-            setFormData({ ...formData, aiProviderConfig: config })
-          }
-        />
 
         <div className="flex justify-end">
           <button

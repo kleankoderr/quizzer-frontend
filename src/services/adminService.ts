@@ -218,11 +218,6 @@ export const adminService = {
     return response.data;
   },
 
-  getAiOptions: async () => {
-    const response = await api.get('/platform-settings/options');
-    return response.data;
-  },
-
   updateSettings: async (data: any) => {
     const response = await api.patch('/platform-settings', data);
     return response.data;
