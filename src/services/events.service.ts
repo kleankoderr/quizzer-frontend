@@ -97,30 +97,41 @@ export class EventsService {
   }
 
   private openEventSource(token: string): void {
-    const url = `${API_BASE_URL}/events/sse?token=${encodeURIComponent(token)}`;
+    try {
+      const url = new URL(`${API_BASE_URL}/events/sse`);
+      url.searchParams.set('token', token);
 
-    this.eventSource = new EventSource(url);
+      console.debug('[EventsService] Connecting to SSE...');
 
-    this.eventSource.onopen = () => {
-      this.connecting = false;
-      this.clearReconnectTimer();
-    };
+      this.eventSource = new EventSource(url.toString());
 
-    this.eventSource.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        this.emit(payload.data ?? payload);
-      } catch {
-        return;
-      }
-    };
+      this.eventSource.onopen = () => {
+        console.debug('[EventsService] SSE connection established');
+        this.connecting = false;
+        this.clearReconnectTimer();
+      };
 
-    this.eventSource.onerror = (_error) => {
-      this.eventSource?.close();
-      this.eventSource = undefined;
+      this.eventSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          this.emit(payload.data ?? payload);
+        } catch (error) {
+          console.error('[EventsService] Failed to parse SSE message:', error);
+        }
+      };
+
+      this.eventSource.onerror = (error) => {
+        console.error('[EventsService] SSE connection error', error);
+        this.eventSource?.close();
+        this.eventSource = undefined;
+        this.connecting = false;
+        this.scheduleReconnect();
+      };
+    } catch (error) {
+      console.error('[EventsService] Error initializing EventSource:', error);
       this.connecting = false;
       this.scheduleReconnect();
-    };
+    }
   }
 
   private handleConnectionFailure(_: unknown): void {
