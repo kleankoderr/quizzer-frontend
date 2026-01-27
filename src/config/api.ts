@@ -14,6 +14,7 @@ export const AUTH_ENDPOINTS = {
   RESEND_OTP: `${API_BASE_URL}/auth/resend-otp`,
   FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
   RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
 };
 
 // Quiz endpoints
@@ -93,4 +94,10 @@ export const USER_ENDPOINTS = {
   CHANGE_PASSWORD: `${API_BASE_URL}/user/password`,
   DELETE_ACCOUNT: `${API_BASE_URL}/user/account`,
   GET_QUOTA: `${API_BASE_URL}/user/quota`,
+  MARK_ASSESSMENT_SHOWN: `${API_BASE_URL}/user/assessment-popup-shown`,
+};
+
+// Onboarding endpoints
+export const ONBOARDING_ENDPOINTS = {
+  GET_STATUS: `${API_BASE_URL}/onboarding/status`,
 };

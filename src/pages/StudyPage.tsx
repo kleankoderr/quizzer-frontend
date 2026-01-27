@@ -1,9 +1,14 @@
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { contentService } from '../services';
-import { useContents, usePopularTopics, useJobEvents, useTour } from '../hooks';
-import { studyGeneratorTour } from '../tours';
+import { contentService, studyPackService } from '../services';
+import { useContents, usePopularTopics, useJobEvents } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -32,25 +37,115 @@ import { StudyPackSelector } from '../components/StudyPackSelector';
 import { CardMenu, Pencil } from '../components/CardMenu';
 import { EditTitleModal } from '../components/EditTitleModal';
 import { formatDate } from '../utils/dateFormat';
+import { useAutoTour } from '../hooks/useAutoTour';
+import { InputError } from '../components/InputError';
+
+interface ContentCardProps {
+  content: any;
+  onEdit: (id: string) => void;
+  onMove: (id: string) => void;
+  onRemove: (id: string, packId: string) => void;
+  onDelete: (id: string) => void;
+}
+
+const ContentCard: React.FC<ContentCardProps> = ({
+  content,
+  onEdit,
+  onMove,
+  onRemove,
+  onDelete,
+}) => {
+  const navigate = useNavigate();
+
+  const navigateToContent = () => {
+    navigate(`/content/${content.id}`, {
+      state: {
+        breadcrumb: [{ label: 'Study Material', path: '/study' }],
+      },
+    });
+  };
+
+  const menuItems = [
+    {
+      label: 'Edit Title',
+      icon: <Pencil className="w-4 h-4" />,
+      onClick: () => onEdit(content.id),
+    },
+    {
+      label: 'Move to Study Set',
+      icon: <Folder className="w-4 h-4" />,
+      onClick: () => onMove(content.id),
+    },
+    ...(content.studyPack || content.studyPackId
+      ? [
+          {
+            label: 'Remove from Study Set',
+            icon: <X className="w-4 h-4" />,
+            onClick: () =>
+              onRemove(
+                content.id,
+                content.studyPack?.id || content.studyPackId
+              ),
+          },
+        ]
+      : []),
+    {
+      label: 'Delete',
+      icon: <Trash2 className="w-4 h-4" />,
+      onClick: () => onDelete(content.id),
+      variant: 'danger' as const,
+    },
+  ];
+
+  return (
+    <Card
+      key={content.id}
+      title={content.title}
+      subtitle={content.topic}
+      icon={
+        <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
+      onTitleClick={navigateToContent}
+      onIconClick={navigateToContent}
+      actions={<CardMenu items={menuItems} />}
+    >
+      <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-1">
+            {formatDate(content.createdAt)}
+          </div>
+          {content.generatedContent && (
+            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              Generated
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 export const StudyPage = () => {
+  // Trigger study material tour
+  useAutoTour('study-generator');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
 
-  const { startIfNotCompleted } = useTour();
-
-  // Use React Query hooks for data fetching (moved up for useMemo dependency)
-  const [page, setPage] = useState(1);
+  // Use React Query hooks for data fetching
   const {
     data: contentsData,
     isLoading: isLoadingContents,
-    refetch,
-  } = useContents(undefined, page, 6);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useContents();
   const { data: popularTopics = [] } = usePopularTopics();
 
-  const contents = useMemo(() => contentsData?.data ?? [], [contentsData]);
-  const totalPages = contentsData?.meta?.totalPages ?? 1;
+  const contents = useMemo(
+    () => contentsData?.pages.flatMap((page) => page.data) ?? [],
+    [contentsData]
+  );
 
   // Content creation states
   const [showCreator, setShowCreator] = useState(
@@ -68,13 +163,17 @@ export const StudyPage = () => {
   const [selectedStudyPackId, setSelectedStudyPackId] = useState<string>(
     location.state?.studyPackId || ''
   );
+  const [isCreatingStudyPack, setIsCreatingStudyPack] = useState(false);
+  const [showStudyPackError, setShowStudyPackError] = useState(false);
 
   const [contentLoading, setContentLoading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showExistingFiles, setShowExistingFiles] = useState(false);
 
   // Job polling state
-  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(
+    undefined
+  );
   const toastIdRef = useRef<string | undefined>(undefined);
 
   // Delete state
@@ -97,25 +196,44 @@ export const StudyPage = () => {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    if (showCreator) {
-      startIfNotCompleted('study-generator-onboarding', studyGeneratorTour);
-    }
-  }, [showCreator, startIfNotCompleted]);
+  const uploadButtonLabel = useMemo(() => {
+    const totalSelected = files.length + selectedFileIds.length;
+    if (totalSelected === 0) return 'Documents';
+    return `${totalSelected} File${totalSelected === 1 ? '' : 's'}`;
+  }, [files.length, selectedFileIds.length]);
 
-  const getSummary = (content: any) => {
-    if (content.description) {
-      return content.description;
-    }
-    if (content.generatedContent?.summary) {
-      return content.generatedContent.summary;
-    }
-    return 'No description available';
-  };
+  useEffect(() => {
+    const mainContent = document.getElementById('main-content-area');
+    if (!mainContent) return;
+
+    let lastScrollTime = 0;
+    const throttleDelay = 200;
+
+    const handleScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollTime < throttleDelay) return;
+      lastScrollTime = now;
+
+      const { scrollTop, scrollHeight, clientHeight } = mainContent;
+      if (
+        scrollHeight - scrollTop <= clientHeight + 500 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    };
+
+    mainContent.addEventListener('scroll', handleScroll);
+    return () => mainContent.removeEventListener('scroll', handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Group contents by study pack
   const groupedContents = useMemo(() => {
-    const groups: Record<string, { id: string; title: string; contents: (typeof contents)[0][] }> = {};
+    const groups: Record<
+      string,
+      { id: string; title: string; contents: (typeof contents)[0][] }
+    > = {};
     const noPack: (typeof contents)[0][] = [];
 
     for (const content of contents) {
@@ -140,77 +258,12 @@ export const StudyPage = () => {
   const handleTitleUpdate = async (contentId: string, newTitle: string) => {
     try {
       await contentService.updateTitle(contentId, newTitle);
-      
-      // Optimistically update the cache
-      queryClient.setQueryData(['contents'], (old: any) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: old.data.map((c: any) =>
-            c.id === contentId ? { ...c, title: newTitle } : c
-          ),
-        };
-      });
-
-      // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['contents'] });
-      
       toast.success('Content title updated successfully!');
     } catch (error) {
       toast.error('Failed to update content title');
       throw error;
     }
-  };
-
-  const renderContentCard = (content: any) => {
-    const menuItems = [
-      {
-        label: 'Edit Title',
-        icon: <Pencil className="w-4 h-4" />,
-        onClick: () => setEditContentId(content.id),
-      },
-      {
-        label: 'Move to Study Set',
-        icon: <Folder className="w-4 h-4" />,
-        onClick: () => setMoveContentId(content.id),
-      },
-      {
-        label: 'Delete',
-        icon: <Trash2 className="w-4 h-4" />,
-        onClick: () => setDeleteContentId(content.id),
-        variant: 'danger' as const,
-      },
-    ];
-
-    return (
-      <Card
-        key={content.id}
-        title={content.title}
-        subtitle={content.topic}
-        onClick={() => navigate(`/content/${content.id}`, {
-          state: {
-            breadcrumb: [
-              { label: 'Study Material', path: '/study' },
-            ],
-          },
-        })}
-        actions={<CardMenu items={menuItems} />}
-      >
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
-          {getSummary(content)}
-        </p>
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            {formatDate(content.createdAt)}
-          </div>
-          {content.generatedContent && (
-            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-              Generated
-            </div>
-          )}
-        </div>
-      </Card>
-    );
   };
 
   // Poll for job status with exponential backoff
@@ -226,6 +279,7 @@ export const StudyPage = () => {
             message="Opening your study material..."
             progress={100}
             status="success"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 2000 }
@@ -234,9 +288,7 @@ export const StudyPage = () => {
       setTimeout(() => {
         navigate(`/content/${result.id}`, {
           state: {
-            breadcrumb: [
-              { label: 'Study Material', path: '/study' },
-            ],
+            breadcrumb: [{ label: 'Study Material', path: '/study' }],
           },
         });
       }, 500);
@@ -244,7 +296,12 @@ export const StudyPage = () => {
       setContentLoading(false);
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
-      refetch();
+      await queryClient.invalidateQueries({ queryKey: ['contents'] });
+      if (selectedStudyPackId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', selectedStudyPackId],
+        });
+      }
     },
     onFailed: (error: string) => {
       toast.custom(
@@ -255,6 +312,7 @@ export const StudyPage = () => {
             message={error}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 5000 }
@@ -268,6 +326,11 @@ export const StudyPage = () => {
   });
 
   const handleGenerateFromTopic = useCallback(async () => {
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     if (!topic.trim()) {
       toast.error('Please enter a topic');
       return;
@@ -284,6 +347,7 @@ export const StudyPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setContentLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -298,12 +362,10 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to generate content';
-      
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to generate content';
+
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -315,6 +377,7 @@ export const StudyPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -323,9 +386,14 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [topic, selectedStudyPackId]);
+  }, [topic, selectedStudyPackId, isCreatingStudyPack]);
 
   const handleCreateFromText = useCallback(async () => {
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     if (!textContent.trim()) {
       toast.error('Please enter some content');
       return;
@@ -341,6 +409,7 @@ export const StudyPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setContentLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -357,12 +426,10 @@ export const StudyPage = () => {
       });
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to generate content';
-      
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to generate content';
+
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -374,6 +441,7 @@ export const StudyPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -382,9 +450,20 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [textTitle, textContent, textTopic, selectedStudyPackId]);
+  }, [
+    textTitle,
+    textContent,
+    textTopic,
+    selectedStudyPackId,
+    isCreatingStudyPack,
+  ]);
 
   const handleFileUpload = useCallback(async () => {
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     if (files.length === 0 && selectedFileIds.length === 0) {
       toast.error('Please select or upload at least one file');
       return;
@@ -400,6 +479,7 @@ export const StudyPage = () => {
           message="Uploading and extracting text..."
           progress={0}
           status="processing"
+          onClose={() => setContentLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -416,20 +496,21 @@ export const StudyPage = () => {
         files,
         (progress) => {
           // Show upload progress
-          if (progress < 100) {
-            toast.custom(
-              (t) => (
-                <ProgressToast
-                  t={t}
-                  title="Uploading Documents"
-                  message={`Uploading... ${progress}%`}
-                  progress={progress}
-                  status="processing"
-                />
-              ),
-              { id: toastId }
-            );
-          }
+          if (progress >= 100) return;
+
+          toast.custom(
+            (t) => (
+              <ProgressToast
+                t={t}
+                title="Uploading Documents"
+                message={`Uploading... ${progress}%`}
+                progress={progress}
+                status="processing"
+                onClose={() => setContentLoading(false)}
+              />
+            ),
+            { id: toastId }
+          );
         }
       );
 
@@ -444,6 +525,7 @@ export const StudyPage = () => {
             progress={0}
             status="processing"
             autoProgress={true}
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId }
@@ -452,11 +534,8 @@ export const StudyPage = () => {
       setCurrentJobId(jobId);
     } catch (error: any) {
       let errorMessage = error?.response?.data?.message || 'Upload failed';
-      
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -468,6 +547,7 @@ export const StudyPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setContentLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -476,140 +556,67 @@ export const StudyPage = () => {
       setCurrentJobId(undefined);
       toastIdRef.current = undefined;
     }
-  }, [files, selectedFileIds, selectedStudyPackId]);
+  }, [files, selectedFileIds, selectedStudyPackId, isCreatingStudyPack]);
+
+  const handleRemoveFromPack = useCallback(
+    async (itemId: string, packId: string) => {
+      const loadingToast = toast.loading('Removing from study set...');
+      try {
+        await studyPackService.removeItem(packId, { type: 'content', itemId });
+        await queryClient.invalidateQueries({ queryKey: ['contents'] });
+        await queryClient.invalidateQueries({ queryKey: ['content', itemId] });
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', packId],
+        });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+        toast.success('Removed from study set', { id: loadingToast });
+      } catch (_error) {
+        toast.error('Failed to remove from study set', { id: loadingToast });
+      }
+    },
+    [queryClient]
+  );
 
   const confirmDeleteContent = useCallback(async () => {
     if (!deleteContentId) return;
+
+    // Find the content to check if it belongs to a study pack
+    const contentToDelete = contents.find((c) => c.id === deleteContentId);
+    const studyPackId = contentToDelete?.studyPack?.id;
 
     setIsDeleting(true);
     const loadingToast = toast.loading('Deleting content...');
     try {
       await contentService.delete(deleteContentId);
       toast.success('Content deleted successfully!', { id: loadingToast });
-      // Refetch the contents list to update the UI
-      refetch();
+      await queryClient.invalidateQueries({ queryKey: ['contents'] });
+
+      // Invalidate the study pack if this content belonged to one
+      if (studyPackId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['studyPack', studyPackId],
+        });
+        await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      }
+
       setDeleteContentId(null);
     } catch (_error) {
       toast.error('Failed to delete content', { id: loadingToast });
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteContentId, refetch]);
+  }, [deleteContentId, queryClient, contents]);
 
-  const renderMainContent = () => {
-    if (isLoadingContents) {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <CardSkeleton count={6} />
-        </div>
-      );
-    }
+  let studyContent;
 
-    if (contents.length > 0) {
-      return (
-        <>
-          <>
-            {Object.values(groupedContents.groups).map((pack) => (
-                <CollapsibleSection
-                  key={pack.id}
-                  title={pack.title}
-                  count={pack.contents.length}
-                  defaultOpen={false}
-                  onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=materials`)}
-                  className="mb-8 last:mb-0"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {pack.contents.map((content) =>
-                      renderContentCard(content)
-                    )}
-                  </div>
-                </CollapsibleSection>
-              )
-            )}
-
-            {/* Uncategorized Contents */}
-            {groupedContents.noPack.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                {groupedContents.noPack.map((content) =>
-                  renderContentCard(content)
-                )}
-              </div>
-            )}
-          </>
-
-          {/* Move Modal */}
-          <MoveToStudyPackModal
-            isOpen={!!moveContentId}
-            onClose={() => setMoveContentId(null)}
-            itemId={moveContentId || ''}
-            itemType="content"
-            onMoveSuccess={(pack) => {
-              // Optimistic update
-              queryClient.setQueryData(['contents', undefined, page, 6], (old: any) => {
-                if (!old?.data) return old;
-                return {
-                  ...old,
-                  data: old.data.map((c: any) =>
-                    c.id === moveContentId
-                      ? {
-                          ...c,
-                          studyPack: pack
-                            ? { id: pack.id, title: pack.title }
-                            : null,
-                        }
-                      : c
-                  ),
-                };
-              });
-              // Query invalidation in the modal handles the UI update
-              queryClient.invalidateQueries({ queryKey: ['contents'] });
-              setMoveContentId(null);
-            }}
-          />
-
-          <EditTitleModal
-            isOpen={!!editContentId}
-            currentTitle={editingContent?.title || ''}
-            onClose={() => setEditContentId(null)}
-            onSave={(newTitle) => handleTitleUpdate(editContentId || '', newTitle)}
-          />
-
-          <DeleteModal
-            isOpen={!!deleteContentId}
-            onClose={() => setDeleteContentId(null)}
-            onConfirm={confirmDeleteContent}
-            title="Delete Study Material"
-            message="Are you sure you want to delete this study material? This action cannot be undone."
-            isDeleting={isDeleting}
-          />
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2 font-medium text-gray-600 dark:text-gray-300 flex items-center text-center">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
-      );
-    }
-
-    return (
+  if (isLoadingContents) {
+    studyContent = (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <CardSkeleton count={6} />
+      </div>
+    );
+  } else if (contents.length === 0) {
+    studyContent = (
       <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
           <BookOpen className="w-8 h-8 text-primary-600 dark:text-primary-400" />
@@ -618,8 +625,8 @@ export const StudyPage = () => {
           No study materials yet
         </h3>
         <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-          Get started by generating content from a topic, your own text,
-          or by uploading files.
+          Get started by generating content from a topic, your own text, or by
+          uploading files.
         </p>
         <button
           onClick={() => setShowCreator(true)}
@@ -630,10 +637,86 @@ export const StudyPage = () => {
         </button>
       </div>
     );
-  };
+  } else {
+    studyContent = (
+      <>
+        {Object.values(groupedContents.groups).map((pack: any) => (
+          <CollapsibleSection
+            key={pack.id}
+            title={pack.title}
+            count={pack.contents.length}
+            defaultOpen={false}
+            onTitleClick={() =>
+              navigate(`/study-pack/${pack.id}?tab=materials`)
+            }
+            className="mb-8 last:mb-0"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pack.contents.map((content: any) => (
+                <ContentCard
+                  key={content.id}
+                  content={content}
+                  onEdit={setEditContentId}
+                  onMove={setMoveContentId}
+                  onRemove={handleRemoveFromPack}
+                  onDelete={setDeleteContentId}
+                />
+              ))}
+            </div>
+          </CollapsibleSection>
+        ))}
+
+        {/* Uncategorized Contents */}
+        {groupedContents.noPack.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+            {groupedContents.noPack.map((content: any) => (
+              <ContentCard
+                key={content.id}
+                content={content}
+                onEdit={setEditContentId}
+                onMove={setMoveContentId}
+                onRemove={handleRemoveFromPack}
+                onDelete={setDeleteContentId}
+              />
+            ))}
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-8 px-4 sm:px-0">
+      <MoveToStudyPackModal
+        isOpen={!!moveContentId}
+        onClose={() => setMoveContentId(null)}
+        itemId={moveContentId || ''}
+        itemType="content"
+        onMoveSuccess={async (pack) => {
+          await queryClient.invalidateQueries({ queryKey: ['contents'] });
+          if (pack) {
+            await queryClient.invalidateQueries({
+              queryKey: ['studyPack', pack.id],
+            });
+          }
+        }}
+      />
+
+      <EditTitleModal
+        isOpen={!!editContentId}
+        currentTitle={editingContent?.title || ''}
+        onClose={() => setEditContentId(null)}
+        onSave={(newTitle) => handleTitleUpdate(editContentId || '', newTitle)}
+      />
+
+      <DeleteModal
+        isOpen={!!deleteContentId}
+        onClose={() => setDeleteContentId(null)}
+        onConfirm={confirmDeleteContent}
+        title="Delete Study Material"
+        message="Are you sure you want to delete this study material? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-700 to-blue-700 dark:from-primary-800 dark:via-primary-900 dark:to-blue-900 p-4 sm:p-6 md:p-10 shadow-xl">
         <div className="absolute inset-0 opacity-10">
@@ -697,7 +780,10 @@ export const StudyPage = () => {
               <Sparkles className="w-7 h-7 text-primary-600" />
             </div>
             <div>
-              <h2 id="study-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h2
+                id="study-generator-title"
+                className="text-2xl font-bold text-gray-900 dark:text-white"
+              >
                 Generate Study Materials
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -707,7 +793,10 @@ export const StudyPage = () => {
           </div>
 
           {/* Tabs */}
-          <div id="study-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+          <div
+            id="study-mode-tabs"
+            className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700"
+          >
             <button
               onClick={() => setActiveTab('topic')}
               className={`px-2 md:px-6 py-3 font-semibold transition-all rounded-lg md:rounded-none md:rounded-t-lg border-b-0 md:border-b-3 -mb-0 md:-mb-0.5 flex flex-col md:flex-row items-center justify-center gap-2 ${
@@ -786,6 +875,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTopic(e.target.value)}
                     placeholder="e.g., Photosynthesis, World War II, Python Programming"
                     className="w-full px-5 py-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg transition-all"
+                    maxLength={200}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !contentLoading) {
                         handleGenerateFromTopic();
@@ -816,8 +906,22 @@ export const StudyPage = () => {
                 <div id="study-generator-study-set">
                   <StudyPackSelector
                     value={selectedStudyPackId}
-                    onChange={setSelectedStudyPackId}
+                    onChange={(val) => {
+                      setSelectedStudyPackId(val);
+                      setShowStudyPackError(false);
+                    }}
+                    onCreationModeChange={(isCreating) => {
+                      setIsCreatingStudyPack(isCreating);
+                      if (!isCreating) setShowStudyPackError(false);
+                    }}
                     className="mb-6"
+                  />
+                  <InputError
+                    message={
+                      showStudyPackError
+                        ? 'Please create or cancel the study set before generating content'
+                        : null
+                    }
                   />
                 </div>
 
@@ -873,6 +977,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTextTitle(e.target.value)}
                     placeholder="Enter content title (auto-generated if empty)"
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    maxLength={200}
                   />
                 </div>
 
@@ -889,6 +994,7 @@ export const StudyPage = () => {
                     onChange={(e) => setTextTopic(e.target.value)}
                     placeholder="e.g., Science, History"
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    maxLength={200}
                   />
                 </div>
 
@@ -904,14 +1010,29 @@ export const StudyPage = () => {
                     onChange={(e) => setTextContent(e.target.value)}
                     placeholder="Paste your study material here..."
                     className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all h-40 md:h-64"
+                    maxLength={1500}
                   />
                 </div>
 
                 <div id="study-generator-study-set">
                   <StudyPackSelector
                     value={selectedStudyPackId}
-                    onChange={setSelectedStudyPackId}
+                    onChange={(val) => {
+                      setSelectedStudyPackId(val);
+                      setShowStudyPackError(false);
+                    }}
+                    onCreationModeChange={(isCreating) => {
+                      setIsCreatingStudyPack(isCreating);
+                      if (!isCreating) setShowStudyPackError(false);
+                    }}
                     className="mb-6"
+                  />
+                  <InputError
+                    message={
+                      showStudyPackError
+                        ? 'Please create or cancel the study set before generating content'
+                        : null
+                    }
                   />
                 </div>
 
@@ -1037,8 +1158,22 @@ export const StudyPage = () => {
                 <div id="study-generator-study-set">
                   <StudyPackSelector
                     value={selectedStudyPackId}
-                    onChange={setSelectedStudyPackId}
+                    onChange={(val) => {
+                      setSelectedStudyPackId(val);
+                      setShowStudyPackError(false);
+                    }}
+                    onCreationModeChange={(isCreating) => {
+                      setIsCreatingStudyPack(isCreating);
+                      if (!isCreating) setShowStudyPackError(false);
+                    }}
                     className="mb-6"
+                  />
+                  <InputError
+                    message={
+                      showStudyPackError
+                        ? 'Please create or cancel the study set before processing documents'
+                        : null
+                    }
                   />
                 </div>
 
@@ -1058,10 +1193,7 @@ export const StudyPage = () => {
                   ) : (
                     <>
                       <Upload className="w-6 h-6" />
-                      Process{' '}
-                      {files.length + selectedFileIds.length > 0
-                        ? `${files.length + selectedFileIds.length} File${files.length + selectedFileIds.length > 1 ? 's' : ''}`
-                        : 'Documents'}
+                      Process {uploadButtonLabel}
                     </>
                   )}
                 </button>
@@ -1078,7 +1210,14 @@ export const StudyPage = () => {
             Your Study Materials
           </h2>
 
-          {renderMainContent()}
+          {/* Study Materials Content */}
+          {studyContent}
+        </div>
+      )}
+
+      {isFetchingNextPage && (
+        <div className="flex justify-center p-4">
+          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>

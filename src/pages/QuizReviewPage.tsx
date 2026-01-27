@@ -100,9 +100,12 @@ export const QuizReviewPage = () => {
     if (!loading && quiz && !location.state?.breadcrumb) {
       const breadcrumbItems = [
         quiz.studyPack
-          ? { label: quiz.studyPack.title, path: `/study-pack/${quiz.studyPack.id}` }
+          ? {
+              label: quiz.studyPack.title,
+              path: `/study-pack/${quiz.studyPack.id}`,
+            }
           : { label: 'Quizzes', path: '/quiz' },
-        { label: quiz.title, path: null },
+        { label: quiz.title, path: `/quiz/${quiz.id}` },
         { label: 'Review', path: null },
       ];
 
@@ -140,11 +143,11 @@ export const QuizReviewPage = () => {
   // Navigate to retake quiz
   const handleRetake = () => {
     if (!quiz?.id) return;
-    
+
     if (challengeId) {
-      navigate(`/quiz/${quiz.id}?challengeId=${challengeId}`);
+      navigate(`/quiz/${quiz.id}?challengeId=${challengeId}&mode=retake`);
     } else {
-      navigate(`/quiz/${quiz.id}`);
+      navigate(`/quiz/${quiz.id}?mode=retake`);
     }
   };
 

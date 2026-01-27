@@ -57,9 +57,7 @@ export const Sidebar = ({
   const navSections: NavSection[] = [
     {
       // Core - Most frequently accessed
-      items: [
-        { path: '/dashboard', icon: Home, label: 'Dashboard' },
-      ],
+      items: [{ path: '/dashboard', icon: Home, label: 'Dashboard' }],
     },
     {
       label: 'Learning Tools',
@@ -99,9 +97,7 @@ export const Sidebar = ({
   // Admin navigation sections
   const adminNavSections: NavSection[] = [
     {
-      items: [
-        { path: '/admin', icon: Home, label: 'Dashboard' },
-      ],
+      items: [{ path: '/admin', icon: Home, label: 'Dashboard' }],
     },
     {
       label: 'Management',
@@ -201,11 +197,17 @@ export const Sidebar = ({
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
+                const linkIdMap: Record<string, string> = {
+                  '/study': 'sidebar-study-btn',
+                  '/quiz': 'sidebar-quiz-btn',
+                };
+                const linkId = linkIdMap[item.path];
 
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
+                    id={linkId}
                     onClick={() => isOpen && closeMobile()} // Close mobile sidebar on navigation
                     className={`
                       flex items-center gap-3 px-3 py-3 sm:py-2.5 rounded-lg transition-all relative touch-manipulation
@@ -256,10 +258,14 @@ export const Sidebar = ({
               title="Subscription"
             >
               <CreditCard className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && <span className="font-medium whitespace-nowrap">Subscription</span>}
+              {!isCollapsed && (
+                <span className="font-medium whitespace-nowrap">
+                  Subscription
+                </span>
+              )}
             </Link>
           )}
-          
+
           {/* Logout Button */}
           <button
             onClick={async () => {

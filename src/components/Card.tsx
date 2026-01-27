@@ -10,6 +10,8 @@ interface CardProps {
   children?: React.ReactNode;
   footer?: React.ReactNode;
   onClick?: () => void;
+  onTitleClick?: () => void;
+  onIconClick?: () => void;
   to?: string;
   className?: string;
   testId?: string;
@@ -24,6 +26,8 @@ export const Card: React.FC<CardProps> = ({
   children,
   footer,
   onClick,
+  onTitleClick,
+  onIconClick,
   to,
   className = '',
   testId,
@@ -56,7 +60,16 @@ export const Card: React.FC<CardProps> = ({
 
       {/* Icon */}
       {icon && (
-        <div className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors">
+        <div
+          className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors"
+          onClick={(e) => {
+            if (onIconClick) {
+              e.preventDefault();
+              e.stopPropagation();
+              onIconClick();
+            }
+          }}
+        >
           {icon}
         </div>
       )}
@@ -67,6 +80,13 @@ export const Card: React.FC<CardProps> = ({
           className={`font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2 ${
             actions ? 'pr-20' : ''
           }`}
+          onClick={(e) => {
+            if (onTitleClick) {
+              e.preventDefault();
+              e.stopPropagation();
+              onTitleClick();
+            }
+          }}
         >
           {title}
         </h3>

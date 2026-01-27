@@ -4,8 +4,8 @@ import { eventsService, type AppEvent } from '../services/events.service';
 export interface UseJobEventsOptions {
   jobId?: string;
   type: 'quiz' | 'flashcard' | 'content' | 'summary';
-  onCompleted?: (result: any) => void;
-  onFailed?: (error: string) => void;
+  onCompleted?: (result: any) => void | Promise<void>;
+  onFailed?: (error: string) => void | Promise<void>;
   enabled?: boolean;
 }
 
@@ -49,7 +49,9 @@ export const useJobEvents = ({
         // Attempt to reconstruct result from event metadata
         const result = {
           id: event.resourceId,
-          ...event.metadata,
+          ...(typeof event.metadata === 'object' && event.metadata !== null
+            ? event.metadata
+            : {}),
         };
 
         callbacksRef.current.onCompleted?.(result);
@@ -59,8 +61,10 @@ export const useJobEvents = ({
     const handleFailed = (event: AppEvent) => {
       if (event.jobId === jobId) {
         setStatus('failed');
-        setError(event.error);
-        callbacksRef.current.onFailed?.(event.error);
+        const errorMessage =
+          typeof event.error === 'string' ? event.error : 'An error occurred';
+        setError(errorMessage);
+        callbacksRef.current.onFailed?.(errorMessage);
       }
     };
 

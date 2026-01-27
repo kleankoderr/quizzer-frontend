@@ -217,7 +217,10 @@ export const SettingsPage = () => {
             </h2>
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Name
                 </label>
                 <input
@@ -231,7 +234,10 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Email
                 </label>
                 <input
@@ -247,7 +253,10 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="schoolName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="schoolName"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   School Name (Optional)
                 </label>
                 <SchoolSearch
@@ -258,7 +267,10 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="grade" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="grade"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Grade (Optional)
                 </label>
                 <input
@@ -291,7 +303,10 @@ export const SettingsPage = () => {
             </h2>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="currentPassword"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Current Password
                 </label>
                 <input
@@ -305,7 +320,10 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="newPassword"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   New Password
                 </label>
                 <input
@@ -323,7 +341,10 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Confirm New Password
                 </label>
                 <input
@@ -379,7 +400,10 @@ export const SettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="studyGoal" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="studyGoal"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Daily Study Goal (Minutes)
                 </label>
                 <input
@@ -429,7 +453,10 @@ export const SettingsPage = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="deleteConfirm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="deleteConfirm"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Type <span className="font-bold">DELETE</span> to confirm
                   </label>
                   <input

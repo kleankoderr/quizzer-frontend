@@ -1,7 +1,17 @@
 import React from 'react';
 import { Card } from './Card';
 
-import { Trash2, Folder, XCircle, MoreVertical } from 'lucide-react';
+import {
+  Trash2,
+  Folder,
+  XCircle,
+  MoreVertical,
+  HelpCircle,
+  Layers,
+  BookOpen,
+  FileText,
+} from 'lucide-react';
+import { formatDate } from '../utils/dateFormat';
 
 interface StudyPackItemCardProps {
   item: any;
@@ -16,11 +26,16 @@ interface StudyPackItemCardProps {
 const getItemStats = (type: string, item: any) => {
   switch (type) {
     case 'quiz': {
-      const count = item._count?.questions ?? item.questions?.length ?? 0;
+      const count =
+        item.questionCount ??
+        item._count?.questions ??
+        item.questions?.length ??
+        0;
       return { count, label: 'question' };
     }
     case 'flashcard': {
-      const count = item._count?.cards ?? item.cards?.length ?? 0;
+      const count =
+        item.cardCount ?? item._count?.cards ?? item.cards?.length ?? 0;
       return { count, label: 'card' };
     }
     default:
@@ -31,14 +46,6 @@ const getItemStats = (type: string, item: any) => {
 const getItemSubtitle = (type: string, item: any) => {
   if (type === 'userDocument') return 'Uploaded File';
   return item.topic || '';
-};
-
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 };
 
 export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
@@ -55,8 +62,6 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   const stats = getItemStats(type, item);
-  const dateStr = item.createdAt || item.uploadedAt;
-  const formattedDate = dateStr ? formatDate(dateStr) : '';
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,13 +88,39 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
     }
   };
 
+  const getIcon = () => {
+    switch (type) {
+      case 'quiz':
+        return (
+          <HelpCircle className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
+      case 'flashcard':
+        return (
+          <Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
+      case 'content':
+        return (
+          <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
+      case 'userDocument':
+        return (
+          <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className={`h-full ${className}`}>
       <Card
         className="h-full"
         title={item.title || item.displayName || 'Untitled'}
         subtitle={getItemSubtitle(type, item)}
+        icon={getIcon()}
         onClick={onClick}
+        onTitleClick={onClick}
+        onIconClick={onClick}
         actions={
           <div className="relative" ref={menuRef}>
             <button
@@ -145,16 +176,16 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
           </div>
         }
       >
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-3">
-          <div className="flex items-center gap-3">
-            {formattedDate && <div>{formattedDate}</div>}
+        {/* Action Hint when not expanded */}
+        <div className="mt-4 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+            {stats
+              ? `${stats.count} ${stats.label}${stats.count === 1 ? '' : 's'}`
+              : type}
           </div>
-
-          {stats && (
-            <span className="flex items-center gap-1.5">
-              {stats.count} {stats.label}
-              {stats.count === 1 ? '' : 's'}
-            </span>
+          {(item.createdAt || item.uploadedAt) && (
+            <span>{formatDate(item.createdAt || item.uploadedAt)}</span>
           )}
         </div>
       </Card>

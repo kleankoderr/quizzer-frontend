@@ -4,6 +4,7 @@ import {
   LEADERBOARD_ENDPOINTS,
   RECOMMENDATION_ENDPOINTS,
   ATTEMPTS_ENDPOINTS,
+  ONBOARDING_ENDPOINTS,
 } from '../config/api';
 import type {
   Streak,
@@ -52,8 +53,6 @@ export const leaderboardService = {
   },
 };
 
-export { challengeService } from './challenge.service';
-
 export const recommendationService = {
   getAll: async (): Promise<Recommendation[]> => {
     const response = await apiClient.get<Recommendation[]>(
@@ -93,11 +92,35 @@ export const attemptService = {
   },
 };
 
+export const onboardingService = {
+  getStatus: async (): Promise<{
+    status: 'NOT_STARTED' | 'PENDING' | 'COMPLETED';
+    quizId?: string;
+  }> => {
+    const response = await apiClient.get(ONBOARDING_ENDPOINTS.GET_STATUS);
+    return response.data;
+  },
+};
+
+export { challengeService } from './challenge.service';
 export { gamificationService } from './gamification.service';
 export { contentService } from './content.service';
 export { coachingService } from './coaching.service';
 export { userService } from './user.service';
 export { userDocumentService } from './user-document.service';
 export { summaryService } from './summary.service';
+export { studyPackService } from './studyPackService';
+export { authService } from './auth.service';
+export { quizService } from './quiz.service';
+export { flashcardService } from './flashcard.service';
+export { subscriptionService } from './subscription.service';
+export { weakAreaService } from './weak-area.service';
+export { statisticsService } from './statistics.service';
+export { searchService } from './searchService';
+export { settingsService } from './settingsService';
+export { adminService } from './adminService';
+export { schoolService } from './school.service';
+export { quoteService } from './quote.service';
+export { studyService } from './study.service';
 export { eventsService } from './events.service';
 export * from './task.service';

@@ -11,21 +11,26 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { Modal } from '../components/Modal';
 
 export const PricingPage: React.FC = () => {
-  const { data: currentPlan, isLoading: isCurrentPlanLoading } = useCurrentPlan();
+  const { data: currentPlan, isLoading: isCurrentPlanLoading } =
+    useCurrentPlan();
   const { mutate: checkout, isPending: isCheckoutLoading } = useCheckout();
-  const { mutate: scheduleDowngrade, isPending: isDowngradeLoading } = useScheduleDowngrade();
-  
+  const { mutate: scheduleDowngrade, isPending: isDowngradeLoading } =
+    useScheduleDowngrade();
+
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [showDowngradeModal, setShowDowngradeModal] = useState(false);
   const [showViolationModal, setShowViolationModal] = useState(false);
   const [violations, setViolations] = useState<string[]>([]);
-  const [planToDowngrade, setPlanToDowngrade] = useState<{ id: string; name: string } | null>(null);
-  
+  const [planToDowngrade, setPlanToDowngrade] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   // Fetch plans
-  const { 
-    data: plans, 
-    isLoading: isPlansLoading, 
-    error: plansError 
+  const {
+    data: plans,
+    isLoading: isPlansLoading,
+    error: plansError,
   } = useQuery({
     queryKey: ['plans'],
     queryFn: subscriptionService.getPlans,
@@ -34,15 +39,15 @@ export const PricingPage: React.FC = () => {
 
   const location = useLocation();
 
-  useEffect(() => {
-  }, [location]);
+  useEffect(() => {}, [location]);
 
   const handleSubscribe = (planId: string) => {
-    const targetPlan = plans?.find(p => p.id === planId);
+    const targetPlan = plans?.find((p) => p.id === planId);
     if (!targetPlan) return;
 
-    const isDowngrade = currentPlan?.price && currentPlan.price > targetPlan.price;
-    
+    const isDowngrade =
+      currentPlan?.price && currentPlan.price > targetPlan.price;
+
     // Don't allow clicking on current plan
     const isCurrent = currentPlan?.price === targetPlan.price;
     if (isCurrent) return;
@@ -56,7 +61,9 @@ export const PricingPage: React.FC = () => {
     setSelectedPlanId(planId);
     checkout(planId, {
       onError: (error: any) => {
-        toast.error(error.response?.data?.message || 'Failed to initiate checkout');
+        toast.error(
+          error.response?.data?.message || 'Failed to initiate checkout'
+        );
         setSelectedPlanId(null);
       },
     });
@@ -67,7 +74,9 @@ export const PricingPage: React.FC = () => {
 
     scheduleDowngrade(planToDowngrade.id, {
       onSuccess: () => {
-        toast.success(`Downgrade scheduled! Your plan will change to ${planToDowngrade.name} at the end of your billing cycle.`);
+        toast.success(
+          `Downgrade scheduled! Your plan will change to ${planToDowngrade.name} at the end of your billing cycle.`
+        );
         setShowDowngradeModal(false);
         setPlanToDowngrade(null);
       },
@@ -78,10 +87,12 @@ export const PricingPage: React.FC = () => {
           setShowDowngradeModal(false);
           setShowViolationModal(true);
         } else {
-          toast.error(error.response?.data?.message || 'Failed to schedule downgrade');
+          toast.error(
+            error.response?.data?.message || 'Failed to schedule downgrade'
+          );
           setShowDowngradeModal(false);
         }
-      }
+      },
     });
   };
 
@@ -90,7 +101,12 @@ export const PricingPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24">
         {/* Header Skeleton */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <Skeleton height={48} width="60%" className="mb-4" borderRadius={12} />
+          <Skeleton
+            height={48}
+            width="60%"
+            className="mb-4"
+            borderRadius={12}
+          />
           <Skeleton height={24} width="40%" />
         </div>
 
@@ -100,7 +116,7 @@ export const PricingPage: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 p-8 h-full flex flex-col">
             <Skeleton height={32} width="40%" className="mb-4" />
             <Skeleton height={48} width="30%" className="mb-8" />
-            
+
             <div className="space-y-4 mb-8 flex-1">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -109,7 +125,7 @@ export const PricingPage: React.FC = () => {
                 </div>
               ))}
             </div>
-            
+
             <Skeleton height={48} borderRadius={12} />
           </div>
 
@@ -117,7 +133,7 @@ export const PricingPage: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 p-8 h-full flex flex-col">
             <Skeleton height={32} width="40%" className="mb-4" />
             <Skeleton height={48} width="30%" className="mb-8" />
-            
+
             <div className="space-y-4 mb-8 flex-1">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -126,14 +142,14 @@ export const PricingPage: React.FC = () => {
                 </div>
               ))}
             </div>
-            
+
             <Skeleton height={48} borderRadius={12} />
           </div>
         </div>
 
         {/* Footer Text Skeleton */}
         <div className="mt-20 text-center flex justify-center">
-            <Skeleton width={300} height={20} />
+          <Skeleton width={300} height={20} />
         </div>
       </div>
     );
@@ -149,7 +165,8 @@ export const PricingPage: React.FC = () => {
           Unable to load plans
         </h2>
         <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
-          We couldn't fetch the available subscription plans. Please try again later.
+          We couldn't fetch the available subscription plans. Please try again
+          later.
         </p>
         <button
           onClick={() => window.location.reload()}
@@ -169,7 +186,8 @@ export const PricingPage: React.FC = () => {
           Simple, Transparent Pricing
         </h1>
         <p className="text-base text-gray-500 dark:text-gray-400">
-          Choose the plan that fits your learning needs. Upgrade or downgrade at any time.
+          Choose the plan that fits your learning needs. Upgrade or downgrade at
+          any time.
         </p>
       </div>
 
@@ -179,34 +197,37 @@ export const PricingPage: React.FC = () => {
           ?.sort((a, b) => a.price - b.price) // Sort by price ascending (Free first, Premium on right)
           .map((plan) => {
             const isPlanPremium = plan.price > 0;
-            
+
             // Determine if this is the current plan based on price matching
             // If user is premium (currentPlan.price > 0), match premium plan
             // If user is free (currentPlan.price === 0), match free plan
-            const isCurrentPlan = currentPlan 
-              ? (currentPlan.price > 0 ? isPlanPremium : !isPlanPremium)
+            const isCurrentPlan = currentPlan
+              ? currentPlan.price > 0
+                ? isPlanPremium
+                : !isPlanPremium
               : !isPlanPremium; // Default to free if no current plan
-          
+
             // Determine if it's a downgrade
-            const isDowngrade = currentPlan?.price && currentPlan.price > plan.price;
-            
+            const isDowngrade =
+              currentPlan?.price && currentPlan.price > plan.price;
+
             let buttonText;
             if (isDowngrade) {
-               buttonText = 'Downgrade';
+              buttonText = 'Downgrade';
             }
-          
+
             return (
-            <PricingCard
-              key={plan.id}
-              plan={plan}
-              isCurrent={isCurrentPlan}
-              isLoading={isCheckoutLoading && selectedPlanId === plan.id}
-              onSubscribe={handleSubscribe}
-              buttonText={buttonText}
-              className={`${isPlanPremium ? 'order-first md:order-last' : 'order-last md:order-first'}`}
-            />
-          );
-        })}
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                isCurrent={isCurrentPlan}
+                isLoading={isCheckoutLoading && selectedPlanId === plan.id}
+                onSubscribe={handleSubscribe}
+                buttonText={buttonText}
+                className={`${isPlanPremium ? 'order-first md:order-last' : 'order-last md:order-first'}`}
+              />
+            );
+          })}
       </div>
 
       <div className="mt-8 text-center">
@@ -223,14 +244,16 @@ export const PricingPage: React.FC = () => {
       >
         <div className="p-4 space-y-4">
           <p className="text-gray-600 dark:text-gray-300">
-            Are you sure you want to downgrade to <strong>{planToDowngrade?.name}</strong>?
+            Are you sure you want to downgrade to{' '}
+            <strong>{planToDowngrade?.name}</strong>?
           </p>
           <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-700">
             <p className="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>
-                Your current plan benefits will remain active until the end of your billing period. 
-                The new plan limits will apply starting from your next billing cycle.
+                Your current plan benefits will remain active until the end of
+                your billing period. The new plan limits will apply starting
+                from your next billing cycle.
               </span>
             </p>
           </div>
@@ -262,17 +285,21 @@ export const PricingPage: React.FC = () => {
           <div className="flex items-start gap-3 text-red-600 dark:text-red-400">
             <AlertCircle className="w-6 h-6 flex-shrink-0" />
             <p className="font-medium">
-              You are currently exceeding the limits of the plan you want to switch to.
+              You are currently exceeding the limits of the plan you want to
+              switch to.
             </p>
           </div>
-          
+
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Please resolve the following issues before downgrading:
           </p>
 
           <ul className="list-disc list-inside space-y-1 bg-red-50 dark:bg-red-900/10 p-4 rounded-lg border border-red-100 dark:border-red-900/50">
             {violations.map((violation, index) => (
-              <li key={index} className="text-sm text-red-700 dark:text-red-300">
+              <li
+                key={index}
+                className="text-sm text-red-700 dark:text-red-300"
+              >
                 {violation}
               </li>
             ))}

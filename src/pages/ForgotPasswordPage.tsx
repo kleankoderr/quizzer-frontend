@@ -32,7 +32,8 @@ export const ForgotPasswordPage = () => {
         }, 3000);
       } catch (err: any) {
         setError(
-          err.response?.data?.message || 'Something went wrong. Please try again.'
+          err.response?.data?.message ||
+            'Something went wrong. Please try again.'
         );
       } finally {
         setLoading(false);
@@ -45,7 +46,10 @@ export const ForgotPasswordPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2 inline-block">
+          <Link
+            to="/"
+            className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2 inline-block"
+          >
             Quizzer
           </Link>
           <p className="text-gray-600 dark:text-gray-400">
@@ -53,7 +57,7 @@ export const ForgotPasswordPage = () => {
           </p>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6 overflow-hidden border border-gray-100 dark:border-gray-700"
@@ -63,7 +67,8 @@ export const ForgotPasswordPage = () => {
               Forgot Password?
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Enter your email and we'll send you a 6-digit code to reset your password.
+              Enter your email and we'll send you a 6-digit code to reset your
+              password.
             </p>
           </div>
 
@@ -78,9 +83,15 @@ export const ForgotPasswordPage = () => {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-2">
                   <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Check your email</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Check your email
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  We've sent a password reset code to <span className="font-semibold text-gray-900 dark:text-white">{email}</span>.
+                  We've sent a password reset code to{' '}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {email}
+                  </span>
+                  .
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 pt-2">
                   Redirecting to reset page...

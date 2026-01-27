@@ -47,7 +47,7 @@ interface CustomDotProps {
 
 function CustomDot({ cx, cy, payload }: Readonly<CustomDotProps>) {
   if (!cx || !cy || !payload) return null;
-  
+
   return (
     <circle
       cx={cx}
@@ -230,7 +230,7 @@ export function AttemptsPage() {
     .map((attempt, index) => {
       const rawPercent = (attempt.score! / attempt.totalQuestions!) * 100;
       const scorePercent = Math.round(Math.max(0, rawPercent));
-      
+
       // Determine color based on performance
       let performanceColor: string;
       if (scorePercent >= 70) {
@@ -240,7 +240,7 @@ export function AttemptsPage() {
       } else {
         performanceColor = '#ef4444'; // Red - Needs improvement
       }
-      
+
       return {
         name: format(parseISO(attempt.completedAt), 'MMM dd'),
         fullDate: format(parseISO(attempt.completedAt), 'MMM dd, yyyy h:mm a'),
@@ -382,11 +382,13 @@ export function AttemptsPage() {
       )}
 
       {/* Stats Cards */}
-      <div className={`grid gap-3 md:gap-4 mb-6 ${
-        filterType === 'all' 
-          ? 'grid-cols-2 md:grid-cols-5' 
-          : 'grid-cols-2 md:grid-cols-2'
-      }`}>
+      <div
+        className={`grid gap-3 md:gap-4 mb-6 ${
+          filterType === 'all'
+            ? 'grid-cols-2 md:grid-cols-5'
+            : 'grid-cols-2 md:grid-cols-2'
+        }`}
+      >
         <StatCard
           title="Total"
           value={attemptStats.total}
@@ -535,7 +537,10 @@ export function AttemptsPage() {
                     borderRadius: '8px',
                     color: '#fff',
                   }}
-                  formatter={(value: number | undefined) => [`${value}%`, 'Score']}
+                  formatter={(value: number | undefined) => [
+                    `${value}%`,
+                    'Score',
+                  ]}
                   labelFormatter={(label, payload) => {
                     if (payload && payload.length > 0) {
                       return `${payload[0].payload.fullDate} (Attempt #${payload[0].payload.attemptNumber})`;
@@ -664,18 +669,24 @@ export function AttemptsPage() {
                   {(() => {
                     let iconBgClass: string;
                     let IconComponent: React.ReactNode;
-                    
+
                     if (item.type === 'quiz') {
                       iconBgClass = 'bg-blue-100 dark:bg-blue-900';
-                      IconComponent = <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />;
+                      IconComponent = (
+                        <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      );
                     } else if (item.type === 'challenge') {
                       iconBgClass = 'bg-pink-100 dark:bg-pink-900';
-                      IconComponent = <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />;
+                      IconComponent = (
+                        <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                      );
                     } else {
                       iconBgClass = 'bg-green-100 dark:bg-green-900';
-                      IconComponent = <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />;
+                      IconComponent = (
+                        <Layers className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      );
                     }
-                    
+
                     return (
                       <div
                         className={`flex items-center justify-center w-12 h-12 rounded-lg ${iconBgClass}`}
@@ -697,49 +708,50 @@ export function AttemptsPage() {
               </div>
 
               {/* Mini chart for this item */}
-              {item.attempts.length > 1 && (() => {
-                // Determine stroke color based on item type
-                let lineStrokeColor: string;
-                if (item.type === 'quiz') {
-                  lineStrokeColor = '#3b82f6'; // Blue
-                } else if (item.type === 'challenge') {
-                  lineStrokeColor = 'rgb(236, 72, 153)'; // Pink
-                } else {
-                  lineStrokeColor = '#10b981'; // Green
-                }
-                
-                return (
-                  <div className="mt-4">
-                    <ResponsiveContainer width="100%" height={80}>
-                      <LineChart
-                        data={item.attempts
-                          .slice(0, 10)
-                          .reverse()
-                          .map((a: Attempt, i: number) => ({
-                            name: `#${i + 1}`,
-                            score:
-                              a.score && a.totalQuestions
-                                ? Math.round(
-                                    Math.max(
-                                      0,
-                                      (a.score / a.totalQuestions) * 100
+              {item.attempts.length > 1 &&
+                (() => {
+                  // Determine stroke color based on item type
+                  let lineStrokeColor: string;
+                  if (item.type === 'quiz') {
+                    lineStrokeColor = '#3b82f6'; // Blue
+                  } else if (item.type === 'challenge') {
+                    lineStrokeColor = 'rgb(236, 72, 153)'; // Pink
+                  } else {
+                    lineStrokeColor = '#10b981'; // Green
+                  }
+
+                  return (
+                    <div className="mt-4">
+                      <ResponsiveContainer width="100%" height={80}>
+                        <LineChart
+                          data={item.attempts
+                            .slice(0, 10)
+                            .reverse()
+                            .map((a: Attempt, i: number) => ({
+                              name: `#${i + 1}`,
+                              score:
+                                a.score && a.totalQuestions
+                                  ? Math.round(
+                                      Math.max(
+                                        0,
+                                        (a.score / a.totalQuestions) * 100
+                                      )
                                     )
-                                  )
-                                : 0,
-                          }))}
-                      >
-                        <Line
-                          type="monotone"
-                          dataKey="score"
-                          stroke={lineStrokeColor}
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                );
-              })()}
+                                  : 0,
+                            }))}
+                        >
+                          <Line
+                            type="monotone"
+                            dataKey="score"
+                            stroke={lineStrokeColor}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  );
+                })()}
             </button>
           ))}
         </div>

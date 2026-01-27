@@ -10,7 +10,8 @@ import * as styles from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy } from 'lucide-react';
 import { Toast } from '../utils/toast';
 
-const vscDarkPlus = (styles as any).vscDarkPlus || (styles as any).default?.vscDarkPlus || styles;
+const vscDarkPlus =
+  (styles as any).vscDarkPlus || (styles as any).default?.vscDarkPlus || styles;
 
 interface MarkdownRendererProps {
   content: string;
@@ -22,7 +23,7 @@ interface MarkdownRendererProps {
 const CodeBlock = ({ node: _node, children, className, ...props }: any) => {
   const match = /language-(\w+)/.exec(className || '');
   const isInline = !className?.startsWith('language-');
-  
+
   if (!isInline && match) {
     return (
       <div className="relative group my-6">
@@ -52,10 +53,10 @@ const CodeBlock = ({ node: _node, children, className, ...props }: any) => {
 
   if (isInline) {
     const cleanContent = String(children).replaceAll('`', '').trim();
-    
+
     return (
-      <code 
-        {...props} 
+      <code
+        {...props}
         className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800/80 text-primary-700 dark:text-primary-300 rounded font-medium text-[0.9em] border border-gray-200/50 dark:border-gray-700/50 inline transition-colors"
         style={{ fontFamily: 'Lexend, sans-serif' }}
       >
@@ -64,57 +65,96 @@ const CodeBlock = ({ node: _node, children, className, ...props }: any) => {
     );
   }
 
-  return <code className={className} {...props}>{children}</code>;
+  return (
+    <code className={className} {...props}>
+      {children}
+    </code>
+  );
 };
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ 
-  content, 
-  className = "", 
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+  content,
+  className = '',
   useRaw = false,
-  HeadingRenderer
+  HeadingRenderer,
 }) => {
-  const rehypePlugins = React.useMemo(() => [
-    useRaw && rehypeRaw,
-    rehypeKatex,
-    [
-      rehypeSanitize,
-      {
-        ...defaultSchema,
-        tagNames: [
-          ...(defaultSchema.tagNames || []),
-          'mark', 'span', 'div', 'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'msqrt', 'mroot', 'mtable', 'mtr', 'mtd', 'code', 'pre'
+  const rehypePlugins = React.useMemo(
+    () =>
+      [
+        useRaw && rehypeRaw,
+        rehypeKatex,
+        [
+          rehypeSanitize,
+          {
+            ...defaultSchema,
+            tagNames: [
+              ...(defaultSchema.tagNames || []),
+              'mark',
+              'span',
+              'div',
+              'math',
+              'semantics',
+              'mrow',
+              'mi',
+              'mo',
+              'mn',
+              'msup',
+              'msub',
+              'mfrac',
+              'msqrt',
+              'mroot',
+              'mtable',
+              'mtr',
+              'mtd',
+              'code',
+              'pre',
+            ],
+            attributes: {
+              ...defaultSchema.attributes,
+              mark: [
+                ['className'],
+                ['data-highlight-id'],
+                ['data-has-note'],
+                ['title'],
+              ],
+              span: [
+                ['className'],
+                ['title'],
+                ['style'],
+                ['data-note-id'],
+                ['data-note-text'],
+              ],
+              div: [['className']],
+              math: [['xmlns'], ['display']],
+              code: [['className']],
+              pre: [['className']],
+            },
+          },
         ],
-        attributes: {
-          ...defaultSchema.attributes,
-          mark: [['className'], ['data-highlight-id'], ['data-has-note'], ['title']],
-          span: [['className'], ['title'], ['style'], ['data-note-id'], ['data-note-text']],
-          div: [['className']],
-          math: [['xmlns'], ['display']],
-          code: [['className']],
-          pre: [['className']],
-        },
-      },
-    ],
-  ].filter(Boolean) as any, [useRaw]);
+      ].filter(Boolean) as any,
+    [useRaw]
+  );
 
   const components = React.useMemo(() => {
     const comps: any = {
       code: CodeBlock,
     };
-    
+
     if (HeadingRenderer) {
       comps.h1 = (props: any) => <HeadingRenderer {...props} level={1} />;
       comps.h2 = (props: any) => <HeadingRenderer {...props} level={2} />;
       comps.h3 = (props: any) => <HeadingRenderer {...props} level={3} />;
     }
-    
+
     return comps;
   }, [HeadingRenderer]);
 
   if (!content) return null;
 
   return (
-    <div className={`prose dark:prose-invert prose-code:before:content-none prose-code:after:content-none max-w-none ${className}`}>
+    <div
+      className={`prose dark:prose-invert prose-code:before:content-none prose-code:after:content-none max-w-none ${className}`}
+    >
       <Markdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={rehypePlugins}

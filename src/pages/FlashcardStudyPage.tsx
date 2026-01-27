@@ -2,7 +2,12 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
-import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
 import { flashcardService } from '../services/flashcard.service';
 import {
@@ -16,7 +21,10 @@ import {
   Target,
 } from 'lucide-react';
 import { useFlashcardSet } from '../hooks';
-import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
+import {
+  ResultsHeroCard,
+  type ResultsStat,
+} from '../components/quiz/ResultsHeroCard';
 import { useAuth } from '../contexts/AuthContext';
 import { AttemptsAnalyticsView } from '../components/AttemptsAnalyticsView';
 import type { FlashcardAttempt } from '../types';
@@ -33,23 +41,40 @@ const buildBreadcrumbItems = (
 ) => {
   return [
     flashcardSet.studyPack
-      ? { label: flashcardSet.studyPack.title, path: `/study-pack/${flashcardSet.studyPack.id}?tab=flashcards` }
+      ? {
+          label: flashcardSet.studyPack.title,
+          path: `/study-pack/${flashcardSet.studyPack.id}?tab=flashcards`,
+        }
       : { label: 'Flashcards', path: '/flashcards' },
-    { label: flashcardSet.title, path: null },
+    {
+      label: flashcardSet.title,
+      path:
+        includeResults || includeHistory
+          ? `/flashcards/${flashcardSet.id}`
+          : null,
+    },
     ...(includeResults ? [{ label: 'Results', path: null }] : []),
     ...(includeHistory ? [{ label: 'Practice History', path: null }] : []),
   ];
 };
 
-const MarkdownParagraph = ({ node, ...props }: any) => <div {...props} />;
+const MarkdownParagraph = ({ _node, ...props }: any) => <div {...props} />;
 
-const FlashcardMarkdown = ({ content, className = '' }: { content: string; className?: string }) => (
-  <div className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0`}>
+const FlashcardMarkdown = ({
+  content,
+  className = '',
+}: {
+  content: string;
+  className?: string;
+}) => (
+  <div
+    className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0`}
+  >
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        p: MarkdownParagraph
+        p: MarkdownParagraph,
       }}
     >
       {content}
@@ -86,7 +111,8 @@ export const FlashcardStudyPage = () => {
     (r) => r.response === 'dont-know'
   ).length;
   const totalCards = flashcardSet?.cards?.length || 0;
-  const percentage = totalCards > 0 ? Math.round((knowCount / totalCards) * 100) : 0;
+  const percentage =
+    totalCards > 0 ? Math.round((knowCount / totalCards) * 100) : 0;
 
   // Flashcard-specific stats for ResultsHeroCard (must be before any conditional returns)
   const flashcardStats: ResultsStat[] = useMemo(
@@ -119,13 +145,26 @@ export const FlashcardStudyPage = () => {
   // Handle breadcrumbs
   useEffect(() => {
     if (!flashcardSet || !id || loading || location.state?.breadcrumb) return;
-    const breadcrumbItems = buildBreadcrumbItems(flashcardSet, false, isStudying === false);
+    const breadcrumbItems = buildBreadcrumbItems(
+      flashcardSet,
+      false,
+      isStudying === false
+    );
     // Preserve existing search params (like ?view=study) when updating breadcrumbs
     navigate(location.pathname + location.search, {
       replace: true,
       state: { breadcrumb: breadcrumbItems },
     });
-  }, [flashcardSet, id, loading, location.pathname, location.state?.breadcrumb, navigate, isStudying]);
+  }, [
+    flashcardSet,
+    id,
+    loading,
+    location.pathname,
+    location.search,
+    location.state?.breadcrumb,
+    navigate,
+    isStudying,
+  ]);
 
   // Initializing isStudying state
   useEffect(() => {
@@ -155,14 +194,19 @@ export const FlashcardStudyPage = () => {
         setShowResults(false);
       }
     }
-  }, [viewHistory, viewStudy, isStudying, showResults]);
+  }, [viewHistory, viewStudy, isStudying, showResults, location.search]);
 
   // Fetch attempts when history view is active
   useEffect(() => {
     const shouldFetch = isStudying === false || viewHistory;
     const isValidId = id && id !== 'undefined';
-    
-    if (shouldFetch && isValidId && !loadingAttempts && fetchedIdRef.current !== id) {
+
+    if (
+      shouldFetch &&
+      isValidId &&
+      !loadingAttempts &&
+      fetchedIdRef.current !== id
+    ) {
       const fetchAttempts = async () => {
         try {
           setLoadingAttempts(true);
@@ -185,7 +229,7 @@ export const FlashcardStudyPage = () => {
     if (attemptId && attempts.length > 0 && isStudying === false) {
       const targetAttempt = attempts.find((a) => a.id === attemptId);
       if (targetAttempt) {
-        setCardResponses(targetAttempt.answers as any || []);
+        setCardResponses((targetAttempt.answers as any) || []);
         setShowResults(true);
         // Note: isStudying is already false from the viewHistory logic
       }
@@ -195,7 +239,11 @@ export const FlashcardStudyPage = () => {
   const updateBreadcrumb = (includeResults = false) => {
     if (!flashcardSet) return;
 
-    const breadcrumbItems = buildBreadcrumbItems(flashcardSet, includeResults, false);
+    const breadcrumbItems = buildBreadcrumbItems(
+      flashcardSet,
+      includeResults,
+      false
+    );
 
     navigate(location.pathname + location.search, {
       replace: true,
@@ -229,10 +277,7 @@ export const FlashcardStudyPage = () => {
       return updatedResponses;
     }
 
-    return [
-      ...cardResponses,
-      { cardIndex: currentCardIndex, response },
-    ];
+    return [...cardResponses, { cardIndex: currentCardIndex, response }];
   };
 
   if (error) {
@@ -308,12 +353,14 @@ export const FlashcardStudyPage = () => {
     setCardResponses([]);
     setShowResults(false);
     setIsStudying(true);
-    
+
     // Consolidate navigation and breadcrumb update into a single call
-    const breadcrumbItems = flashcardSet ? buildBreadcrumbItems(flashcardSet, false, false) : [];
-    navigate(location.pathname + '?view=study', { 
+    const breadcrumbItems = flashcardSet
+      ? buildBreadcrumbItems(flashcardSet, false, false)
+      : [];
+    navigate(location.pathname + '?view=study', {
       replace: true,
-      state: { breadcrumb: breadcrumbItems }
+      state: { breadcrumb: breadcrumbItems },
     });
   };
 
@@ -416,7 +463,7 @@ export const FlashcardStudyPage = () => {
       opacity: 0,
       scale: 0.9,
       rotateZ: direction > 0 ? 10 : -10,
-      zIndex: 0
+      zIndex: 0,
     }),
     center: {
       x: 0,
@@ -429,8 +476,8 @@ export const FlashcardStudyPage = () => {
         x: { type: 'spring', stiffness: 260, damping: 30 },
         opacity: { duration: 0.2 },
         scale: { duration: 0.4 },
-        rotateZ: { type: 'spring', stiffness: 200, damping: 25 }
-      }
+        rotateZ: { type: 'spring', stiffness: 200, damping: 25 },
+      },
     },
     exit: (direction: number) => ({
       x: direction < 0 ? '100%' : '-100%',
@@ -440,16 +487,16 @@ export const FlashcardStudyPage = () => {
       zIndex: 0,
       transition: {
         x: { type: 'spring', stiffness: 260, damping: 30 },
-        opacity: { duration: 0.2 }
-      }
-    })
+        opacity: { duration: 0.2 },
+      },
+    }),
   };
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col min-h-[calc(100vh-120px)] space-y-2 md:space-y-4 pb-4 overflow-hidden">
-      <FlashcardHeader 
-        title={flashcardSet.title} 
-        topic={flashcardSet.topic} 
+      <FlashcardHeader
+        title={flashcardSet.title}
+        topic={flashcardSet.topic}
         progress={progress}
         currentCardIndex={currentCardIndex}
         totalCards={flashcardSet.cards.length}
@@ -471,10 +518,14 @@ export const FlashcardStudyPage = () => {
           {/* Stacked Card Background Effects - Balanced for mobile */}
           <div className="absolute inset-x-6 -bottom-6 translate-y-2 scale-[0.92] bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg border border-gray-200/50 dark:border-gray-700/50 z-0 opacity-30 h-full transition-transform"></div>
           <div className="absolute inset-x-3 -bottom-3 translate-y-1 scale-[0.96] bg-white dark:bg-gray-800 rounded-[2rem] shadow-md border border-gray-200/50 dark:border-gray-700/50 z-[1] opacity-60 h-full transition-transform"></div>
-          
+
           {/* Main Card with Animation and Gestures */}
           <div className="relative z-[2] h-full w-full perspective-[1500px]">
-            <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+            <AnimatePresence
+              mode="popLayout"
+              initial={false}
+              custom={direction}
+            >
               <motion.div
                 key={currentCardIndex}
                 custom={direction}
@@ -494,7 +545,7 @@ export const FlashcardStudyPage = () => {
                 whileTap={{ cursor: 'grabbing' }}
                 className="absolute inset-0 cursor-grab w-full h-full"
               >
-                <FlashcardItem 
+                <FlashcardItem
                   card={currentCard}
                   isFlipped={isFlipped}
                   onFlip={handleFlip}
@@ -507,7 +558,10 @@ export const FlashcardStudyPage = () => {
         {/* Next Button */}
         <button
           onClick={handleNext}
-          disabled={currentCardIndex === flashcardSet.cards.length - 1 && !cardResponses.some((r) => r.cardIndex === currentCardIndex)}
+          disabled={
+            currentCardIndex === flashcardSet.cards.length - 1 &&
+            !cardResponses.some((r) => r.cardIndex === currentCardIndex)
+          }
           className="absolute right-4 lg:right-0 z-20 p-4 bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 disabled:opacity-20 hover:scale-110 active:scale-95 transition-all hidden md:flex"
           aria-label="Next Card"
         >
@@ -521,7 +575,9 @@ export const FlashcardStudyPage = () => {
           submitting={submitting}
           currentCardIndex={currentCardIndex}
           totalCards={flashcardSet.cards.length}
-          hasResponse={cardResponses.some((r) => r.cardIndex === currentCardIndex)}
+          hasResponse={cardResponses.some(
+            (r) => r.cardIndex === currentCardIndex
+          )}
           onResponse={handleResponse}
           onNext={handleNext}
           onPrevious={handlePrevious}
@@ -532,7 +588,13 @@ export const FlashcardStudyPage = () => {
 };
 
 // Sub-components to reduce complexity
-const FlashcardHeader = ({ title, topic, progress, currentCardIndex, totalCards }: any) => {
+const FlashcardHeader = ({
+  title,
+  topic,
+  progress,
+  currentCardIndex,
+  totalCards,
+}: any) => {
   const navigate = useNavigate();
   return (
     <div className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-3.5 md:p-6 shadow-lg mb-2 md:mb-2">
@@ -553,7 +615,9 @@ const FlashcardHeader = ({ title, topic, progress, currentCardIndex, totalCards 
 
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-yellow-300" />
-            <span className="text-yellow-300 font-semibold text-xs uppercase tracking-wider">Study Session</span>
+            <span className="text-yellow-300 font-semibold text-xs uppercase tracking-wider">
+              Study Session
+            </span>
           </div>
         </div>
 
@@ -562,8 +626,12 @@ const FlashcardHeader = ({ title, topic, progress, currentCardIndex, totalCards 
             <Layers className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-xl md:text-2xl font-bold text-white line-clamp-1">{title}</h1>
-            <p className="text-primary-100 text-sm line-clamp-1 opacity-90">{topic}</p>
+            <h1 className="text-xl md:text-2xl font-bold text-white line-clamp-1">
+              {title}
+            </h1>
+            <p className="text-primary-100 text-sm line-clamp-1 opacity-90">
+              {topic}
+            </p>
           </div>
         </div>
 
@@ -583,7 +651,15 @@ const FlashcardHeader = ({ title, topic, progress, currentCardIndex, totalCards 
   );
 };
 
-const FlashcardControls = ({ submitting, currentCardIndex, totalCards, hasResponse, onResponse, onNext, onPrevious }: any) => (
+const FlashcardControls = ({
+  submitting,
+  currentCardIndex,
+  totalCards,
+  hasResponse,
+  onResponse,
+  onNext,
+  onPrevious,
+}: any) => (
   <div className="flex flex-col gap-4">
     {/* Combined Controls Row */}
     <div className="flex items-stretch justify-center gap-2 md:gap-4 px-2">
@@ -605,7 +681,9 @@ const FlashcardControls = ({ submitting, currentCardIndex, totalCards, hasRespon
           className="flex-1 flex flex-col items-center justify-center gap-1 group px-2 py-3 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 border-2 border-transparent hover:border-red-200 dark:hover:border-red-900/30 rounded-2xl shadow-sm transition-all"
         >
           <span className="text-xl">😟</span>
-          <span className="text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">I don't know</span>
+          <span className="text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">
+            I don't know
+          </span>
         </button>
 
         <button
@@ -614,7 +692,9 @@ const FlashcardControls = ({ submitting, currentCardIndex, totalCards, hasRespon
           className="flex-1 flex flex-col items-center justify-center gap-1 group px-2 py-3 bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900/10 border-2 border-transparent hover:border-green-200 dark:hover:border-green-900/30 rounded-2xl shadow-sm transition-all"
         >
           <span className="text-xl">😃</span>
-          <span className="text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">I know it!</span>
+          <span className="text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">
+            I know it!
+          </span>
         </button>
       </div>
 
@@ -661,7 +741,10 @@ const FlashcardItem = ({ card, isFlipped, onFlip }: any) => (
           </div>
         </div>
         <button
-          onClick={(e) => { e.stopPropagation(); onFlip(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFlip();
+          }}
           className="mt-6 md:mt-10 px-6 py-2.5 bg-gray-50 dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900/10 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-300 rounded-full text-xs font-black uppercase tracking-widest transition-all"
         >
           Tap to flip
@@ -685,12 +768,16 @@ const FlashcardItem = ({ card, isFlipped, onFlip }: any) => (
           <div className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-snug">
             <FlashcardMarkdown content={card.back} />
           </div>
-          
+
           {card.explanation && (
             <div className="pt-6 border-t border-gray-100 dark:border-gray-700 w-full text-left">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-5 h-5 flex items-center justify-center bg-yellow-400 rounded-full text-[10px] text-white">💡</div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Deep Dive</span>
+                <div className="w-5 h-5 flex items-center justify-center bg-yellow-400 rounded-full text-[10px] text-white">
+                  💡
+                </div>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  Deep Dive
+                </span>
               </div>
               <div className="text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/50 p-4 rounded-xl leading-relaxed">
                 <FlashcardMarkdown content={card.explanation} />
@@ -700,8 +787,11 @@ const FlashcardItem = ({ card, isFlipped, onFlip }: any) => (
         </div>
 
         <button
-           onClick={(e) => { e.stopPropagation(); onFlip(); }}
-           className="mt-6 px-6 py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+          onClick={(e) => {
+            e.stopPropagation();
+            onFlip();
+          }}
+          className="mt-6 px-6 py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
         >
           Back to Question
         </button>

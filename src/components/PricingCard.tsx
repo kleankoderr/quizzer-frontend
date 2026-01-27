@@ -40,32 +40,44 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     return [
       {
         label: 'Quizzes per month',
-        value: q.quizzes === -1 ? 'Unlimited' : q.quizzes ?? 0,
+        value: q.quizzes === -1 ? 'Unlimited' : (q.quizzes ?? 0),
         icon: Zap,
       },
       {
         label: 'Flashcard sets per month',
-        value: q.flashcards === -1 ? 'Unlimited' : q.flashcards ?? 0,
+        value: q.flashcards === -1 ? 'Unlimited' : (q.flashcards ?? 0),
         icon: Zap,
       },
       {
         label: 'Study Materials per month',
-        value: q.studyMaterials === -1 ? 'Unlimited' : q.studyMaterials ?? 0,
+        value: q.studyMaterials === -1 ? 'Unlimited' : (q.studyMaterials ?? 0),
+        icon: Zap,
+      },
+      {
+        label: 'Summaries per month',
+        value: q.summaries === -1 ? 'Unlimited' : (q.summaries ?? 0),
         icon: Zap,
       },
       {
         label: 'AI Explanations per month',
-        value: q.conceptExplanations === -1 ? 'Unlimited' : q.conceptExplanations ?? 0,
+        value:
+          q.conceptExplanations === -1
+            ? 'Unlimited'
+            : (q.conceptExplanations ?? 0),
         icon: Zap,
       },
       {
         label: 'File Uploads',
-        value: q.filesPerMonth === -1 ? 'Unlimited' : `${q.filesPerMonth ?? 0} files`,
+        value:
+          q.filesPerMonth === -1
+            ? 'Unlimited'
+            : `${q.filesPerMonth ?? 0} files`,
         icon: Check,
       },
       {
         label: 'Storage Limit',
-        value: q.storageLimitMB === -1 ? 'Unlimited' : `${q.storageLimitMB ?? 0} MB`,
+        value:
+          q.storageLimitMB === -1 ? 'Unlimited' : `${q.storageLimitMB ?? 0} MB`,
         icon: Check,
       },
     ];
@@ -88,7 +100,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Recommended Badge - Top Right Corner */}
       {!isFree && !isCurrent && (
         <div className="absolute top-0 right-0">
@@ -130,11 +142,13 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         <ul className="space-y-2.5 mb-6 flex-1">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-2.5">
-              <div className={`p-1 rounded-full mt-0.5 shrink-0 ${
-                isFree 
-                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400' 
-                  : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
-              }`}>
+              <div
+                className={`p-1 rounded-full mt-0.5 shrink-0 ${
+                  isFree
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                }`}
+              >
                 <Check className="w-3 h-3" strokeWidth={3} />
               </div>
               <div>

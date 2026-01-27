@@ -6,6 +6,5 @@ export const useQuiz = (id: string | undefined) => {
     queryKey: ['quiz', id],
     queryFn: () => quizService.getById(id!),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

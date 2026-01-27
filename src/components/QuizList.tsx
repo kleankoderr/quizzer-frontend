@@ -2,12 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './Card';
 import type { Quiz, StudyPack } from '../types';
-import { Brain, Plus } from 'lucide-react';
+import { Brain, Plus, Pencil, Folder, Trash2, X } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
-import { CardMenu, Pencil, Folder, Trash2 } from './CardMenu';
+import { CardMenu } from './CardMenu';
 import { EditTitleModal } from './EditTitleModal';
 import { quizService } from '../services/quiz.service';
+import { studyPackService } from '../services';
 import { Toast as toast } from '../utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '../utils/dateFormat';
@@ -19,13 +20,95 @@ interface QuizListProps {
   onItemMoved?: (itemId: string, pack?: StudyPack) => void;
 }
 
+interface QuizCardProps {
+  quiz: Quiz;
+  onDelete?: (id: string) => void;
+  onEdit: (id: string) => void;
+  onMove: (id: string) => void;
+  onRemove: (id: string, packId: string) => void;
+}
+
+const QuizCard: React.FC<QuizCardProps> = ({
+  quiz,
+  onDelete,
+  onEdit,
+  onMove,
+  onRemove,
+}) => {
+  const navigate = useNavigate();
+
+  const navigateToQuiz = () => {
+    navigate(
+      `/quiz/${quiz.id}${quiz.attemptCount && quiz.attemptCount > 0 ? '?view=history' : ''}`
+    );
+  };
+
+  const menuItems = [
+    {
+      label: 'Edit Title',
+      icon: <Pencil className="w-4 h-4" />,
+      onClick: () => onEdit(quiz.id),
+    },
+    {
+      label: 'Move to Study Set',
+      icon: <Folder className="w-4 h-4" />,
+      onClick: () => onMove(quiz.id),
+    },
+    ...(quiz.studyPack || quiz.studyPackId
+      ? [
+          {
+            label: 'Remove from Study Set',
+            icon: <X className="w-4 h-4" />,
+            onClick: () =>
+              onRemove(
+                quiz.id,
+                (quiz.studyPack?.id || quiz.studyPackId) as string
+              ),
+          },
+        ]
+      : []),
+    ...(onDelete
+      ? [
+          {
+            label: 'Delete',
+            icon: <Trash2 className="w-4 h-4" />,
+            onClick: () => onDelete(quiz.id),
+            variant: 'danger' as const,
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <Card
+      key={quiz.id}
+      title={quiz.title}
+      subtitle={quiz.topic}
+      icon={
+        <Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
+      onClick={navigateToQuiz}
+      onTitleClick={navigateToQuiz}
+      onIconClick={navigateToQuiz}
+      actions={<CardMenu items={menuItems} />}
+    >
+      <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+        <span>
+          {quiz.questionCount || quiz.questions?.length || 0} Questions
+        </span>
+        {quiz.createdAt && <span>{formatDate(quiz.createdAt)}</span>}
+      </div>
+    </Card>
+  );
+};
+
 export const QuizList: React.FC<QuizListProps> = ({
   quizzes,
   onDelete,
   onCreateNew,
   onItemMoved,
 }) => {
-  const navigate = useNavigate ();
+  const navigate = useNavigate();
   const [moveQuizId, setMoveQuizId] = React.useState<string | null>(null);
   const [editQuizId, setEditQuizId] = React.useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -35,7 +118,7 @@ export const QuizList: React.FC<QuizListProps> = ({
   const handleTitleUpdate = async (quizId: string, newTitle: string) => {
     try {
       await quizService.updateTitle(quizId, newTitle);
-      
+
       // Optimistically update the cache
       queryClient.setQueryData(['quizzes'], (old: any) => {
         if (!old?.data) return old;
@@ -49,7 +132,7 @@ export const QuizList: React.FC<QuizListProps> = ({
 
       // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-      
+
       toast.success('Quiz title updated successfully!');
     } catch (error) {
       toast.error('Failed to update quiz title');
@@ -57,8 +140,26 @@ export const QuizList: React.FC<QuizListProps> = ({
     }
   };
 
+  const handleRemoveFromPack = async (itemId: string, packId: string) => {
+    const loadingToast = toast.loading('Removing from study set...');
+    try {
+      await studyPackService.removeItem(packId, { type: 'quiz', itemId });
+
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await queryClient.invalidateQueries({ queryKey: ['quiz', itemId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      toast.success('Removed from study set', { id: loadingToast });
+    } catch (_error) {
+      toast.error('Failed to remove from study set', { id: loadingToast });
+    }
+  };
+
   const groupedQuizzes = React.useMemo(() => {
-    const groups: { [key: string]: { id: string; title: string; quizzes: Quiz[] } } = {};
+    const groups: {
+      [key: string]: { id: string; title: string; quizzes: Quiz[] };
+    } = {};
     const noPack: Quiz[] = [];
 
     quizzes.forEach((quiz) => {
@@ -79,91 +180,6 @@ export const QuizList: React.FC<QuizListProps> = ({
 
     return { groups, noPack };
   }, [quizzes]);
-
-  const renderQuizCard = (quiz: Quiz) => {
-    const latestAttempt = quiz.attempts?.[0] ?? null;
-
-    const menuItems = [
-      {
-        label: 'Edit Title',
-        icon: <Pencil className="w-4 h-4" />,
-        onClick: () => setEditQuizId(quiz.id),
-      },
-      {
-        label: 'Move to Study Set',
-        icon: <Folder className="w-4 h-4" />,
-        onClick: () => setMoveQuizId(quiz.id),
-      },
-      ...(onDelete
-        ? [
-            {
-              label: 'Delete',
-              icon: <Trash2 className="w-4 h-4" />,
-              onClick: () => handleDelete(new Event('click') as any, quiz.id),
-              variant: 'danger' as const,
-            },
-          ]
-        : []),
-    ];
-
-    return (
-      <Card
-        key={quiz.id}
-        to={`/quiz/${quiz.id}${quiz.attemptCount && quiz.attemptCount > 0 ? '?view=history' : ''}`}
-        title={quiz.title}
-        subtitle={quiz.topic}
-        actions={<CardMenu items={menuItems} />}
-      >
-        {/* Tags */}
-        {quiz.tags && quiz.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {quiz.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-[10px] font-medium"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <Brain className="w-4 h-4" />
-              <span>
-                {quiz.questionCount || quiz.questions?.length || 0} questions
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs">
-                {quiz.createdAt ? formatDate(quiz.createdAt) : 'Unknown date'}
-              </span>
-            </div>
-          </div>
-
-          {/* Footer */}
-          {latestAttempt && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
-              Last attempt: {formatDate(latestAttempt.completedAt)} •{' '}
-              {latestAttempt.score}/
-              {quiz.questionCount || quiz.questions?.length} correct
-            </div>
-          )}
-        </div>
-      </Card>
-    );
-  };
-
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation();
-    if (onDelete) {
-      onDelete(id);
-    }
-  };
 
   if (quizzes.length === 0) {
     return (
@@ -208,7 +224,16 @@ export const QuizList: React.FC<QuizListProps> = ({
             onTitleClick={() => navigate(`/study-pack/${pack.id}?tab=quizzes`)}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {pack.quizzes.map((quiz) => renderQuizCard(quiz))}
+              {pack.quizzes.map((quiz) => (
+                <QuizCard
+                  key={quiz.id}
+                  quiz={quiz}
+                  onEdit={(id) => setEditQuizId(id)}
+                  onMove={(id) => setMoveQuizId(id)}
+                  onRemove={handleRemoveFromPack}
+                  onDelete={onDelete}
+                />
+              ))}
             </div>
           </CollapsibleSection>
         ))}
@@ -216,7 +241,16 @@ export const QuizList: React.FC<QuizListProps> = ({
         {/* Uncategorized Quizzes */}
         {groupedQuizzes.noPack.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-            {groupedQuizzes.noPack.map((quiz) => renderQuizCard(quiz))}
+            {groupedQuizzes.noPack.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                onEdit={(id) => setEditQuizId(id)}
+                onMove={(id) => setMoveQuizId(id)}
+                onRemove={handleRemoveFromPack}
+                onDelete={onDelete}
+              />
+            ))}
           </div>
         )}
       </div>

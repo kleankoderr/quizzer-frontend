@@ -1,16 +1,11 @@
 import React, { useState, useRef, useEffect, createRef } from 'react';
-import {
-  CheckCircle,
-  Brain,
-  BookOpen,
-  LayoutTemplate,
-} from 'lucide-react';
+import { CheckCircle, Brain, BookOpen, LayoutTemplate } from 'lucide-react';
 import { contentService, type Content } from '../services/content.service';
 import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 import { LearningGuideSection } from './LearningGuideSection';
 import { SectionNavigator } from './SectionNavigator';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import { useInvalidateQuota } from '../hooks/useQuota';
+import { useInvalidateQuota } from '../hooks';
 
 interface LearningGuideProps {
   guide: NonNullable<Content['learningGuide']>;
@@ -44,11 +39,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   const invalidateQuota = useInvalidateQuota();
   // Create refs for each section
   const sectionRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
-  
+
   // Initialize refs array
   useEffect(() => {
-    sectionRefs.current = guide.sections.map((_, i) => sectionRefs.current[i] || createRef<HTMLDivElement>());
-  }, [guide.sections.length]);
+    sectionRefs.current = guide.sections.map(
+      (_, i) => sectionRefs.current[i] || createRef<HTMLDivElement>()
+    );
+  }, [guide.sections]);
 
   const [completedSections, setCompletedSections] = useState<Set<number>>(
     () => {
@@ -70,30 +67,36 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     }
     setCompletedSections(newCompleted);
   }, [guide]);
-  
+
   // Initialize activeSection - prioritize first uncompleted section
   const [activeSection, setActiveSection] = useState<number>(() => {
     // Find the first uncompleted section
-    const firstUncompletedIndex = guide.sections.findIndex(section => !section.completed);
-    
+    const firstUncompletedIndex = guide.sections.findIndex(
+      (section) => !section.completed
+    );
+
     // Try to get stored section from localStorage
     try {
       const stored = localStorage.getItem(`activeSection-${contentId}`);
       if (stored) {
         const storedIndex = Number.parseInt(stored, 10);
         // Only use stored section if it's valid and uncompleted
-        if (storedIndex >= 0 && storedIndex < guide.sections.length && !guide.sections[storedIndex].completed) {
+        if (
+          storedIndex >= 0 &&
+          storedIndex < guide.sections.length &&
+          !guide.sections[storedIndex].completed
+        ) {
           return storedIndex;
         }
       }
     } catch {
       // Ignore localStorage errors
     }
-    
+
     // Default to first uncompleted section, or -1 if all are completed
     return firstUncompletedIndex;
   });
-  
+
   const [generatedContent, setGeneratedContent] = useState<
     Record<string, string>
   >(() => {
@@ -103,21 +106,17 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       if (section.generatedExplanation) {
         const val = section.generatedExplanation as any;
         initial[`${index}-explain`] =
-          typeof val === 'object'
-            ? val.explanation || ''
-            : String(val);
+          typeof val === 'object' ? val.explanation || '' : String(val);
       }
       if (section.generatedExample) {
         const val = section.generatedExample as any;
         initial[`${index}-example`] =
-          typeof val === 'object'
-            ? val.examples || ''
-            : String(val);
+          typeof val === 'object' ? val.examples || '' : String(val);
       }
     }
     return initial;
   });
-  
+
   const [visibleContent, setVisibleContent] = useState<Record<string, boolean>>(
     () => {
       const initial: Record<string, boolean> = {};
@@ -133,13 +132,16 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       return initial;
     }
   );
-  
+
   const [loadingAction, setLoadingAction] = useState<{
     section: number;
     type: 'explain' | 'example';
   } | null>(null);
-  
-  const [activeKnowledgeCheckSectionIndex, setActiveKnowledgeCheckSectionIndex] = useState<number | null>(null);
+
+  const [
+    activeKnowledgeCheckSectionIndex,
+    setActiveKnowledgeCheckSectionIndex,
+  ] = useState<number | null>(null);
 
   // Smooth scroll to active section when completed sections change
   React.useEffect(() => {
@@ -148,35 +150,37 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       const timer = setTimeout(() => {
         const sectionElement = sectionRefs.current[activeSection]?.current;
         if (sectionElement) {
-          const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+          const elementTop =
+            sectionElement.getBoundingClientRect().top + window.pageYOffset;
           const currentScroll = window.pageYOffset;
-          
+
           // Only scroll if the section is not already in view
           if (Math.abs(elementTop - currentScroll - 80) > 50) {
             window.scrollTo({
               top: elementTop - 80,
-              behavior: 'smooth'
+              behavior: 'smooth',
             });
           }
         }
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [completedSections, activeSection]);
 
-
-
   const toggleSection = (index: number) => {
     const newActiveSection = activeSection === index ? -1 : index;
     setActiveSection(newActiveSection);
-    
+
     // Store in localStorage
     try {
       if (newActiveSection === -1) {
         localStorage.removeItem(`activeSection-${contentId}`);
       } else {
-        localStorage.setItem(`activeSection-${contentId}`, String(newActiveSection));
+        localStorage.setItem(
+          `activeSection-${contentId}`,
+          String(newActiveSection)
+        );
       }
     } catch {
       // Ignore localStorage errors
@@ -187,10 +191,11 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       setTimeout(() => {
         const sectionElement = sectionRefs.current[index]?.current;
         if (sectionElement) {
-          const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+          const elementTop =
+            sectionElement.getBoundingClientRect().top + window.pageYOffset;
           window.scrollTo({
             top: elementTop - 80, // 80px offset to position below sticky header
-            behavior: 'smooth'
+            behavior: 'smooth',
           });
         }
       }, 200);
@@ -200,11 +205,15 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   const markAsComplete = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const section = guide.sections[index];
-    
+
     // Check for Knowledge Check if trying to complete (not un-complete)
-    if (!completedSections.has(index) && section.knowledgeCheck && section.knowledgeCheck.userScore !== 1) {
-       setActiveKnowledgeCheckSectionIndex(index);
-       return;
+    if (
+      !completedSections.has(index) &&
+      section.knowledgeCheck &&
+      section.knowledgeCheck.userScore !== 1
+    ) {
+      setActiveKnowledgeCheckSectionIndex(index);
+      return;
     }
 
     const newCompleted = new Set(completedSections);
@@ -216,16 +225,19 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       // Auto-advance to next section or close if last
       if (index === activeSection) {
         const nextSection = index < guide.sections.length - 1 ? index + 1 : -1;
-        
+
         setTimeout(() => {
           setActiveSection(nextSection);
-          
+
           // Update localStorage
           try {
             if (nextSection === -1) {
               localStorage.removeItem(`activeSection-${contentId}`);
             } else {
-              localStorage.setItem(`activeSection-${contentId}`, String(nextSection));
+              localStorage.setItem(
+                `activeSection-${contentId}`,
+                String(nextSection)
+              );
             }
           } catch {
             // Ignore localStorage errors
@@ -236,15 +248,16 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             setTimeout(() => {
               const sectionElement = sectionRefs.current[nextSection]?.current;
               if (sectionElement) {
-                const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+                const elementTop =
+                  sectionElement.getBoundingClientRect().top +
+                  window.pageYOffset;
                 window.scrollTo({
                   top: elementTop - 80, // 80px offset to position below sticky header
-                  behavior: 'smooth'
+                  behavior: 'smooth',
                 });
               }
             }, 200);
           }
-
         }, 300);
       }
     } else {
@@ -386,7 +399,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                 <span className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
-                  {completedSections.size} of {guide.sections.length} sections completed
+                  {completedSections.size} of {guide.sections.length} sections
+                  completed
                 </span>
               </div>
             </div>
@@ -484,7 +498,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           );
         })}
       </div>
-      
+
       {progress === 100 && (
         <div className="bg-gradient-to-br from-primary-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl p-4 md:p-6 border border-primary-100 dark:border-gray-700 text-center animate-in zoom-in duration-500">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -517,9 +531,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                     className="text-gray-700 dark:text-gray-300 font-medium text-sm prose dark:prose-invert max-w-none"
                     style={{ fontFamily: 'Lexend' }}
                   >
-                    <MarkdownRenderer 
-                      content={step}
-                    />
+                    <MarkdownRenderer content={step} />
                   </div>
                 </div>
               ))}
@@ -557,59 +569,70 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Knowledge Check Modal */}
-      {activeKnowledgeCheckSectionIndex !== null && guide.sections[activeKnowledgeCheckSectionIndex] && (
-        <KnowledgeCheckModal 
-          isOpen={true}
-          onClose={() => setActiveKnowledgeCheckSectionIndex(null)}
-          sectionTitle={guide.sections[activeKnowledgeCheckSectionIndex].title}
-          knowledgeCheck={guide.sections[activeKnowledgeCheckSectionIndex].knowledgeCheck!}
-          onUpdate={(updates) => {
-             if (onSectionUpdate) {
+      {activeKnowledgeCheckSectionIndex !== null &&
+        guide.sections[activeKnowledgeCheckSectionIndex] && (
+          <KnowledgeCheckModal
+            isOpen={true}
+            onClose={() => setActiveKnowledgeCheckSectionIndex(null)}
+            sectionTitle={
+              guide.sections[activeKnowledgeCheckSectionIndex].title
+            }
+            knowledgeCheck={
+              guide.sections[activeKnowledgeCheckSectionIndex].knowledgeCheck!
+            }
+            onUpdate={(updates) => {
+              if (onSectionUpdate) {
                 onSectionUpdate(activeKnowledgeCheckSectionIndex, updates);
-             }
-          }}
-          onComplete={() => {
-             // Mark as complete
-             const index = activeKnowledgeCheckSectionIndex;
-             const newCompleted = new Set(completedSections);
-             newCompleted.add(index);
-             setCompletedSections(newCompleted);
+              }
+            }}
+            onComplete={() => {
+              // Mark as complete
+              const index = activeKnowledgeCheckSectionIndex;
+              const newCompleted = new Set(completedSections);
+              newCompleted.add(index);
+              setCompletedSections(newCompleted);
 
-             if (onSectionUpdate) {
+              if (onSectionUpdate) {
                 onSectionUpdate(index, { completed: true });
-             } else {
+              } else {
                 onToggleSectionComplete?.(index, true);
-             }
+              }
 
-             // Auto-advance or close if last
-             if (index === activeSection) {
-               if (index < guide.sections.length - 1) {
+              // Auto-advance or close if last
+              if (index === activeSection) {
+                if (index < guide.sections.length - 1) {
                   const nextSection = index + 1;
                   setTimeout(() => {
                     setActiveSection(nextSection);
 
                     // Update localStorage
                     try {
-                      localStorage.setItem(`activeSection-${contentId}`, String(nextSection));
+                      localStorage.setItem(
+                        `activeSection-${contentId}`,
+                        String(nextSection)
+                      );
                     } catch {
                       // Ignore localStorage errors
                     }
 
                     // Scroll to top of next section with smooth behavior
                     setTimeout(() => {
-                      const sectionElement = sectionRefs.current[nextSection]?.current;
+                      const sectionElement =
+                        sectionRefs.current[nextSection]?.current;
                       if (sectionElement) {
-                        const elementTop = sectionElement.getBoundingClientRect().top + window.pageYOffset;
+                        const elementTop =
+                          sectionElement.getBoundingClientRect().top +
+                          window.pageYOffset;
                         window.scrollTo({
                           top: elementTop - 80, // 80px offset to position below sticky header
-                          behavior: 'smooth'
+                          behavior: 'smooth',
                         });
                       }
                     }, 300); // Increased delay to allow section to appear first
                   }, 300);
-               } else {
+                } else {
                   setTimeout(() => {
                     setActiveSection(-1);
                     // Remove from localStorage
@@ -619,13 +642,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       // Ignore localStorage errors
                     }
                   }, 300);
-               }
-             }
-             
-             setActiveKnowledgeCheckSectionIndex(null);
-          }}
-        />
-      )}
+                }
+              }
+
+              setActiveKnowledgeCheckSectionIndex(null);
+            }}
+          />
+        )}
     </div>
   );
 };

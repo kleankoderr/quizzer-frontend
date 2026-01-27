@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { flashcardService } from '../services/flashcard.service';
+import { flashcardService } from '../services';
 import type { FlashcardGenerateRequest } from '../types';
 import {
   CreditCard,
@@ -15,31 +15,31 @@ import {
 import { FlashcardGenerator } from '../components/FlashcardGenerator';
 import { FlashcardSetList } from '../components/FlashcardSetList';
 import { DeleteModal } from '../components/DeleteModal';
-import {
-  useFlashcardSets,
-  useJobEvents,
-  useInvalidateQuota,
-  useTour,
-} from '../hooks';
-import { flashcardGeneratorTour } from '../tours';
+import { useFlashcardSets, useJobEvents, useInvalidateQuota } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { CardSkeleton, StatCardSkeleton } from '../components/skeletons';
 import { ProgressToast } from '../components/ProgressToast';
+import { useAutoTour } from '../hooks/useAutoTour';
 
 export const FlashcardsPage = () => {
+  // Trigger flashcard tour
+  useAutoTour('flashcard-generator');
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
   const location = useLocation();
   const navigate = useNavigate();
-  const { startIfNotCompleted } = useTour();
   const [showGenerator, setShowGenerator] = useState(false);
-  const { data: flashcardSets = [], isLoading } = useFlashcardSets();
-
-  useEffect(() => {
-    if (showGenerator) {
-      startIfNotCompleted('flashcard-generator-onboarding', flashcardGeneratorTour);
-    }
-  }, [showGenerator, startIfNotCompleted]);
+  const {
+    data: setsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFlashcardSets();
+  const flashcardSets = useMemo(
+    () => setsData?.pages.flatMap((page) => page.data) ?? [],
+    [setsData]
+  );
   const [loading, setLoading] = useState(false);
   const [deleteSetId, setDeleteSetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -56,20 +56,28 @@ export const FlashcardsPage = () => {
   >(undefined);
 
   // Job polling state
-  const [currentJobId, setCurrentJobId] = useState<string | undefined>(undefined);
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>(
+    undefined
+  );
   const toastIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (location.state) {
-      const { topic, contentText, sourceTitle, contentId, openGenerator, studyPackId } =
-        location.state as {
-          topic?: string;
-          contentText?: string;
-          sourceTitle?: string;
-          contentId?: string;
-          openGenerator?: boolean;
-          studyPackId?: string;
-        };
+      const {
+        topic,
+        contentText,
+        sourceTitle,
+        contentId,
+        openGenerator,
+        studyPackId,
+      } = location.state as {
+        topic?: string;
+        contentText?: string;
+        sourceTitle?: string;
+        contentId?: string;
+        openGenerator?: boolean;
+        studyPackId?: string;
+      };
 
       if (topic || contentText || openGenerator) {
         setInitialValues({
@@ -90,6 +98,32 @@ export const FlashcardsPage = () => {
       setShowGenerator(false);
     };
   }, [location.state]);
+
+  useEffect(() => {
+    const mainContent = document.getElementById('main-content-area');
+    if (!mainContent) return;
+
+    let lastScrollTime = 0;
+    const throttleDelay = 200;
+
+    const handleScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollTime < throttleDelay) return;
+      lastScrollTime = now;
+
+      const { scrollTop, scrollHeight, clientHeight } = mainContent;
+      if (
+        scrollHeight - scrollTop <= clientHeight + 500 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    };
+
+    mainContent.addEventListener('scroll', handleScroll);
+    return () => mainContent.removeEventListener('scroll', handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Poll for job status with exponential backoff
   useJobEvents({
@@ -113,6 +147,7 @@ export const FlashcardsPage = () => {
             message="Opening your flashcards..."
             progress={100}
             status="success"
+            onClose={() => setLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 2000 }
@@ -135,6 +170,7 @@ export const FlashcardsPage = () => {
             message={error}
             progress={0}
             status="error"
+            onClose={() => setLoading(false)}
           />
         ),
         { id: toastIdRef.current, duration: 5000 }
@@ -163,6 +199,7 @@ export const FlashcardsPage = () => {
           progress={0}
           status="processing"
           autoProgress={true}
+          onClose={() => setLoading(false)}
         />
       ),
       { duration: Infinity }
@@ -174,12 +211,10 @@ export const FlashcardsPage = () => {
       const { jobId } = await flashcardService.generate(request, files);
       setCurrentJobId(jobId);
     } catch (error: any) {
-      let errorMessage = error?.response?.data?.message || 'Failed to create flashcards';
-      
-      // Handle specific backend exception for quota limits
-      if (error?.response?.status === 403 && error?.response?.data?.exception) {
-        errorMessage = error.response.data.exception;
-      } else if (error?.response?.data?.exception) {
+      let errorMessage =
+        error?.response?.data?.message || 'Failed to create flashcards';
+
+      if (error?.response?.data?.exception) {
         errorMessage = error.response.data.exception;
       }
 
@@ -191,6 +226,7 @@ export const FlashcardsPage = () => {
             message={errorMessage}
             progress={0}
             status="error"
+            onClose={() => setLoading(false)}
           />
         ),
         { id: toastId, duration: 5000 }
@@ -238,7 +274,7 @@ export const FlashcardsPage = () => {
   const studiedSets = flashcardSets.filter((set) => set.lastStudiedAt).length;
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8 px-4 sm:px-0">
       {/* Hero Header */}
       <header className="relative overflow-hidden rounded-xl bg-primary-600 dark:bg-primary-700 p-6 md:p-8 shadow-lg">
         <div className="absolute inset-0 opacity-10">
@@ -350,7 +386,9 @@ export const FlashcardsPage = () => {
               if (location.state?.cancelRoute) {
                 navigate(location.state.cancelRoute);
               } else if (initialValues?.studyPackId) {
-                navigate(`/study-pack/${initialValues.studyPackId}?tab=flashcards`);
+                navigate(
+                  `/study-pack/${initialValues.studyPackId}?tab=flashcards`
+                );
               } else {
                 setShowGenerator(false);
                 setInitialValues(undefined);
@@ -402,6 +440,12 @@ export const FlashcardsPage = () => {
             }}
           />
         ))}
+
+      {isFetchingNextPage && (
+        <div className="flex justify-center p-4">
+          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
       <DeleteModal
         isOpen={!!deleteSetId}

@@ -104,8 +104,11 @@ export const LoginPage = () => {
 
       try {
         const response = await authService.login(email, password);
-        
-        if ('requiresVerification' in response && response.requiresVerification) {
+
+        if (
+          'requiresVerification' in response &&
+          response.requiresVerification
+        ) {
           navigate('/verify-email', { state: { email: response.email } });
           return;
         }
@@ -119,7 +122,7 @@ export const LoginPage = () => {
         setLoading(false);
       }
     },
-    [email, password, handleLoginSuccess]
+    [email, password, handleLoginSuccess, navigate]
   );
 
   return (

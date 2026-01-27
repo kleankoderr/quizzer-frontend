@@ -40,9 +40,7 @@ export const WeakAreaCard = ({
               <span className="font-semibold text-red-600 dark:text-red-400">
                 {weakArea.errorCount}
               </span>
-              <span>
-                {weakArea.errorCount === 1 ? 'error' : 'errors'}
-              </span>
+              <span>{weakArea.errorCount === 1 ? 'error' : 'errors'}</span>
             </div>
             <span>•</span>
             <div>
@@ -83,7 +81,11 @@ export const WeakAreaCard = ({
                 ? 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                 : 'text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 cursor-not-allowed'
             }`}
-            title={!isPremium ? 'Upgrade to Premium to generate smart practice quizzes' : ''}
+            title={
+              !isPremium
+                ? 'Upgrade to Premium to generate smart practice quizzes'
+                : ''
+            }
           >
             {!isPremium ? (
               <>

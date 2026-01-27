@@ -11,7 +11,7 @@ export const GlobalEventListener = () => {
 
     const handleSummaryCompleted = (event: AppEvent) => {
       const contentId = event.resourceId; // The content ID from the event
-      
+
       // Invalidate contents list and specific content item
       queryClient.invalidateQueries({ queryKey: ['contents'] });
       if (contentId) {
@@ -26,8 +26,14 @@ export const GlobalEventListener = () => {
       );
     };
 
-    const unsubscribeCompleted = eventsService.on('summary.completed', handleSummaryCompleted);
-    const unsubscribeFailed = eventsService.on('summary.failed', handleSummaryFailed);
+    const unsubscribeCompleted = eventsService.on(
+      'summary.completed',
+      handleSummaryCompleted
+    );
+    const unsubscribeFailed = eventsService.on(
+      'summary.failed',
+      handleSummaryFailed
+    );
 
     return () => {
       unsubscribeCompleted?.();

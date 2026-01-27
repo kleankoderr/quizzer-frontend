@@ -29,8 +29,7 @@ export const useStorageCleanup = () => {
         '/user/quota/cleanup-suggestions'
       );
       setData(response.data);
-    } catch (error) {
-      console.error('Failed to fetch cleanup suggestions:', error);
+    } catch (_error) {
       toast.error('Failed to load storage suggestions');
     } finally {
       setLoading(false);
@@ -49,8 +48,7 @@ export const useStorageCleanup = () => {
         // Refresh suggestions
         await fetchSuggestions();
         return true;
-      } catch (error) {
-        console.error('Failed to delete files:', error);
+      } catch (_error) {
         toast.error('Failed to delete some files');
         return false;
       } finally {

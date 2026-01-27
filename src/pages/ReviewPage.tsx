@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { studyService } from '../services/study.service';
 import { ReviewCard } from '../components/ReviewCard';
-import {
-  BookOpen,
-  Brain,
-  Clock,
-  CheckCircle2,
-} from 'lucide-react';
+import { BookOpen, Brain, Clock, CheckCircle2 } from 'lucide-react';
 import { format, isToday, parseISO } from 'date-fns';
 import { CardSkeleton } from '../components/skeletons';
 
@@ -23,8 +18,8 @@ export const ReviewPage = () => {
   const upcomingReviews = reviewData?.upcomingReviews || [];
 
   const allItems = [
-    ...dueQuizzes.map(q => ({ ...q, type: 'quiz' as const })),
-    ...dueFlashcards.map(f => ({ ...f, type: 'flashcard' as const }))
+    ...dueQuizzes.map((q) => ({ ...q, type: 'quiz' as const })),
+    ...dueFlashcards.map((f) => ({ ...f, type: 'flashcard' as const })),
   ];
 
   // Empty state
@@ -42,14 +37,12 @@ export const ReviewPage = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
               All Caught Up!
             </h1>
-            <p className="text-primary-100">
-              No items need review right now
-            </p>
+            <p className="text-primary-100">No items need review right now</p>
           </div>
         </header>
 
         {/* Upcoming Reviews */}
-        {upcomingReviews.some(day => day.count > 0) && (
+        {upcomingReviews.some((day) => day.count > 0) && (
           <div className="card p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Upcoming Reviews (Next 7 Days)
@@ -67,23 +60,33 @@ export const ReviewPage = () => {
                         : 'bg-gray-50 dark:bg-gray-800'
                     }`}
                   >
-                    <div className={`text-xs font-medium mb-1 ${
-                      today ? 'text-primary-700 dark:text-primary-300' : 'text-gray-500 dark:text-gray-400'
-                    }`}>
+                    <div
+                      className={`text-xs font-medium mb-1 ${
+                        today
+                          ? 'text-primary-700 dark:text-primary-300'
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}
+                    >
                       {format(date, 'EEE')}
                     </div>
-                    <div className={`text-sm font-bold ${
-                      today ? 'text-primary-900 dark:text-primary-100' : 'text-gray-900 dark:text-white'
-                    }`}>
+                    <div
+                      className={`text-sm font-bold ${
+                        today
+                          ? 'text-primary-900 dark:text-primary-100'
+                          : 'text-gray-900 dark:text-white'
+                      }`}
+                    >
                       {format(date, 'd')}
                     </div>
                     {day.count > 0 && (
                       <div className="mt-1">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
-                          today
-                            ? 'bg-primary-600 text-white'
-                            : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                        }`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                            today
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                          }`}
+                        >
                           {day.count}
                         </span>
                       </div>
@@ -118,7 +121,8 @@ export const ReviewPage = () => {
             Review Your Learning
           </h1>
           <p className="text-primary-100 text-lg mb-4">
-            Review these items to strengthen your memory and retain knowledge longer
+            Review these items to strengthen your memory and retain knowledge
+            longer
           </p>
 
           {/* Quick Stats */}
@@ -143,8 +147,9 @@ export const ReviewPage = () => {
           💡 Why Review?
         </h3>
         <p className="text-sm text-gray-700 dark:text-gray-300">
-          Regular reviews help move information from short-term to long-term memory. 
-          Click on any item below to start reviewing. Reviewing on time strengthens retention and prevents forgetting.
+          Regular reviews help move information from short-term to long-term
+          memory. Click on any item below to start reviewing. Reviewing on time
+          strengthens retention and prevents forgetting.
         </p>
       </div>
 
@@ -224,7 +229,7 @@ export const ReviewPage = () => {
       </div>
 
       {/* Schedule Preview - Only if there are upcoming reviews */}
-      {upcomingReviews.some(day => day.count > 0) && (
+      {upcomingReviews.some((day) => day.count > 0) && (
         <div className="card p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Review Schedule (Next 7 Days)
@@ -242,23 +247,33 @@ export const ReviewPage = () => {
                       : 'bg-gray-50 dark:bg-gray-800'
                   }`}
                 >
-                  <div className={`text-xs font-medium mb-1 ${
-                    today ? 'text-primary-700 dark:text-primary-300' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
+                  <div
+                    className={`text-xs font-medium mb-1 ${
+                      today
+                        ? 'text-primary-700 dark:text-primary-300'
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                  >
                     {format(date, 'EEE')}
                   </div>
-                  <div className={`text-sm font-bold ${
-                    today ? 'text-primary-900 dark:text-primary-100' : 'text-gray-900 dark:text-white'
-                  }`}>
+                  <div
+                    className={`text-sm font-bold ${
+                      today
+                        ? 'text-primary-900 dark:text-primary-100'
+                        : 'text-gray-900 dark:text-white'
+                    }`}
+                  >
                     {format(date, 'd')}
                   </div>
                   {day.count > 0 && (
                     <div className="mt-1">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
-                        today
-                          ? 'bg-primary-600 text-white'
-                          : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                      }`}>
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                          today
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                        }`}
+                      >
                         {day.count}
                       </span>
                     </div>

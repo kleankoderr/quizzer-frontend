@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowRight, Check, BookOpen, GraduationCap } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SchoolSearch } from '../components/SchoolSearch';
@@ -17,32 +17,140 @@ const GRADES = [
 
 const SUBJECTS = [
   'Mathematics',
+  'Further Mathematics',
+  'English Language',
   'Physics',
   'Chemistry',
   'Biology',
-  'History',
+  'Agricultural Science',
   'Geography',
-  'Literature',
-  'Computer Science',
+  'History',
   'Economics',
-  'Psychology',
-  'Sociology',
-  'Philosophy',
-  'Art',
+  'Government',
+  'Civic Education',
+  'Christian Religious Studies',
+  'Islamic Religious Studies',
+  'Literature-in-English',
+  'Financial Accounting',
+  'Commerce',
+  'Technical Drawing',
+  'Computer Science',
+  'Data Processing',
+  'Yoruba Language',
+  'Igbo Language',
+  'Hausa Language',
+  'Basic Science',
+  'Social Studies',
+  'Physical and Health Education',
   'Business Studies',
-  'Environmental Science',
-  'Health Education',
+  'Home Economics',
+  'Art and Craft',
   'Medicine',
   'Engineering',
   'Law',
+  'Pharmacy',
   'Architecture',
   'Political Science',
+  'Psychology',
+  'Sociology',
+  'Philosophy',
 ];
 
-const USER_TYPES = [
-  { id: 'student', label: 'Student', icon: GraduationCap },
-  { id: 'teacher', label: 'Teacher', icon: BookOpen },
-];
+const SUBJECT_MAP: Record<string, string[]> = {
+  'Primary School': [
+    'Mathematics',
+    'English Language',
+    'Basic Science',
+    'Social Studies',
+    'Home Economics',
+    'Agricultural Science',
+    'Physical and Health Education',
+    'Art and Craft',
+    'Yoruba Language',
+    'Igbo Language',
+    'Hausa Language',
+  ],
+  'Junior Secondary School (JSS)': [
+    'Mathematics',
+    'English Language',
+    'Basic Science',
+    'Social Studies',
+    'Civic Education',
+    'Computer Science',
+    'Business Studies',
+    'Agricultural Science',
+    'Home Economics',
+    'Physical and Health Education',
+    'Art and Craft',
+    'Yoruba Language',
+    'Igbo Language',
+    'Hausa Language',
+  ],
+  'Senior Secondary School (SSS)': [
+    'Mathematics',
+    'English Language',
+    'Civic Education',
+    'Biology',
+    'Economics',
+    'Physics',
+    'Chemistry',
+    'Further Mathematics',
+    'Geography',
+    'Government',
+    'History',
+    'Literature-in-English',
+    'Financial Accounting',
+    'Agricultural Science',
+    'Technical Drawing',
+    'Christian Religious Studies',
+    'Islamic Religious Studies',
+    'Commerce',
+    'Data Processing',
+    'Computer Science',
+    'Yoruba Language',
+    'Igbo Language',
+    'Hausa Language',
+  ],
+  Undergraduate: [
+    'Mathematics',
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'Medicine',
+    'Engineering',
+    'Law',
+    'Pharmacy',
+    'Architecture',
+    'Economics',
+    'Computer Science',
+    'Political Science',
+    'Psychology',
+    'Sociology',
+    'Philosophy',
+    'Government',
+    'Financial Accounting',
+    'Business Studies',
+  ],
+  'Graduate Student': [
+    'Mathematics',
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'Medicine',
+    'Engineering',
+    'Law',
+    'Pharmacy',
+    'Architecture',
+    'Economics',
+    'Computer Science',
+    'Political Science',
+    'Psychology',
+    'Sociology',
+    'Philosophy',
+    'Business Studies',
+  ],
+  'Lifelong Learner': SUBJECTS,
+};
 
 export const OnboardingPage = () => {
   const [step, setStep] = useState(1);
@@ -58,6 +166,25 @@ export const OnboardingPage = () => {
   });
 
   const handleNext = () => {
+    if (step === 1) {
+      const { schoolName, grade } = formData;
+      if (!grade) {
+        alert('Please select your level');
+        return;
+      }
+      if (!schoolName) {
+        alert('Please enter your school or institution');
+        return;
+      }
+      if (schoolName.length < 3) {
+        alert('School name must be at least 3 characters');
+        return;
+      }
+      if (!/^[a-zA-Z0-9\s.,&'()-]+$/.test(schoolName)) {
+        alert('School name contains invalid characters');
+        return;
+      }
+    }
     setStep((prev) => prev + 1);
   };
 
@@ -84,8 +211,8 @@ export const OnboardingPage = () => {
         login({ ...user, onboardingCompleted: true });
       }
 
-      // Move to completion step (Step 4) which will auto-redirect
-      setStep(4);
+      // Move to completion step (Step 3) which will auto-redirect
+      setStep(3);
     } catch (error) {
       console.error('Error completing onboarding:', error);
       // Even if it fails, try to redirect to dashboard to avoid getting stuck
@@ -94,9 +221,6 @@ export const OnboardingPage = () => {
       setLoading(false);
     }
   };
-
-
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
@@ -115,50 +239,16 @@ export const OnboardingPage = () => {
           <div className="h-2 bg-gray-100 dark:bg-gray-700">
             <div
               className="h-full bg-primary-600 transition-all duration-500 ease-out"
-              style={{ width: `${(step / 4) * 100}%` }}
+              style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
 
           <div className="p-8">
             <AnimatePresence mode="wait">
-              {/* Step 1: User Type */}
+              {/* Step 1: Grade & School */}
               {step === 1 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-6"
-                >
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                    Tell us about yourself
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {USER_TYPES.map((type) => (
-                      <button
-                        key={type.id}
-                        onClick={() =>
-                          setFormData({ ...formData, userType: type.id })
-                        }
-                        className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
-                          formData.userType === type.id
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 text-gray-600 dark:text-gray-400'
-                        }`}
-                      >
-                        <type.icon className="w-8 h-8" />
-                        <span className="font-medium">{type.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 2: Grade & School */}
-              {step === 2 && (
-                <motion.div
-                  key="step2"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -170,14 +260,21 @@ export const OnboardingPage = () => {
 
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="grade-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label
+                        htmlFor="grade-select"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
                         Select your level
                       </label>
                       <select
                         id="grade-select"
                         value={formData.grade}
                         onChange={(e) =>
-                          setFormData({ ...formData, grade: e.target.value })
+                          setFormData({
+                            ...formData,
+                            grade: e.target.value,
+                            subjects: [], // Clear subjects when grade changes
+                          })
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
@@ -191,7 +288,10 @@ export const OnboardingPage = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="school-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label
+                        htmlFor="school-search"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
                         School / Institution
                       </label>
                       <SchoolSearch
@@ -207,10 +307,10 @@ export const OnboardingPage = () => {
                 </motion.div>
               )}
 
-              {/* Step 3: Interests */}
-              {step === 3 && (
+              {/* Step 2: Interests */}
+              {step === 2 && (
                 <motion.div
-                  key="step3"
+                  key="step2"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -224,30 +324,32 @@ export const OnboardingPage = () => {
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
-                    {SUBJECTS.map((subject) => (
-                      <button
-                        key={subject}
-                        onClick={() => toggleSubject(subject)}
-                        className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
-                          formData.subjects.includes(subject)
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        <span className="text-sm font-medium">{subject}</span>
-                        {formData.subjects.includes(subject) && (
-                          <Check className="w-4 h-4" />
-                        )}
-                      </button>
-                    ))}
+                    {(SUBJECT_MAP[formData.grade] || SUBJECTS).map(
+                      (subject) => (
+                        <button
+                          key={subject}
+                          onClick={() => toggleSubject(subject)}
+                          className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
+                            formData.subjects.includes(subject)
+                              ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <span className="text-sm font-medium">{subject}</span>
+                          {formData.subjects.includes(subject) && (
+                            <Check className="w-4 h-4" />
+                          )}
+                        </button>
+                      )
+                    )}
                   </div>
                 </motion.div>
               )}
 
-              {/* Step 4: Completion (Manual redirect) */}
-              {step === 4 && (
+              {/* Step 3: Completion (Manual redirect) */}
+              {step === 3 && (
                 <motion.div
-                  key="step4"
+                  key="step3"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
@@ -282,7 +384,7 @@ export const OnboardingPage = () => {
             </AnimatePresence>
 
             {/* Navigation Buttons */}
-            {step < 4 && (
+            {step < 3 && (
               <div className="mt-8 flex items-center justify-between pt-6 border-t border-gray-100 dark:border-gray-700">
                 {step > 1 && (
                   <button
@@ -293,7 +395,7 @@ export const OnboardingPage = () => {
                   </button>
                 )}
 
-                {step < 3 ? (
+                {step < 2 ? (
                   <button
                     onClick={handleNext}
                     className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"

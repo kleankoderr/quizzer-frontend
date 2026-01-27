@@ -1,86 +1,85 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { summaryService } from '../services/summary.service';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { eventsService } from '../services';
 import { Toast as toast } from '../utils/toast';
 
 interface UseSummaryGenerationResult {
-  startPolling: (
+  startGeneration: (
     jobId: string,
-    onComplete?: (summaryId: string) => void
+    onComplete?: (shortCode: string) => void
   ) => void;
-  isPolling: boolean;
+  isGenerating: boolean;
+  streamingContent: string;
 }
 
 export const useSummaryGeneration = (): UseSummaryGenerationResult => {
-  const [isPolling, setIsPolling] = useState(false);
-  const pollingRef = useRef<boolean>(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
+  const activeJobId = useRef<string | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
-  const poll = useCallback(
-    async (
-      jobId: string,
-      attempt: number,
-      onComplete?: (shortCode: string) => void
-    ) => {
-      if (!pollingRef.current) return;
-
-      try {
-        const status = await summaryService.getGenerationStatus(jobId);
-
-        if (status.state === 'completed') {
-          pollingRef.current = false;
-          setIsPolling(false);
-          toast.success('Summary successfully generated');
-          if (onComplete && status.result?.shortCode) {
-            onComplete(status.result.shortCode);
-          }
-          return;
-        }
-
-        if (status.state === 'failed') {
-          pollingRef.current = false;
-          setIsPolling(false);
-          toast.error('Summary generation failed');
-          return;
-        }
-
-        // Exponential backoff: start at 1s, multiply by 1.5, cap at 10s
-        const delay = Math.min(1000 * Math.pow(1.5, attempt), 10000);
-
-        timeoutRef.current = setTimeout(() => {
-          poll(jobId, attempt + 1, onComplete);
-        }, delay);
-      } catch (error) {
-        console.error('Polling error:', error);
-        // Check if it's a 404 (job not found) or other potentially fatal error to stop polling?
-        // For now, valid keep retrying with backoff as it might be network glitch
-        const delay = Math.min(1000 * Math.pow(1.5, attempt), 10000);
-        timeoutRef.current = setTimeout(() => {
-          poll(jobId, attempt + 1, onComplete);
-        }, delay);
+  const startGeneration = useCallback(
+    (jobId: string, onComplete?: (shortCode: string) => void) => {
+      // Cleanup previous listeners if any
+      if (cleanupRef.current) {
+        cleanupRef.current();
       }
+
+      activeJobId.current = jobId;
+      setIsGenerating(true);
+      setStreamingContent('');
+
+      // 1. Listen for chunks
+      const unsubChunk = eventsService.on('summary.chunk', (event: any) => {
+        if (event.jobId === jobId) {
+          setStreamingContent((prev) => prev + event.chunk);
+        }
+      });
+
+      // 2. Listen for completion
+      const unsubCompleted = eventsService.on(
+        'summary.completed',
+        (event: any) => {
+          if (event.jobId === jobId) {
+            setIsGenerating(false);
+            activeJobId.current = null;
+            cleanup();
+            toast.success('Summary successfully generated');
+            if (onComplete && event.shortCode) {
+              onComplete(event.shortCode);
+            }
+          }
+        }
+      );
+
+      // 3. Listen for failure
+      const unsubFailed = eventsService.on('summary.failed', (event: any) => {
+        if (event.jobId === jobId) {
+          setIsGenerating(false);
+          activeJobId.current = null;
+          cleanup();
+          toast.error('Summary generation failed');
+        }
+      });
+
+      const cleanup = () => {
+        unsubChunk();
+        unsubCompleted();
+        unsubFailed();
+        cleanupRef.current = null;
+      };
+
+      cleanupRef.current = cleanup;
     },
     []
   );
 
-  const startPolling = useCallback(
-    (jobId: string, onComplete?: (shortCode: string) => void) => {
-      if (pollingRef.current) return; // Already polling
-
-      pollingRef.current = true;
-      setIsPolling(true);
-      poll(jobId, 0, onComplete);
-    },
-    [poll]
-  );
-
   useEffect(() => {
     return () => {
-      pollingRef.current = false;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (cleanupRef.current) {
+        cleanupRef.current();
       }
     };
   }, []);
 
-  return { startPolling, isPolling };
+  return { startGeneration, isGenerating, streamingContent };
 };

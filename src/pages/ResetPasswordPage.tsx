@@ -16,7 +16,7 @@ import { authService } from '../services/auth.service';
 export const ResetPasswordPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
@@ -45,11 +45,17 @@ export const ResetPasswordPage = () => {
         await authService.resetPassword(email, otp, password);
         setSuccess(true);
         setTimeout(() => {
-          navigate('/login', { state: { message: 'Password reset successful. Please sign in with your new password.' } });
+          navigate('/login', {
+            state: {
+              message:
+                'Password reset successful. Please sign in with your new password.',
+            },
+          });
         }, 3000);
       } catch (err: any) {
         setError(
-          err.response?.data?.message || 'Something went wrong. Please try again.'
+          err.response?.data?.message ||
+            'Something went wrong. Please try again.'
         );
       } finally {
         setLoading(false);
@@ -62,7 +68,10 @@ export const ResetPasswordPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2 inline-block">
+          <Link
+            to="/"
+            className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2 inline-block"
+          >
             Quizzer
           </Link>
           <p className="text-gray-600 dark:text-gray-400">
@@ -70,7 +79,7 @@ export const ResetPasswordPage = () => {
           </p>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6 overflow-hidden border border-gray-100 dark:border-gray-700"
@@ -95,7 +104,9 @@ export const ResetPasswordPage = () => {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-2">
                   <CheckCircle className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Password Updated!</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Password Updated!
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   Your password has been reset successfully.
                 </p>
@@ -115,7 +126,12 @@ export const ResetPasswordPage = () => {
                 {/* Email (Hidden or Read-only) */}
                 {!location.state?.email && (
                   <div className="space-y-1">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+                    <label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Email Address
+                    </label>
                     <input
                       id="email"
                       type="email"
@@ -130,7 +146,12 @@ export const ResetPasswordPage = () => {
 
                 {/* Reset Code */}
                 <div className="space-y-1">
-                  <label htmlFor="otp" className="text-sm font-medium text-gray-700 dark:text-gray-300">Reset Code</label>
+                  <label
+                    htmlFor="otp"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Reset Code
+                  </label>
                   <div className="relative">
                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
@@ -138,7 +159,9 @@ export const ResetPasswordPage = () => {
                       type="text"
                       maxLength={6}
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replaceAll(/\D/g, ''))}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replaceAll(/\D/g, ''))
+                      }
                       className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white tracking-[0.5em] font-mono text-center text-xl"
                       placeholder="000000"
                       required
@@ -148,7 +171,12 @@ export const ResetPasswordPage = () => {
 
                 {/* New Password */}
                 <div className="space-y-1">
-                  <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                  <label
+                    htmlFor="password"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    New Password
+                  </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
@@ -166,7 +194,11 @@ export const ResetPasswordPage = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>

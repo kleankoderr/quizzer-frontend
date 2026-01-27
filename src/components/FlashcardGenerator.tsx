@@ -14,6 +14,7 @@ import {
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
 import { StudyPackSelector } from './StudyPackSelector';
+import { InputError } from './InputError';
 import { Toast as toast } from '../utils/toast';
 
 interface FlashcardGeneratorProps {
@@ -46,6 +47,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [selectedStudyPackId, setSelectedStudyPackId] = useState(
     initialValues?.studyPackId || ''
   );
+  const [isCreatingStudyPack, setIsCreatingStudyPack] = useState(false);
+  const [showStudyPackError, setShowStudyPackError] = useState(false);
 
   useEffect(() => {
     if (initialValues) {
@@ -62,6 +65,12 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isCreatingStudyPack) {
+      setShowStudyPackError(true);
+      return;
+    }
+    setShowStudyPackError(false);
     const contentId = initialValues?.contentId;
     const commonParams = {
       numberOfCards,
@@ -88,7 +97,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div className="p-2 bg-primary-100 rounded-lg">
           <Layers className="w-6 h-6 text-primary-600" />
         </div>
-        <h2 id="flashcard-generator-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2
+          id="flashcard-generator-title"
+          className="text-2xl font-bold text-gray-900 dark:text-white"
+        >
           Generate New Flashcard Set
         </h2>
       </div>
@@ -112,7 +124,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       )}
 
       {!initialValues?.sourceTitle && (
-        <div id="flashcard-mode-tabs" className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700">
+        <div
+          id="flashcard-mode-tabs"
+          className="grid grid-cols-3 md:flex md:gap-2 mb-6 md:mb-8 border-b-0 md:border-b-2 border-gray-200 dark:border-gray-700"
+        >
           <button
             type="button"
             onClick={() => setMode('topic')}
@@ -175,9 +190,14 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder={initialValues?.sourceTitle ? "Topic from study material" : "e.g., French Vocabulary, Chemistry Formulas"}
+              placeholder={
+                initialValues?.sourceTitle
+                  ? 'Topic from study material'
+                  : 'e.g., French Vocabulary, Chemistry Formulas'
+              }
               className="input-field"
               required
+              maxLength={200}
               readOnly={!!initialValues?.sourceTitle}
               disabled={!!initialValues?.sourceTitle}
             />
@@ -202,6 +222,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               placeholder="Paste your notes, article, or any text content here..."
               className="input-field min-h-[200px] resize-y"
               required
+              maxLength={1500}
             />
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               The system will extract key concepts and create flashcards
@@ -291,7 +312,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         )}
 
-        <div id="flashcard-count-config" className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+        <div
+          id="flashcard-count-config"
+          className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700"
+        >
           <div className="flex items-center justify-between mb-4">
             <label
               htmlFor="cards"
@@ -322,8 +346,22 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div id="flashcard-study-set-config">
           <StudyPackSelector
             value={selectedStudyPackId}
-            onChange={setSelectedStudyPackId}
+            onChange={(val) => {
+              setSelectedStudyPackId(val);
+              setShowStudyPackError(false);
+            }}
+            onCreationModeChange={(isCreating) => {
+              setIsCreatingStudyPack(isCreating);
+              if (!isCreating) setShowStudyPackError(false);
+            }}
             className="mb-6"
+          />
+          <InputError
+            message={
+              showStudyPackError
+                ? 'Please create or cancel the study set before generating flashcards'
+                : null
+            }
           />
         </div>
 

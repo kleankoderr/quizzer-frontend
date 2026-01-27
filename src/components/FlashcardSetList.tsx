@@ -2,21 +2,105 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FlashcardSet, StudyPack } from '../types';
 import { Card } from './Card';
-import { Layers, Plus } from 'lucide-react';
+import { Layers, Plus, Pencil, Folder, Trash2, X } from 'lucide-react';
 import { MoveToStudyPackModal } from './MoveToStudyPackModal';
 import { CollapsibleSection } from './CollapsibleSection';
-import { CardMenu, Pencil, Folder, Trash2 } from './CardMenu';
+import { CardMenu } from './CardMenu';
 import { EditTitleModal } from './EditTitleModal';
 import { flashcardService } from '../services/flashcard.service';
+import { studyPackService } from '../services';
 import { Toast as toast } from '../utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '../utils/dateFormat';
+
 interface FlashcardSetListProps {
   sets: FlashcardSet[];
   onDelete?: (id: string) => void;
   onCreateNew?: () => void;
   onItemMoved?: (itemId: string, pack?: StudyPack) => void;
 }
+
+interface FlashcardSetCardProps {
+  set: FlashcardSet;
+  onDelete?: (id: string) => void;
+  onEdit: (id: string) => void;
+  onMove: (id: string) => void;
+  onRemove: (id: string, packId: string) => void;
+}
+
+const FlashcardSetCard: React.FC<FlashcardSetCardProps> = ({
+  set,
+  onDelete,
+  onEdit,
+  onMove,
+  onRemove,
+}) => {
+  const navigate = useNavigate();
+  const cardCount =
+    set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
+  const attemptCount = set.attemptCount || set._count?.attempts || 0;
+  const hasStudied = attemptCount > 0;
+
+  const navigateToSet = () => {
+    navigate(`/flashcards/${set.id}${hasStudied ? '?view=history' : ''}`);
+  };
+
+  const menuItems = [
+    {
+      label: 'Edit Title',
+      icon: <Pencil className="w-4 h-4" />,
+      onClick: () => onEdit(set.id),
+    },
+    {
+      label: 'Move to Study Set',
+      icon: <Folder className="w-4 h-4" />,
+      onClick: () => onMove(set.id),
+    },
+    ...(set.studyPack || set.studyPackId
+      ? [
+          {
+            label: 'Remove from Study Set',
+            icon: <X className="w-4 h-4" />,
+            onClick: () =>
+              onRemove(
+                set.id,
+                (set.studyPack?.id || set.studyPackId) as string
+              ),
+          },
+        ]
+      : []),
+    ...(onDelete
+      ? [
+          {
+            label: 'Delete',
+            icon: <Trash2 className="w-4 h-4" />,
+            onClick: () => onDelete(set.id),
+            variant: 'danger' as const,
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <Card
+      key={set.id}
+      title={set.title}
+      subtitle={set.topic}
+      icon={
+        <Layers className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      }
+      onClick={navigateToSet}
+      onTitleClick={navigateToSet}
+      onIconClick={navigateToSet}
+      actions={<CardMenu items={menuItems} />}
+    >
+      <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+        <span>{cardCount} Cards</span>
+        {set.createdAt && <span>{formatDate(set.createdAt)}</span>}
+      </div>
+    </Card>
+  );
+};
 
 export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   sets,
@@ -34,7 +118,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
   const handleTitleUpdate = async (setId: string, newTitle: string) => {
     try {
       await flashcardService.updateTitle(setId, newTitle);
-      
+
       // Optimistically update the cache
       queryClient.setQueryData(['flashcardSets'], (old: any) => {
         if (!old?.data) return old;
@@ -48,7 +132,7 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
 
       // Invalidate to refetch from server
       await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
-      
+
       toast.success('Flashcard set title updated successfully!');
     } catch (error) {
       toast.error('Failed to update flashcard set title');
@@ -56,11 +140,31 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
     }
   };
 
+  const handleRemoveFromPack = async (itemId: string, packId: string) => {
+    const loadingToast = toast.loading('Removing from study set...');
+    try {
+      await studyPackService.removeItem(packId, { type: 'flashcard', itemId });
+
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['flashcardSet', itemId],
+      });
+      await queryClient.invalidateQueries({ queryKey: ['studyPack', packId] });
+      await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
+      toast.success('Removed from study set', { id: loadingToast });
+    } catch (_error) {
+      toast.error('Failed to remove from study set', { id: loadingToast });
+    }
+  };
+
   const groupedSets = React.useMemo(() => {
-    const groups: { [key: string]: { id: string; title: string; sets: FlashcardSet[] } } = {};
+    const groups: {
+      [key: string]: { id: string; title: string; sets: FlashcardSet[] };
+    } = {};
     const noPack: FlashcardSet[] = [];
 
-    sets.forEach((set) => {
+    for (const set of sets) {
       if (set.studyPack) {
         const packId = set.studyPack.id;
         if (!groups[packId]) {
@@ -74,77 +178,10 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
       } else {
         noPack.push(set);
       }
-    });
+    }
 
     return { groups, noPack };
   }, [sets]);
-
-  const renderSetCard = (set: FlashcardSet) => {
-    const cardCount = set.cardCount || (Array.isArray(set.cards) ? set.cards.length : 0);
-    const attemptCount = set.attemptCount || set._count?.attempts || 0;
-    const hasStudied = attemptCount > 0;
-
-    const menuItems = [
-      {
-        label: 'Edit Title',
-        icon: <Pencil className="w-4 h-4" />,
-        onClick: () => setEditSetId(set.id),
-      },
-      {
-        label: 'Move to Study Set',
-        icon: <Folder className="w-4 h-4" />,
-        onClick: () => setMoveSetId(set.id),
-      },
-      ...(onDelete
-        ? [
-            {
-              label: 'Delete',
-              icon: <Trash2 className="w-4 h-4" />,
-              onClick: () => handleDelete(new Event('click') as any, set.id),
-              variant: 'danger' as const,
-            },
-          ]
-        : []),
-    ];
-
-    return (
-      <Card
-        key={set.id}
-        to={`/flashcards/${set.id}${hasStudied ? '?view=history' : ''}`}
-        title={set.title}
-        subtitle={set.topic}
-        actions={<CardMenu items={menuItems} />}
-      >
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-            <Layers className="w-4 h-4" />
-            {cardCount} card{cardCount === 1 ? '' : 's'}
-          </span>
-          <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md text-xs font-medium">
-            Active
-          </span>
-        </div>
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1">
-            {formatDate(set.createdAt)}
-          </span>
-          {hasStudied && (
-            <span className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">
-              Last studied
-            </span>
-          )}
-        </div>
-      </Card>
-    );
-  };
-
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation();
-    if (onDelete) {
-      onDelete(id);
-    }
-  };
 
   if (sets.length === 0) {
     return (
@@ -189,7 +226,16 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
           className="mb-8 last:mb-0"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {pack.sets.map((set) => renderSetCard(set))}
+            {pack.sets.map((set) => (
+              <FlashcardSetCard
+                key={set.id}
+                set={set}
+                onEdit={(id) => setEditSetId(id)}
+                onMove={(id) => setMoveSetId(id)}
+                onRemove={handleRemoveFromPack}
+                onDelete={onDelete}
+              />
+            ))}
           </div>
         </CollapsibleSection>
       ))}
@@ -197,7 +243,16 @@ export const FlashcardSetList: React.FC<FlashcardSetListProps> = ({
       {/* Uncategorized Sets */}
       {groupedSets.noPack.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-          {groupedSets.noPack.map((set) => renderSetCard(set))}
+          {groupedSets.noPack.map((set) => (
+            <FlashcardSetCard
+              key={set.id}
+              set={set}
+              onEdit={(id) => setEditSetId(id)}
+              onMove={(id) => setMoveSetId(id)}
+              onRemove={handleRemoveFromPack}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
       )}
 

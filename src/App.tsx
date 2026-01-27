@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import {QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
 import { AuthProvider } from './contexts/AuthContext';
@@ -24,13 +24,19 @@ const SignupPage = lazy(() =>
   import('./pages/SignupPage').then((m) => ({ default: m.SignupPage }))
 );
 const VerifyEmailPage = lazy(() =>
-  import('./pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage }))
+  import('./pages/VerifyEmailPage').then((m) => ({
+    default: m.VerifyEmailPage,
+  }))
 );
 const ForgotPasswordPage = lazy(() =>
-  import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage }))
+  import('./pages/ForgotPasswordPage').then((m) => ({
+    default: m.ForgotPasswordPage,
+  }))
 );
 const ResetPasswordPage = lazy(() =>
-  import('./pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage }))
+  import('./pages/ResetPasswordPage').then((m) => ({
+    default: m.ResetPasswordPage,
+  }))
 );
 const SummaryPage = lazy(() =>
   import('./pages/SummaryPage').then((m) => ({ default: m.SummaryPage }))
@@ -38,7 +44,6 @@ const SummaryPage = lazy(() =>
 const OnboardingPage = lazy(() =>
   import('./pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage }))
 );
-
 
 const DashboardPage = lazy(() =>
   import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
@@ -116,13 +121,16 @@ const PricingPage = lazy(() =>
   import('./pages/PricingPage').then((m) => ({ default: m.PricingPage }))
 );
 
-
 const VerifyPaymentPage = lazy(() =>
-  import('./pages/VerifyPaymentPage').then((m) => ({ default: m.VerifyPaymentPage }))
+  import('./pages/VerifyPaymentPage').then((m) => ({
+    default: m.VerifyPaymentPage,
+  }))
 );
 
 const ManageSubscriptionPage = lazy(() =>
-  import('./pages/ManageSubscriptionPage').then((m) => ({ default: m.ManageSubscriptionPage }))
+  import('./pages/ManageSubscriptionPage').then((m) => ({
+    default: m.ManageSubscriptionPage,
+  }))
 );
 
 // Lazy load admin pages
@@ -230,36 +238,31 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <TourProvider>
-              <BrowserRouter>
-                <MaintenanceBanner />
-                <AssessmentPopup />
-                <GlobalEventListener />
-                <AppRoutes />
-                <Toaster position="top-right" />
-              </BrowserRouter>
-            </TourProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <TourProvider>
+            <BrowserRouter>
+              <MaintenanceBanner />
+              <AssessmentPopup />
+              <GlobalEventListener />
+              <AppRoutes />
+              <Toaster position="top-right" />
+            </BrowserRouter>
+          </TourProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
-
-
 function AppRoutes() {
-
-
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Summary Route */}
         <Route path="/s/:shortCode" element={<SummaryPage />} />
-        
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
@@ -319,7 +322,10 @@ function AppRoutes() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="pricing" element={<PricingPage />} />
-          <Route path="subscription/manage" element={<ManageSubscriptionPage />} />
+          <Route
+            path="subscription/manage"
+            element={<ManageSubscriptionPage />}
+          />
           <Route path="subscription/verify" element={<VerifyPaymentPage />} />
           <Route path="recommendations" element={<RecommendationsPage />} />
           <Route path="weak-areas" element={<WeakAreasPage />} />

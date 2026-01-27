@@ -55,4 +55,11 @@ export const userService = {
     );
     return response.data;
   },
+
+  markAssessmentShown: async (): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>(
+      USER_ENDPOINTS.MARK_ASSESSMENT_SHOWN
+    );
+    return response.data;
+  },
 };

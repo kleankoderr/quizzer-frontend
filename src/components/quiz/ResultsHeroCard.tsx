@@ -22,8 +22,13 @@ const SCORE_THRESHOLDS = {
 } as const;
 
 // Helper functions
-const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard' = 'quiz', title?: string) => {
-  const fallbackTitle = context === 'flashcard' ? 'these cards' : `this ${context}`;
+const getGradeInfo = (
+  score: number,
+  context: 'quiz' | 'challenge' | 'flashcard' = 'quiz',
+  title?: string
+) => {
+  const fallbackTitle =
+    context === 'flashcard' ? 'these cards' : `this ${context}`;
 
   if (score >= SCORE_THRESHOLDS.EXCELLENT) {
     return {
@@ -58,7 +63,12 @@ const getGradeInfo = (score: number, context: 'quiz' | 'challenge' | 'flashcard'
   return {
     color: 'text-rose-400',
     grade: 'C',
-    message: context === 'flashcard' ? 'Session Completed' : context === 'challenge' ? 'Challenge Completed' : 'Quiz Completed',
+    message:
+      context === 'flashcard'
+        ? 'Session Completed'
+        : context === 'challenge'
+          ? 'Challenge Completed'
+          : 'Quiz Completed',
     descriptionPrefix: 'Review ',
     descriptionSuffix: ' and try again.',
     titleDisplay: title || fallbackTitle,
@@ -138,30 +148,30 @@ export interface ResultsHeroCardProps {
 }
 
 export const ResultsHeroCard = ({
-                                  score,
-                                  totalScore,
-                                  totalQuestions,
-                                  userName,
-                                  title,
-                                  stats,
-                                  showConfetti = false,
-                                  onBack,
-                                  backLabel = 'Back',
-                                  onShare,
-                                  shareId,
-                                  shareTitle,
-                                  isSharing = false,
-                                  customDescription,
-                                  customTitle,
-                                  completionType = 'quiz',
-                                  contentContext,
-                                  onRetake,
-                                  onReview,
-                                  onStudyPackClick,
-                                  studyPackTitle,
-                                  onViewAttempts,
-                                  attemptId,
-                                }: ResultsHeroCardProps) => {
+  score,
+  totalScore,
+  totalQuestions,
+  userName,
+  title,
+  stats,
+  showConfetti = false,
+  onBack,
+  backLabel = 'Back',
+  onShare,
+  shareId,
+  shareTitle,
+  isSharing = false,
+  customDescription,
+  customTitle,
+  completionType = 'quiz',
+  contentContext,
+  onRetake,
+  onReview,
+  onStudyPackClick,
+  studyPackTitle,
+  onViewAttempts,
+  attemptId,
+}: ResultsHeroCardProps) => {
   const { width, height } = useWindowSize();
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -169,8 +179,12 @@ export const ResultsHeroCard = ({
   const firstName = userName ? userName.split(' ')[0] : undefined;
 
   // Use contentContext if provided, otherwise fall back to completionType
-  const context = contentContext || (completionType === 'challenge' ? 'challenge' : 'quiz');
-  const gradeInfo = useMemo(() => getGradeInfo(score, context, title), [score, context, title]);
+  const context =
+    contentContext || (completionType === 'challenge' ? 'challenge' : 'quiz');
+  const gradeInfo = useMemo(
+    () => getGradeInfo(score, context, title),
+    [score, context, title]
+  );
 
   // Helper to get retake button label based on context
   const getRetakeLabel = () => {
@@ -197,7 +211,7 @@ export const ResultsHeroCard = ({
         valueColor: gradeInfo.color,
       },
     ],
-    [totalScore, totalQuestions, gradeInfo],
+    [totalScore, totalQuestions, gradeInfo]
   );
 
   const displayStats = stats || defaultStats;
@@ -263,10 +277,8 @@ export const ResultsHeroCard = ({
       >
         {/* Background Lighting */}
         <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-white opacity-[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div
-            className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-white opacity-[0.03] rounded-full blur-2xl translate-y-1/3 -translate-x-1/3" />
+          <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-white opacity-[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-white opacity-[0.03] rounded-full blur-2xl translate-y-1/3 -translate-x-1/3" />
         </div>
 
         <div className="relative z-10 px-6 py-8 md:p-12">
@@ -310,8 +322,7 @@ export const ResultsHeroCard = ({
             {/* Trophy Icon */}
             <div className="relative mb-4">
               <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
-              <div
-                className="relative inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 border border-white/20 shadow-2xl animate-float">
+              <div className="relative inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 border border-white/20 shadow-2xl animate-float">
                 <Trophy className="w-8 h-8 md:w-10 md:h-10 text-white drop-shadow-lg" />
               </div>
             </div>
@@ -325,12 +336,14 @@ export const ResultsHeroCard = ({
                   {firstName && (
                     <>
                       {' '}
-                      <span className="text-blue-200 font-bold">{firstName}</span>
+                      <span className="text-blue-200 font-bold">
+                        {firstName}
+                      </span>
                       ,
                     </>
                   )}
                   {firstName ? '' : '!'}
-                  {' you\'ve completed the '}
+                  {" you've completed the "}
                   {completionType === 'challenge' ? 'challenge' : 'quiz'}!
                 </>
               )}
@@ -341,7 +354,9 @@ export const ResultsHeroCard = ({
               ) : (
                 <>
                   {gradeInfo.descriptionPrefix}
-                  <span className="text-blue-200 font-semibold">{gradeInfo.titleDisplay}</span>
+                  <span className="text-blue-200 font-semibold">
+                    {gradeInfo.titleDisplay}
+                  </span>
                   {gradeInfo.descriptionSuffix}
                 </>
               )}
@@ -431,7 +446,9 @@ export const ResultsHeroCard = ({
                     >
                       <Eye className="w-5 h-5" />
                       <span>
-                        {context === 'flashcard' ? 'Review Cards' : 'Review Answers'}
+                        {context === 'flashcard'
+                          ? 'Review Cards'
+                          : 'Review Answers'}
                       </span>
                     </button>
                   )}
@@ -466,7 +483,9 @@ export const ResultsHeroCard = ({
                     >
                       <BookOpen className="w-5 h-5" />
                       <span>
-                        {studyPackTitle ? `Back to ${studyPackTitle}` : 'Back to Study Set'}
+                        {studyPackTitle
+                          ? `Back to ${studyPackTitle}`
+                          : 'Back to Study Set'}
                       </span>
                     </button>
                   )}

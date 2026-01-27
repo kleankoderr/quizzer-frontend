@@ -1,83 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight } from 'lucide-react';
-import { apiClient } from '../services/api';
+import { useTour, useAssessmentStatus } from '../hooks';
 
 export const AssessmentPopup = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [quizId, setQuizId] = useState<string | null>(null);
+  const { startTour } = useTour();
   const navigate = useNavigate();
-  const { user, login } = useAuth();
-  const location = useLocation();
-
-  useEffect(() => {
-    let pollInterval: ReturnType<typeof setInterval>;
-
-    const checkStatus = async () => {
-      try {
-        if (!user) return;
-
-        // Check if we've already shown it (DB flag)
-        if (user.assessmentPopupShown) {
-          return;
-        }
-
-        // Don't show if already on the quiz page or onboarding
-        if (
-          location.pathname.includes('/quiz/') ||
-          location.pathname === '/onboarding'
-        ) {
-          return;
-        }
-
-        const { data } = await apiClient.get('/onboarding/status');
-
-        if (data.status === 'NOT_STARTED') {
-          // If onboarding hasn't started (no task), redirect to onboarding
-          // But don't redirect if we're on login or signup pages
-          const isAuthPage =
-            location.pathname === '/login' ||
-            location.pathname === '/signup' ||
-            location.pathname === '/admin';
-          if (location.pathname !== '/onboarding' && !isAuthPage) {
-            navigate('/onboarding');
-          }
-        } else if (data.status === 'COMPLETED' && data.quizId) {
-          setQuizId(data.quizId);
-          setIsVisible(true);
-
-          // Stop polling if completed
-          if (pollInterval) clearInterval(pollInterval);
-        } else if (data.status === 'PENDING') {
-          // If PENDING, we set up polling if not already set
-          if (!pollInterval) {
-            pollInterval = setInterval(checkStatus, 5000); // Check every 5 seconds for faster feedback
-          }
-        }
-      } catch (_error) {}
-    };
-
-    // Initial check
-    if (user && !user.assessmentPopupShown) {
-      checkStatus();
-    }
-
-    return () => {
-      if (pollInterval) clearInterval(pollInterval);
-    };
-  }, [navigate, location.pathname, user]);
-
-  const markAsShown = async () => {
-    try {
-      await apiClient.post('/user/assessment-popup-shown');
-      if (user) {
-        login({ ...user, assessmentPopupShown: true });
-      }
-    } catch (_error) {}
-  };
+  const { isVisible, setIsVisible, quizId, markAsShown } =
+    useAssessmentStatus();
 
   const handleTakeQuiz = () => {
     if (quizId) {
@@ -90,6 +21,11 @@ export const AssessmentPopup = () => {
   const handleClose = async () => {
     await markAsShown();
     setIsVisible(false);
+
+    // After closing, show a guide to where they can find it
+    setTimeout(() => {
+      startTour('assessment-location');
+    }, 100);
   };
 
   return createPortal(

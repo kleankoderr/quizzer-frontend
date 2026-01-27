@@ -1,6 +1,6 @@
 import { useContext, useCallback } from 'react';
 import { TourContext } from '../contexts/TourContext';
-import { type Step } from 'react-joyride';
+import { type TourConfig } from '../types/tour';
 
 export function useTour() {
   const context = useContext(TourContext);
@@ -11,18 +11,20 @@ export function useTour() {
 
   const { startTour, stopTour } = context;
 
-  const startIfNotCompleted = useCallback(
-    (key: string, steps: Step[]) => {
-      const isMobile = window.innerWidth < 1024;
-      // Don't run on mobile as per previous implementation logic
-      if (isMobile) return;
+  const isTourCompleted = useCallback((id: string) => {
+    return !!localStorage.getItem(`tour_completed_${id}`);
+  }, []);
 
-      if (!localStorage.getItem(`tour_${key}`)) {
-        startTour(key, steps);
-      }
+  const resetTour = useCallback((id: string) => {
+    localStorage.removeItem(`tour_completed_${id}`);
+  }, []);
+
+  const startDynamicTour = useCallback(
+    (config: TourConfig) => {
+      startTour(config);
     },
     [startTour]
   );
 
-  return { startTour, stopTour, startIfNotCompleted };
+  return { startTour, stopTour, isTourCompleted, resetTour, startDynamicTour };
 }

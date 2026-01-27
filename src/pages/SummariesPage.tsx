@@ -4,7 +4,16 @@ import { Link } from 'react-router-dom';
 import { summaryService, type Summary } from '../services/summary.service';
 import { Card } from '../components/Card';
 import { CardMenu, Trash2 } from '../components/CardMenu';
-import { Sparkles, BarChart3, Clock, Globe, Lock, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import {
+  Sparkles,
+  BarChart3,
+  Clock,
+  Globe,
+  Lock,
+  Eye,
+  EyeOff,
+  ExternalLink,
+} from 'lucide-react';
 import { formatDate } from '../utils/dateFormat';
 import { Toast as toast } from '../utils/toast';
 import { LoadingScreen } from '../components/LoadingScreen';
@@ -12,9 +21,13 @@ import { LoadingScreen } from '../components/LoadingScreen';
 export const SummariesPage: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const { data: summaries, isLoading, error } = useQuery({
+  const {
+    data: summaries,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['user-summaries'],
-    queryFn: summaryService.getUserSummaries
+    queryFn: summaryService.getUserSummaries,
   });
 
   const deleteMutation = useMutation({
@@ -25,7 +38,7 @@ export const SummariesPage: React.FC = () => {
     },
     onError: () => {
       toast.error('Failed to delete summary');
-    }
+    },
   });
 
   const visibilityMutation = useMutation({
@@ -33,15 +46,22 @@ export const SummariesPage: React.FC = () => {
       summaryService.toggleVisibility(id, isPublic),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user-summaries'] });
-      toast.success(`Summary is now ${variables.isPublic ? 'public' : 'private'}`);
+      toast.success(
+        `Summary is now ${variables.isPublic ? 'public' : 'private'}`
+      );
     },
     onError: () => {
       toast.error('Failed to update visibility');
-    }
+    },
   });
 
   if (isLoading) return <LoadingScreen message="Loading summaries..." />;
-  if (error) return <div className="p-8 text-center text-red-500">Error loading summaries</div>;
+  if (error)
+    return (
+      <div className="p-8 text-center text-red-500">
+        Error loading summaries
+      </div>
+    );
 
   const handleVisibilityToggle = (summary: Summary) => {
     visibilityMutation.mutate({ id: summary.id, isPublic: !summary.isPublic });
@@ -89,9 +109,10 @@ export const SummariesPage: React.FC = () => {
           </p>
         </div>
         <div className="bg-primary-50 dark:bg-primary-900/20 px-4 py-2 rounded-full border border-primary-100 dark:border-primary-800">
-           <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
-             {summaries.length} {summaries.length === 1 ? 'Summary' : 'Summaries'}
-           </span>
+          <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
+            {summaries.length}{' '}
+            {summaries.length === 1 ? 'Summary' : 'Summaries'}
+          </span>
         </div>
       </div>
 
@@ -105,7 +126,11 @@ export const SummariesPage: React.FC = () => {
             },
             {
               label: summary.isPublic ? 'Make Private' : 'Make Public',
-              icon: summary.isPublic ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />,
+              icon: summary.isPublic ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              ),
               onClick: () => handleVisibilityToggle(summary),
             },
             {
@@ -113,7 +138,7 @@ export const SummariesPage: React.FC = () => {
               icon: <Trash2 className="w-4 h-4" />,
               onClick: () => handleDelete(summary.id),
               variant: 'danger' as const,
-            }
+            },
           ];
 
           return (
@@ -125,7 +150,10 @@ export const SummariesPage: React.FC = () => {
                 summary.studyMaterial.topic ? (
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {summary.studyMaterial.topic.split(',').map((tag) => (
-                      <span key={tag} className="px-1.5 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider rounded border border-primary-100 dark:border-primary-800/50">
+                      <span
+                        key={tag}
+                        className="px-1.5 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider rounded border border-primary-100 dark:border-primary-800/50"
+                      >
                         {tag.trim().replaceAll('`', '')}
                       </span>
                     ))}
@@ -161,9 +189,9 @@ export const SummariesPage: React.FC = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                     <span className="text-xs text-gray-400">
-                       {(summary as any)._count?.reactions || 0} reactions
-                     </span>
+                    <span className="text-xs text-gray-400">
+                      {(summary as any)._count?.reactions || 0} reactions
+                    </span>
                   </div>
                 </div>
               </div>

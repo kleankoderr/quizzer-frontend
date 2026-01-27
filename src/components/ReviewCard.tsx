@@ -36,8 +36,10 @@ export const ReviewCard = ({
   };
 
   const getUrgencyColor = () => {
-    if (daysOverdue > 2) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
-    if (daysOverdue >= 0) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300';
+    if (daysOverdue > 2)
+      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+    if (daysOverdue >= 0)
+      return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300';
     return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
   };
 
@@ -50,8 +52,9 @@ export const ReviewCard = ({
       { name: '⭐ Mastered', level: 'MASTERY', stage: 3 },
     ];
 
-    const currentStage = stages.find(s => s.level === retentionLevel) || stages[0];
-    
+    const currentStage =
+      stages.find((s) => s.level === retentionLevel) || stages[0];
+
     return {
       currentStage: currentStage.stage,
       stageName: currentStage.name,
@@ -94,21 +97,21 @@ export const ReviewCard = ({
             {segments.map((segment) => {
               const startAngle = segment * (segmentAngle + gapAngle);
               const endAngle = startAngle + segmentAngle;
-              
+
               const startRad = (startAngle * Math.PI) / 180;
               const endRad = (endAngle * Math.PI) / 180;
-              
+
               const radius = 34;
               const centerX = 40;
               const centerY = 40;
-              
+
               const x1 = centerX + radius * Math.cos(startRad);
               const y1 = centerY + radius * Math.sin(startRad);
               const x2 = centerX + radius * Math.cos(endRad);
               const y2 = centerY + radius * Math.sin(endRad);
-              
+
               const isCompleted = segment < stageInfo.completed;
-              
+
               return (
                 <path
                   key={segment}
@@ -116,9 +119,10 @@ export const ReviewCard = ({
                   stroke="currentColor"
                   strokeWidth="5"
                   fill="none"
-                  className={isCompleted 
-                    ? 'text-blue-600 dark:text-blue-500' 
-                    : 'text-gray-200 dark:text-gray-700'
+                  className={
+                    isCompleted
+                      ? 'text-blue-600 dark:text-blue-500'
+                      : 'text-gray-200 dark:text-gray-700'
                   }
                   strokeLinecap="round"
                 />
@@ -141,7 +145,9 @@ export const ReviewCard = ({
     >
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
-          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getUrgencyColor()}`}>
+          <span
+            className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getUrgencyColor()}`}
+          >
             {getUrgencyLabel()}
           </span>
           <span className="text-gray-600 dark:text-gray-400">

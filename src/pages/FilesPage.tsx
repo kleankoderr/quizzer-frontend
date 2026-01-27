@@ -49,7 +49,10 @@ export const FilesPage = () => {
   const queryClient = useQueryClient();
   const invalidateQuota = useInvalidateQuota();
 
-  const documents = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
+  const documents = useMemo(
+    () => data?.pages.flatMap((page) => page.data) ?? [],
+    [data]
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -193,7 +196,7 @@ export const FilesPage = () => {
       if (
         error.response?.status === 403 &&
         (error.response?.data?.message?.includes('storage limit') ||
-         error.response?.data?.message?.includes('Storage limit'))
+          error.response?.data?.message?.includes('Storage limit'))
       ) {
         toast.dismiss(loadingToast);
         setStorageCleanupModalOpen(true);
@@ -229,8 +232,9 @@ export const FilesPage = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollContainerRef.current;
       const scrolledToBottom = scrollHeight - scrollTop <= clientHeight + 200; // 200px threshold
 
       if (scrolledToBottom && hasNextPage && !isFetchingNextPage) {
@@ -398,9 +402,7 @@ export const FilesPage = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-                        {userDocumentService.getFileIcon(
-                          doc.document.mimeType
-                        )}
+                        {userDocumentService.getFileIcon(doc.document.mimeType)}
                       </div>
                       <div className="min-w-0 max-w-[200px] sm:max-w-xs lg:max-w-md">
                         <p className="font-medium text-gray-900 dark:text-white truncate">
@@ -416,9 +418,7 @@ export const FilesPage = () => {
                     </div>
                   </td>
                   <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {userDocumentService.formatFileSize(
-                      doc.document.sizeBytes
-                    )}
+                    {userDocumentService.formatFileSize(doc.document.sizeBytes)}
                   </td>
                   <td className="hidden lg:table-cell px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
@@ -458,7 +458,7 @@ export const FilesPage = () => {
   })();
 
   return (
-    <div 
+    <div
       ref={scrollContainerRef}
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-screen overflow-y-auto"
     >
@@ -569,7 +569,9 @@ export const FilesPage = () => {
               onChange={(e) => setSelectedType(e.target.value)}
               className="pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white appearance-none cursor-pointer min-w-[180px]"
             >
-              <option value="all">All Documents ({getFileTypeCount('all')})</option>
+              <option value="all">
+                All Documents ({getFileTypeCount('all')})
+              </option>
               <option value="pdf">PDFs ({getFileTypeCount('pdf')})</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />

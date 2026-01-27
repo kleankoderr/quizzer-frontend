@@ -29,8 +29,8 @@ export const QuizAttemptsHistory: React.FC<QuizAttemptsHistoryProps> = ({
       return { best: 0, average: 0, latest: 0 };
     }
 
-    const percentages = attempts.map(
-      (a) => Math.round((a.score / a.totalQuestions) * 100)
+    const percentages = attempts.map((a) =>
+      Math.round((a.score / a.totalQuestions) * 100)
     );
 
     return {

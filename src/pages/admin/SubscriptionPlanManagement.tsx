@@ -197,22 +197,40 @@ export const SubscriptionPlanManagement = () => {
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.quizzes || 0}</span> quizzes/mo
+                    <span className="font-medium">
+                      {plan.quotas?.quizzes || 0}
+                    </span>{' '}
+                    quizzes/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.flashcards || 0}</span> flashcards/mo
+                    <span className="font-medium">
+                      {plan.quotas?.flashcards || 0}
+                    </span>{' '}
+                    flashcards/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.studyMaterials || 0}</span> materials/mo
+                    <span className="font-medium">
+                      {plan.quotas?.studyMaterials || 0}
+                    </span>{' '}
+                    materials/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.conceptExplanations || 0}</span> explanations/mo
+                    <span className="font-medium">
+                      {plan.quotas?.conceptExplanations || 0}
+                    </span>{' '}
+                    explanations/mo
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.storageLimitMB || 0}</span> MB storage
+                    <span className="font-medium">
+                      {plan.quotas?.storageLimitMB || 0}
+                    </span>{' '}
+                    MB storage
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">{plan.quotas?.filesPerMonth || 0}</span> files/mo
+                    <span className="font-medium">
+                      {plan.quotas?.filesPerMonth || 0}
+                    </span>{' '}
+                    files/mo
                   </div>
                 </div>
               </div>
@@ -251,11 +269,13 @@ export const SubscriptionPlanManagement = () => {
             </h3>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Are you sure you want to delete "{selectedPlan.name}"?
-              {selectedPlan.subscriberCount && selectedPlan.subscriberCount > 0 && (
-                <span className="mt-2 block font-medium text-amber-600">
-                  This plan has {selectedPlan.subscriberCount} active subscribers. It will be deactivated instead of deleted.
-                </span>
-              )}
+              {selectedPlan.subscriberCount &&
+                selectedPlan.subscriberCount > 0 && (
+                  <span className="mt-2 block font-medium text-amber-600">
+                    This plan has {selectedPlan.subscriberCount} active
+                    subscribers. It will be deactivated instead of deleted.
+                  </span>
+                )}
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -263,7 +283,8 @@ export const SubscriptionPlanManagement = () => {
                   setIsDeleteModalOpen(false);
                   setSelectedPlan(null);
                 }}
-                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"              >
+                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
                 Cancel
               </button>
               <button
@@ -359,7 +380,10 @@ const PlanFormModal = ({
                   const value = e.target.value;
                   // Allow empty string or valid numbers only
                   if (value === '' || /^\d+$/.test(value)) {
-                    setFormData({ ...formData, price: value === '' ? 0 : Number(value) });
+                    setFormData({
+                      ...formData,
+                      price: value === '' ? 0 : Number(value),
+                    });
                   }
                 }}
                 className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"

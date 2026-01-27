@@ -66,7 +66,10 @@ export const FileSelector = ({
     }
   }, [searchQuery, documents]);
 
-  const loadDocuments = async (pageNum: number = 1, append: boolean = false) => {
+  const loadDocuments = async (
+    pageNum: number = 1,
+    append: boolean = false
+  ) => {
     // Prevent duplicate calls
     if (loadingRef.current) {
       return;
@@ -79,15 +82,15 @@ export const FileSelector = ({
       } else {
         setLoading(true);
       }
-      
+
       const docs = await userDocumentService.getUserDocuments(pageNum, 20);
-      
+
       if (append) {
-        setDocuments(prev => [...prev, ...docs.data]);
+        setDocuments((prev) => [...prev, ...docs.data]);
       } else {
         setDocuments(docs.data);
       }
-      
+
       setHasMore(docs.pagination.hasMore);
       setPage(pageNum);
     } catch (_error) {
@@ -104,7 +107,13 @@ export const FileSelector = ({
     const scrolledToBottom =
       target.scrollHeight - target.scrollTop <= target.clientHeight + 50; // 50px threshold
 
-    if (scrolledToBottom && hasMore && !loadingMore && !loadingRef.current && !searchQuery) {
+    if (
+      scrolledToBottom &&
+      hasMore &&
+      !loadingMore &&
+      !loadingRef.current &&
+      !searchQuery
+    ) {
       loadDocuments(page + 1, true);
     }
   };
@@ -226,9 +235,9 @@ export const FileSelector = ({
       </div>
 
       {/* File List */}
-      <div 
+      <div
         ref={listRef}
-        className="max-h-64 overflow-y-auto" 
+        className="max-h-64 overflow-y-auto"
         onScroll={handleScroll}
       >
         {filteredDocuments.length === 0 ? (
@@ -286,7 +295,7 @@ export const FileSelector = ({
             })}
           </div>
         )}
-        
+
         {/* Loading More Indicator */}
         {loadingMore && (
           <div className="flex items-center justify-center py-4">

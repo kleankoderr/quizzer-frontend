@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { apiClient } from '../services/api';
-import type { JobStatus, UseJobPollingOptions } from '../types/job';
+import type { JobStatus, UseJobPollingOptions } from '../types';
 
 const POLLING_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -148,7 +148,7 @@ export const useJobPolling = ({
     ) {
       onFailed(data.error || 'Job failed');
     }
-  }, [data?.status, onCompleted, onFailed]);
+  }, [data?.status, onCompleted, onFailed, data]);
 
   // Reset refs when jobId changes
   useEffect(() => {

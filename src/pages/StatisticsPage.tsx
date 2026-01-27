@@ -300,7 +300,10 @@ export const StatisticsPage = () => {
                     padding: '12px',
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  formatter={(value: number | undefined) => [`${value}%`, 'Accuracy']}
+                  formatter={(value: number | undefined) => [
+                    `${value}%`,
+                    'Accuracy',
+                  ]}
                 />
                 <Bar dataKey="accuracy" radius={[8, 8, 0, 0]} barSize={40}>
                   {performanceChartData.map((_, index) => (
@@ -368,7 +371,10 @@ export const StatisticsPage = () => {
                   borderRadius: '8px',
                   padding: '12px',
                 }}
-                formatter={(value: number | undefined, name: string | number | undefined) => {
+                formatter={(
+                  value: number | undefined,
+                  name: string | number | undefined
+                ) => {
                   if (name === 'accuracy') {
                     return [`${value}%`, 'Accuracy'];
                   }
@@ -430,7 +436,9 @@ export const StatisticsPage = () => {
         {recentAttempts.length === 0 ? (
           <div className="text-center py-8">
             <Layers className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-            <p className="text-gray-600 dark:text-gray-400">No practice history yet</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              No practice history yet
+            </p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
               Start taking quizzes or studying flashcards!
             </p>

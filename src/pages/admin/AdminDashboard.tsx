@@ -187,8 +187,12 @@ export const AdminDashboard = () => {
       trend: (
         <span className="text-gray-500">
           {subscriptionStats?.freeUsers && subscriptionStats?.totalUsers
-            ? ((subscriptionStats.freeUsers / subscriptionStats.totalUsers) * 100).toFixed(1)
-            : 0}% of total users
+            ? (
+                (subscriptionStats.freeUsers / subscriptionStats.totalUsers) *
+                100
+              ).toFixed(1)
+            : 0}
+          % of total users
         </span>
       ),
     },
@@ -199,7 +203,8 @@ export const AdminDashboard = () => {
       color: 'purple' as const,
       trend: (
         <span className="text-gray-500">
-          Total: ₦{(subscriptionStats?.totalRevenue || 0).toLocaleString('en-NG')}
+          Total: ₦
+          {(subscriptionStats?.totalRevenue || 0).toLocaleString('en-NG')}
         </span>
       ),
     },
@@ -214,7 +219,8 @@ export const AdminDashboard = () => {
       color: 'indigo' as const,
       trend: (
         <span className="text-gray-500">
-          {stats?.content.quizzes || 0} quizzes, {stats?.content.flashcards || 0} flashcards
+          {stats?.content.quizzes || 0} quizzes,{' '}
+          {stats?.content.flashcards || 0} flashcards
         </span>
       ),
     },
@@ -305,8 +311,8 @@ export const AdminDashboard = () => {
                 Monitor transaction status
               </p>
             </div>
-            
-             <div className="flex items-center justify-between rounded-lg bg-red-50 p-4 dark:bg-red-900/10">
+
+            <div className="flex items-center justify-between rounded-lg bg-red-50 p-4 dark:bg-red-900/10">
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-red-100 p-2 text-red-600 dark:bg-red-900/30 dark:text-red-400">
                   <AlertTriangle className="h-5 w-5" />
