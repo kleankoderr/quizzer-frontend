@@ -87,13 +87,18 @@ export class EventsService {
   }
 
   private async fetchSseToken(): Promise<string> {
-    const { data } = await apiClient.post<{ token: string }>('/events/token');
+    try {
+      const { data } = await apiClient.post<{ token: string }>('/events/token');
 
-    if (!data?.token) {
-      throw new Error('Missing SSE token');
+      if (!data?.token) {
+        throw new Error('Missing SSE token in response');
+      }
+
+      return data.token;
+    } catch (error) {
+      console.error('[EventsService] Failed to fetch SSE token:', error);
+      throw error;
     }
-
-    return data.token;
   }
 
   private openEventSource(token: string): void {
@@ -102,6 +107,10 @@ export class EventsService {
       url.searchParams.set('token', token);
 
       console.debug('[EventsService] Connecting to SSE...');
+
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
 
       this.eventSource = new EventSource(url.toString());
 
@@ -114,6 +123,10 @@ export class EventsService {
       this.eventSource.onmessage = (event) => {
         try {
           const payload = JSON.parse(event.data);
+          // Ignore heartbeats
+          if (payload?.data?.type === 'heartbeat') {
+            return;
+          }
           this.emit(payload.data ?? payload);
         } catch (error) {
           console.error('[EventsService] Failed to parse SSE message:', error);
@@ -121,22 +134,21 @@ export class EventsService {
       };
 
       this.eventSource.onerror = (error) => {
-        console.error('[EventsService] SSE connection error', error);
-        this.eventSource?.close();
-        this.eventSource = undefined;
-        this.connecting = false;
-        this.scheduleReconnect();
+        console.error('[EventsService] SSE connection error:', error);
+        this.handleConnectionFailure(error);
       };
     } catch (error) {
       console.error('[EventsService] Error initializing EventSource:', error);
-      this.connecting = false;
-      this.scheduleReconnect();
+      this.handleConnectionFailure(error);
     }
   }
 
   private handleConnectionFailure(_: unknown): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = undefined;
+    }
     this.connecting = false;
-    this.eventSource = undefined;
     this.scheduleReconnect();
   }
 
