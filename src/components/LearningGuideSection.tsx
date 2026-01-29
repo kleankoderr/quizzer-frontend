@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  CheckCircle,
-  ChevronRight,
-  Lightbulb,
-  MessageCircle,
-  Sparkles,
-  Loader2,
-  Brain,
-} from 'lucide-react';
+import { Brain, CheckCircle, ChevronRight, Lightbulb, Loader2, MessageCircle, Sparkles } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import type { Content } from '../services/content.service';
 
@@ -98,13 +90,13 @@ export const LearningGuideSection = React.forwardRef<
         </div>
 
         <div
-          className={`grid transition-all duration-300 ease-in-out ${
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${
             isActive
-              ? 'grid-rows-[1fr] opacity-100'
-              : 'grid-rows-[0fr] opacity-0'
+              ? 'max-h-[10000px] opacity-100'
+              : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="overflow-hidden">
+          <div>
             <div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700/50 mt-2">
               <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown">
                 <MarkdownRenderer

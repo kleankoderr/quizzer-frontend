@@ -1,17 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   BookOpen,
   Brain,
-  Trash2,
-  MoreVertical,
-  ChevronRight,
-  Home,
-  Edit2,
   Check,
-  X,
+  ChevronRight,
+  Edit2,
+  Home,
   LayoutTemplate,
   Loader2,
+  MoreVertical,
+  Trash2,
+  X,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -22,7 +22,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github.css';
 
-import { contentService, type Content } from '../services/content.service';
+import { type Content, contentService } from '../services/content.service';
 import { summaryService } from '../services';
 
 import { Toast as toast } from '../utils/toast';
@@ -375,7 +375,7 @@ export const ContentPage = () => {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
         {/* Breadcrumbs - placed outside sticky header */}
@@ -634,7 +634,7 @@ export const ContentPage = () => {
 
       <div className="flex gap-8 max-w-[1600px] mx-auto">
         {/* Main Content */}
-        <div className="flex-1 min-w-0 min-h-screen">
+        <div className="flex-1 min-w-0">
           <div
             ref={contentRef}
             className="bg-white dark:bg-gray-800 sm:rounded-2xl sm:shadow-sm sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-8 md:p-12 min-h-[500px]"

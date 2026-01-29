@@ -13,6 +13,31 @@ import { Toast } from '../utils/toast';
 const vscDarkPlus =
   (styles as any).vscDarkPlus || (styles as any).default?.vscDarkPlus || styles;
 
+/**
+ * Preprocess content to convert various LaTeX delimiter formats to standard $ delimiters
+ * that remark-math can parse properly
+ */
+const preprocessMath = (content: string): string => {
+  if (!content) return content;
+
+  let processed = content;
+
+  // Convert \[...\] to $$...$$ (display math)
+  processed = processed.replaceAll(/\\\[([\s\S]*?)\\\]/g, '$$$$1$$');
+
+  // Convert \(...\) to $...$ (inline math)
+  processed = processed.replaceAll(/\\\(([\s\S]*?)\\\)/g, '$$$1$$');
+
+  // Handle cases where parentheses are used like (P(n): formula) - common in proofs
+  // Convert patterns like (P(n): ...) where there's clear math notation
+  processed = processed.replaceAll(
+    /\(([A-Z]\([a-z]\):\s*[^)]+(?:\^\d+|\\[a-z]+|[+\-*/=])[^)]*)\)/g,
+    '$$$1$$'
+  );
+
+  return processed;
+};
+
 interface MarkdownRendererProps {
   content: string;
   className?: string;
@@ -149,7 +174,13 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     return comps;
   }, [HeadingRenderer]);
 
-  if (!content) return null;
+  // Preprocess content to handle various LaTeX delimiter formats
+  const processedContent = React.useMemo(
+    () => preprocessMath(content),
+    [content]
+  );
+
+  if (!processedContent) return null;
 
   return (
     <div
@@ -160,7 +191,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         rehypePlugins={rehypePlugins}
         components={components}
       >
-        {content}
+        {processedContent}
       </Markdown>
     </div>
   );
