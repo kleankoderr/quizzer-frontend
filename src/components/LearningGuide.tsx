@@ -299,23 +299,16 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         [key]: true,
       }));
 
-      // Persist to backend
-      const updatedGuide = structuredClone(guide);
       // Invalidate quota
       await invalidateQuota();
 
-      if (updatedGuide.sections[sectionIndex]) {
-        if (type === 'explain') {
-          updatedGuide.sections[sectionIndex].generatedExplanation = result;
-        } else {
-          updatedGuide.sections[sectionIndex].generatedExample = result;
-        }
-
-        try {
-          await contentService.update(contentId, {
-            learningGuide: updatedGuide,
-          });
-        } catch (_err) {}
+      // Notify parent to update cache (backend already persisted)
+      if (onSectionUpdate) {
+        const updates =
+          type === 'explain'
+            ? { generatedExplanation: result }
+            : { generatedExample: result };
+        onSectionUpdate(sectionIndex, updates);
       }
     } catch (_error) {
     } finally {
