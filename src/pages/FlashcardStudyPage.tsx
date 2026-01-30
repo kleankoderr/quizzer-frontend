@@ -3,8 +3,9 @@ import type { Variants } from 'framer-motion';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Toast as toast } from '../utils/toast';
-import { flashcardService } from '../services';
+import { eventsService, flashcardService } from '../services';
 import { ArrowLeft, ChevronLeft, ChevronRight, Layers, Sparkles, Target, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useFlashcardSet } from '../hooks';
 import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
@@ -218,6 +219,31 @@ export const FlashcardStudyPage = () => {
       }
     }
   }, [attemptId, attempts, isStudying]);
+
+  const queryClient = useQueryClient();
+
+  // Listen for progressive updates
+  useEffect(() => {
+    if (!id) return;
+
+    eventsService.connect();
+
+    const handleProgress = (event: any) => {
+      // Check if this progress event is for our current flashcard set
+      if (
+        event.eventType === 'flashcard.progress' &&
+        event.metadata?.flashcardSetId === id
+      ) {
+        // Force re-fetch by invalidating query
+        queryClient.invalidateQueries({ queryKey: ['flashcardSet', id] });
+      }
+    };
+
+    const unsubscribe = eventsService.on('flashcard.progress', handleProgress);
+    return () => {
+      unsubscribe?.();
+    };
+  }, [id, queryClient]);
 
   const updateBreadcrumb = (includeResults = false) => {
     if (!flashcardSet) return;
@@ -498,6 +524,20 @@ export const FlashcardStudyPage = () => {
         </button>
 
         <div className="relative w-full max-w-2xl mx-auto h-[320px] sm:h-[480px]">
+          {/* Generating Indicator */}
+          {flashcardSet.totalCardsRequested &&
+            flashcardSet.cards.length < flashcardSet.totalCardsRequested && (
+              <div className="absolute -top-12 inset-x-0 flex items-center justify-center animate-fade-in z-20">
+                <div className="bg-primary-50 dark:bg-primary-900/40 backdrop-blur-md border border-primary-200 dark:border-primary-800/50 px-4 py-2 rounded-full flex items-center gap-2.5 shadow-sm">
+                  <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-ping" />
+                  <span className="text-xs font-bold text-primary-700 dark:text-primary-300">
+                    Generating more cards... ({flashcardSet.cards.length} /{' '}
+                    {flashcardSet.totalCardsRequested})
+                  </span>
+                </div>
+              </div>
+            )}
+
           {/* Stacked Card Background Effects - Balanced for mobile */}
           <div className="absolute inset-x-6 -bottom-6 translate-y-2 scale-[0.92] bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg border border-gray-200/50 dark:border-gray-700/50 z-0 opacity-30 h-full transition-transform"></div>
           <div className="absolute inset-x-3 -bottom-3 translate-y-1 scale-[0.96] bg-white dark:bg-gray-800 rounded-[2rem] shadow-md border border-gray-200/50 dark:border-gray-700/50 z-[1] opacity-60 h-full transition-transform"></div>

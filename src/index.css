@@ -186,8 +186,8 @@
   /* Remove backticks from code tags globally in prose */
   .prose code::before,
   .prose code::after,
-  [class*="prose-"] code::before,
-  [class*="prose-"] code::after {
+  [class*='prose-'] code::before,
+  [class*='prose-'] code::after {
     content: none !important;
   }
 }

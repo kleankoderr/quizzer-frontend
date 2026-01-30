@@ -78,8 +78,12 @@ export const LearningGuideSection = React.forwardRef<
                   onMarkComplete(index, e as any);
                 }
               }}
-              aria-label={isCompleted ? 'Mark section as incomplete' : 'Mark section as complete'}
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer ${ 
+              aria-label={
+                isCompleted
+                  ? 'Mark section as incomplete'
+                  : 'Mark section as complete'
+              }
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer ${
                 isCompleted
                   ? 'bg-green-500 border-green-500 text-white'
                   : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500'
@@ -107,9 +111,7 @@ export const LearningGuideSection = React.forwardRef<
 
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${
-            isActive
-              ? 'max-h-[10000px] opacity-100'
-              : 'max-h-0 opacity-0'
+            isActive ? 'max-h-[10000px] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
           <div>
@@ -172,9 +174,9 @@ export const LearningGuideSection = React.forwardRef<
                         className="m-0 leading-relaxed"
                         style={{ fontFamily: 'Lexend' }}
                       >
-                        <MarkdownRenderer 
-                          content={section.assessment} 
-                          className="prose-sm !text-xs prose-p:!text-xs" 
+                        <MarkdownRenderer
+                          content={section.assessment}
+                          className="prose-sm !text-xs prose-p:!text-xs"
                         />
                       </div>
                     </div>

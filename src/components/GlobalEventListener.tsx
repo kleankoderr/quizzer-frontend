@@ -46,7 +46,10 @@ export const GlobalEventListener = () => {
     return () => {
       unsubscribeCompleted?.();
       unsubscribeFailed?.();
-      globalThis.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      globalThis.removeEventListener(
+        'unhandledrejection',
+        handleUnhandledRejection
+      );
     };
   }, [queryClient]);
 

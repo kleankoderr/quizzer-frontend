@@ -1,17 +1,12 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  useParams,
-  useNavigate,
-  useSearchParams,
-  useLocation,
-} from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Toast as toast } from '../utils/toast';
-import { quizService } from '../services/quiz.service';
+import { eventsService, quizService } from '../services';
 import type { AnswerValue } from '../types';
 
 import { QuestionRenderer } from '../components/QuestionRenderer';
-import { useQuizTimer, useQuizStorage, useQuiz } from '../hooks';
+import { useQuiz, useQuizStorage, useQuizTimer } from '../hooks';
 import { QuizHeader } from '../components/quiz/QuizHeader';
 import { QuizNavigation } from '../components/quiz/QuizNavigation';
 import { QuizAttemptsView } from '../components/quiz/QuizAttemptsView';
@@ -258,6 +253,39 @@ export const QuizTakePage = () => {
     isTaking,
   ]);
 
+  // Listen for progressive updates
+  useEffect(() => {
+    if (!id) return;
+
+    eventsService.connect();
+
+    const handleProgress = (event: any) => {
+      // Check if this progress event is for our current quiz
+      if (event.metadata?.quizId === id) {
+        // Force re-fetch by invalidating query
+        queryClient.invalidateQueries({ queryKey: ['quiz', id] });
+      }
+    };
+
+    const unsubscribe = eventsService.on('quiz.progress', handleProgress);
+    return () => {
+      unsubscribe?.();
+    };
+  }, [id, queryClient]);
+
+  // Grow answers array if questions are added in background
+  useEffect(() => {
+    if (initialized && questions.length > selectedAnswers.length) {
+      setSelectedAnswers((prev) => {
+        const next = [...prev];
+        while (next.length < questions.length) {
+          next.push(null);
+        }
+        return next;
+      });
+    }
+  }, [questions.length, initialized, selectedAnswers.length]);
+
   // Answer selection handler
   const handleAnswerSelect = useCallback(
     (answer: AnswerValue) => {
@@ -322,8 +350,12 @@ export const QuizTakePage = () => {
   // Quiz taking view
   const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = selectedAnswers.filter((a) => a !== null).length;
+  const displayTotalQuestions =
+    quiz.totalQuestionsRequested || questions.length;
   const progressPercentage =
-    questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
+    displayTotalQuestions > 0
+      ? (answeredCount / displayTotalQuestions) * 100
+      : 0;
 
   if (isTaking === false) {
     return (
@@ -350,7 +382,7 @@ export const QuizTakePage = () => {
       <QuizHeader
         quiz={quiz}
         currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={questions.length}
+        totalQuestions={displayTotalQuestions}
         answeredCount={answeredCount}
         progressPercentage={progressPercentage}
         timeRemaining={timeRemaining}
@@ -371,6 +403,22 @@ export const QuizTakePage = () => {
         onPaste={(e) => e.preventDefault()}
         onContextMenu={(e) => e.preventDefault()}
       >
+        {quiz.totalQuestionsRequested &&
+          questions.length < quiz.totalQuestionsRequested && (
+            <div className="mb-6 p-4 bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-lg flex items-center justify-between animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary-500 rounded-full animate-ping" />
+                <p className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                  Generating more questions... ({questions.length} /{' '}
+                  {quiz.totalQuestionsRequested})
+                </p>
+              </div>
+              <span className="text-xs text-primary-600 dark:text-primary-400 font-medium">
+                You can start now!
+              </span>
+            </div>
+          )}
+
         <QuestionRenderer
           question={currentQuestion}
           questionIndex={currentQuestionIndex}

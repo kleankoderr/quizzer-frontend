@@ -187,7 +187,8 @@ export const SummariesPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-400">
-                      {Number((summary as any)._count?.reactions) || 0} reactions
+                      {Number((summary as any)._count?.reactions) || 0}{' '}
+                      reactions
                     </span>
                   </div>
                 </div>
@@ -213,7 +214,8 @@ export const SummariesPage: React.FC = () => {
             Are you sure you want to delete the summary for{' '}
             <span className="font-semibold text-gray-900 dark:text-white">
               {summaryToDelete?.studyMaterial.title}
-            </span>? This action cannot be undone and will remove all associated
+            </span>
+            ? This action cannot be undone and will remove all associated
             reactions and views.
           </p>
         }
