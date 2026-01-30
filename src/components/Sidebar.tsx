@@ -1,25 +1,25 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Home,
-  BookOpen,
-  Layers,
-  Trophy,
+  AlertTriangle,
   BarChart3,
-  LogOut,
+  BookOpen,
+  Brain,
+  Calendar,
   ChevronLeft,
   ChevronRight,
-  Medal,
-  User,
-  Settings,
-  Brain,
-  Folder,
-  Calendar,
-  FileText,
   CreditCard,
-  Package,
-  AlertTriangle,
-  Sparkles,
+  FileText,
+  Folder,
+  Home,
+  Layers,
+  LogOut,
   type LucideProps,
+  Medal,
+  Package,
+  Settings,
+  Sparkles,
+  Trophy,
+  User,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -148,7 +148,7 @@ export const Sidebar = ({
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:static inset-y-0 left-0 z-[100]
+          fixed inset-y-0 left-0 z-[100] h-screen
           bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-600 flex flex-col transition-all duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${isCollapsed ? 'w-20' : 'w-64'}

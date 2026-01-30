@@ -1,17 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   BookOpen,
   Brain,
-  Trash2,
-  MoreVertical,
-  ChevronRight,
-  Home,
-  Edit2,
   Check,
-  X,
+  ChevronRight,
+  Edit2,
+  Home,
   LayoutTemplate,
   Loader2,
+  MoreVertical,
+  Trash2,
+  X,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -22,15 +22,15 @@ import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github.css';
 
-import { contentService, type Content } from '../services/content.service';
-import { summaryService } from '../services';
+import { type Content, contentService } from '../services/content.service';
+import { eventsService, summaryService } from '../services';
 
 import { Toast as toast } from '../utils/toast';
 import { DeleteModal } from '../components/DeleteModal';
 import { LearningGuide } from '../components/LearningGuide';
 import { ContentPageSkeleton } from '../components/skeletons';
 import './ContentPage.css';
-import { useContent, useSummaryGeneration } from '../hooks';
+import { useContent, useLearningGuideStreaming, useSummaryGeneration } from '../hooks';
 import { Modal } from '../components/Modal';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { useQueryClient } from '@tanstack/react-query';
@@ -103,7 +103,7 @@ const MarkdownContent = ({
   }, [onProgressUpdate]);
 
   return (
-    <div className="prose prose-lg max-w-none content-markdown font-sans dark:prose-invert">
+    <div className="prose prose-lg max-w-none content-markdown font-sans dark:prose-invert prose-code:before:content-none prose-code:after:content-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[
@@ -185,6 +185,35 @@ export const ContentPage = () => {
       setEditedTitle(content.title);
     }
   }, [content]);
+
+  // Listen for learning guide section streaming events
+  const { generatingSections, loadedSections } = useLearningGuideStreaming({
+    contentId: id || '',
+    onOutlineCompleted: () => {
+      // Outline complete, refresh content to show structure
+      queryClient.invalidateQueries({ queryKey: ['content', id] });
+    },
+    onAllSectionsCompleted: () => {
+      // All sections done, refresh content
+      queryClient.invalidateQueries({ queryKey: ['content', id] });
+      toast.success('Learning guide completed!');
+    },
+  });
+
+  // Also listen for individual section completions to update UI progressively
+  useEffect(() => {
+    const unsubscribe = eventsService.on(
+      'learning-guide.section.completed',
+      (event: any) => {
+        if (event.contentId === id) {
+          // Invalidate to fetch updated section content
+          queryClient.invalidateQueries({ queryKey: ['content', id] });
+        }
+      }
+    );
+
+    return unsubscribe;
+  }, [id, queryClient]);
 
   const handleTitleUpdate = async () => {
     if (!content || !editedTitle.trim() || editedTitle === content.title) {
@@ -335,22 +364,49 @@ export const ContentPage = () => {
     setIsDeleteContentModalOpen(true);
   };
 
-  const confirmDeleteContent = async () => {
-    if (!id) return;
+  const handleDeleteContent = async () => {
+    if (!content) return;
 
     setIsDeletingContent(true);
-    const loadingToast = toast.loading('Deleting content...');
     try {
-      await contentService.delete(id);
-      toast.success('Content deleted successfully!', { id: loadingToast });
-      // Invalidate contents list to remove deleted item
-      await queryClient.invalidateQueries({ queryKey: ['contents'] });
-      setIsDeleteContentModalOpen(false);
-      navigate('/study');
+      await contentService.delete(content.id);
+      toast.success('Content deleted');
+      navigate('/dashboard');
     } catch (_error) {
-      toast.error('Failed to delete content', { id: loadingToast });
+      toast.error('Failed to delete content');
     } finally {
       setIsDeletingContent(false);
+      setIsDeleteContentModalOpen(false);
+    }
+  };
+
+  const handleSectionUpdate = async (index: number, updates: any) => {
+    if (!content?.learningGuide) return;
+
+    const updatedGuide = structuredClone(content.learningGuide);
+
+    if (updatedGuide.sections[index]) {
+      updatedGuide.sections[index] = {
+        ...updatedGuide.sections[index],
+        ...updates,
+      };
+    }
+
+    // Optimistic update
+    queryClient.setQueryData(['content', id], (old: Content | undefined) => {
+      if (!old?.learningGuide) return old;
+      return {
+        ...old,
+        learningGuide: updatedGuide,
+      };
+    });
+
+    try {
+      await contentService.update(content.id, { learningGuide: updatedGuide });
+      await queryClient.invalidateQueries({ queryKey: ['content', id] });
+    } catch (_error) {
+      toast.error('Failed to save progress');
+      await queryClient.invalidateQueries({ queryKey: ['content', id] });
     }
   };
 
@@ -375,7 +431,7 @@ export const ContentPage = () => {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
         {/* Breadcrumbs - placed outside sticky header */}
@@ -634,73 +690,26 @@ export const ContentPage = () => {
 
       <div className="flex gap-8 max-w-[1600px] mx-auto">
         {/* Main Content */}
-        <div className="flex-1 min-w-0 min-h-screen">
+        <div className="flex-1 min-w-0">
           <div
             ref={contentRef}
             className="bg-white dark:bg-gray-800 sm:rounded-2xl sm:shadow-sm sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-8 md:p-12 min-h-[500px]"
           >
             {content.learningGuide ? (
               <LearningGuide
-                key={content.id}
                 guide={content.learningGuide}
                 title={content.title}
                 contentRef={contentRef}
                 contentId={content.id}
-                topic={content.topic}
-                description={content.description}
+                topic={content.topic || undefined}
+                description={content.description || undefined}
+                onSectionUpdate={handleSectionUpdate}
                 onGenerateQuiz={handleGenerateQuiz}
                 onGenerateFlashcards={handleGenerateFlashcards}
                 onGenerateSummary={handleGenerateSummary}
                 hasSummary={!!content.summary}
-                onSectionUpdate={async (index, updates) => {
-                  if (!content?.learningGuide) return;
-
-                  const updatedGuide = structuredClone(content.learningGuide);
-
-                  if (updatedGuide.sections[index]) {
-                    updatedGuide.sections[index] = {
-                      ...updatedGuide.sections[index],
-                      ...updates,
-                    };
-                  }
-
-                  // Recalculate progress if completed status changed
-                  let newProgress = content.lastReadPosition;
-                  if ('completed' in updates) {
-                    const totalSections = updatedGuide.sections.length;
-                    const completedCount = updatedGuide.sections.filter(
-                      (s: any) => s.completed
-                    ).length;
-                    newProgress = Math.round(
-                      (completedCount / totalSections) * 100
-                    );
-                  }
-
-                  // Optimistic update
-                  queryClient.setQueryData(
-                    ['content', id],
-                    (old: Content | undefined) => {
-                      if (!old?.learningGuide) return old;
-                      return {
-                        ...old,
-                        learningGuide: updatedGuide,
-                        lastReadPosition: newProgress,
-                      };
-                    }
-                  );
-
-                  try {
-                    await contentService.update(content.id, {
-                      learningGuide: updatedGuide,
-                      lastReadPosition: newProgress,
-                    });
-                  } catch (_error) {
-                    toast.error('Failed to save progress');
-                    await queryClient.invalidateQueries({
-                      queryKey: ['content', id],
-                    });
-                  }
-                }}
+                generatingSections={generatingSections}
+                loadedSections={loadedSections}
               />
             ) : (
               <MarkdownContent
@@ -725,10 +734,10 @@ export const ContentPage = () => {
       <DeleteModal
         isOpen={isDeleteContentModalOpen}
         onClose={() => setIsDeleteContentModalOpen(false)}
-        onConfirm={confirmDeleteContent}
-        title="Delete Content"
-        message="Are you sure you want to delete this content? This action cannot be undone."
+        onConfirm={handleDeleteContent}
         isDeleting={isDeletingContent}
+        title={`Delete "${content?.title}"?`}
+        message="This action cannot be undone. All quizzes, flashcards, and summaries associated with this content will also be deleted."
       />
 
       {/* Streaming Summary Modal */}

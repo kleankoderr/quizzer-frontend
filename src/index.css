@@ -182,6 +182,14 @@
   .dark .prose ol > li::marker {
     color: #9ca3af;
   }
+
+  /* Remove backticks from code tags globally in prose */
+  .prose code::before,
+  .prose code::after,
+  [class*="prose-"] code::before,
+  [class*="prose-"] code::after {
+    content: none !important;
+  }
 }
 
 @layer utilities {

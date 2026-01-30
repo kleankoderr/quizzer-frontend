@@ -37,7 +37,7 @@ export const Card: React.FC<CardProps> = ({
   const containerProps = to
     ? {
         to,
-        className: `group relative ${actions ? 'overflow-visible' : 'overflow-hidden'} border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1 block ${className}`,
+        className: `group relative ${actions ? 'overflow-visible' : 'overflow-hidden'} border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 hover:-translate-y-1 cursor-pointer block ${className}`,
       }
     : {
         onClick,
@@ -61,14 +61,13 @@ export const Card: React.FC<CardProps> = ({
       {/* Icon */}
       {icon && (
         <div
-          className="inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors"
-          onClick={(e) => {
-            if (onIconClick) {
-              e.preventDefault();
+          className={`inline-flex p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg mb-3 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors ${onIconClick ? 'cursor-pointer' : ''}`}
+          {...(onIconClick && {
+            onClick: (e) => {
               e.stopPropagation();
               onIconClick();
-            }
-          }}
+            },
+          })}
         >
           {icon}
         </div>
@@ -79,14 +78,13 @@ export const Card: React.FC<CardProps> = ({
         <h3
           className={`font-bold text-lg mb-1.5 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2 ${
             actions ? 'pr-20' : ''
-          }`}
-          onClick={(e) => {
-            if (onTitleClick) {
-              e.preventDefault();
+          } ${onTitleClick ? 'cursor-pointer' : ''}`}
+          {...(onTitleClick && {
+            onClick: (e) => {
               e.stopPropagation();
               onTitleClick();
-            }
-          }}
+            },
+          })}
         >
           {title}
         </h3>

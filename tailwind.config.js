@@ -1,4 +1,4 @@
-import typography from "@tailwindcss/typography";
+import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -38,6 +38,18 @@ export default {
       },
       fontFamily: {
         sans: ["Lexend", "sans-serif"],
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+          },
+        },
       },
     },
   },

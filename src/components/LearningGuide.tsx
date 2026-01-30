@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, createRef } from 'react';
-import { CheckCircle, Brain, BookOpen, LayoutTemplate } from 'lucide-react';
-import { contentService, type Content } from '../services/content.service';
+import React, { createRef, useEffect, useRef, useState } from 'react';
+import { BookOpen, Brain, CheckCircle, LayoutTemplate } from 'lucide-react';
+import { type Content, contentService } from '../services/content.service';
 import { KnowledgeCheckModal } from './KnowledgeCheckModal';
 import { LearningGuideSection } from './LearningGuideSection';
 import { SectionNavigator } from './SectionNavigator';
@@ -20,6 +20,8 @@ interface LearningGuideProps {
   onGenerateSummary?: () => void;
   onSectionUpdate?: (index: number, updates: any) => void;
   hasSummary?: boolean;
+  generatingSections?: Set<number>;
+  loadedSections?: Set<number>;
 }
 
 export const LearningGuide: React.FC<LearningGuideProps> = ({
@@ -35,6 +37,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   onGenerateSummary,
   onSectionUpdate,
   hasSummary,
+  generatingSections = new Set(),
+  loadedSections = new Set(),
 }) => {
   const invalidateQuota = useInvalidateQuota();
   // Create refs for each section
@@ -70,31 +74,18 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
 
   // Initialize activeSection - prioritize first uncompleted section
   const [activeSection, setActiveSection] = useState<number>(() => {
-    // Find the first uncompleted section
-    const firstUncompletedIndex = guide.sections.findIndex(
-      (section) => !section.completed
-    );
-
-    // Try to get stored section from localStorage
-    try {
+    // Try to get stored section from localStorage (user's last opened section)
       const stored = localStorage.getItem(`activeSection-${contentId}`);
       if (stored) {
         const storedIndex = Number.parseInt(stored, 10);
-        // Only use stored section if it's valid and uncompleted
-        if (
-          storedIndex >= 0 &&
-          storedIndex < guide.sections.length &&
-          !guide.sections[storedIndex].completed
-        ) {
+        // Only use stored section if it's valid
+        if (storedIndex >= 0 && storedIndex < guide.sections.length) {
           return storedIndex;
         }
-      }
-    } catch {
-      // Ignore localStorage errors
     }
 
-    // Default to first uncompleted section, or -1 if all are completed
-    return firstUncompletedIndex;
+    // Default to no section open (-1)
+    return -1;
   });
 
   const [generatedContent, setGeneratedContent] = useState<
@@ -143,31 +134,6 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
     setActiveKnowledgeCheckSectionIndex,
   ] = useState<number | null>(null);
 
-  // Smooth scroll to active section when completed sections change
-  React.useEffect(() => {
-    if (activeSection !== -1 && sectionRefs.current[activeSection]?.current) {
-      // Small delay to allow DOM to update after section visibility changes
-      const timer = setTimeout(() => {
-        const sectionElement = sectionRefs.current[activeSection]?.current;
-        if (sectionElement) {
-          const elementTop =
-            sectionElement.getBoundingClientRect().top + window.pageYOffset;
-          const currentScroll = window.pageYOffset;
-
-          // Only scroll if the section is not already in view
-          if (Math.abs(elementTop - currentScroll - 80) > 50) {
-            window.scrollTo({
-              top: elementTop - 80,
-              behavior: 'smooth',
-            });
-          }
-        }
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [completedSections, activeSection]);
-
   const toggleSection = (index: number) => {
     const newActiveSection = activeSection === index ? -1 : index;
     setActiveSection(newActiveSection);
@@ -186,19 +152,25 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       // Ignore localStorage errors
     }
 
-    // Scroll to top of section when opening
+    // Scroll to section header when opening - only if header is completely above viewport
     if (newActiveSection !== -1 && sectionRefs.current[index]?.current) {
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
         const sectionElement = sectionRefs.current[index]?.current;
         if (sectionElement) {
-          const elementTop =
-            sectionElement.getBoundingClientRect().top + window.pageYOffset;
-          window.scrollTo({
-            top: elementTop - 80, // 80px offset to position below sticky header
-            behavior: 'smooth',
-          });
+          const rect = sectionElement.getBoundingClientRect();
+          const headerOffset = 80; // sticky header height
+          
+          // Only scroll if the section header is completely above the viewport
+          if (rect.top < 0) {
+            const elementTop = window.pageYOffset + rect.top;
+            window.scrollTo({
+              top: elementTop - headerOffset,
+              behavior: 'smooth',
+            });
+          }
         }
-      }, 200);
+      });
     }
   };
 
@@ -243,20 +215,25 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
             // Ignore localStorage errors
           }
 
-          // Scroll to top of next section
+          // Scroll to next section header only if it's above viewport
+          // Use requestAnimationFrame to ensure DOM has updated
           if (nextSection !== -1 && sectionRefs.current[nextSection]?.current) {
-            setTimeout(() => {
+            requestAnimationFrame(() => {
               const sectionElement = sectionRefs.current[nextSection]?.current;
               if (sectionElement) {
-                const elementTop =
-                  sectionElement.getBoundingClientRect().top +
-                  window.pageYOffset;
-                window.scrollTo({
-                  top: elementTop - 80, // 80px offset to position below sticky header
-                  behavior: 'smooth',
-                });
+                const rect = sectionElement.getBoundingClientRect();
+                const headerOffset = 80;
+                
+                // Only scroll if section header is completely above the viewport
+                if (rect.top < 0) {
+                  const elementTop = window.pageYOffset + rect.top;
+                  window.scrollTo({
+                    top: elementTop - headerOffset,
+                    behavior: 'smooth',
+                  });
+                }
               }
-            }, 200);
+            });
           }
         }, 300);
       }
@@ -326,23 +303,16 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         [key]: true,
       }));
 
-      // Persist to backend
-      const updatedGuide = structuredClone(guide);
       // Invalidate quota
       await invalidateQuota();
 
-      if (updatedGuide.sections[sectionIndex]) {
-        if (type === 'explain') {
-          updatedGuide.sections[sectionIndex].generatedExplanation = result;
-        } else {
-          updatedGuide.sections[sectionIndex].generatedExample = result;
-        }
-
-        try {
-          await contentService.update(contentId, {
-            learningGuide: updatedGuide,
-          });
-        } catch (_err) {}
+      // Notify parent to update cache (backend already persisted)
+      if (onSectionUpdate) {
+        const updates =
+          type === 'explain'
+            ? { generatedExplanation: result }
+            : { generatedExample: result };
+        onSectionUpdate(sectionIndex, updates);
       }
     } catch (_error) {
     } finally {
@@ -468,35 +438,40 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         activeSection={activeSection}
         completedSections={completedSections}
         onSectionClick={toggleSection}
+        generatingSections={generatingSections}
+        loadedSections={loadedSections}
       />
 
       {/* All Sections in Natural Order */}
       <div className="space-y-4">
-        {guide.sections.map((section, idx) => {
-          const processedContent = section.content;
-          const isCompleted = completedSections.has(idx);
-          const isActive = activeSection === idx;
+        {guide.sections
+          .filter((section) => section.content && section.content.trim().length > 0)
+          .map((section) => {
+            const originalIndex = guide.sections.indexOf(section);
+            const processedContent = section.content;
+            const isCompleted = completedSections.has(originalIndex);
+            const isActive = activeSection === originalIndex;
 
-          return (
-            <LearningGuideSection
-              key={idx}
-              ref={sectionRefs.current[idx]}
-              section={section}
-              index={idx}
-              isActive={isActive}
-              isCompleted={isCompleted}
-              processedContent={processedContent}
-              generatedContent={generatedContent}
-              visibleContent={visibleContent}
-              loadingAction={loadingAction}
-              HeadingRenderer={HeadingRenderer}
-              onToggleSection={toggleSection}
-              onMarkComplete={markAsComplete}
-              onAskQuestion={handleAskQuestion}
-              onToggleContentVisibility={toggleContentVisibility}
-            />
-          );
-        })}
+            return (
+              <LearningGuideSection
+                key={originalIndex}
+                ref={sectionRefs.current[originalIndex]}
+                section={section}
+                index={originalIndex}
+                isActive={isActive}
+                isCompleted={isCompleted}
+                processedContent={processedContent}
+                generatedContent={generatedContent}
+                visibleContent={visibleContent}
+                loadingAction={loadingAction}
+                HeadingRenderer={HeadingRenderer}
+                onToggleSection={toggleSection}
+                onMarkComplete={markAsComplete}
+                onAskQuestion={handleAskQuestion}
+                onToggleContentVisibility={toggleContentVisibility}
+              />
+            );
+          })}
       </div>
 
       {progress === 100 && (
@@ -617,20 +592,24 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       // Ignore localStorage errors
                     }
 
-                    // Scroll to top of next section with smooth behavior
-                    setTimeout(() => {
+                    // Scroll to next section only if header is above viewport
+                    requestAnimationFrame(() => {
                       const sectionElement =
                         sectionRefs.current[nextSection]?.current;
                       if (sectionElement) {
-                        const elementTop =
-                          sectionElement.getBoundingClientRect().top +
-                          window.pageYOffset;
-                        window.scrollTo({
-                          top: elementTop - 80, // 80px offset to position below sticky header
-                          behavior: 'smooth',
-                        });
+                        const rect = sectionElement.getBoundingClientRect();
+                        const headerOffset = 80;
+                        
+                        // Only scroll if section header is completely above viewport
+                        if (rect.top < 0) {
+                          const elementTop = window.pageYOffset + rect.top;
+                          window.scrollTo({
+                            top: elementTop - headerOffset,
+                            behavior: 'smooth',
+                          });
+                        }
                       }
-                    }, 300); // Increased delay to allow section to appear first
+                    });
                   }, 300);
                 } else {
                   setTimeout(() => {

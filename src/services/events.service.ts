@@ -14,7 +14,12 @@ export type EventType =
   | 'summary.progress'
   | 'summary.chunk'
   | 'summary.completed'
-  | 'summary.failed';
+  | 'summary.failed'
+  | 'learning-guide.outline.completed'
+  | 'learning-guide.section.started'
+  | 'learning-guide.section.chunk'
+  | 'learning-guide.section.completed'
+  | 'learning-guide.all-sections.completed';
 
 export interface AppEvent {
   eventType: EventType;

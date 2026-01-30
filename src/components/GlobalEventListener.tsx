@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { eventsService, type AppEvent } from '../services/events.service';
+import { type AppEvent, eventsService } from '../services/events.service';
 import { Toast as toast } from '../utils/toast';
 
 export const GlobalEventListener = () => {
@@ -35,9 +35,18 @@ export const GlobalEventListener = () => {
       handleSummaryFailed
     );
 
+    // Global promise rejection handling
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled Promise Rejection:', event.reason);
+      // Optional: Send to logging service
+    };
+
+    globalThis.addEventListener('unhandledrejection', handleUnhandledRejection);
+
     return () => {
       unsubscribeCompleted?.();
       unsubscribeFailed?.();
+      globalThis.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, [queryClient]);
 

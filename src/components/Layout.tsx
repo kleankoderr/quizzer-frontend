@@ -16,7 +16,7 @@ export const Layout = () => {
   const breadcrumbs = useBreadcrumbs();
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
       <Sidebar
         isCollapsed={sidebarCollapsed}
         toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -24,7 +24,7 @@ export const Layout = () => {
         closeMobile={() => setMobileSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-0 lg:ml-64'}`}>
         <Header
           toggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         />
@@ -33,7 +33,7 @@ export const Layout = () => {
 
         <main
           id="main-content-area"
-          className={`flex-1 overflow-y-auto overflow-x-hidden ${isContentPage ? '' : 'p-3 sm:p-4 md:p-6'}`}
+          className={`flex-1 overflow-x-hidden ${isContentPage ? '' : 'p-3 sm:p-4 md:p-6'}`}
         >
           <div
             className={`${isContentPage ? 'w-full' : 'max-w-7xl mx-auto w-full'}`}

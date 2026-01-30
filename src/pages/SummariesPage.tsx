@@ -1,25 +1,19 @@
-import React from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { summaryService, type Summary } from '../services/summary.service';
+import { type Summary, summaryService } from '../services/summary.service';
 import { Card } from '../components/Card';
 import { CardMenu, Trash2 } from '../components/CardMenu';
-import {
-  Sparkles,
-  BarChart3,
-  Clock,
-  Globe,
-  Lock,
-  Eye,
-  EyeOff,
-  ExternalLink,
-} from 'lucide-react';
+import { BarChart3, Clock, ExternalLink, Eye, EyeOff, Globe, Lock, Sparkles } from 'lucide-react';
 import { formatDate } from '../utils/dateFormat';
 import { Toast as toast } from '../utils/toast';
 import { LoadingScreen } from '../components/LoadingScreen';
+import { DeleteModal } from '../components/DeleteModal';
 
 export const SummariesPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [summaryToDelete, setSummaryToDelete] = useState<Summary | null>(null);
 
   const {
     data: summaries,
@@ -38,6 +32,10 @@ export const SummariesPage: React.FC = () => {
     },
     onError: () => {
       toast.error('Failed to delete summary');
+    },
+    onSettled: () => {
+      setIsDeleteModalOpen(false);
+      setSummaryToDelete(null);
     },
   });
 
@@ -67,10 +65,9 @@ export const SummariesPage: React.FC = () => {
     visibilityMutation.mutate({ id: summary.id, isPublic: !summary.isPublic });
   };
 
-  const handleDelete = (id: string) => {
-    if (globalThis.confirm('Are you sure you want to delete this summary?')) {
-      deleteMutation.mutate(id);
-    }
+  const handleDelete = (summary: Summary) => {
+    setSummaryToDelete(summary);
+    setIsDeleteModalOpen(true);
   };
 
   if (!summaries || summaries.length === 0) {
@@ -136,7 +133,7 @@ export const SummariesPage: React.FC = () => {
             {
               label: 'Delete',
               icon: <Trash2 className="w-4 h-4" />,
-              onClick: () => handleDelete(summary.id),
+              onClick: () => handleDelete(summary),
               variant: 'danger' as const,
             },
           ];
@@ -190,7 +187,7 @@ export const SummariesPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-400">
-                      {(summary as any)._count?.reactions || 0} reactions
+                      {Number((summary as any)._count?.reactions) || 0} reactions
                     </span>
                   </div>
                 </div>
@@ -199,6 +196,28 @@ export const SummariesPage: React.FC = () => {
           );
         })}
       </div>
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => {
+          if (summaryToDelete) {
+            deleteMutation.mutate(summaryToDelete.id);
+          }
+        }}
+        title="Delete Summary"
+        itemName={summaryToDelete?.studyMaterial.title}
+        isDeleting={deleteMutation.isPending}
+        message={
+          <p>
+            Are you sure you want to delete the summary for{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {summaryToDelete?.studyMaterial.title}
+            </span>? This action cannot be undone and will remove all associated
+            reactions and views.
+          </p>
+        }
+      />
     </div>
   );
 };

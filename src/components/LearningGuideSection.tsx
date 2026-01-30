@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  CheckCircle,
-  ChevronRight,
-  Lightbulb,
-  MessageCircle,
-  Sparkles,
-  Loader2,
-  Brain,
-} from 'lucide-react';
+import { Brain, CheckCircle, ChevronRight, Lightbulb, Loader2, MessageCircle, Sparkles } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import type { Content } from '../services/content.service';
 
@@ -52,33 +44,49 @@ export const LearningGuideSection = React.forwardRef<
     },
     ref
   ) => {
+    // Determine border classes based on section state
+    const getSectionBorderClasses = () => {
+      if (isActive) {
+        return 'sm:border-primary-500 sm:shadow-md sm:ring-2 ring-primary-500/20';
+      }
+      if (isCompleted) {
+        return 'border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-100';
+      }
+      return 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600';
+    };
+
     return (
       <div
         ref={ref}
         data-section-index={index}
-        className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${
-          isActive
-            ? 'sm:border-primary-500 sm:shadow-md sm:ring-2 ring-primary-500/20'
-            : isCompleted
-              ? 'border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-100'
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-        }`}
+        className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${getSectionBorderClasses()}`}
       >
-        <div
+        <button
           onClick={() => onToggleSection(index)}
-          className="p-4 md:p-6 flex items-center justify-between cursor-pointer select-none"
+          className="w-full p-4 md:p-6 flex items-center justify-between cursor-pointer select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+          aria-expanded={isActive}
+          aria-label={`Toggle section ${index + 1}: ${section.title}`}
         >
           <div className="flex items-center gap-4">
-            <button
+            <div
               onClick={(e) => onMarkComplete(index, e)}
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onMarkComplete(index, e as any);
+                }
+              }}
+              aria-label={isCompleted ? 'Mark section as incomplete' : 'Mark section as complete'}
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer ${ 
                 isCompleted
                   ? 'bg-green-500 border-green-500 text-white'
                   : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500'
               }`}
             >
               <CheckCircle className="w-4 h-4" />
-            </button>
+            </div>
             <h3
               className={`text-lg font-semibold transition-colors ${
                 isCompleted
@@ -95,18 +103,18 @@ export const LearningGuideSection = React.forwardRef<
               isActive ? 'rotate-90' : ''
             }`}
           />
-        </div>
+        </button>
 
         <div
-          className={`grid transition-all duration-300 ease-in-out ${
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${
             isActive
-              ? 'grid-rows-[1fr] opacity-100'
-              : 'grid-rows-[0fr] opacity-0'
+              ? 'max-h-[10000px] opacity-100'
+              : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="overflow-hidden">
+          <div>
             <div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700/50 mt-2">
-              <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown">
+              <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown prose-code:before:content-none prose-code:after:content-none">
                 <MarkdownRenderer
                   content={processedContent}
                   HeadingRenderer={HeadingRenderer}
@@ -130,7 +138,7 @@ export const LearningGuideSection = React.forwardRef<
                         </h4>
                       </div>
                     </div>
-                    <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20">
+                    <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20 prose-code:before:content-none prose-code:after:content-none">
                       <div
                         className="m-0 leading-relaxed text-sm"
                         style={{ fontFamily: 'Lexend' }}
@@ -159,12 +167,15 @@ export const LearningGuideSection = React.forwardRef<
                         </h4>
                       </div>
                     </div>
-                    <div className="prose prose-green prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-green-50 dark:border-green-900/20">
+                    <div className="bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-green-50 dark:border-green-900/20">
                       <div
-                        className="m-0 leading-relaxed text-sm"
+                        className="m-0 leading-relaxed"
                         style={{ fontFamily: 'Lexend' }}
                       >
-                        <MarkdownRenderer content={section.assessment} />
+                        <MarkdownRenderer 
+                          content={section.assessment} 
+                          className="prose-sm !text-xs prose-p:!text-xs" 
+                        />
                       </div>
                     </div>
                   </div>
@@ -244,7 +255,7 @@ export const LearningGuideSection = React.forwardRef<
                               <ChevronRight className="w-5 h-5 rotate-90" />
                             </button>
                           </div>
-                          <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
+                          <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20 prose-code:before:content-none prose-code:after:content-none">
                             <MarkdownRenderer
                               content={generatedContent[`${index}-explain`]}
                             />
@@ -281,7 +292,7 @@ export const LearningGuideSection = React.forwardRef<
                               <ChevronRight className="w-5 h-5 rotate-90" />
                             </button>
                           </div>
-                          <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
+                          <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20 prose-code:before:content-none prose-code:after:content-none">
                             <MarkdownRenderer
                               content={generatedContent[`${index}-example`]}
                             />
