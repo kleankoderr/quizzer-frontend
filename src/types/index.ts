@@ -101,6 +101,7 @@ export interface Quiz {
     id: string;
     title: string;
   };
+  totalQuestionsRequested?: number;
 }
 
 export interface QuizGenerateRequest {
@@ -167,6 +168,7 @@ export interface FlashcardSet {
     attempts: number;
     cards?: number;
   };
+  totalCardsRequested?: number;
 }
 
 export interface FlashcardAttempt {
