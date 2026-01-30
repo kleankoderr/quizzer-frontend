@@ -127,11 +127,11 @@ export function SummaryPage() {
 
     const isActive = userReactions.has(type);
     const newReactions = new Set(userReactions);
-    
+
     // Deep copy summary and counts to avoid direct mutation
     const currentCounts = { ...summary.reactionCounts };
     const currentCount = Number(currentCounts[type]) || 0;
-    
+
     if (isActive) {
       newReactions.delete(type);
       currentCounts[type] = Math.max(0, currentCount - 1);
@@ -140,10 +140,10 @@ export function SummaryPage() {
       currentCounts[type] = currentCount + 1;
     }
 
-    const newSummary = { 
-      ...summary, 
+    const newSummary = {
+      ...summary,
       reactionCounts: currentCounts,
-      userReactions: Array.from(newReactions)
+      userReactions: Array.from(newReactions),
     };
 
     setUserReactions(newReactions);

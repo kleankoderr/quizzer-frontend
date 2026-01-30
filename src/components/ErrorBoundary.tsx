@@ -34,10 +34,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      const isChunkError = 
-        this.state.error?.name === 'ChunkLoadError' || 
+      const isChunkError =
+        this.state.error?.name === 'ChunkLoadError' ||
         this.state.error?.message?.includes('Loading chunk') ||
-        this.state.error?.message?.includes('Failed to fetch dynamically imported module');
+        this.state.error?.message?.includes(
+          'Failed to fetch dynamically imported module'
+        );
 
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 font-lexend">
@@ -45,13 +47,13 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
-            
+
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               {isChunkError ? 'Update Available' : 'Something went wrong'}
             </h1>
-            
+
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              {isChunkError 
+              {isChunkError
                 ? 'An updated version of Quizzer is available. Please reload the page to continue.'
                 : 'We encountered an unexpected error while rendering this page.'}
             </p>
@@ -64,7 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <RefreshCcw className="w-4 h-4" />
                 Reload Page
               </button>
-              
+
               {!isChunkError && (
                 <button
                   onClick={this.handleGoHome}
@@ -75,7 +77,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </button>
               )}
             </div>
-            
+
             {(import.meta as any).env.DEV && !isChunkError && (
               <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left overflow-auto max-h-40">
                 <p className="text-xs font-mono text-red-600 dark:text-red-400 break-all">
@@ -91,4 +93,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-

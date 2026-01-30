@@ -525,16 +525,18 @@ export const FlashcardStudyPage = () => {
 
         <div className="relative w-full max-w-2xl mx-auto h-[320px] sm:h-[480px]">
           {/* Generating Indicator */}
-          {flashcardSet.totalCardsRequested && flashcardSet.cards.length < flashcardSet.totalCardsRequested && (
-            <div className="absolute -top-12 inset-x-0 flex items-center justify-center animate-fade-in z-20">
-              <div className="bg-primary-50 dark:bg-primary-900/40 backdrop-blur-md border border-primary-200 dark:border-primary-800/50 px-4 py-2 rounded-full flex items-center gap-2.5 shadow-sm">
-                <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-ping" />
-                <span className="text-xs font-bold text-primary-700 dark:text-primary-300">
-                  Generating more cards... ({flashcardSet.cards.length} / {flashcardSet.totalCardsRequested})
-                </span>
+          {flashcardSet.totalCardsRequested &&
+            flashcardSet.cards.length < flashcardSet.totalCardsRequested && (
+              <div className="absolute -top-12 inset-x-0 flex items-center justify-center animate-fade-in z-20">
+                <div className="bg-primary-50 dark:bg-primary-900/40 backdrop-blur-md border border-primary-200 dark:border-primary-800/50 px-4 py-2 rounded-full flex items-center gap-2.5 shadow-sm">
+                  <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-ping" />
+                  <span className="text-xs font-bold text-primary-700 dark:text-primary-300">
+                    Generating more cards... ({flashcardSet.cards.length} /{' '}
+                    {flashcardSet.totalCardsRequested})
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Stacked Card Background Effects - Balanced for mobile */}
           <div className="absolute inset-x-6 -bottom-6 translate-y-2 scale-[0.92] bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg border border-gray-200/50 dark:border-gray-700/50 z-0 opacity-30 h-full transition-transform"></div>

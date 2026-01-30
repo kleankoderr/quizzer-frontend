@@ -67,10 +67,10 @@ const MermaidDiagram: React.FC<{ chart: string }> = ({ chart }) => {
       try {
         setError('');
         setSvg(''); // Reset SVG while rendering
-        
+
         // Generate a unique ID for this diagram
         const id = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
-        
+
         // Validate syntax first
         try {
           await mermaid.parse(chart);
@@ -82,9 +82,12 @@ const MermaidDiagram: React.FC<{ chart: string }> = ({ chart }) => {
 
         // Render the diagram
         const { svg: renderedSvg } = await mermaid.render(id, chart);
-        
+
         // If it still contains error indicators (some versions might return error SVG instead of throwing)
-        if (renderedSvg.includes('aria-roledescription="error"') || renderedSvg.includes('Syntax error in text')) {
+        if (
+          renderedSvg.includes('aria-roledescription="error"') ||
+          renderedSvg.includes('Syntax error in text')
+        ) {
           setError('Failed to load diagram');
           return;
         }
@@ -119,17 +122,27 @@ const MermaidDiagram: React.FC<{ chart: string }> = ({ chart }) => {
   }
 
   return (
-    <div 
+    <div
       className="my-6 p-6 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
 };
 
-const CodeBlock = ({ node: _node, inline, children, className, ...props }: any) => {
+const CodeBlock = ({
+  node: _node,
+  inline,
+  children,
+  className,
+  ...props
+}: any) => {
   const match = /language-(\w+)/.exec(className || '');
   const childrenStr = String(children);
-  const isInline = inline || (!match && !className?.includes('language-') && !childrenStr.includes('\n'));
+  const isInline =
+    inline ||
+    (!match &&
+      !className?.includes('language-') &&
+      !childrenStr.includes('\n'));
   const language = match?.[1];
 
   // Special handling for Mermaid diagrams

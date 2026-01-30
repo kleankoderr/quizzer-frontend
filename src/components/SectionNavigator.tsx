@@ -75,19 +75,28 @@ export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
               const lastContentIndex = sections.reduce((max, s, i) => {
                 return s.content?.trim().length > 0 ? i : max;
               }, -1);
-              
+
               // Also consider sections being tracked as loaded/completed
               const lastTrackedIndex = Math.max(
-                ...Array.from(completedSections).concat(Array.from(loadedSections)),
+                ...Array.from(completedSections).concat(
+                  Array.from(loadedSections)
+                ),
                 -1
               );
-              
+
               // Show up to the furthest point of progress
-              const furthestProgress = Math.max(lastContentIndex, lastTrackedIndex);
+              const furthestProgress = Math.max(
+                lastContentIndex,
+                lastTrackedIndex
+              );
               const visibleUpTo = Math.max(2, furthestProgress + 2); // At least 3, or 2 ahead
-              
+
               // Special case: if no content yet but outline exists, show first section as loading
-              const isFirstSectionLoading = idx === 0 && sections.length > 0 && !hasContent && !isGenerating;
+              const isFirstSectionLoading =
+                idx === 0 &&
+                sections.length > 0 &&
+                !hasContent &&
+                !isGenerating;
 
               // Hide sections beyond the visible threshold
               if (idx > visibleUpTo) {

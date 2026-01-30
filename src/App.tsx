@@ -262,195 +262,195 @@ function AppRoutes() {
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-        {/* Public Summary Route */}
-        <Route path="/s/:shortCode" element={<SummaryPage />} />
+          {/* Public Summary Route */}
+          <Route path="/s/:shortCode" element={<SummaryPage />} />
 
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-        <Route
-          path="/onboarding"
-          element={
-            <ProtectedRoute>
-              <OnboardingPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="study" element={<StudyPage />} />
-          <Route path="discover" element={<DiscoverPage />} />
-          <Route path="content/generate" element={<ContentPage />} />
-          <Route path="content/:id" element={<ContentPage />} />
-          <Route path="quiz" element={<QuizPage />} />
-          <Route path="quiz/:id" element={<QuizTakePage />} />
-          <Route
-            path="quiz/:id/results/:attemptId"
-            element={<QuizReviewPage />}
-          />
-          <Route
-            path="quiz/attempt/:attemptId/review"
-            element={<QuizReviewPage />}
-          />
-
-          <Route path="flashcards" element={<FlashcardsPage />} />
-          <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
-          <Route path="leaderboard" element={<LeaderboardPage />} />
-          <Route path="challenges" element={<ChallengesPage />} />
-          <Route path="challenges/:id" element={<ChallengeDetailsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route
-            path="challenges/:id/results"
-            element={<ChallengeResultsPage />}
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <OnboardingPage />
+              </ProtectedRoute>
+            }
           />
-          <Route path="statistics" element={<StatisticsPage />} />
-          <Route path="attempts" element={<AttemptsPage />} />
-          <Route path="files" element={<FilesPage />} />
-          <Route path="study-pack" element={<StudyPacksPage />} />
-          <Route path="study-pack/:id" element={<StudyPackDetailsPage />} />
-          <Route path="summaries" element={<SummariesPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="pricing" element={<PricingPage />} />
-          <Route
-            path="subscription/manage"
-            element={<ManageSubscriptionPage />}
-          />
-          <Route path="subscription/verify" element={<VerifyPaymentPage />} />
-          <Route path="recommendations" element={<RecommendationsPage />} />
-          <Route path="weak-areas" element={<WeakAreasPage />} />
-          <Route path="review" element={<ReviewPage />} />
 
-          {/* Admin Routes */}
           <Route
-            path="admin"
+            path="/"
             element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
             }
-          />
-          <Route
-            path="admin/users"
-            element={
-              <AdminRoute>
-                <UserManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/users/:id"
-            element={
-              <AdminRoute>
-                <UserDetailsPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/content"
-            element={
-              <AdminRoute>
-                <ContentManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/moderation"
-            element={
-              <AdminRoute>
-                <ContentModeration />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/schools"
-            element={
-              <AdminRoute>
-                <SchoolManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/generation-analytics"
-            element={
-              <AdminRoute>
-                <AiAnalytics />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/analytics"
-            element={
-              <AdminRoute>
-                <AnalyticsDashboard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/settings"
-            element={
-              <AdminRoute>
-                <PlatformSettings />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/plans"
-            element={
-              <AdminRoute>
-                <SubscriptionPlanManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/subscriptions"
-            element={
-              <AdminRoute>
-                <SubscriptionsPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/payments/failures"
-            element={
-              <AdminRoute>
-                <PaymentFailuresPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/campaigns"
-            element={
-              <AdminRoute>
-                <EmailCampaignsPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="admin/campaigns"
-            element={
-              <AdminRoute>
-                <EmailCampaignsPage />
-              </AdminRoute>
-            }
-          />
-        </Route>
+          >
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="study" element={<StudyPage />} />
+            <Route path="discover" element={<DiscoverPage />} />
+            <Route path="content/generate" element={<ContentPage />} />
+            <Route path="content/:id" element={<ContentPage />} />
+            <Route path="quiz" element={<QuizPage />} />
+            <Route path="quiz/:id" element={<QuizTakePage />} />
+            <Route
+              path="quiz/:id/results/:attemptId"
+              element={<QuizReviewPage />}
+            />
+            <Route
+              path="quiz/attempt/:attemptId/review"
+              element={<QuizReviewPage />}
+            />
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Suspense>
+            <Route path="flashcards" element={<FlashcardsPage />} />
+            <Route path="flashcards/:id" element={<FlashcardStudyPage />} />
+            <Route path="leaderboard" element={<LeaderboardPage />} />
+            <Route path="challenges" element={<ChallengesPage />} />
+            <Route path="challenges/:id" element={<ChallengeDetailsPage />} />
+
+            <Route
+              path="challenges/:id/results"
+              element={<ChallengeResultsPage />}
+            />
+            <Route path="statistics" element={<StatisticsPage />} />
+            <Route path="attempts" element={<AttemptsPage />} />
+            <Route path="files" element={<FilesPage />} />
+            <Route path="study-pack" element={<StudyPacksPage />} />
+            <Route path="study-pack/:id" element={<StudyPackDetailsPage />} />
+            <Route path="summaries" element={<SummariesPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="pricing" element={<PricingPage />} />
+            <Route
+              path="subscription/manage"
+              element={<ManageSubscriptionPage />}
+            />
+            <Route path="subscription/verify" element={<VerifyPaymentPage />} />
+            <Route path="recommendations" element={<RecommendationsPage />} />
+            <Route path="weak-areas" element={<WeakAreasPage />} />
+            <Route path="review" element={<ReviewPage />} />
+
+            {/* Admin Routes */}
+            <Route
+              path="admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/users"
+              element={
+                <AdminRoute>
+                  <UserManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/users/:id"
+              element={
+                <AdminRoute>
+                  <UserDetailsPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/content"
+              element={
+                <AdminRoute>
+                  <ContentManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/moderation"
+              element={
+                <AdminRoute>
+                  <ContentModeration />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/schools"
+              element={
+                <AdminRoute>
+                  <SchoolManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/generation-analytics"
+              element={
+                <AdminRoute>
+                  <AiAnalytics />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/analytics"
+              element={
+                <AdminRoute>
+                  <AnalyticsDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/settings"
+              element={
+                <AdminRoute>
+                  <PlatformSettings />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/plans"
+              element={
+                <AdminRoute>
+                  <SubscriptionPlanManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/subscriptions"
+              element={
+                <AdminRoute>
+                  <SubscriptionsPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/payments/failures"
+              element={
+                <AdminRoute>
+                  <PaymentFailuresPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/campaigns"
+              element={
+                <AdminRoute>
+                  <EmailCampaignsPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/campaigns"
+              element={
+                <AdminRoute>
+                  <EmailCampaignsPage />
+                </AdminRoute>
+              }
+            />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 }

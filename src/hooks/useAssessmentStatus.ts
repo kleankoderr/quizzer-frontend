@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { userService, onboardingService } from '../services';
+import { onboardingService, userService } from '../services';
 
 export const useAssessmentStatus = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -19,8 +19,7 @@ export const useAssessmentStatus = () => {
     enabled: !!user && user.role === 'USER' && !user.assessmentPopupShown,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (user?.role !== 'USER' || user.assessmentPopupShown)
-        return false;
+      if (user?.role !== 'USER' || user.assessmentPopupShown) return false;
 
       const isInternalPage =
         location.pathname.includes('/quiz/') ||

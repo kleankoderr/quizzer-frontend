@@ -75,13 +75,13 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   // Initialize activeSection - prioritize first uncompleted section
   const [activeSection, setActiveSection] = useState<number>(() => {
     // Try to get stored section from localStorage (user's last opened section)
-      const stored = localStorage.getItem(`activeSection-${contentId}`);
-      if (stored) {
-        const storedIndex = Number.parseInt(stored, 10);
-        // Only use stored section if it's valid
-        if (storedIndex >= 0 && storedIndex < guide.sections.length) {
-          return storedIndex;
-        }
+    const stored = localStorage.getItem(`activeSection-${contentId}`);
+    if (stored) {
+      const storedIndex = Number.parseInt(stored, 10);
+      // Only use stored section if it's valid
+      if (storedIndex >= 0 && storedIndex < guide.sections.length) {
+        return storedIndex;
+      }
     }
 
     // Default to no section open (-1)
@@ -160,7 +160,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         if (sectionElement) {
           const rect = sectionElement.getBoundingClientRect();
           const headerOffset = 80; // sticky header height
-          
+
           // Only scroll if the section header is completely above the viewport
           if (rect.top < 0) {
             const elementTop = window.pageYOffset + rect.top;
@@ -223,7 +223,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
               if (sectionElement) {
                 const rect = sectionElement.getBoundingClientRect();
                 const headerOffset = 80;
-                
+
                 // Only scroll if section header is completely above the viewport
                 if (rect.top < 0) {
                   const elementTop = window.pageYOffset + rect.top;
@@ -445,7 +445,9 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
       {/* All Sections in Natural Order */}
       <div className="space-y-4">
         {guide.sections
-          .filter((section) => section.content && section.content.trim().length > 0)
+          .filter(
+            (section) => section.content && section.content.trim().length > 0
+          )
           .map((section) => {
             const originalIndex = guide.sections.indexOf(section);
             const processedContent = section.content;
@@ -599,7 +601,7 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
                       if (sectionElement) {
                         const rect = sectionElement.getBoundingClientRect();
                         const headerOffset = 80;
-                        
+
                         // Only scroll if section header is completely above viewport
                         if (rect.top < 0) {
                           const elementTop = window.pageYOffset + rect.top;
