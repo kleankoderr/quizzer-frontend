@@ -151,6 +151,8 @@ export const useLearningGuideStreaming = ({
       }
     );
 
+    const buffers = sectionBuffers.current;
+
     return () => {
       unsubscribeOutline();
       unsubscribeSectionStarted();
@@ -159,7 +161,7 @@ export const useLearningGuideStreaming = ({
       unsubscribeAllCompleted();
 
       // Clear buffers
-      sectionBuffers.current.clear();
+      buffers.clear();
     };
   }, [contentId, onOutlineCompleted, onAllSectionsCompleted]);
 
