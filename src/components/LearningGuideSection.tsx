@@ -44,21 +44,28 @@ export const LearningGuideSection = React.forwardRef<
     },
     ref
   ) => {
+    // Determine border classes based on section state
+    const getSectionBorderClasses = () => {
+      if (isActive) {
+        return 'sm:border-primary-500 sm:shadow-md sm:ring-2 ring-primary-500/20';
+      }
+      if (isCompleted) {
+        return 'border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-100';
+      }
+      return 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600';
+    };
+
     return (
       <div
         ref={ref}
         data-section-index={index}
-        className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${
-          isActive
-            ? 'sm:border-primary-500 sm:shadow-md sm:ring-2 ring-primary-500/20'
-            : isCompleted
-              ? 'border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-100'
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-        }`}
+        className={`bg-white dark:bg-gray-800 sm:rounded-xl sm:border transition-all duration-300 overflow-hidden ${getSectionBorderClasses()}`}
       >
-        <div
+        <button
           onClick={() => onToggleSection(index)}
-          className="p-4 md:p-6 flex items-center justify-between cursor-pointer select-none"
+          className="w-full p-4 md:p-6 flex items-center justify-between cursor-pointer select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+          aria-expanded={isActive}
+          aria-label={`Toggle section ${index + 1}: ${section.title}`}
         >
           <div className="flex items-center gap-4">
             <button
@@ -87,7 +94,7 @@ export const LearningGuideSection = React.forwardRef<
               isActive ? 'rotate-90' : ''
             }`}
           />
-        </div>
+        </button>
 
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${
