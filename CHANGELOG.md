@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.1...frontend-v0.0.2) (2026-01-30)
+
+
+### Features
+
+* Add new public route for search functionality ([da0e52c](https://github.com/kleankoderr/quizzer-frontend/commit/da0e52cad19070ce099c28f7149f4038ef6e69fa))
+
 ### 0.0.1 (2026-01-30)
 
 
