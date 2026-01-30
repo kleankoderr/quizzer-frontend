@@ -187,7 +187,7 @@ export const SummariesPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-400">
-                      {(summary as any)._count?.reactions || 0} reactions
+                      {Number((summary as any)._count?.reactions) || 0} reactions
                     </span>
                   </div>
                 </div>

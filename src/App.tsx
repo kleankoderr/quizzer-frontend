@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
@@ -15,6 +15,7 @@ import { TourProvider } from './contexts/TourProvider';
 
 import { AdminRoute } from './components/AdminRoute';
 import { LoadingScreen } from './components/LoadingScreen';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy load all page components for code splitting
 const LoginPage = lazy(() =>
@@ -258,8 +259,9 @@ function App() {
 
 function AppRoutes() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
         {/* Public Summary Route */}
         <Route path="/s/:shortCode" element={<SummaryPage />} />
 
@@ -449,6 +451,7 @@ function AppRoutes() {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>
+    </ErrorBoundary>
   );
 }
 

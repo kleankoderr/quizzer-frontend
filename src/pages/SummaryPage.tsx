@@ -122,20 +122,29 @@ export function SummaryPage() {
 
     if (!shortCode || !summary) return;
 
+    const previousSummary = summary;
+    const previousUserReactions = userReactions;
+
     const isActive = userReactions.has(type);
     const newReactions = new Set(userReactions);
-    const newSummary = { ...summary };
-
+    
+    // Deep copy summary and counts to avoid direct mutation
+    const currentCounts = { ...summary.reactionCounts };
+    const currentCount = Number(currentCounts[type]) || 0;
+    
     if (isActive) {
       newReactions.delete(type);
-      newSummary.reactionCounts[type] = Math.max(
-        0,
-        summary.reactionCounts[type] - 1
-      );
+      currentCounts[type] = Math.max(0, currentCount - 1);
     } else {
       newReactions.add(type);
-      newSummary.reactionCounts[type] = summary.reactionCounts[type] + 1;
+      currentCounts[type] = currentCount + 1;
     }
+
+    const newSummary = { 
+      ...summary, 
+      reactionCounts: currentCounts,
+      userReactions: Array.from(newReactions)
+    };
 
     setUserReactions(newReactions);
     setSummary(newSummary);
@@ -147,9 +156,9 @@ export function SummaryPage() {
         await summaryService.addReaction(shortCode, type);
       }
     } catch (err) {
-      const previousReactions = new Set(summary.userReactions || []);
-      setUserReactions(previousReactions);
-      setSummary({ ...summary });
+      // Revert to original summary on failure
+      setSummary(previousSummary);
+      setUserReactions(previousUserReactions);
       Toast.error('Failed to update reaction');
       console.error('Reaction error:', err);
     }
@@ -374,8 +383,9 @@ export function SummaryPage() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    {Object.values(summary.reactionCounts).reduce(
-                      (a, b) => a + b,
+                    {Object.values(summary.reactionCounts || {}).reduce(
+                      (totalReactions, reactionCount) =>
+                        totalReactions + (Number(reactionCount) || 0),
                       0
                     )}{' '}
                     reactions
