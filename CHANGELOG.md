@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.2...frontend-v0.0.3) (2026-01-30)
+
+
+### Features
+
+* Add real-time updates for flashcard and quiz progress with loading indicators ([1d13652](https://github.com/kleankoderr/quizzer-frontend/commit/1d136527ab2a90249a969ef83b0e8731d8396fb0))
+
+
+### Styling
+
+* Refactor code for improved readability and consistency ([4d13117](https://github.com/kleankoderr/quizzer-frontend/commit/4d1311737fde836574520993e4cb5805af199f81))
+
 ### [0.0.2](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.1...frontend-v0.0.2) (2026-01-30)
 
 
