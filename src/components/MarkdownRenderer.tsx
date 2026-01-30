@@ -9,6 +9,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import * as styles from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy } from 'lucide-react';
 import { Toast } from '../utils/toast';
+import mermaid from 'mermaid';
 
 const vscDarkPlus =
   (styles as any).vscDarkPlus || (styles as any).default?.vscDarkPlus || styles;
@@ -45,17 +46,104 @@ interface MarkdownRendererProps {
   HeadingRenderer?: React.FC<{ level: number; children?: any }>;
 }
 
-const CodeBlock = ({ node: _node, children, className, ...props }: any) => {
-  const match = /language-(\w+)/.exec(className || '');
-  const isInline = !className?.startsWith('language-');
+// Initialize mermaid with configuration
+(mermaid as any).initialize({
+  startOnLoad: false,
+  theme: 'default',
+  securityLevel: 'loose',
+  fontFamily: 'Lexend, sans-serif',
+  suppressError: true, // Suppress internal Mermaid error UI
+});
 
-  if (!isInline && match) {
+// Mermaid diagram component
+const MermaidDiagram: React.FC<{ chart: string }> = ({ chart }) => {
+  const [svg, setSvg] = React.useState<string>('');
+  const [error, setError] = React.useState<string>('');
+
+  React.useEffect(() => {
+    const renderDiagram = async () => {
+      if (!chart) return;
+
+      try {
+        setError('');
+        setSvg(''); // Reset SVG while rendering
+        
+        // Generate a unique ID for this diagram
+        const id = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
+        
+        // Validate syntax first
+        try {
+          await mermaid.parse(chart);
+        } catch (parseErr) {
+          console.error('Mermaid parse error:', parseErr);
+          setError('Failed to load diagram');
+          return;
+        }
+
+        // Render the diagram
+        const { svg: renderedSvg } = await mermaid.render(id, chart);
+        
+        // If it still contains error indicators (some versions might return error SVG instead of throwing)
+        if (renderedSvg.includes('aria-roledescription="error"') || renderedSvg.includes('Syntax error in text')) {
+          setError('Failed to load diagram');
+          return;
+        }
+
+        setSvg(renderedSvg);
+      } catch (err) {
+        console.error('Mermaid rendering error:', err);
+        setError('Failed to load diagram'); // Keep it simple
+        setSvg(''); // Ensure SVG is cleared on error
+      }
+    };
+
+    renderDiagram();
+  }, [chart]);
+
+  if (error) {
+    return (
+      <div className="my-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="text-center text-gray-500 text-sm">
+          Failed to load diagram
+        </div>
+      </div>
+    );
+  }
+
+  if (!svg) {
+    return (
+      <div className="my-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="text-center text-gray-500">Loading diagram...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className="my-6 p-6 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+};
+
+const CodeBlock = ({ node: _node, inline, children, className, ...props }: any) => {
+  const match = /language-(\w+)/.exec(className || '');
+  const childrenStr = String(children);
+  const isInline = inline || (!match && !className?.includes('language-') && !childrenStr.includes('\n'));
+  const language = match?.[1];
+
+  // Special handling for Mermaid diagrams
+  if (!isInline && language === 'mermaid') {
+    return <MermaidDiagram chart={childrenStr.trim()} />;
+  }
+
+  if (!isInline) {
     return (
       <div className="relative group my-6">
         <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <button
             onClick={() => {
-              navigator.clipboard.writeText(String(children));
+              navigator.clipboard.writeText(childrenStr);
               Toast.success('Code copied!');
             }}
             className="p-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg text-white backdrop-blur-sm"
@@ -66,33 +154,25 @@ const CodeBlock = ({ node: _node, children, className, ...props }: any) => {
         <SyntaxHighlighter
           {...props}
           style={vscDarkPlus}
-          language={match[1]}
+          language={language || 'text'}
           PreTag="div"
           className="rounded-xl !bg-gray-900 !p-4 sm:!p-6 border border-gray-700/50 overflow-x-auto shadow-lg"
         >
-          {String(children).replace(/\n$/, '')}
+          {childrenStr.replace(/\n$/, '')}
         </SyntaxHighlighter>
       </div>
     );
   }
 
-  if (isInline) {
-    const cleanContent = String(children).replaceAll('`', '').trim();
-
-    return (
-      <code
-        {...props}
-        className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800/80 text-primary-700 dark:text-primary-300 rounded font-medium text-[0.9em] border border-gray-200/50 dark:border-gray-700/50 inline transition-colors"
-        style={{ fontFamily: 'Lexend, sans-serif' }}
-      >
-        {cleanContent}
-      </code>
-    );
-  }
+  const cleanContent = childrenStr.replace(/^`+|`+$/g, '').trim();
 
   return (
-    <code className={className} {...props}>
-      {children}
+    <code
+      {...props}
+      className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800/80 text-primary-700 dark:text-primary-300 rounded font-medium text-[0.9em] border border-gray-200/50 dark:border-gray-700/50 inline transition-colors"
+      style={{ fontFamily: 'Lexend, sans-serif' }}
+    >
+      {cleanContent}
     </code>
   );
 };

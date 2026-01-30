@@ -30,3 +30,4 @@ export * from './useTaskStatus';
 export * from './useUserDocuments';
 export * from './useTour';
 export * from './useAssessmentStatus';
+export * from './useLearningGuideStreaming';

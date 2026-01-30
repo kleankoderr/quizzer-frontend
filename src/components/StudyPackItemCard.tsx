@@ -1,16 +1,7 @@
 import React from 'react';
 import { Card } from './Card';
 
-import {
-  Trash2,
-  Folder,
-  XCircle,
-  MoreVertical,
-  HelpCircle,
-  Layers,
-  BookOpen,
-  FileText,
-} from 'lucide-react';
+import { BookOpen, FileText, Folder, HelpCircle, Layers, MoreVertical, Trash2, XCircle } from 'lucide-react';
 import { formatDate } from '../utils/dateFormat';
 
 interface StudyPackItemCardProps {
@@ -119,8 +110,6 @@ export const StudyPackItemCard: React.FC<StudyPackItemCardProps> = ({
         subtitle={getItemSubtitle(type, item)}
         icon={getIcon()}
         onClick={onClick}
-        onTitleClick={onClick}
-        onIconClick={onClick}
         actions={
           <div className="relative" ref={menuRef}>
             <button

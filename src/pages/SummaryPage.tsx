@@ -1,34 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import {
+  ArrowLeft,
+  Bookmark,
+  Calendar,
+  Check,
+  ChevronUp,
+  Copy,
+  ExternalLink,
   Eye,
   Heart,
   Lightbulb,
-  Bookmark,
-  Share2,
-  Copy,
-  Check,
-  ArrowLeft,
   Loader2,
-  Calendar,
-  ExternalLink,
-  ChevronUp,
+  Share2,
   ThumbsUp,
 } from 'lucide-react';
-import {
-  FaXTwitter,
-  FaFacebook,
-  FaLinkedin,
-  FaWhatsapp,
-} from 'react-icons/fa6';
-import {
-  summaryService,
-  type Summary,
-  type ReactionType,
-} from '../services/summary.service';
+import { FaFacebook, FaLinkedin, FaWhatsapp, FaXTwitter } from 'react-icons/fa6';
+import { type ReactionType, type Summary, summaryService } from '../services/summary.service';
 import { useAuth } from '../contexts/AuthContext';
 import { Toast } from '../utils/toast';
 
@@ -405,6 +396,7 @@ export function SummaryPage() {
           <div className="sm:p-12">
             <div
               className="prose prose-sm sm:prose-lg prose-gray dark:prose-invert max-w-none 
+              prose-code:before:content-none prose-code:after:content-none
               prose-headings:font-extrabold prose-headings:tracking-tight
               prose-h1:text-2xl sm:prose-h1:text-3xl prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 sm:prose-h2:mt-12 prose-h2:mb-4 sm:prose-h2:mb-6
               prose-p:leading-relaxed prose-p:text-gray-600 dark:prose-p:text-gray-300

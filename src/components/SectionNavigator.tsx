@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, Circle, ChevronDown, List } from 'lucide-react';
+import { CheckCircle, ChevronDown, Circle, List, Loader2 } from 'lucide-react';
 import type { Content } from '../services/content.service';
 
 interface SectionNavigatorProps {
@@ -7,6 +7,8 @@ interface SectionNavigatorProps {
   activeSection: number;
   completedSections: Set<number>;
   onSectionClick: (index: number) => void;
+  generatingSections?: Set<number>;
+  loadedSections?: Set<number>;
 }
 
 export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
@@ -14,6 +16,8 @@ export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
   activeSection,
   completedSections,
   onSectionClick,
+  generatingSections = new Set(),
+  loadedSections = new Set(),
 }) => {
   const [isExpanded, setIsExpanded] = useState(true); // Expanded by default for better visibility
 
@@ -61,22 +65,55 @@ export const SectionNavigator: React.FC<SectionNavigatorProps> = ({
             {sections.map((section, idx) => {
               const isCompleted = completedSections.has(idx);
               const isActive = activeSection === idx;
+              const isGenerating = generatingSections.has(idx);
+              const hasContent = section.content?.trim().length > 0;
+              const isLoaded = loadedSections.has(idx) || hasContent;
+              const isDisabled = !isCompleted && !isActive && !isLoaded;
+
+              // Progressive reveal: show sections based on what has content
+              // Find the last section with actual content
+              const lastContentIndex = sections.reduce((max, s, i) => {
+                return s.content?.trim().length > 0 ? i : max;
+              }, -1);
+              
+              // Also consider sections being tracked as loaded/completed
+              const lastTrackedIndex = Math.max(
+                ...Array.from(completedSections).concat(Array.from(loadedSections)),
+                -1
+              );
+              
+              // Show up to the furthest point of progress
+              const furthestProgress = Math.max(lastContentIndex, lastTrackedIndex);
+              const visibleUpTo = Math.max(2, furthestProgress + 2); // At least 3, or 2 ahead
+              
+              // Special case: if no content yet but outline exists, show first section as loading
+              const isFirstSectionLoading = idx === 0 && sections.length > 0 && !hasContent && !isGenerating;
+
+              // Hide sections beyond the visible threshold
+              if (idx > visibleUpTo) {
+                return null;
+              }
 
               return (
                 <button
                   key={idx}
-                  onClick={() => onSectionClick(idx)}
+                  onClick={() => !isDisabled && onSectionClick(idx)}
+                  disabled={isDisabled}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-left group ${
                     isActive
                       ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 shadow-sm'
                       : isCompleted
                         ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
+                        : isDisabled
+                          ? 'opacity-50 cursor-not-allowed border border-transparent'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
                   }`}
                 >
                   {/* Icon */}
                   <div className="flex-shrink-0">
-                    {isCompleted ? (
+                    {isGenerating || isFirstSectionLoading ? (
+                      <Loader2 className="w-5 h-5 text-primary-600 dark:text-primary-400 animate-spin" />
+                    ) : isCompleted ? (
                       <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                     ) : isActive ? (
                       <div className="w-5 h-5 rounded-full bg-primary-600 dark:bg-primary-500 flex items-center justify-center">

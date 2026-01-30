@@ -20,6 +20,8 @@ interface LearningGuideProps {
   onGenerateSummary?: () => void;
   onSectionUpdate?: (index: number, updates: any) => void;
   hasSummary?: boolean;
+  generatingSections?: Set<number>;
+  loadedSections?: Set<number>;
 }
 
 export const LearningGuide: React.FC<LearningGuideProps> = ({
@@ -35,6 +37,8 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
   onGenerateSummary,
   onSectionUpdate,
   hasSummary,
+  generatingSections = new Set(),
+  loadedSections = new Set(),
 }) => {
   const invalidateQuota = useInvalidateQuota();
   // Create refs for each section
@@ -434,35 +438,40 @@ export const LearningGuide: React.FC<LearningGuideProps> = ({
         activeSection={activeSection}
         completedSections={completedSections}
         onSectionClick={toggleSection}
+        generatingSections={generatingSections}
+        loadedSections={loadedSections}
       />
 
       {/* All Sections in Natural Order */}
       <div className="space-y-4">
-        {guide.sections.map((section, idx) => {
-          const processedContent = section.content;
-          const isCompleted = completedSections.has(idx);
-          const isActive = activeSection === idx;
+        {guide.sections
+          .filter((section) => section.content && section.content.trim().length > 0)
+          .map((section) => {
+            const originalIndex = guide.sections.indexOf(section);
+            const processedContent = section.content;
+            const isCompleted = completedSections.has(originalIndex);
+            const isActive = activeSection === originalIndex;
 
-          return (
-            <LearningGuideSection
-              key={idx}
-              ref={sectionRefs.current[idx]}
-              section={section}
-              index={idx}
-              isActive={isActive}
-              isCompleted={isCompleted}
-              processedContent={processedContent}
-              generatedContent={generatedContent}
-              visibleContent={visibleContent}
-              loadingAction={loadingAction}
-              HeadingRenderer={HeadingRenderer}
-              onToggleSection={toggleSection}
-              onMarkComplete={markAsComplete}
-              onAskQuestion={handleAskQuestion}
-              onToggleContentVisibility={toggleContentVisibility}
-            />
-          );
-        })}
+            return (
+              <LearningGuideSection
+                key={originalIndex}
+                ref={sectionRefs.current[originalIndex]}
+                section={section}
+                index={originalIndex}
+                isActive={isActive}
+                isCompleted={isCompleted}
+                processedContent={processedContent}
+                generatedContent={generatedContent}
+                visibleContent={visibleContent}
+                loadingAction={loadingAction}
+                HeadingRenderer={HeadingRenderer}
+                onToggleSection={toggleSection}
+                onMarkComplete={markAsComplete}
+                onAskQuestion={handleAskQuestion}
+                onToggleContentVisibility={toggleContentVisibility}
+              />
+            );
+          })}
       </div>
 
       {progress === 100 && (

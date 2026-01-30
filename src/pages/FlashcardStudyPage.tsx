@@ -1,30 +1,13 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Variants } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
-import {
-  useParams,
-  useNavigate,
-  useLocation,
-  useSearchParams,
-} from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Toast as toast } from '../utils/toast';
-import { flashcardService } from '../services/flashcard.service';
-import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowLeft,
-  Layers,
-  Sparkles,
-  ThumbsUp,
-  ThumbsDown,
-  Target,
-} from 'lucide-react';
+import { flashcardService } from '../services';
+import { ArrowLeft, ChevronLeft, ChevronRight, Layers, Sparkles, Target, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useFlashcardSet } from '../hooks';
-import {
-  ResultsHeroCard,
-  type ResultsStat,
-} from '../components/quiz/ResultsHeroCard';
+import { ResultsHeroCard, type ResultsStat } from '../components/quiz/ResultsHeroCard';
 import { useAuth } from '../contexts/AuthContext';
 import { AttemptsAnalyticsView } from '../components/AttemptsAnalyticsView';
 import type { FlashcardAttempt } from '../types';
@@ -68,7 +51,7 @@ const FlashcardMarkdown = ({
   className?: string;
 }) => (
   <div
-    className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0`}
+    className={`prose prose-lg dark:prose-invert max-w-none ${className} [&_p]:m-0 prose-code:before:content-none prose-code:after:content-none`}
   >
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}

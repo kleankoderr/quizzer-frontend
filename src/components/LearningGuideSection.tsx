@@ -68,16 +68,25 @@ export const LearningGuideSection = React.forwardRef<
           aria-label={`Toggle section ${index + 1}: ${section.title}`}
         >
           <div className="flex items-center gap-4">
-            <button
+            <div
               onClick={(e) => onMarkComplete(index, e)}
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onMarkComplete(index, e as any);
+                }
+              }}
+              aria-label={isCompleted ? 'Mark section as incomplete' : 'Mark section as complete'}
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer ${ 
                 isCompleted
                   ? 'bg-green-500 border-green-500 text-white'
                   : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-green-500'
               }`}
             >
               <CheckCircle className="w-4 h-4" />
-            </button>
+            </div>
             <h3
               className={`text-lg font-semibold transition-colors ${
                 isCompleted
@@ -105,7 +114,7 @@ export const LearningGuideSection = React.forwardRef<
         >
           <div>
             <div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 border-t border-gray-100 dark:border-gray-700/50 mt-2">
-              <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown">
+              <div className="prose prose-lg dark:prose-invert max-w-none mt-4 text-gray-600 dark:text-gray-300 content-markdown prose-code:before:content-none prose-code:after:content-none">
                 <MarkdownRenderer
                   content={processedContent}
                   HeadingRenderer={HeadingRenderer}
@@ -129,7 +138,7 @@ export const LearningGuideSection = React.forwardRef<
                         </h4>
                       </div>
                     </div>
-                    <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20">
+                    <div className="prose prose-blue prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-blue-50 dark:border-blue-900/20 prose-code:before:content-none prose-code:after:content-none">
                       <div
                         className="m-0 leading-relaxed text-sm"
                         style={{ fontFamily: 'Lexend' }}
@@ -158,12 +167,15 @@ export const LearningGuideSection = React.forwardRef<
                         </h4>
                       </div>
                     </div>
-                    <div className="prose prose-green prose-sm dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-green-50 dark:border-green-900/20">
+                    <div className="bg-white/50 dark:bg-gray-900/30 rounded-lg p-3 border border-green-50 dark:border-green-900/20">
                       <div
-                        className="m-0 leading-relaxed text-sm"
+                        className="m-0 leading-relaxed"
                         style={{ fontFamily: 'Lexend' }}
                       >
-                        <MarkdownRenderer content={section.assessment} />
+                        <MarkdownRenderer 
+                          content={section.assessment} 
+                          className="prose-sm !text-xs prose-p:!text-xs" 
+                        />
                       </div>
                     </div>
                   </div>
@@ -243,7 +255,7 @@ export const LearningGuideSection = React.forwardRef<
                               <ChevronRight className="w-5 h-5 rotate-90" />
                             </button>
                           </div>
-                          <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20">
+                          <div className="prose prose-purple prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-purple-50 dark:border-purple-900/20 prose-code:before:content-none prose-code:after:content-none">
                             <MarkdownRenderer
                               content={generatedContent[`${index}-explain`]}
                             />
@@ -280,7 +292,7 @@ export const LearningGuideSection = React.forwardRef<
                               <ChevronRight className="w-5 h-5 rotate-90" />
                             </button>
                           </div>
-                          <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20">
+                          <div className="prose prose-amber prose-sm sm:prose-base dark:prose-invert max-w-none bg-white/50 dark:bg-gray-900/30 rounded-xl p-4 border border-amber-50 dark:border-amber-900/20 prose-code:before:content-none prose-code:after:content-none">
                             <MarkdownRenderer
                               content={generatedContent[`${index}-example`]}
                             />

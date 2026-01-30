@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import React, { useState } from 'react';
-import type { QuizQuestion, AnswerValue } from '../types';
-import { Check, X, AlertTriangle } from 'lucide-react';
+import type { AnswerValue, QuizQuestion } from '../types';
+import { AlertTriangle, Check, X } from 'lucide-react';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
@@ -29,7 +29,7 @@ const MarkdownText = ({
   className?: string;
 }) => (
   <div
-    className={`prose prose-sm dark:prose-invert max-w-none ${className} [&_p]:m-0 [&_p]:inline-block`}
+    className={`prose prose-sm dark:prose-invert max-w-none ${className} [&_p]:m-0 [&_p]:inline-block prose-code:before:content-none prose-code:after:content-none`}
   >
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
@@ -694,10 +694,10 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-white w-full max-w-full overflow-hidden break-words [&_p]:m-0 [&_pre]:whitespace-pre-wrap [&_code]:break-all [&_code]:bg-gray-100 dark:[&_code]:bg-gray-700 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em] [&_img]:max-w-full">
+          <div className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white w-full max-w-full overflow-hidden break-words [&_p]:m-0 [&_pre]:whitespace-pre-wrap [&_code]:break-all [&_code]:bg-gray-100 dark:[&_code]:bg-gray-700 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em] [&_img]:max-w-full">
             <MarkdownText
               content={question.question}
-              className="!prose-lg sm:!prose-xl md:!prose-2xl"
+              className="prose-sm sm:prose-base md:prose-lg"
             />
           </div>
         </div>
