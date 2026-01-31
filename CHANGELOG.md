@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.3...frontend-v1.1.0) (2026-01-31)
+
+
+### Features
+
+* Implement quiz management features with new routes and UI components ([69d8bf2](https://github.com/kleankoderr/quizzer-frontend/commit/69d8bf25918bcdea96bfb315e47c86e51f35bee4))
+* Refactor question selection logic and improve quiz status toggle UI ([4f058e7](https://github.com/kleankoderr/quizzer-frontend/commit/4f058e720e3db5feceff88cc007b09104594bc4f))
+
+
+### Maintenance
+
+* **release:** 1.0.0 ([94f992f](https://github.com/kleankoderr/quizzer-frontend/commit/94f992f2ae2dd94c643fc315c0841c1d2c279bdb))
+
 ## 1.0.0 (2026-01-31)
 
 
