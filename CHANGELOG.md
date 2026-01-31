@@ -188,6 +188,12 @@ All notable changes to this project will be documented in this file. See [standa
 * Memoize data and functions in quiz and attempt pages using `useMemo` and `useCallback` to optimize performance. ([0995cec](https://github.com/kleankoderr/quizzer-frontend/commit/0995cecd738473dd76860491df579bc48a292c3f))
 
 
+### Styling
+
+* Improve code formatting and consistency across multiple components ([8de3582](https://github.com/kleankoderr/quizzer-frontend/commit/8de35821bfc5146498a9827250266a8d17663e18))
+* Reformat `handleSubmit` `useCallback` definition for consistency. ([b25e0fc](https://github.com/kleankoderr/quizzer-frontend/commit/b25e0fc5ca95da49b04df569358ebf3d628aad04))
+
+
 ### Maintenance
 
 * Add .env files to gitignore ([03605e5](https://github.com/kleankoderr/quizzer-frontend/commit/03605e51a2d3642358e9ca93f2cb4bdb475d9783))

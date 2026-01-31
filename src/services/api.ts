@@ -141,6 +141,7 @@ function isPublicRoute(pathname: string): boolean {
     '/signup',
     '/forgot-password',
     '/reset-password',
+    '/s/',
   ];
   return publicRoutes.some((route) => pathname.startsWith(route));
 }
