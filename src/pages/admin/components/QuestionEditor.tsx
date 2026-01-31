@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Files, Trash2 } from 'lucide-react';
-import { Select } from '../../ui/Select';
+import { Select } from '../../../components/ui/Select';
 import type { QuestionType, QuizQuestion } from '../../../types';
 
 interface QuestionEditorProps {

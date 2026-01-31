@@ -138,7 +138,7 @@ export const AdminQuizDetail = () => {
                   id="select-all"
                   type="checkbox"
                   checked={state.selectedQuestions.length === state.questions.length && state.questions.length > 0}
-                  onChange={(e) => actions.toggleSelectAll(e.target.checked)}
+                  onChange={(e) => e.target.checked ? actions.selectAllQuestions() : actions.deselectAllQuestions()}
                   className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
                 <label htmlFor="select-all" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -168,7 +168,7 @@ export const AdminQuizDetail = () => {
           <div className="space-y-4">
             {state.questions.map((q, index) => (
               <QuestionEditor
-                key={q.localId}
+                key={q.id}
                 index={index}
                 question={q}
                 isSelected={state.selectedQuestions.includes(index)}
@@ -291,10 +291,22 @@ export const AdminQuizDetail = () => {
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Settings</h3>
               <div className="flex items-center justify-between py-3 border-t border-gray-50 dark:border-gray-800">
                 <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Status</span>
-                <div className="relative inline-flex items-center cursor-pointer" onClick={() => actions.setIsActive(!state.isActive)}>
-                  <input type="checkbox" className="sr-only peer" checked={state.isActive} readOnly />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
-                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={state.isActive}
+                  onClick={() => actions.setIsActive(!state.isActive)}
+                  className="relative inline-flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-full"
+                >
+                  <span className="sr-only">Toggle quiz status</span>
+                  <div className={`w-11 h-6 rounded-full transition-all duration-200 ${
+                    state.isActive ? 'bg-emerald-600 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-gray-200 dark:bg-gray-700'
+                  }`}>
+                    <div className={`absolute top-[2px] left-[2px] bg-white rounded-full h-5 w-5 transition-transform duration-200 shadow-sm ${
+                      state.isActive ? 'translate-x-5' : 'translate-x-0'
+                    }`} />
+                  </div>
+                </button>
               </div>
               <div className="flex items-center justify-between py-3 border-t border-gray-50 dark:border-gray-800">
                 <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Questions</span>

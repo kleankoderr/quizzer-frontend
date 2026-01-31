@@ -144,7 +144,7 @@ export const useAdminQuizDetail = (quizId: string | undefined) => {
       newQuestion.correctAnswer = '';
     }
     setQuestions([newQuestion, ...questions]);
-    setSelectedQuestions(selectedQuestions.map((i) => i + 1));
+    setSelectedQuestions(selectedQuestions.map((selectedIndex) => selectedIndex + 1));
   };
 
   const deleteQuestion = (index: number) => {
@@ -154,8 +154,8 @@ export const useAdminQuizDetail = (quizId: string | undefined) => {
     setQuestions(newQuestions);
     setSelectedQuestions(
       selectedQuestions
-        .filter((i) => i !== index)
-        .map((i) => (i > index ? i - 1 : i))
+        .filter((selectedIndex) => selectedIndex !== index)
+        .map((selectedIndex) => (selectedIndex > index ? selectedIndex - 1 : selectedIndex))
     );
 
     if (questionId) {
@@ -202,17 +202,17 @@ export const useAdminQuizDetail = (quizId: string | undefined) => {
     }
   };
 
-  const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedQuestions(questions.map((_, i) => i));
-    } else {
-      setSelectedQuestions([]);
-    }
+  const selectAllQuestions = () => {
+    setSelectedQuestions(questions.map((_, index) => index));
+  };
+
+  const deselectAllQuestions = () => {
+    setSelectedQuestions([]);
   };
 
   const toggleSelectQuestion = (index: number) => {
     if (selectedQuestions.includes(index)) {
-      setSelectedQuestions(selectedQuestions.filter((i) => i !== index));
+      setSelectedQuestions(selectedQuestions.filter((selectedIndex) => selectedIndex !== index));
     } else {
       setSelectedQuestions([...selectedQuestions, index]);
     }
@@ -244,7 +244,8 @@ export const useAdminQuizDetail = (quizId: string | undefined) => {
       duplicateQuestion,
       updateQuestion,
       bulkDelete,
-      toggleSelectAll,
+      selectAllQuestions,
+      deselectAllQuestions,
       toggleSelectQuestion,
       handleSave,
     },
