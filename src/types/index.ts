@@ -66,6 +66,7 @@ export type AnswerValue =
   | { [key: string]: string };
 
 export interface QuizQuestion {
+  id?: string;
   questionType: QuestionType;
   question: string;
   options?: string[];
@@ -116,6 +117,10 @@ export interface QuizGenerateRequest {
   selectedFileIds?: string[];
   studyPackId?: string;
   title?: string;
+  // Admin fields
+  scope?: 'GLOBAL' | 'SCHOOL';
+  schoolId?: string;
+  isActive?: boolean;
 }
 
 export interface QuizSubmission {

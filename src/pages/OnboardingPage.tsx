@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowRight, Check } from 'lucide-react';
 import { apiClient } from '../services/api';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { SchoolSearch } from '../components/SchoolSearch';
+
+import { Select } from '../components/ui/Select';
 
 const GRADES = [
   'Primary School',
@@ -14,6 +16,11 @@ const GRADES = [
   'Graduate Student',
   'Lifelong Learner',
 ];
+
+const GRADE_OPTIONS = GRADES.map((grade) => ({
+  label: grade,
+  value: grade,
+}));
 
 const SUBJECTS = [
   'Mathematics',
@@ -260,31 +267,19 @@ export const OnboardingPage = () => {
 
                   <div className="space-y-4">
                     <div>
-                      <label
-                        htmlFor="grade-select"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        Select your level
-                      </label>
-                      <select
+                      <Select
                         id="grade-select"
+                        options={GRADE_OPTIONS}
                         value={formData.grade}
-                        onChange={(e) =>
+                        onChange={(val) =>
                           setFormData({
                             ...formData,
-                            grade: e.target.value,
+                            grade: val,
                             subjects: [], // Clear subjects when grade changes
                           })
                         }
-                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      >
-                        <option value="">Select your level</option>
-                        {GRADES.map((grade) => (
-                          <option key={grade} value={grade}>
-                            {grade}
-                          </option>
-                        ))}
-                      </select>
+                        placeholder="Select your level"
+                      />
                     </div>
 
                     <div>

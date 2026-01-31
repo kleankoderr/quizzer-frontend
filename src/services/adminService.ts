@@ -166,8 +166,30 @@ export const adminService = {
     return response.data;
   },
 
+  getAdminQuizzes: async (filter: any) => {
+    const response = await api.get('/admin/quiz', { params: filter });
+    return response.data;
+  },
+
   getReportedContent: async () => {
     const response = await api.get('/admin/content/reports');
+    return response.data;
+  },
+
+  getAdminQuizDetails: async (id: string) => {
+    const response = await api.get(`/admin/quiz/${id}`);
+    return response.data;
+  },
+
+  updateAdminQuiz: async (id: string, data: any) => {
+    const response = await api.patch(`/admin/quiz/${id}`, data);
+    return response.data;
+  },
+
+  deleteQuestions: async (quizId: string, questionIds: string[]) => {
+    const response = await api.delete(`/admin/quiz/${quizId}/questions`, {
+      data: { questionIds },
+    });
     return response.data;
   },
 
@@ -190,6 +212,44 @@ export const adminService = {
 
   deleteQuiz: async (id: string) => {
     const response = await api.delete(`/admin/quiz/${id}`);
+    return response.data;
+  },
+
+  generateQuiz: async (
+    request: any,
+    files?: File[]
+  ): Promise<{ jobId: string; status: string }> => {
+    const formData = new FormData();
+
+    // Add files if provided
+    if (files && files.length > 0) {
+      for (const file of files) {
+        formData.append('files', file);
+      }
+    }
+
+    // Add all other fields from the request
+    Object.entries(request).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(`${key}[]`, String(v)));
+        } else if (typeof value === 'object') {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, String(value));
+        }
+      }
+    });
+
+    const response = await api.post<{ jobId: string; status: string }>(
+      '/admin/quiz',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
     return response.data;
   },
 

@@ -1,19 +1,13 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import {
-  Search,
-  Shield,
-  ShieldAlert,
-  UserX,
-  UserCheck,
-  Trash2,
-} from 'lucide-react';
+import { Filter, Search, Shield, ShieldAlert, Trash2, UserCheck, UserX } from 'lucide-react';
 import { adminService, type User } from '../../services/adminService';
 import { format } from 'date-fns';
 import { Toast as toast } from '../../utils/toast';
 import { Modal } from '../../components/Modal';
 import { TableSkeleton } from '../../components/skeletons';
+import { Select } from '../../components/ui/Select';
 
 export const UserManagement = () => {
   const [search, setSearch] = useState('');
@@ -123,25 +117,29 @@ export const UserManagement = () => {
               className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white sm:w-64"
             />
           </div>
-          <select
+          <Select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-          >
-            <option value="">All Roles</option>
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
-          </select>
-          <select
+            onChange={setRoleFilter}
+            options={[
+              { label: 'All Roles', value: '' },
+              { label: 'User', value: 'USER' },
+              { label: 'Admin', value: 'ADMIN' },
+              { label: 'Super Admin', value: 'SUPER_ADMIN' },
+            ]}
+            prefixIcon={<Filter className="h-4 w-4" />}
+            className="min-w-[140px]"
+          />
+          <Select
             value={premiumFilter}
-            onChange={(e) => setPremiumFilter(e.target.value)}
-            className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-          >
-            <option value="">All Users</option>
-            <option value="true">Premium</option>
-            <option value="false">Free</option>
-          </select>
+            onChange={setPremiumFilter}
+            options={[
+              { label: 'All Users', value: '' },
+              { label: 'Premium', value: 'true' },
+              { label: 'Free', value: 'false' },
+            ]}
+            prefixIcon={<Filter className="h-4 w-4" />}
+            className="min-w-[140px]"
+          />
         </div>
       </div>
 

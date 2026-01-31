@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CreditCard } from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { CreditCard, Filter } from 'lucide-react';
+import { adminService } from '../../services';
 import { format } from 'date-fns';
+import { Select } from '../../components/ui/Select';
 
 export const SubscriptionsPage = () => {
   const [page, setPage] = useState(1);
@@ -30,16 +31,18 @@ export const SubscriptionsPage = () => {
           </p>
         </div>
 
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">All Status</option>
-          <option value="ACTIVE">Active</option>
-          <option value="CANCELLED">Cancelled</option>
-          <option value="EXPIRED">Expired</option>
-        </select>
+          onChange={setStatusFilter}
+          options={[
+            { label: 'All Status', value: '' },
+            { label: 'Active', value: 'ACTIVE' },
+            { label: 'Cancelled', value: 'CANCELLED' },
+            { label: 'Expired', value: 'EXPIRED' },
+          ]}
+          prefixIcon={<Filter className="w-5 h-5" />}
+          className="min-w-[160px]"
+        />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">

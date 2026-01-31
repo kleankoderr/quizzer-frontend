@@ -761,7 +761,7 @@ export const ContentPage = () => {
           ) : isGenerating ? (
             <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
               <Loader2 className="w-4 h-4 animate-spin" />
-              AI is writing your summary...
+              Quizzer is writing your summary...
             </div>
           ) : null
         }

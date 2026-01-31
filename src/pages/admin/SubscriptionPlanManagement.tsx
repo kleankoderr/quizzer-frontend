@@ -1,18 +1,10 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Package,
-  Plus,
-  Edit2,
-  Trash2,
-  Check,
-  X,
-  Users,
-  Zap,
-} from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Check, Edit2, Package, Plus, Trash2, Users, X, Zap } from 'lucide-react';
 import type { SubscriptionPlan } from '../../services/adminService';
+import { adminService } from '../../services';
 import { Toast as toast } from '../../utils/toast';
+import { Select } from '../../components/ui/Select';
 
 export const SubscriptionPlanManagement = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -395,16 +387,16 @@ const PlanFormModal = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Billing Interval
               </label>
-              <select
+              <Select
                 value={formData.interval}
-                onChange={(e) =>
-                  setFormData({ ...formData, interval: e.target.value })
+                onChange={(val) =>
+                  setFormData({ ...formData, interval: val })
                 }
-                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-              >
-                <option value="month">Monthly</option>
-                <option value="year">Yearly</option>
-              </select>
+                options={[
+                  { label: 'Monthly', value: 'month' },
+                  { label: 'Yearly', value: 'year' },
+                ]}
+              />
             </div>
 
             <div className="flex items-center">

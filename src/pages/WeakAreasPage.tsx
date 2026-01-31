@@ -1,27 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { weakAreaService } from '../services';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WeakAreaCard } from '../components/WeakAreaCard';
-import {
-  Target,
-  AlertTriangle,
-  TrendingDown,
-  BarChart3,
-  Filter,
-} from 'lucide-react';
+import { AlertTriangle, BarChart3, Filter, Target, TrendingDown } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { userService } from '../services';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+import { userService, weakAreaService } from '../services';
+import { Select } from '../components/ui/Select';
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 type Tab = 'active' | 'resolved' | 'statistics';
 type SortBy = 'errors' | 'recent';
@@ -216,34 +201,31 @@ export const WeakAreasPage = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Topic Filter */}
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <select
+              <Select
                 value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-              >
-                <option value="all">All Topics</option>
-                {topics.map((topic) => (
-                  <option key={topic} value={topic}>
-                    {topic}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedTopic}
+                options={[
+                  { label: 'All Topics', value: 'all' },
+                  ...topics.map((topic) => ({ label: topic, value: topic })),
+                ]}
+                prefixIcon={<Filter className="h-4 w-4" />}
+                className="min-w-[160px]"
+              />
             </div>
 
-            {/* Sort By */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 Sort by:
               </span>
-              <select
+              <Select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-              >
-                <option value="errors">Error Count</option>
-                <option value="recent">Most Recent</option>
-              </select>
+                onChange={(val) => setSortBy(val as SortBy)}
+                options={[
+                  { label: 'Error Count', value: 'errors' },
+                  { label: 'Most Recent', value: 'recent' },
+                ]}
+                className="min-w-[140px]"
+              />
             </div>
           </div>
         )}

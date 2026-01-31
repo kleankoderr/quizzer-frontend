@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
-import type { QuizGenerateRequest, QuizType, QuestionType } from '../types';
+import React from 'react';
+import type { QuestionType, QuizGenerateRequest, QuizType } from '../types';
 import {
-  Brain,
-  Sparkles,
+  AlignLeft,
   BookOpen,
-  FileText,
-  Upload,
+  Brain,
+  CheckCircle,
+  CheckSquare,
   ChevronDown,
   ChevronRight,
   Clock,
-  Target,
-  ListChecks,
-  CheckSquare,
-  CheckCircle,
-  Link as LinkIcon,
-  AlignLeft,
-  LayoutList,
+  FileText,
   Folder,
+  LayoutList,
+  Link as LinkIcon,
+  ListChecks,
+  Sparkles,
+  Target,
+  Upload,
 } from 'lucide-react';
 import { FileSelector } from './FileSelector';
 import { FileUpload } from './FileUpload';
 import { StudyPackSelector } from './StudyPackSelector';
 import { InputError } from './InputError';
-import { Toast as toast } from '../utils/toast';
+import { useQuizGenerator } from '../hooks/useQuizGenerator';
 
 interface QuizGeneratorProps {
   onGenerate: (request: QuizGenerateRequest, files?: File[]) => void;
@@ -36,81 +36,64 @@ interface QuizGeneratorProps {
     contentId?: string;
     studyPackId?: string;
   };
+  extraFields?: React.ReactNode;
+  onExtraData?: () => Partial<QuizGenerateRequest>;
+  showTitleInput?: boolean;
 }
 
 export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   onGenerate,
   loading,
   initialValues,
+  extraFields,
+  onExtraData,
+  showTitleInput = false,
 }) => {
-  const [mode, setMode] = useState<'topic' | 'content' | 'files'>(
-    initialValues?.mode || 'topic'
-  );
-  const [topic, setTopic] = useState(
-    initialValues?.sourceTitle || initialValues?.topic || ''
-  );
-  const [content, setContent] = useState(initialValues?.content || '');
-  const [files, setFiles] = useState<File[]>([]);
-  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
-  const [showUpload, setShowUpload] = useState(false);
-  const [showExistingFiles, setShowExistingFiles] = useState(false);
-  const [numberOfQuestions, setNumberOfQuestions] = useState(5);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>(
-    'medium'
-  );
-  const [quizType, setQuizType] = useState<QuizType>('standard');
-  const [timeLimit, setTimeLimit] = useState(300);
-  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<
-    QuestionType[]
-  >(['single-select', 'true-false']);
-  const [selectedStudyPackId, setSelectedStudyPackId] = useState(
-    initialValues?.studyPackId || ''
-  );
-  const [isCreatingStudyPack, setIsCreatingStudyPack] = useState(false);
-  const [showStudyPackError, setShowStudyPackError] = useState(false);
+  const { state, actions } = useQuizGenerator({ onGenerate, initialValues });
 
-  const toggleQuestionType = (type: QuestionType) => {
-    setSelectedQuestionTypes((prev) => {
-      if (prev.includes(type)) {
-        return prev.length > 1 ? prev.filter((t) => t !== type) : prev;
-      }
-      return [...prev, type];
-    });
-  };
+  const {
+    mode,
+    topic,
+    content,
+    files,
+    selectedFileIds,
+    showUpload,
+    showExistingFiles,
+    numberOfQuestions,
+    difficulty,
+    quizType,
+    timeLimit,
+    selectedQuestionTypes,
+    selectedStudyPackId,
+    showStudyPackError,
+  } = state;
 
-  // File handling functions removed as they are now handled by FileUpload component
+  const {
+    setMode,
+    setTopic,
+    setContent,
+    setFiles,
+    setSelectedFileIds,
+    setShowUpload,
+    setShowExistingFiles,
+    setNumberOfQuestions,
+    setDifficulty,
+    setQuizType,
+    setTimeLimit,
+    setSelectedStudyPackId,
+    setIsCreatingStudyPack,
+    toggleQuestionType,
+    handleSubmit,
+  } = actions;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [title, setTitle] = React.useState('');
 
-    if (isCreatingStudyPack) {
-      setShowStudyPackError(true);
-      return;
-    }
-    setShowStudyPackError(false);
-
-    const request: QuizGenerateRequest = {
-      numberOfQuestions,
-      difficulty,
-      quizType,
-      timeLimit: quizType === 'timed' ? timeLimit : undefined,
-      questionTypes:
-        selectedQuestionTypes.length > 0 ? selectedQuestionTypes : undefined,
-      contentId: initialValues?.contentId,
-      studyPackId: selectedStudyPackId || undefined,
+  const handleFormSubmit = (e: React.FormEvent) => {
+    const extraData = {
+      ...(onExtraData ? onExtraData() : {}),
+      ...(showTitleInput ? { title } : {}),
     };
-
-    if (mode === 'topic' && topic.trim()) {
-      onGenerate({ ...request, topic });
-    } else if (mode === 'content' && content.trim()) {
-      onGenerate({ ...request, topic: content.substring(0, 50), content });
-    } else if (mode === 'files') {
-      if (files.length === 0 && selectedFileIds.length === 0) {
-        toast.error('Please select or upload at least one file');
-        return;
-      }
-      onGenerate({ ...request, selectedFileIds }, files);
-    }
+    handleSubmit(e, extraData);
   };
 
   return (
@@ -198,7 +181,27 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
+        {showTitleInput && (
+          <div>
+            <label
+              htmlFor="quiz-title"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Quiz Title (Optional)
+            </label>
+            <input
+              id="quiz-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Midterm Biology Review"
+              className="input-field"
+              maxLength={100}
+            />
+          </div>
+        )}
+
         {mode === 'topic' && (
           <div>
             <label
@@ -257,7 +260,6 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
 
         {mode === 'files' && (
           <div className="space-y-4">
-            {/* Collapsible Existing Files Section */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
               <button
                 type="button"
@@ -297,7 +299,6 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               )}
             </div>
 
-            {/* Collapsible Upload Section */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
               <button
                 type="button"
@@ -372,10 +373,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
             </div>
           </div>
 
-          <div id="quiz-difficulty-config">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          <fieldset id="quiz-difficulty-config">
+            <legend className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Difficulty Level
-            </label>
+            </legend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {(['easy', 'medium', 'hard'] as const).map((level) => (
                 <button
@@ -427,12 +428,12 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
-          <div id="quiz-format-config">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          <fieldset id="quiz-format-config">
+            <legend className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Quiz Format
-            </label>
+            </legend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 {
@@ -480,7 +481,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {quizType === 'timed' && (
             <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-5 border border-blue-100 dark:border-blue-900/30">
@@ -514,10 +515,10 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
             </div>
           )}
 
-          <div id="quiz-types-config">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          <fieldset id="quiz-types-config">
+            <legend className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Included Question Types
-            </label>
+            </legend>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
                 {
@@ -570,18 +571,18 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                 * Please select at least one question type
               </p>
             )}
-          </div>
+          </fieldset>
 
           <div id="quiz-study-set-config">
             <StudyPackSelector
               value={selectedStudyPackId}
               onChange={(val) => {
                 setSelectedStudyPackId(val);
-                setShowStudyPackError(false);
+                actions.setShowStudyPackError(false);
               }}
               onCreationModeChange={(isCreating) => {
                 setIsCreatingStudyPack(isCreating);
-                if (!isCreating) setShowStudyPackError(false);
+                if (!isCreating) actions.setShowStudyPackError(false);
               }}
             />
             <InputError
@@ -592,6 +593,16 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               }
             />
           </div>
+
+          {/* Extra fields for admin */}
+          {extraFields && (
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                Admin Settings
+              </h3>
+              {extraFields}
+            </div>
+          )}
         </div>
 
         <button

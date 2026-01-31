@@ -16,6 +16,7 @@ import {
   type LucideProps,
   Medal,
   Package,
+  School,
   Settings,
   Sparkles,
   Trophy,
@@ -104,7 +105,9 @@ export const Sidebar = ({
       items: [
         { path: '/admin/users', icon: User, label: 'Users' },
         { path: '/admin/content', icon: Layers, label: 'Content' },
+        { path: '/admin/quizzes', icon: Brain, label: 'Quizzes' },
         { path: '/admin/plans', icon: Package, label: 'Subscription Plans' },
+        { path: '/admin/schools', icon: School, label: 'Schools' },
       ],
     },
     {
