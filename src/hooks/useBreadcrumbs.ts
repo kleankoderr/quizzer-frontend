@@ -16,8 +16,8 @@ const ROUTE_LABELS: Record<string, string> = {
   'study-pack': 'Study Sets',
   leaderboard: 'Leaderboard',
   challenges: 'Challenges',
-  statistics: 'Statistics',
-  attempts: 'Attempts',
+  statistics: 'Performance',
+  attempts: 'Practice History',
   profile: 'Profile',
   settings: 'Settings',
   admin: 'Admin',
@@ -27,6 +27,7 @@ const ROUTE_LABELS: Record<string, string> = {
   schools: 'Schools',
   'generation-analytics': 'Generation Analytics',
   analytics: 'Analytics',
+  'weak-areas': 'Focus Areas'
 };
 
 export const useBreadcrumbs = () => {
