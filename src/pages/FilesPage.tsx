@@ -1,36 +1,33 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  FileText,
-  Download,
-  Trash2,
-  Search,
-  Filter,
-  Upload,
-  Calendar,
-  HardDrive,
-  ChevronDown,
-  X,
-  Eye,
-  MoreVertical,
   ArrowLeft,
+  Calendar,
+  Download,
+  Eye,
+  FileText,
+  Filter,
   Grid,
+  HardDrive,
   List,
+  MoreVertical,
+  Search,
   SortAsc,
   SortDesc,
+  Trash2,
+  Upload,
+  X,
 } from 'lucide-react';
+import { Select } from '../components/ui/Select';
 import { CardSkeleton, TableSkeleton } from '../components/skeletons';
 import { format } from 'date-fns';
 import { Toast as toast } from '../utils/toast';
-import {
-  userDocumentService,
-  type UserDocument,
-} from '../services/user-document.service';
+import { type UserDocument, userDocumentService } from '../services/user-document.service';
 import { Modal } from '../components/Modal';
 import { DeleteModal } from '../components/DeleteModal';
 import { FileUpload } from '../components/FileUpload';
 import { StorageCleanupModal } from '../components/User/StorageCleanupModal';
-import { useUserDocuments, useInvalidateQuota } from '../hooks';
+import { useInvalidateQuota, useUserDocuments } from '../hooks';
 import { useQueryClient } from '@tanstack/react-query';
 
 type SortField = 'name' | 'date' | 'size';
@@ -562,20 +559,19 @@ export const FilesPage = () => {
           </div>
 
           {/* Type Filter */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white appearance-none cursor-pointer min-w-[180px]"
-            >
-              <option value="all">
-                All Documents ({getFileTypeCount('all')})
-              </option>
-              <option value="pdf">PDFs ({getFileTypeCount('pdf')})</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-          </div>
+          <Select
+            value={selectedType}
+            onChange={setSelectedType}
+            options={[
+              {
+                label: `All Documents (${getFileTypeCount('all')})`,
+                value: 'all',
+              },
+              { label: `PDFs (${getFileTypeCount('pdf')})`, value: 'pdf' },
+            ]}
+            prefixIcon={<Filter className="w-5 h-5" />}
+            className="min-w-[220px]"
+          />
 
           {/* View Mode Toggle */}
           <div className="flex gap-2 bg-gray-50 dark:bg-gray-900 p-1 rounded-xl">

@@ -1,15 +1,12 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StudyPackCard } from '../components/StudyPackCard';
 import { studyPackService } from '../services';
-import { Plus, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { ArrowUpDown, ChevronLeft, ChevronRight, Plus, Search, X } from 'lucide-react';
+import { Select } from '../components/ui/Select';
 import { StudyPackModal } from '../components/StudyPackModal';
 import { DeleteModal } from '../components/DeleteModal';
 import { Toast as toast } from '../utils/toast';
-import {
-  useQuery,
-  useQueryClient,
-  keepPreviousData,
-} from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { StudyPack } from '../types';
 
 const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -166,16 +163,16 @@ export const StudyPacksPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <select
+            <Select
               value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value as 'alphabetical' | 'date')
-              }
-              className="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 font-medium shadow-sm transition-all"
-            >
-              <option value="alphabetical">Alphabetical (A-Z)</option>
-              <option value="date">Date Added</option>
-            </select>
+              onChange={(val) => setSortBy(val as 'alphabetical' | 'date')}
+              options={[
+                { label: 'Alphabetical (A-Z)', value: 'alphabetical' },
+                { label: 'Date Added', value: 'date' },
+              ]}
+              prefixIcon={<ArrowUpDown className="h-4 w-4" />}
+              className="min-w-[200px]"
+            />
 
             <button
               onClick={handleOpenCreate}

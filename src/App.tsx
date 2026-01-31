@@ -150,6 +150,16 @@ const ContentManagement = lazy(() =>
     default: m.ContentManagement,
   }))
 );
+const AdminQuizManagement = lazy(() =>
+  import('./pages/admin/AdminQuizManagement').then((m) => ({
+    default: m.AdminQuizManagement,
+  }))
+);
+const AdminQuizDetail = lazy(() =>
+  import('./pages/admin/AdminQuizDetail').then((m) => ({
+    default: m.AdminQuizDetail,
+  }))
+);
 const ContentModeration = lazy(() =>
   import('./pages/admin/ContentModeration').then((m) => ({
     default: m.ContentModeration,
@@ -367,6 +377,22 @@ function AppRoutes() {
               }
             />
             <Route
+              path="admin/quizzes"
+              element={
+                <AdminRoute>
+                  <AdminQuizManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/quizzes/:id"
+              element={
+                <AdminRoute>
+                  <AdminQuizDetail />
+                </AdminRoute>
+              }
+            />
+            <Route
               path="admin/moderation"
               element={
                 <AdminRoute>
@@ -427,14 +453,6 @@ function AppRoutes() {
               element={
                 <AdminRoute>
                   <PaymentFailuresPage />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="admin/campaigns"
-              element={
-                <AdminRoute>
-                  <EmailCampaignsPage />
                 </AdminRoute>
               }
             />

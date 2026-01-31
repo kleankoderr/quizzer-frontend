@@ -6,6 +6,19 @@ export interface BreadcrumbItem {
   path?: string;
 }
 
+/**
+ * Example:
+ *
+ * URL: /admin/content/12345/analytics
+ *
+ * Resulting breadcrumbs:
+ * [
+ *   { label: 'Admin', path: '/admin' },
+ *   { label: 'Content', path: '/admin/content' },
+ *   { label: 'Details', path: '/admin/content/12345' },
+ *   { label: 'Analytics' }
+ * ]
+ */
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
   study: 'Study Material',
@@ -27,63 +40,71 @@ const ROUTE_LABELS: Record<string, string> = {
   schools: 'Schools',
   'generation-analytics': 'Generation Analytics',
   analytics: 'Analytics',
+  'weak-areas': 'Focus Areas',
 };
+
+/**
+ * URL segments that should appear in breadcrumbs
+ * but should not be clickable
+ */
+const NON_LINKABLE_SEGMENTS = new Set([
+  'results',
+  'attempt',
+  'review',
+]);
+
+/**
+ * Heuristic to detect IDs in URLs and avoid
+ * showing raw identifiers in breadcrumbs
+ */
+const isLikelyId = (segment: string) =>
+  segment.length > 10 && /\d/.test(segment);
+
+/**
+ * Returns a readable label for a route segment
+ */
+const formatLabel = (segment: string) =>
+  ROUTE_LABELS[segment] ??
+  segment.charAt(0).toUpperCase() + segment.slice(1);
 
 export const useBreadcrumbs = () => {
   const location = useLocation();
 
-  const breadcrumbs = useMemo(() => {
-    // 1. Check for custom breadcrumb trail in state (passed from previous page)
-    if (location.state?.breadcrumb) {
-      return location.state.breadcrumb as BreadcrumbItem[];
+  return useMemo<BreadcrumbItem[]>(() => {
+    // Prefer explicitly provided breadcrumbs (e.g. dynamic titles)
+    const customBreadcrumb = location.state?.breadcrumb as
+      | BreadcrumbItem[]
+      | undefined;
+
+    if (customBreadcrumb) {
+      return customBreadcrumb;
     }
 
-    // 2. Generate default hierarchy based on URL
-    const pathnames = location.pathname.split('/').filter(Boolean);
-    const items: BreadcrumbItem[] = [];
+    // Split current URL into path segments
+    const segments = location.pathname.split('/').filter(Boolean);
+    const breadcrumbs: BreadcrumbItem[] = [];
 
-    // Always start with Home/Dashboard if not already there
-    // (The Breadcrumb component adds the Home icon link to /dashboard, so we don't need to duplicate it here unless we want text)
-    // Let's stick to the path segments.
+    let accumulatedPath = '';
 
-    let currentPath = '';
+    segments.forEach((segment, index) => {
+      // Build the path progressively for clickable breadcrumb items
+      accumulatedPath += `/${segment}`;
 
-    pathnames.forEach((value, index) => {
-      currentPath += `/${value}`;
-      const isLast = index === pathnames.length - 1;
+      const isLast = index === segments.length - 1;
+      const isNonLinkable = NON_LINKABLE_SEGMENTS.has(segment.toLowerCase());
 
-      // Skip IDs (simple heuristic: if it looks like a UUID or is very long/numeric, treat as ID)
-      // For now, we'll just use the route map or capitalize.
-      // Ideally, we'd look up the title, but for generic routes:
+      // Replace IDs with a generic label to keep breadcrumbs readable
+      const label = isLikelyId(segment)
+        ? 'Details'
+        : formatLabel(segment);
 
-      let label =
-        ROUTE_LABELS[value] || value.charAt(0).toUpperCase() + value.slice(1);
-
-      // If it's an ID (often 2nd segment in /content/:id), we might want to skip it or show "Details"
-      // But for now, let's keep it simple. If it's a known route, use the label.
-      // If it's not known and looks like an ID, maybe ignore it or show "Details"?
-      // Let's rely on the state passing for "nice" names (like Content Title).
-      // For default URL parsing, showing the ID is ugly.
-
-      // Heuristic: if value has numbers and length > 10, it's probably an ID.
-      if (value.length > 10 && /\d/.test(value)) {
-        label = 'Details';
-      }
-
-      // Handle specific non-linkable segments to prevent broken breadcrumbs
-      // 'results', 'attempt', 'review' are typically part of a longer path and don't have their own index pages
-      const isNonLinkable = ['results', 'attempt', 'review'].includes(
-        value.toLowerCase()
-      );
-
-      items.push({
+      breadcrumbs.push({
         label,
-        path: isLast || isNonLinkable ? undefined : currentPath,
+        // Only intermediate routes should be clickable
+        path: isLast || isNonLinkable ? undefined : accumulatedPath,
       });
     });
 
-    return items;
+    return breadcrumbs;
   }, [location]);
-
-  return breadcrumbs;
 };

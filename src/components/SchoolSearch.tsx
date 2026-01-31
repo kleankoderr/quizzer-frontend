@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { School as SchoolIcon, Search, Plus, ChevronDown } from 'lucide-react';
-import { schoolService, type School } from '../services/school.service';
-import { useDebounce, useClickOutside } from '../hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { ChevronDown, Plus, School as SchoolIcon, Search } from 'lucide-react';
+import { type School, schoolService } from '../services/school.service';
+import { useClickOutside, useDebounce } from '../hooks';
 
 interface SchoolSearchProps {
   id?: string;
@@ -23,7 +24,40 @@ export const SchoolSearch = ({
   const [initialSchools, setInitialSchools] = useState<School[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const updateCoords = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updateCoords();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleEvents = () => {
+      if (isOpen) updateCoords();
+    };
+
+    window.addEventListener('resize', handleEvents);
+    window.addEventListener('scroll', handleEvents, true);
+
+    return () => {
+      window.removeEventListener('resize', handleEvents);
+      window.removeEventListener('scroll', handleEvents, true);
+    };
+  }, [isOpen]);
 
   const debouncedQuery = useDebounce(query, 300);
 
@@ -44,9 +78,13 @@ export const SchoolSearch = ({
     setQuery(value);
   }, [value]);
 
-  useClickOutside(wrapperRef as React.RefObject<HTMLElement>, () =>
-    setIsOpen(false)
-  );
+  useClickOutside(wrapperRef as React.RefObject<HTMLElement>, (event) => {
+    // Only close if the click wasn't inside the portal-rendered list
+    const isPortalClick = !!document.getElementById('school-search-portal')?.contains(event.target as Node);
+    if (!isPortalClick) {
+      setIsOpen(false);
+    }
+  });
 
   useEffect(() => {
     const searchSchools = async () => {
@@ -144,6 +182,7 @@ export const SchoolSearch = ({
         <SchoolIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
         <input
           id={id}
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => {
@@ -176,10 +215,20 @@ export const SchoolSearch = ({
         )}
       </div>
 
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-80 overflow-y-auto">
+      {isOpen && createPortal(
+        <div 
+          id="school-search-portal"
+          style={{
+            position: 'absolute',
+            top: coords.top + 4,
+            left: coords.left,
+            width: coords.width,
+          }}
+          className="z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-80 overflow-y-auto"
+        >
           {renderDropdownContent()}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

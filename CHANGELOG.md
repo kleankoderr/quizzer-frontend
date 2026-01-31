@@ -2,26 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.0.3](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.2...frontend-v0.0.3) (2026-01-30)
-
-
-### Features
-
-* Add real-time updates for flashcard and quiz progress with loading indicators ([1d13652](https://github.com/kleankoderr/quizzer-frontend/commit/1d136527ab2a90249a969ef83b0e8731d8396fb0))
-
-
-### Styling
-
-* Refactor code for improved readability and consistency ([4d13117](https://github.com/kleankoderr/quizzer-frontend/commit/4d1311737fde836574520993e4cb5805af199f81))
-
-### [0.0.2](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.1...frontend-v0.0.2) (2026-01-30)
-
-
-### Features
-
-* Add new public route for search functionality ([da0e52c](https://github.com/kleankoderr/quizzer-frontend/commit/da0e52cad19070ce099c28f7149f4038ef6e69fa))
-
-### 0.0.1 (2026-01-30)
+## 1.0.0 (2026-01-31)
 
 
 ### Features
@@ -55,6 +36,7 @@ All notable changes to this project will be documented in this file. See [standa
 * Add product tour component to enhance user onboarding experience and improve navigation guidance ([90adfb5](https://github.com/kleankoderr/quizzer-frontend/commit/90adfb5e29938a613e6f2fe22b7db07d484cde66))
 * Add quiz review component, enhance challenge ID handling in attempts, and improve challenge results page with dynamic score grading. ([6cb3d50](https://github.com/kleankoderr/quizzer-frontend/commit/6cb3d507722396bd87813695981f822a52b90417))
 * Add quiz review page and update navigation for quiz attempts ([7134954](https://github.com/kleankoderr/quizzer-frontend/commit/713495485da966cd26247753ae13b96727e52969))
+* Add real-time updates for flashcard and quiz progress with loading indicators ([1d13652](https://github.com/kleankoderr/quizzer-frontend/commit/1d136527ab2a90249a969ef83b0e8731d8396fb0))
 * Add recommendations feature with AI-powered suggestions and dismiss functionality ([e55fd13](https://github.com/kleankoderr/quizzer-frontend/commit/e55fd13e69dd13182bfdc832677bcbe17a7a6db9))
 * Add release automation with standard-version and GitHub Actions ([9cd5116](https://github.com/kleankoderr/quizzer-frontend/commit/9cd5116e1588e35ce93f659c9418179627ee7eb5))
 * Add review page and floating button for due items with enhanced dashboard integration ([a4bb580](https://github.com/kleankoderr/quizzer-frontend/commit/a4bb58040c72855fa4a65e71a94b605c1401f655))
@@ -128,6 +110,7 @@ All notable changes to this project will be documented in this file. See [standa
 * Implement pagination for flashcard and quiz retrieval, and enhance data structures with additional counts ([24541d5](https://github.com/kleankoderr/quizzer-frontend/commit/24541d5be1df89310ac6cef0a50bdebfca87e993))
 * Implement post-authentication redirect, refine challenge UI, add logout service call, and bypass onboarding for challenge pages. ([c0406d3](https://github.com/kleankoderr/quizzer-frontend/commit/c0406d32b18a81dd176de196b5aea16aa0265570))
 * Implement public settings caching, restrict file uploads to PDF with a 5MB limit, and update chart tooltip styles while removing the ([df817dd](https://github.com/kleankoderr/quizzer-frontend/commit/df817dd8f47ee24f4df90f0059c04f201e318cc1))
+* Implement quiz management features with new routes and UI components ([69d8bf2](https://github.com/kleankoderr/quizzer-frontend/commit/69d8bf25918bcdea96bfb315e47c86e51f35bee4))
 * Implement retry logic for payment verification with exponential backoff ([b9b8349](https://github.com/kleankoderr/quizzer-frontend/commit/b9b8349074cb4d0804894fd0b9a4dce8fb63aa35))
 * Implement school search, add quiz tags display, introduce assessment popup, and refine onboarding flow with new loading screens. ([15420c3](https://github.com/kleankoderr/quizzer-frontend/commit/15420c385a4d84efd0451c21b3b49db951118757))
 * Implement ScrollToTop component for improved navigation experience ([7f37967](https://github.com/kleankoderr/quizzer-frontend/commit/7f379670ee74e0e94d2019b0cd2b6c316798d070))
@@ -150,6 +133,7 @@ All notable changes to this project will be documented in this file. See [standa
 * Reduce default limit for flashcard and quiz retrieval endpoints to improve performance ([d0c6d72](https://github.com/kleankoderr/quizzer-frontend/commit/d0c6d726b727fa49cb0387cc2801d79e52fbfd0c))
 * Refactor flashcard and quiz generation to use job polling for status updates ([1be2df8](https://github.com/kleankoderr/quizzer-frontend/commit/1be2df81ad1fd4772da899dcc40893f89c38c8ed))
 * Refactor LearningGuide component and introduce LearningGuideSection and SectionNavigator for improved structure and navigation ([8317161](https://github.com/kleankoderr/quizzer-frontend/commit/831716166ca436ef92108ef3e67c9c70660c41b2))
+* Refactor question selection logic and improve quiz status toggle UI ([4f058e7](https://github.com/kleankoderr/quizzer-frontend/commit/4f058e720e3db5feceff88cc007b09104594bc4f))
 * Refactor quota management to use monthly limits and implement pagination for user documents ([d525d0f](https://github.com/kleankoderr/quizzer-frontend/commit/d525d0f2c1629fe930cb3468c05121089b576361))
 * Refactor results display with ResultsHeroCard component for quizzes and flashcards ([912c31e](https://github.com/kleankoderr/quizzer-frontend/commit/912c31e8354602b92ed60449fc18ca57454363c7))
 * Refactor section border classes for improved readability and maintainability ([f359c9e](https://github.com/kleankoderr/quizzer-frontend/commit/f359c9ee849b2d0be007d0ccf3bf92112876052b))
@@ -254,3 +238,10 @@ All notable changes to this project will be documented in this file. See [standa
 * Update scroll handling in multiple pages to use main content area and improve performance ([6f19842](https://github.com/kleankoderr/quizzer-frontend/commit/6f1984289b2683a4306baad8fbfae43d0cbfb548))
 * Update Tailwind CSS import syntax, remove duplicate dependency, and adjust TypeScript configuration. ([4c81fef](https://github.com/kleankoderr/quizzer-frontend/commit/4c81fef1a57b34cbc5b6f91938ba54b2bd7a0320))
 * Use named import for `api` ([b1faf2c](https://github.com/kleankoderr/quizzer-frontend/commit/b1faf2c75777f2dd25ba20ba7ccf6404b8de9748))
+
+
+### Styling
+
+* Improve code formatting and consistency across multiple components ([8de3582](https://github.com/kleankoderr/quizzer-frontend/commit/8de35821bfc5146498a9827250266a8d17663e18))
+* Refactor code for improved readability and consistency ([4d13117](https://github.com/kleankoderr/quizzer-frontend/commit/4d1311737fde836574520993e4cb5805af199f81))
+* Reformat `handleSubmit` `useCallback` definition for consistency. ([b25e0fc](https://github.com/kleankoderr/quizzer-frontend/commit/b25e0fc5ca95da49b04df569358ebf3d628aad04))
