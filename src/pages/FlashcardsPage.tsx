@@ -208,8 +208,44 @@ export const FlashcardsPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await flashcardService.generate(request, files);
-      setCurrentJobId(jobId);
+      const response = await flashcardService.generate(request, files);
+      
+      // Handle immediate completion (e.g. cached result)
+      if (response.status === 'completed' || response.cached) {
+        await queryClient.invalidateQueries({ queryKey: ['flashcardSets'] });
+        await invalidateQuota();
+
+        if (initialValues?.contentId) {
+          await queryClient.invalidateQueries({
+            queryKey: ['content', initialValues.contentId],
+          });
+        }
+
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Flashcards Ready!"
+              message="Opening your flashcards... (loaded from cache)"
+              progress={100}
+              status="success"
+              onClose={() => setLoading(false)}
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
+
+        setTimeout(() => {
+          navigate(`/flashcards/${response.recordId || response.jobId}`);
+        }, 500);
+
+        setLoading(false);
+        setCurrentJobId(undefined);
+        toastIdRef.current = undefined;
+        return;
+      }
+
+      setCurrentJobId(response.jobId);
     } catch (error: any) {
       let errorMessage =
         error?.response?.data?.message || 'Failed to create flashcards';

@@ -29,7 +29,12 @@ export const quizService = {
   generate: async (
     request: QuizGenerateRequest,
     files?: File[]
-  ): Promise<{ jobId: string; status: string }> => {
+  ): Promise<{
+    jobId: string;
+    status: string;
+    recordId?: string;
+    cached?: boolean;
+  }> => {
     const formData = new FormData();
 
     // Add files if provided
@@ -64,15 +69,16 @@ export const quizService = {
       }
     }
 
-    const response = await apiClient.post<{ jobId: string; status: string }>(
-      QUIZ_ENDPOINTS.GENERATE,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+    const response = await apiClient.post<{
+      jobId: string;
+      status: string;
+      recordId?: string;
+      cached?: boolean;
+    }>(QUIZ_ENDPOINTS.GENERATE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

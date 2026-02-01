@@ -20,6 +20,20 @@ interface QuestionRendererProps {
 // Custom paragraph renderer component to avoid re-creation on every render
 const ParagraphRenderer = ({ _node, ...props }: any) => <span {...props} />;
 
+// Helper to preprocess math content to ensure LaTeX renders properly
+const preprocessMath = (text: string) => {
+  if (!text) return '';
+  
+  // Standardize LaTeX delimiters to $ and $$ for KaTeX
+  return text
+    // Replace \[ and \] with $$ (block math)
+    .replaceAll(/\\{1,2}\[([\s\S]*?)\\{1,2}\]/g, '$$$$$1$$$$')
+    // Replace \( and \) with $ (inline math)
+    .replaceAll(/\\{1,2}\((([\s\S]*?))\\{1,2}\)/g, '$$$1$$')
+    // Handle ( \sqrt... ) or other commands start inside plain parentheses
+    .replaceAll(/\(\s*(\\[a-zA-Z][\s\S]*?)\)/g, '$$$1$$');
+};
+
 // Reusable Markdown component for questions and options
 const MarkdownText = ({
   content,
@@ -38,7 +52,7 @@ const MarkdownText = ({
         p: ParagraphRenderer,
       }}
     >
-      {content}
+      {preprocessMath(content)}
     </ReactMarkdown>
   </div>
 );

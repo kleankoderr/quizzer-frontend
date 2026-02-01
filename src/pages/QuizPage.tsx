@@ -244,8 +244,53 @@ export const QuizPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await quizService.generate(request, files);
-      setCurrentJobId(jobId);
+      const response = await quizService.generate(request, files);
+
+      // Handle immediate completion (e.g. cached result)
+      if (response.status === 'completed' || response.cached) {
+        await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+        await invalidateQuota();
+
+        if (initialValues?.contentId) {
+          await queryClient.invalidateQueries({
+            queryKey: ['content', initialValues.contentId],
+          });
+        }
+
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Quiz Ready!"
+              message="Opening your quiz... (loaded from cache)"
+              progress={100}
+              status="success"
+              onClose={() => setGenerating(false)}
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
+
+        setTimeout(() => {
+          navigate(`/quiz/${response.recordId || response.jobId}`, {
+            state: {
+              breadcrumb: initialValues?.breadcrumb
+                ? [
+                    ...initialValues.breadcrumb.slice(0, -1),
+                    { label: 'Quiz', path: null },
+                  ]
+                : undefined,
+            },
+          });
+        }, 500);
+
+        setGenerating(false);
+        setCurrentJobId(undefined);
+        toastIdRef.current = undefined;
+        return;
+      }
+
+      setCurrentJobId(response.jobId);
     } catch (error: any) {
       let errorMessage =
         error?.response?.data?.message || 'Failed to generate quiz';

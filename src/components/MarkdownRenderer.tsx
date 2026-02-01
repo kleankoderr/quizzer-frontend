@@ -23,14 +23,19 @@ const preprocessMath = (content: string): string => {
 
   let processed = content;
 
+  // Standardize LaTeX delimiters to $ and $$ for KaTeX
+  // Handle both single and double backslashes
+  
   // Convert \[...\] to $$...$$ (display math)
-  processed = processed.replaceAll(/\\\[([\s\S]*?)\\\]/g, '$$$$1$$');
+  processed = processed.replaceAll(/\\{1,2}\[([\s\S]*?)\\{1,2}\]/g, '$$$$$1$$$$');
 
   // Convert \(...\) to $...$ (inline math)
-  processed = processed.replaceAll(/\\\(([\s\S]*?)\\\)/g, '$$$1$$');
+  processed = processed.replaceAll(/\\{1,2}\(([\s\S]*?)\\{1,2}\)/g, '$$$1$$');
+
+  // Handle ( \sqrt... ) or other commands start inside plain parentheses
+  processed = processed.replaceAll(/\(\s*(\\[a-zA-Z][\s\S]*?)\)/g, '$$$1$$');
 
   // Handle cases where parentheses are used like (P(n): formula) - common in proofs
-  // Convert patterns like (P(n): ...) where there's clear math notation
   processed = processed.replaceAll(
     /\(([A-Z]\([a-z]\):\s*[^)]+(?:\^\d+|\\[a-z]+|[+\-*/=])[^)]*)\)/g,
     '$$$1$$'
@@ -74,8 +79,8 @@ const MermaidDiagram: React.FC<{ chart: string }> = ({ chart }) => {
         // Validate syntax first
         try {
           await mermaid.parse(chart);
-        } catch (parseErr) {
-          console.error('Mermaid parse error:', parseErr);
+        } catch (error_) {
+          console.error('Mermaid parse error:', error_);
           setError('Failed to load diagram');
           return;
         }
@@ -171,13 +176,13 @@ const CodeBlock = ({
           PreTag="div"
           className="rounded-xl !bg-gray-900 !p-4 sm:!p-6 border border-gray-700/50 overflow-x-auto shadow-lg"
         >
-          {childrenStr.replace(/\n$/, '')}
+          {childrenStr.replaceAll(/\n$/g, '')}
         </SyntaxHighlighter>
       </div>
     );
   }
 
-  const cleanContent = childrenStr.replace(/^`+|`+$/g, '').trim();
+  const cleanContent = childrenStr.replaceAll(/(^`+)|(`+$)/g, '').trim();
 
   return (
     <code

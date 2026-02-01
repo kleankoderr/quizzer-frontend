@@ -115,8 +115,33 @@ export const AdminQuizManagement = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await adminService.generateQuiz(request, files);
-      setCurrentJobId(jobId);
+      const response = await adminService.generateQuiz(request, files);
+      
+      // Handle immediate completion (e.g. cached result)
+      if (response.status === 'completed' || (response as any).cached) {
+        await queryClient.invalidateQueries({ queryKey: ['adminQuizzes'] });
+        
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Quiz Generated!"
+              message="Quiz is now available (loaded from cache)."
+              progress={100}
+              status="success"
+              onClose={() => setGenerating(false)}
+            />
+          ),
+          { id: toastIdRef.current, duration: 3000 }
+        );
+
+        setGenerating(false);
+        toastIdRef.current = undefined;
+        setShowGenerator(false);
+        return;
+      }
+
+      setCurrentJobId(response.jobId);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to start generation', { id: toastId });
       setGenerating(false);

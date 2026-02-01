@@ -356,11 +356,48 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.generate({
+      const response = await contentService.generate({
         topic,
         studyPackId: selectedStudyPackId || undefined,
       });
-      setCurrentJobId(jobId);
+
+      // Handle immediate completion (e.g. cached result)
+      if (response.status === 'completed' || response.cached) {
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Content Ready!"
+              message="Opening your study material... (loaded from cache)"
+              progress={100}
+              status="success"
+              onClose={() => setContentLoading(false)}
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
+
+        setTimeout(() => {
+          navigate(`/content/${response.recordId || response.jobId}`, {
+            state: {
+              breadcrumb: [{ label: 'Study Material', path: '/study' }],
+            },
+          });
+        }, 500);
+
+        setContentLoading(false);
+        setCurrentJobId(undefined);
+        toastIdRef.current = undefined;
+        await queryClient.invalidateQueries({ queryKey: ['contents'] });
+        if (selectedStudyPackId) {
+          await queryClient.invalidateQueries({
+            queryKey: ['studyPack', selectedStudyPackId],
+          });
+        }
+        return;
+      }
+
+      setCurrentJobId(response.jobId);
     } catch (error: any) {
       let errorMessage =
         error?.response?.data?.message || 'Failed to generate content';
@@ -418,13 +455,50 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.generate({
+      const response = await contentService.generate({
         content: textContent,
         title: textTitle || undefined,
         topic: textTopic || undefined,
         studyPackId: selectedStudyPackId || undefined,
       });
-      setCurrentJobId(jobId);
+
+      // Handle immediate completion (e.g. cached result)
+      if (response.status === 'completed' || response.cached) {
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Content Ready!"
+              message="Opening your study material... (loaded from cache)"
+              progress={100}
+              status="success"
+              onClose={() => setContentLoading(false)}
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
+
+        setTimeout(() => {
+          navigate(`/content/${response.recordId || response.jobId}`, {
+            state: {
+              breadcrumb: [{ label: 'Study Material', path: '/study' }],
+            },
+          });
+        }, 500);
+
+        setContentLoading(false);
+        setCurrentJobId(undefined);
+        toastIdRef.current = undefined;
+        await queryClient.invalidateQueries({ queryKey: ['contents'] });
+        if (selectedStudyPackId) {
+          await queryClient.invalidateQueries({
+            queryKey: ['studyPack', selectedStudyPackId],
+          });
+        }
+        return;
+      }
+
+      setCurrentJobId(response.jobId);
     } catch (error: any) {
       let errorMessage =
         error?.response?.data?.message || 'Failed to generate content';
@@ -488,7 +562,7 @@ export const StudyPage = () => {
     toastIdRef.current = toastId;
 
     try {
-      const { jobId } = await contentService.generate(
+      const response = await contentService.generate(
         {
           selectedFileIds,
           studyPackId: selectedStudyPackId || undefined,
@@ -514,6 +588,42 @@ export const StudyPage = () => {
         }
       );
 
+      // Handle immediate completion (e.g. cached result)
+      if (response.status === 'completed' || response.cached) {
+        toast.custom(
+          (t) => (
+            <ProgressToast
+              t={t}
+              title="Content Ready!"
+              message="Opening your study material... (loaded from cache)"
+              progress={100}
+              status="success"
+              onClose={() => setContentLoading(false)}
+            />
+          ),
+          { id: toastIdRef.current, duration: 2000 }
+        );
+
+        setTimeout(() => {
+          navigate(`/content/${response.recordId || response.jobId}`, {
+            state: {
+              breadcrumb: [{ label: 'Study Material', path: '/study' }],
+            },
+          });
+        }, 500);
+
+        setContentLoading(false);
+        setCurrentJobId(undefined);
+        toastIdRef.current = undefined;
+        await queryClient.invalidateQueries({ queryKey: ['contents'] });
+        if (selectedStudyPackId) {
+          await queryClient.invalidateQueries({
+            queryKey: ['studyPack', selectedStudyPackId],
+          });
+        }
+        return;
+      }
+
       // Switch to auto-progress for content generation phase
       toast.custom(
         (t) => (
@@ -531,7 +641,7 @@ export const StudyPage = () => {
         { id: toastId }
       );
 
-      setCurrentJobId(jobId);
+      setCurrentJobId(response.jobId);
     } catch (error: any) {
       let errorMessage = error?.response?.data?.message || 'Upload failed';
 

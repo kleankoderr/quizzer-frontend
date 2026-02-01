@@ -218,7 +218,12 @@ export const adminService = {
   generateQuiz: async (
     request: any,
     files?: File[]
-  ): Promise<{ jobId: string; status: string }> => {
+  ): Promise<{
+    jobId: string;
+    status: string;
+    recordId?: string;
+    cached?: boolean;
+  }> => {
     const formData = new FormData();
 
     // Add files if provided
@@ -241,15 +246,16 @@ export const adminService = {
       }
     });
 
-    const response = await api.post<{ jobId: string; status: string }>(
-      '/admin/quiz',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+    const response = await api.post<{
+      jobId: string;
+      status: string;
+      recordId?: string;
+      cached?: boolean;
+    }>('/admin/quiz', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

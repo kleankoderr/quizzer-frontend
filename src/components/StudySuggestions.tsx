@@ -22,7 +22,14 @@ export const StudySuggestions: React.FC<StudySuggestionsProps> = ({
   const handleAction = async (suggestion: Suggestion) => {
     // Generate a quick quiz for the topic
     try {
-      await contentService.generate({ topic: suggestion.topic });
+      const response = await contentService.generate({ topic: suggestion.topic });
+      
+      if (response.status === 'completed' || response.cached) {
+         // If cached, navigate directly to content
+         navigate(`/content/${response.recordId || response.jobId}`);
+         return;
+      }
+      
       // Navigate to tasks or wait for completion (simplified for now)
       navigate('/dashboard');
     } catch (_error) {}

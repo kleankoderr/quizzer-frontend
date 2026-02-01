@@ -81,7 +81,12 @@ export const contentService = {
     data: GenerateContentDto,
     files?: File[],
     onProgress?: (progress: number) => void
-  ): Promise<{ jobId: string }> {
+  ): Promise<{
+    jobId: string;
+    status?: string;
+    recordId?: string;
+    cached?: boolean;
+  }> {
     clearCache();
     const formData = new FormData();
 
