@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v1.2.1...frontend-v1.3.0) (2026-02-22)
+
+
+### Features
+
+* Update delete user and flashcard mutation functions for improved clarity ([31d9730](https://github.com/kleankoderr/quizzer-frontend/commit/31d97306775925d295e45c4d0e11d6c4f6b3b8d1))
+
 ### [1.2.1](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v1.2.0...frontend-v1.2.1) (2026-02-22)
 
 
