@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v1.2.0...frontend-v1.2.1) (2026-02-22)
+
+
+### Bug Fixes
+
+* Ensure delete confirmation only triggers mutation if deleteId is present ([ce8f6c8](https://github.com/kleankoderr/quizzer-frontend/commit/ce8f6c8263ecc7ed45b82c37a4133035ccb52cab))
+
 ## [1.2.0](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v1.1.0...frontend-v1.2.0) (2026-02-22)
 
 
