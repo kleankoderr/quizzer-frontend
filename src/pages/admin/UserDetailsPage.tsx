@@ -1,29 +1,27 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  Mail,
-  Calendar,
-  Shield,
   Activity,
-  BookOpen,
-  Layers,
-  Trophy,
-  Target,
-  TrendingUp,
-  Clock,
+  ArrowLeft,
   Award,
-  Trash2,
+  BookOpen,
+  Calendar,
+  Clock,
   FileText,
+  Layers,
+  Mail,
+  Shield,
+  Target,
+  Trash2,
+  TrendingUp,
+  Trophy,
 } from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { adminService } from '../../services';
 import { format } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import { Modal } from '../../components/Modal';
-import { CardSkeleton } from '../../components/skeletons';
-import { StatCardSkeleton } from '../../components/skeletons';
-import { TableSkeleton } from '../../components/skeletons';
+import { CardSkeleton, StatCardSkeleton, TableSkeleton } from '../../components/skeletons';
 
 type ContentType = 'all' | 'quiz' | 'flashcard' | 'content';
 
@@ -75,7 +73,7 @@ export default function UserDetailsPage() {
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: adminService.deleteUser,
+    mutationFn: (userId: string) => adminService.deleteUser(userId),
     onSuccess: () => {
       toast.success('User deleted successfully');
       navigate('/admin/users');
@@ -101,7 +99,7 @@ export default function UserDetailsPage() {
   });
 
   const deleteFlashcardMutation = useMutation({
-    mutationFn: adminService.deleteFlashcard,
+    mutationFn: adminService.deleteFlashcardSet,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['userContent'] });
       await queryClient.invalidateQueries({ queryKey: ['userDetails'] });
