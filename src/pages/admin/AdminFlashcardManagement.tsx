@@ -324,7 +324,9 @@ export const AdminFlashcardManagement = () => {
       <DeleteModal
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
-        onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
+        onConfirm={() => {
+          if (deleteId) deleteMutation.mutate(deleteId);
+        }}
         title="Delete Flashcard Set"
         message="Are you sure you want to delete this flashcard set? This cannot be undone."
         isDeleting={deleteMutation.isPending}
