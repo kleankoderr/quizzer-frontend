@@ -1,16 +1,7 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Search,
-  BookOpen,
-  Calendar,
-  User,
-  Trash2,
-  Layers,
-  Trophy,
-  FileText,
-} from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BookOpen, Calendar, FileText, Layers, Search, Trash2, Trophy, User } from 'lucide-react';
+import { adminService } from '../../services';
 import { format } from 'date-fns';
 import { Toast as toast } from '../../utils/toast';
 import { DeleteModal } from '../../components/DeleteModal';
@@ -18,10 +9,19 @@ import { TableSkeleton } from '../../components/skeletons';
 
 type ContentType = 'quizzes' | 'flashcards' | 'contents' | 'challenges';
 
-export const ContentManagement = () => {
+interface ContentManagementProps {
+  initialTab?: ContentType;
+}
+
+export const ContentManagement = ({ initialTab = 'quizzes' }: ContentManagementProps) => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<ContentType>('quizzes');
+  const [activeTab, setActiveTab] = useState<ContentType>(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
     title: string;
@@ -49,7 +49,12 @@ export const ContentManagement = () => {
           type: 'quiz',
         });
       } else if (activeTab === 'flashcards') {
-        return adminService.getAllFlashcards({ page, limit: 10, search });
+        return adminService.getAllContent({
+          page,
+          limit: 10,
+          search,
+          type: 'flashcard',
+        });
       } else if (activeTab === 'challenges') {
         return adminService.getAllChallenges({ page, limit: 10, search });
       } else {
@@ -77,7 +82,7 @@ export const ContentManagement = () => {
   });
 
   const deleteFlashcardMutation = useMutation({
-    mutationFn: adminService.deleteFlashcard,
+    mutationFn: adminService.deleteFlashcardSet,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['adminContent'] });
       toast.success('Flashcard set deleted successfully');

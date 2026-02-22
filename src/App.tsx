@@ -160,6 +160,21 @@ const AdminQuizDetail = lazy(() =>
     default: m.AdminQuizDetail,
   }))
 );
+const AdminStudyMaterialManagement = lazy(() =>
+  import('./pages/admin/AdminStudyMaterialManagement').then((m) => ({
+    default: m.AdminStudyMaterialManagement,
+  }))
+);
+const AdminStudyPackManagement = lazy(() =>
+  import('./pages/admin/AdminStudyPackManagement.tsx').then((m) => ({
+    default: m.AdminStudyPackManagement,
+  }))
+);
+const AdminFlashcardManagement = lazy(() =>
+  import('./pages/admin/AdminFlashcardManagement').then((m) => ({
+    default: m.AdminFlashcardManagement,
+  }))
+);
 const ContentModeration = lazy(() =>
   import('./pages/admin/ContentModeration').then((m) => ({
     default: m.ContentModeration,
@@ -377,6 +392,14 @@ function AppRoutes() {
               }
             />
             <Route
+              path="admin/flashcards"
+              element={
+                <AdminRoute>
+                  <AdminFlashcardManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
               path="admin/quizzes"
               element={
                 <AdminRoute>
@@ -389,6 +412,22 @@ function AppRoutes() {
               element={
                 <AdminRoute>
                   <AdminQuizDetail />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/study-materials"
+              element={
+                <AdminRoute>
+                  <AdminStudyMaterialManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="admin/study-packs"
+              element={
+                <AdminRoute>
+                  <AdminStudyPackManagement />
                 </AdminRoute>
               }
             />

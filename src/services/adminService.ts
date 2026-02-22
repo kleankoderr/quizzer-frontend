@@ -166,6 +166,17 @@ export const adminService = {
     return response.data;
   },
 
+  /** List all flashcard sets in the application (admin view) */
+  getAllContentFlashcards: async (filter: { page?: number; limit?: number; search?: string }) => {
+    const response = await api.get('/admin/content/flashcards', { params: filter });
+    return response.data;
+  },
+
+  deleteFlashcardSet: async (flashcardSetId: string) => {
+    const response = await api.delete(`/admin/flashcard-set/${flashcardSetId}`);
+    return response.data;
+  },
+
   getAdminQuizzes: async (filter: any) => {
     const response = await api.get('/admin/quiz', { params: filter });
     return response.data;
@@ -253,6 +264,123 @@ export const adminService = {
     return response.data;
   },
 
+  getAdminStudyMaterials: async (params?: {
+    page?: number;
+    limit?: number;
+    scope?: string;
+    schoolId?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/admin/study-material', { params });
+    return response.data;
+  },
+
+  getAdminStudyMaterialDetail: async (id: string) => {
+    const response = await api.get(`/admin/study-material/${id}`);
+    return response.data;
+  },
+
+  /** Queue admin study material generation (same UI as user). Returns jobId for progress tracking. */
+  generateAdminStudyMaterial: async (
+    data: {
+      topic?: string;
+      content?: string;
+      title?: string;
+      selectedFileIds?: string[];
+      scope: 'GLOBAL' | 'SCHOOL';
+      schoolId?: string;
+      isActive?: boolean;
+    },
+    files?: File[]
+  ): Promise<{ jobId: string; status: string }> => {
+    const formData = new FormData();
+    if (data.topic) formData.append('topic', data.topic);
+    if (data.content) formData.append('content', data.content);
+    if (data.title) formData.append('title', data.title);
+    if (data.scope) formData.append('scope', data.scope);
+    if (data.schoolId) formData.append('schoolId', data.schoolId);
+    formData.append('isActive', String(data.isActive !== false));
+    if (data.selectedFileIds?.length) {
+      data.selectedFileIds.forEach((id) => formData.append('selectedFileIds[]', id));
+    }
+    if (files?.length) {
+      files.forEach((file) => formData.append('files', file));
+    }
+    const response = await api.post<{ jobId: string; status: string }>(
+      '/admin/study-material',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+  },
+
+  updateAdminStudyMaterial: async (
+    id: string,
+    data: {
+      title?: string;
+      topic?: string;
+      content?: string;
+      description?: string;
+      scope?: 'GLOBAL' | 'SCHOOL';
+      schoolId?: string;
+      isActive?: boolean;
+    }
+  ) => {
+    const response = await api.patch(`/admin/study-material/${id}`, data);
+    return response.data;
+  },
+
+  deleteAdminStudyMaterial: async (id: string) => {
+    const response = await api.delete(`/admin/study-material/${id}`);
+    return response.data;
+  },
+
+  getAdminStudyPacks: async (params?: {
+    page?: number;
+    limit?: number;
+    scope?: string;
+    schoolId?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/admin/study-pack', { params });
+    return response.data;
+  },
+
+  getAdminStudyPack: async (id: string) => {
+    const response = await api.get(`/admin/study-pack/${id}`);
+    return response.data;
+  },
+
+  createAdminStudyPack: async (data: {
+    title: string;
+    description?: string;
+    scope: 'GLOBAL' | 'SCHOOL';
+    schoolId?: string;
+    isActive?: boolean;
+  }) => {
+    const response = await api.post('/admin/study-pack', data);
+    return response.data;
+  },
+
+  updateAdminStudyPack: async (
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      scope?: 'GLOBAL' | 'SCHOOL';
+      schoolId?: string;
+      isActive?: boolean;
+    }
+  ) => {
+    const response = await api.patch(`/admin/study-pack/${id}`, data);
+    return response.data;
+  },
+
+  deleteAdminStudyPack: async (id: string) => {
+    const response = await api.delete(`/admin/study-pack/${id}`);
+    return response.data;
+  },
+
   getSchools: async () => {
     const response = await api.get('/admin/schools');
     return response.data;
@@ -283,7 +411,55 @@ export const adminService = {
     return response.data;
   },
 
-  deleteFlashcard: async (id: string) => {
+  /** List only admin-created flashcard sets */
+  getAdminFlashcards: async (params?: {
+    page?: number;
+    limit?: number;
+    scope?: string;
+    schoolId?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/admin/flashcard', { params });
+    return response.data;
+  },
+
+  getAdminFlashcard: async (id: string) => {
+    const response = await api.get(`/admin/flashcard/${id}`);
+    return response.data;
+  },
+
+  createAdminFlashcard: async (
+    data: {
+      topic?: string;
+      content?: string;
+      contentId?: string;
+      numberOfCards: number;
+      scope: 'GLOBAL' | 'SCHOOL';
+      schoolId?: string;
+      isActive?: boolean;
+    },
+    files?: File[]
+  ): Promise<{ jobId: string; status: string }> => {
+    const formData = new FormData();
+    if (data.topic) formData.append('topic', data.topic);
+    if (data.content) formData.append('content', data.content);
+    if (data.contentId) formData.append('contentId', data.contentId);
+    formData.append('numberOfCards', String(data.numberOfCards));
+    formData.append('scope', data.scope);
+    if (data.schoolId) formData.append('schoolId', data.schoolId);
+    formData.append('isActive', String(data.isActive !== false));
+    if (files?.length) {
+      files.forEach((f) => formData.append('files', f));
+    }
+    const response = await api.post<{ jobId: string; status: string }>(
+      '/admin/flashcard',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+  },
+
+  deleteAdminFlashcard: async (id: string) => {
     const response = await api.delete(`/admin/flashcard/${id}`);
     return response.data;
   },
@@ -308,10 +484,6 @@ export const adminService = {
     return response.data;
   },
 
-  getAllFlashcards: async (filter?: any) => {
-    const response = await api.get('/admin/flashcards', { params: filter });
-    return response.data;
-  },
 
   generateDailyChallenges: async () => {
     const response = await api.post('/admin/challenges/generate/daily');

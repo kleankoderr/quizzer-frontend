@@ -74,8 +74,17 @@ export const useQuizGenerator = ({
 
     if (mode === 'topic' && topic.trim()) {
       return { ...request, topic };
-    } else if (mode === 'content' && content.trim()) {
-      return { ...request, topic: content.substring(0, 50), content };
+    } else if (mode === 'content') {
+      if (content.trim()) {
+        return { ...request, topic: content.substring(0, 50), content };
+      }
+      if (initialValues?.contentId) {
+        return {
+          ...request,
+          contentId: initialValues.contentId,
+          topic: initialValues.sourceTitle || topic || 'Study material',
+        };
+      }
     } else if (mode === 'files') {
       if (files.length === 0 && selectedFileIds.length === 0) {
         toast.error('Please select or upload at least one file');

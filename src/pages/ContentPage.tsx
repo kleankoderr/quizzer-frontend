@@ -24,6 +24,7 @@ import 'highlight.js/styles/github.css';
 
 import { type Content, contentService } from '../services/content.service';
 import { eventsService, summaryService } from '../services';
+import { useAuth } from '../contexts/AuthContext';
 
 import { Toast as toast } from '../utils/toast';
 import { DeleteModal } from '../components/DeleteModal';
@@ -169,9 +170,12 @@ export const ContentPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { data: content, isLoading: loading } = useContent(id);
   const contentRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
   // Modal states
   const [isDeleteContentModalOpen, setIsDeleteContentModalOpen] =
@@ -273,8 +277,27 @@ export const ContentPage = () => {
     ];
 
     if (content.quizId) {
-      navigate(`/quiz/${content.quizId}`, {
-        state: { breadcrumb: baseBreadcrumb },
+      if (content.isAdminMaterial && isAdmin && content.adminQuizId) {
+        navigate(`/admin/quizzes/${content.adminQuizId}`, {
+          state: { breadcrumb: baseBreadcrumb },
+        });
+      } else {
+        navigate(`/quiz/${content.quizId}`, {
+          state: { breadcrumb: baseBreadcrumb },
+        });
+      }
+      return;
+    }
+
+    // Admin study material: send to admin quiz UI so the created quiz is admin (visible to everyone)
+    if (content.isAdminMaterial && isAdmin) {
+      navigate('/admin/quizzes', {
+        state: {
+          openGenerator: true,
+          contentId: content.id,
+          sourceTitle: content.title,
+          mode: 'content',
+        },
       });
       return;
     }
@@ -307,6 +330,18 @@ export const ContentPage = () => {
     if (content.flashcardSetId) {
       navigate(`/flashcards/${content.flashcardSetId}`, {
         state: { breadcrumb: baseBreadcrumb },
+      });
+      return;
+    }
+
+    if (content.isAdminMaterial && isAdmin) {
+      navigate('/admin/flashcards', {
+        state: {
+          openGenerator: true,
+          contentId: content.id,
+          sourceTitle: content.title,
+          mode: 'content',
+        },
       });
       return;
     }
@@ -533,13 +568,19 @@ export const ContentPage = () => {
                 {/* Quiz Button */}
                 {content.quizId ? (
                   <button
-                    onClick={() => navigate(`/quiz/${content.quizId}`)}
+                    onClick={() => {
+                      if (content.isAdminMaterial && isAdmin && content.adminQuizId) {
+                        navigate(`/admin/quizzes/${content.adminQuizId}`);
+                      } else {
+                        navigate(`/quiz/${content.quizId}`);
+                      }
+                    }}
                     className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all shadow-sm"
                     title="View Quiz"
                   >
                     <Brain className="w-4 h-4" />
                   </button>
-                ) : (
+                ) : (isAdmin || !content.isAdminMaterial) ? (
                   <button
                     onClick={handleGenerateQuiz}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
@@ -548,7 +589,7 @@ export const ContentPage = () => {
                     <Brain className="w-3.5 h-3.5" />
                     <span>Quiz</span>
                   </button>
-                )}
+                ) : null}
 
                 {/* Flashcards Button */}
                 {content.flashcardSetId ? (
@@ -561,7 +602,7 @@ export const ContentPage = () => {
                   >
                     <BookOpen className="w-4 h-4" />
                   </button>
-                ) : (
+                ) : (isAdmin || !content.isAdminMaterial) ? (
                   <button
                     onClick={handleGenerateFlashcards}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all shadow-sm text-[10px] font-bold uppercase tracking-wider"
@@ -570,7 +611,7 @@ export const ContentPage = () => {
                     <BookOpen className="w-3.5 h-3.5" />
                     <span>Cards</span>
                   </button>
-                )}
+                ) : null}
 
                 {/* Summary Button */}
                 {content.summary ? (
@@ -621,19 +662,25 @@ export const ContentPage = () => {
                     {/* Quiz */}
                     {content.quizId ? (
                       <button
-                        onClick={() => navigate(`/quiz/${content.quizId}`)}
+                        onClick={() => {
+                          if (content.isAdminMaterial && isAdmin && content.adminQuizId) {
+                            navigate(`/admin/quizzes/${content.adminQuizId}`);
+                          } else {
+                            navigate(`/quiz/${content.quizId}`);
+                          }
+                        }}
                         className="w-full text-left px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center gap-2"
                       >
                         <Brain className="w-4 h-4" /> View Quiz
                       </button>
-                    ) : (
+                    ) : (isAdmin || !content.isAdminMaterial) ? (
                       <button
                         onClick={handleGenerateQuiz}
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                       >
                         <Brain className="w-4 h-4" /> Generate Quiz
                       </button>
-                    )}
+                    ) : null}
 
                     {/* Flashcards */}
                     {content.flashcardSetId ? (
@@ -645,14 +692,14 @@ export const ContentPage = () => {
                       >
                         <BookOpen className="w-4 h-4" /> View Cards
                       </button>
-                    ) : (
+                    ) : (isAdmin || !content.isAdminMaterial) ? (
                       <button
                         onClick={handleGenerateFlashcards}
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                       >
                         <BookOpen className="w-4 h-4" /> Generate Cards
                       </button>
-                    )}
+                    ) : null}
 
                     {/* Summary Mobile */}
                     {content.summary ? (

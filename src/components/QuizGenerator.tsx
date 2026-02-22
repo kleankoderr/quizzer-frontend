@@ -54,7 +54,6 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const {
     mode,
     topic,
-    content,
     files,
     selectedFileIds,
     showUpload,
@@ -71,7 +70,6 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const {
     setMode,
     setTopic,
-    setContent,
     setFiles,
     setSelectedFileIds,
     setShowUpload,
@@ -86,7 +84,15 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
     handleSubmit,
   } = actions;
 
-  const [title, setTitle] = React.useState('');
+  const [title, setTitle] = React.useState(
+    (showTitleInput && initialValues?.sourceTitle) ? initialValues.sourceTitle : ''
+  );
+
+  React.useEffect(() => {
+    if (showTitleInput && initialValues?.sourceTitle) {
+      setTitle(initialValues.sourceTitle);
+    }
+  }, [showTitleInput, initialValues?.sourceTitle]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     const extraData = {
@@ -188,7 +194,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               htmlFor="quiz-title"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              Quiz Title (Optional)
+              Quiz Title
             </label>
             <input
               id="quiz-title"
@@ -234,29 +240,6 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
           </div>
         )}
 
-        {mode === 'content' && (
-          <div>
-            <label
-              htmlFor="content"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Content
-            </label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Paste your study notes, article, or any text content here..."
-              className="input-field min-h-[200px] resize-y"
-              required
-              maxLength={1500}
-            />
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              The system will analyze your content and generate relevant
-              questions
-            </p>
-          </div>
-        )}
 
         {mode === 'files' && (
           <div className="space-y-4">

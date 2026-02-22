@@ -1,0 +1,365 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, Globe, History as HistoryIcon, Plus, School, Search, Trash2, X, XCircle } from 'lucide-react';
+import { adminService } from '../../services';
+import { format } from 'date-fns';
+import { Toast as toast } from '../../utils/toast';
+import { DeleteModal } from '../../components/DeleteModal';
+import { TableSkeleton } from '../../components/skeletons';
+import { Select } from '../../components/ui/Select';
+
+export const AdminStudyPackManagement = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [scope, setScope] = useState<'GLOBAL' | 'SCHOOL'>('GLOBAL');
+  const [schoolId, setSchoolId] = useState<string>('');
+  const [isActive, setIsActive] = useState<boolean>(true);
+  const [schools, setSchools] = useState<any[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
+  const [createTitle, setCreateTitle] = useState('');
+  const [createDescription, setCreateDescription] = useState('');
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (scope === 'SCHOOL') {
+      setLoadingSchools(true);
+      adminService.getSchools().then((data) => setSchools(data || [])).finally(() => setLoadingSchools(false));
+    }
+  }, [scope]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['adminStudyPacks', page, search],
+    queryFn: () =>
+      adminService.getAdminStudyPacks({
+        page,
+        limit: 10,
+        search: search || undefined,
+      }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: adminService.deleteAdminStudyPack,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminStudyPacks'] });
+      toast.success('Study pack deleted');
+      setDeleteId(null);
+    },
+    onError: () => {
+      toast.error('Failed to delete study pack');
+    },
+  });
+
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const title = createTitle.trim();
+    if (!title) {
+      toast.error('Title is required');
+      return;
+    }
+    setCreateSubmitting(true);
+    try {
+      await adminService.createAdminStudyPack({
+        title,
+        description: createDescription.trim() || undefined,
+        scope,
+        schoolId: scope === 'SCHOOL' ? schoolId || undefined : undefined,
+        isActive,
+      });
+      toast.success('Study pack created');
+      queryClient.invalidateQueries({ queryKey: ['adminStudyPacks'] });
+      setShowCreateModal(false);
+      setCreateTitle('');
+      setCreateDescription('');
+      setPage(1);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to create study pack');
+    } finally {
+      setCreateSubmitting(false);
+    }
+  };
+
+  const getScopeIcon = (s: string) =>
+    s === 'GLOBAL' ? <Globe className="w-4 h-4" /> : <School className="w-4 h-4" />;
+
+  const getStatusBadge = (active: boolean) => (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+        active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+      }`}
+    >
+      {active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+      {active ? 'Active' : 'Inactive'}
+    </span>
+  );
+
+  return (
+    <div className="space-y-6 p-4 sm:p-6 pb-20">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            Study Pack Management
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Create and manage study packs visible to everyone (global or per school)
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search study packs..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="input-field pl-10"
+            />
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          >
+            <Plus className="w-5 h-5" />
+            Create Study Pack
+          </button>
+        </div>
+      </div>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6">
+            <button
+              onClick={() => !createSubmitting && setShowCreateModal(false)}
+              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 rounded-xl transition-all z-20"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Create Study Pack</h2>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Title</label>
+                <input
+                  type="text"
+                  value={createTitle}
+                  onChange={(e) => setCreateTitle(e.target.value)}
+                  placeholder="e.g. Biology Fundamentals"
+                  className="input-field w-full"
+                  maxLength={200}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Description (optional)</label>
+                <textarea
+                  value={createDescription}
+                  onChange={(e) => setCreateDescription(e.target.value)}
+                  placeholder="Brief description of the study pack"
+                  className="input-field w-full min-h-[80px] resize-y"
+                  maxLength={500}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Visibility Scope</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setScope('GLOBAL')}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      scope === 'GLOBAL'
+                        ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <Globe className="w-4 h-4" />
+                    Global
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScope('SCHOOL')}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      scope === 'SCHOOL'
+                        ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <School className="w-4 h-4" />
+                    School
+                  </button>
+                </div>
+              </div>
+              {scope === 'SCHOOL' && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">School</label>
+                  <Select
+                    value={schoolId}
+                    onChange={setSchoolId}
+                    disabled={loadingSchools}
+                    options={[
+                      { label: 'Select a school...', value: '' },
+                      ...schools.map((s) => ({ label: s.name, value: s.id })),
+                    ]}
+                    prefixIcon={<School className="w-5 h-5" />}
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Status</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsActive(true)}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      isActive ? 'border-green-600 bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Active
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsActive(false)}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      !isActive ? 'border-red-600 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Inactive
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="btn-secondary px-4 py-2"
+                  disabled={createSubmitting}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary px-4 py-2" disabled={createSubmitting}>
+                  {createSubmitting ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+              <tr>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Title</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Scope</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Items</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Status</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Created</th>
+                <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-xs w-20">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {isLoading && (
+                <tr>
+                  <td colSpan={6} className="p-0">
+                    <TableSkeleton rows={8} columns={6} />
+                  </td>
+                </tr>
+              )}
+              {!isLoading && data?.data?.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full">
+                        <HistoryIcon className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">
+                        No study packs yet. Create one to get started.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {!isLoading &&
+                data?.data?.map((item: any) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                    onClick={() => item.studyPackId && navigate(`/study-pack/${item.studyPackId}`)}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-gray-900 dark:text-white">{item.title}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 font-medium">
+                        {getScopeIcon(item.scope)}
+                        <span>{item.scope}</span>
+                        {item.school && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400">• {item.school.name}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                      {item.itemCount ?? 0}
+                    </td>
+                    <td className="px-6 py-4">{getStatusBadge(item.isActive !== false)}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm whitespace-nowrap">
+                      {format(new Date(item.createdAt), 'MMM d, yyyy')}
+                    </td>
+                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => setDeleteId(item.id)}
+                        className="p-2 rounded-xl text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        {data?.meta && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              Showing <span className="text-gray-900 dark:text-white font-bold">{(page - 1) * 10 + 1}</span> to{' '}
+              <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * 10, data.meta.total)}</span> of{' '}
+              <span className="text-gray-900 dark:text-white font-bold">{data.meta.total}</span> packs
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="btn-secondary px-4 py-1.5 text-sm"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(data.meta.totalPages, p + 1))}
+                disabled={page === data.meta.totalPages}
+                className="btn-secondary px-4 py-1.5 text-sm"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <DeleteModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => { if (deleteId) deleteMutation.mutate(deleteId); }}
+        title="Delete Study Pack"
+        message="Are you sure you want to delete this study pack? This cannot be undone."
+        isDeleting={deleteMutation.isPending}
+      />
+    </div>
+  );
+};

@@ -10,7 +10,9 @@ export interface Content {
   createdAt: string;
   updatedAt: string;
   quizId?: string;
+  adminQuizId?: string;
   flashcardSetId?: string;
+  adminFlashcardSetId?: string;
   learningGuide?: {
     overview?: string;
     keyConcepts?: string[];
@@ -42,6 +44,8 @@ export interface Content {
     id: string;
     shortCode: string;
   };
+  /** True when this content is an admin-created study material (visible to everyone) */
+  isAdminMaterial?: boolean;
 }
 
 export interface GenerateContentDto {
