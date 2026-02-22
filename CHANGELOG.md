@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v1.1.0...frontend-v1.2.0) (2026-02-22)
+
+
+### Features
+
+* Add admin management for flashcards and study materials with generator functionality ([7ed101d](https://github.com/kleankoderr/quizzer-frontend/commit/7ed101d375f71b37e076b182f98020145d0ef967))
+
 ## [1.1.0](https://github.com/kleankoderr/quizzer-frontend/compare/frontend-v0.0.3...frontend-v1.1.0) (2026-01-31)
 
 
