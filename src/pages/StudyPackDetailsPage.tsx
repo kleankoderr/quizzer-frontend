@@ -7,11 +7,14 @@ import {
   flashcardService,
   quizService,
   studyPackService,
+  adminService,
 } from '../services';
+import { useAuth } from '../contexts/AuthContext';
 import { StudyPackItemCard } from '../components/StudyPackItemCard';
 import { DeleteModal } from '../components/DeleteModal';
 import { MoveToStudyPackModal } from '../components/MoveToStudyPackModal';
 import { StudyPackModal } from '../components/StudyPackModal';
+import { AdminStudyPackFormModal } from '../components/admin/AdminStudyPackFormModal';
 import { Toast as toast } from '../utils/toast';
 import {
   BookOpen,
@@ -59,6 +62,11 @@ interface StudyPackData {
   contents?: any[];
   userDocuments?: any[];
   userId: string;
+  isAdminPack?: boolean;
+  adminPackId?: string;
+  scope?: string;
+  schoolId?: string | null;
+  isActive?: boolean;
   _count?: {
     quizzes: number;
     flashcardSets: number;
@@ -158,6 +166,8 @@ export const StudyPackDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
   const {
     data: studyPack,
@@ -181,7 +191,7 @@ export const StudyPackDetailsPage: React.FC = () => {
     }
   }, [isError, navigate]);
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get('tab') as TabId) || 'quizzes';
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
@@ -277,6 +287,7 @@ export const StudyPackDetailsPage: React.FC = () => {
     fetchNextContents,
   ]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAdminEditModal, setShowAdminEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteItemModal, setShowDeleteItemModal] = useState(false);
   const [moveState, setMoveState] = useState<MoveState>({
@@ -290,6 +301,22 @@ export const StudyPackDetailsPage: React.FC = () => {
   const [isDeletingPack, setIsDeletingPack] = useState(false);
   const [isDeletingItem, setIsDeletingItem] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isAdminEditSubmitting, setIsAdminEditSubmitting] = useState(false);
+
+  // Open admin edit modal when navigated with ?edit=admin (e.g. from Study Sets list)
+  React.useEffect(() => {
+    if (
+      studyPack?.isAdminPack &&
+      studyPack?.adminPackId &&
+      isAdmin &&
+      searchParams.get('edit') === 'admin'
+    ) {
+      setShowAdminEditModal(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('edit');
+      setSearchParams(next, { replace: true });
+    }
+  }, [studyPack?.isAdminPack, studyPack?.adminPackId, isAdmin, searchParams, setSearchParams]);
 
   const tabs: TabConfig[] = useMemo(
     () => [
@@ -366,6 +393,44 @@ export const StudyPackDetailsPage: React.FC = () => {
         console.error('Failed to update study pack:', error);
       } finally {
         setIsUpdating(false);
+      }
+    },
+    [studyPack, id, queryClient]
+  );
+
+  const handleAdminEditSubmit = useCallback(
+    async (data: {
+      title: string;
+      description?: string;
+      scope: 'GLOBAL' | 'SCHOOL';
+      schoolId?: string;
+      isActive: boolean;
+    }) => {
+      if (!studyPack?.isAdminPack || !studyPack.adminPackId) return;
+      setIsAdminEditSubmitting(true);
+      try {
+        await adminService.updateAdminStudyPack(studyPack.adminPackId, data);
+        queryClient.setQueryData(
+          ['studyPack', id],
+          (old: StudyPackData | undefined) => {
+            if (!old) return old;
+            return {
+              ...old,
+              title: data.title,
+              description: data.description ?? old.description,
+              scope: data.scope,
+              schoolId: data.schoolId ?? null,
+              isActive: data.isActive,
+            };
+          }
+        );
+        queryClient.invalidateQueries({ queryKey: ['adminStudyPacks'] });
+        toast.success('Study pack updated successfully');
+        setShowAdminEditModal(false);
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message || 'Failed to update study pack');
+      } finally {
+        setIsAdminEditSubmitting(false);
       }
     },
     [studyPack, id, queryClient]
@@ -597,17 +662,21 @@ export const StudyPackDetailsPage: React.FC = () => {
 
     const hasItems = items.length > 0;
 
+    const canEdit = !studyPack.isAdminPack;
+
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <div className="flex justify-end">
-          <button
-            onClick={() => handleNavigateToCreate(activeTab)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            {currentTab?.emptyAction || 'Add Item'}
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => handleNavigateToCreate(activeTab)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              {currentTab?.emptyAction || 'Add Item'}
+            </button>
+          </div>
+        )}
 
         {hasItems ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -622,12 +691,12 @@ export const StudyPackDetailsPage: React.FC = () => {
                     : () => handleNavigateToItem(item.id, config.itemType, item)
                 }
                 onMove={
-                  config.itemType === 'userDocument'
-                    ? undefined
-                    : () => handleMoveItem(item.id, config.itemType as any)
+                  canEdit && config.itemType !== 'userDocument'
+                    ? () => handleMoveItem(item.id, config.itemType as any)
+                    : undefined
                 }
-                onRemove={() => handleRemoveItem(item.id, config.itemType)}
-                onDelete={() => handleDeleteItem(item.id, config.itemType)}
+                onRemove={canEdit ? () => handleRemoveItem(item.id, config.itemType) : undefined}
+                onDelete={canEdit ? () => handleDeleteItem(item.id, config.itemType) : undefined}
               />
             ))}
           </div>
@@ -686,14 +755,20 @@ export const StudyPackDetailsPage: React.FC = () => {
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">
                     {studyPack.title}
                   </h1>
-                  <button
-                    onClick={() => setShowEditModal(true)}
-                    className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex-shrink-0"
-                    title="Edit Study Set"
-                    aria-label="Edit Study Set"
-                  >
-                    <Edit2 className="w-5 h-5" />
-                  </button>
+                  {(!studyPack.isAdminPack || isAdmin) && (
+                    <button
+                      onClick={() =>
+                        studyPack.isAdminPack && isAdmin
+                          ? setShowAdminEditModal(true)
+                          : setShowEditModal(true)
+                      }
+                      className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex-shrink-0"
+                      title="Edit Study Set"
+                      aria-label="Edit Study Set"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
                 {studyPack.description && (
                   <p className="text-gray-600 dark:text-gray-400 max-w-2xl text-sm sm:text-base">
@@ -714,14 +789,16 @@ export const StudyPackDetailsPage: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium w-full sm:w-auto"
-              aria-label="Delete Study Set"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete Set
-            </button>
+            {!studyPack.isAdminPack && (
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium w-full sm:w-auto"
+                aria-label="Delete Study Set"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Set
+              </button>
+            )}
           </div>
         </div>
 
@@ -769,6 +846,24 @@ export const StudyPackDetailsPage: React.FC = () => {
           onSubmit={handleEditSubmit}
           isLoading={isUpdating}
         />
+
+        {studyPack?.adminPackId && (
+          <AdminStudyPackFormModal
+            isOpen={showAdminEditModal}
+            onClose={() => setShowAdminEditModal(false)}
+            mode="edit"
+            initialValues={{
+              id: studyPack.adminPackId,
+              title: studyPack.title,
+              description: studyPack.description,
+              scope: studyPack.scope ?? 'GLOBAL',
+              schoolId: studyPack.schoolId ?? null,
+              isActive: studyPack.isActive !== false,
+            }}
+            onSubmit={handleAdminEditSubmit}
+            isSubmitting={isAdminEditSubmitting}
+          />
+        )}
 
         <DeleteModal
           isOpen={showDeleteModal}

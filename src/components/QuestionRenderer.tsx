@@ -20,6 +20,14 @@ interface QuestionRendererProps {
 // Custom paragraph renderer component to avoid re-creation on every render
 const ParagraphRenderer = ({ _node, ...props }: any) => <span {...props} />;
 
+/**
+ * Escape leading characters that markdown would interpret as list markers
+ * (e.g. "+ (Addition)" becomes "\\+ (Addition)" so it renders as plain text).
+ */
+const escapeLeadingListMarkers = (text: string): string => {
+  return text.replace(/^([+\-*])(\s|\()/gm, '\\$1$2');
+};
+
 // Reusable Markdown component for questions and options
 const MarkdownText = ({
   content,
@@ -38,7 +46,7 @@ const MarkdownText = ({
         p: ParagraphRenderer,
       }}
     >
-      {content}
+      {escapeLeadingListMarkers(content)}
     </ReactMarkdown>
   </div>
 );

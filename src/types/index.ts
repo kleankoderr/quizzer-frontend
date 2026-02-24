@@ -399,6 +399,9 @@ export interface StudyPack {
   userId: string;
   createdAt: string;
   updatedAt?: string;
+  isAdminPack?: boolean;
+  itemCount?: number;
+  adminPackId?: string;
   _count?: {
     quizzes: number;
     flashcardSets: number;

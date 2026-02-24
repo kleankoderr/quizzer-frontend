@@ -9,6 +9,7 @@ interface StudyPackCardProps {
 import React from 'react';
 import { Card } from './Card';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import type { StudyPack } from '../types';
 import { formatDate } from '../utils/dateFormat';
 
@@ -18,6 +19,10 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
   onEdit,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const showEdit = onEdit && (!studyPack.isAdminPack || isAdmin);
+  const showDelete = onDelete && (!studyPack.isAdminPack || isAdmin);
 
   const counts = studyPack._count || {
     quizzes: 0,
@@ -26,12 +31,15 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
     userDocuments: 0,
   };
 
-  const totalItems = Object.values(counts).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const totalItems = studyPack.isAdminPack && studyPack.itemCount != null
+    ? studyPack.itemCount
+    : Object.values(counts).reduce((sum, count) => sum + count, 0);
 
   const renderCountBreakdown = () => {
+    if (studyPack.isAdminPack && (studyPack.itemCount ?? 0) > 0) {
+      const n = studyPack.itemCount!;
+      return `${n} ${n === 1 ? 'Item' : 'Items'}`;
+    }
     const parts = [];
     if (counts.quizzes > 0)
       parts.push(
@@ -86,7 +94,7 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
       gradientColor="bg-blue-500"
       actions={
         <div className="flex items-center gap-1">
-          {onEdit && (
+          {showEdit && (
             <button
               onClick={handleEdit}
               className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-gray-400 hover:text-blue-500 group/edit"
@@ -96,7 +104,7 @@ export const StudyPackCard: React.FC<StudyPackCardProps> = ({
               <Pencil className="w-5 h-5 transition-transform group-hover/edit:scale-110" />
             </button>
           )}
-          {onDelete && (
+          {showDelete && (
             <button
               onClick={handleDelete}
               className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors text-gray-400 hover:text-red-500 group/delete"

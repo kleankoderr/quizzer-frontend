@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StudyPackCard } from '../components/StudyPackCard';
-import { studyPackService } from '../services';
+import { useAuth } from '../contexts/AuthContext';
+import { studyPackService, adminService } from '../services';
 import { ArrowUpDown, ChevronLeft, ChevronRight, Plus, Search, X } from 'lucide-react';
 import { Select } from '../components/ui/Select';
 import { StudyPackModal } from '../components/StudyPackModal';
@@ -20,7 +22,10 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const StudyPacksPage: React.FC = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPack, setEditingPack] = useState<StudyPack | undefined>(
     undefined
@@ -76,6 +81,10 @@ export const StudyPacksPage: React.FC = () => {
   };
 
   const handleOpenEdit = (pack: StudyPack) => {
+    if (pack.isAdminPack && isAdmin) {
+      navigate(`/study-pack/${pack.id}?edit=admin`);
+      return;
+    }
     setEditingPack(pack);
     setIsModalOpen(true);
   };
@@ -111,18 +120,27 @@ export const StudyPacksPage: React.FC = () => {
   const handleDelete = useCallback(async () => {
     if (!deleteId) return;
 
+    const pack = sortedStudyPacks.find((p) => p.id === deleteId);
+    const isAdminPackDelete =
+      isAdmin && pack?.isAdminPack && pack?.adminPackId;
+
     setIsDeleting(true);
     try {
-      await studyPackService.delete(deleteId);
+      if (isAdminPackDelete) {
+        await adminService.deleteAdminStudyPack(pack!.adminPackId!);
+        toast.success('Study pack deleted');
+      } else {
+        await studyPackService.delete(deleteId);
+        toast.success('Study set deleted');
+      }
       setDeleteId(null);
-      toast.success('Study set deleted');
       await queryClient.invalidateQueries({ queryKey: ['studyPacks'] });
     } catch (_error) {
       toast.error('Failed to delete study set');
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteId, queryClient]);
+  }, [deleteId, sortedStudyPacks, isAdmin, queryClient]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
